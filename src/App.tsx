@@ -6,8 +6,9 @@ import { ChatHistory } from './components/chat/ChatHistory'
 import { TextInput } from './components/chat/TextInput'
 import { useSpeechRecognition } from './components/voice/useSpeechRecognition'
 import { useSpeechSynthesis } from './components/voice/useSpeechSynthesis'
-import { sendMessage } from './lib/claude'
+import { sendMessageStreaming } from './lib/claude'
 import { useStore } from './lib/store'
+import { useSoundEffects } from './hooks/useSoundEffects'
 import './App.css'
 
 function App() {
@@ -27,6 +28,9 @@ function App() {
     transcript,
     setTranscript
   } = useStore()
+
+  // Sound effects
+  const { play: playSound } = useSoundEffects()
 
   // Ref to capture final transcript for use in onEnd
   const finalTranscriptRef = useRef('')
@@ -65,7 +69,7 @@ function App() {
 
   // Speech synthesis
   const {
-    speak,
+    speakStreaming,
     isSpeaking,
     isSupported: ttsSupported
   } = useSpeechSynthesis({
@@ -86,6 +90,13 @@ function App() {
       setAvatarState('listening')
     }
   }, [isListening, setAvatarState])
+
+  // Play success sound when response completes
+  useEffect(() => {
+    if (avatarState === 'happy') {
+      playSound('success')
+    }
+  }, [avatarState, playSound])
 
   // Sync state to API for MCP server
   useEffect(() => {
@@ -114,7 +125,9 @@ function App() {
     if (!text.trim() || !apiKey) return
 
     setAvatarState('thinking')
+    playSound('thinking')
     setError('')
+    setResponseText('')
 
     // Add user message
     addMessage({ role: 'user', content: text })
@@ -125,36 +138,49 @@ function App() {
       timestamp: Date.now()
     }]
 
+    let fullResponse = ''
+
     try {
-      const response = await sendMessage(updatedMessages, apiKey)
+      await sendMessageStreaming(
+        updatedMessages,
+        apiKey,
+        (chunk) => {
+          fullResponse += chunk
+          setResponseText(fullResponse)
+          // Stream to TTS - speak complete sentences as they arrive
+          speakStreaming(chunk, false)
+        }
+      )
+
+      // Signal streaming complete - flush any remaining text
+      speakStreaming('', true)
 
       // Add assistant message
-      addMessage({ role: 'assistant', content: response })
-      setResponseText(response)
-
-      // Speak the response
-      speak(response)
+      addMessage({ role: 'assistant', content: fullResponse })
     } catch (err) {
       console.error('API error:', err)
+      playSound('error')
       setError(err instanceof Error ? err.message : 'Something went wrong')
       setAvatarState('confused')
       setTimeout(() => setAvatarState('idle'), 2000)
     }
 
     setTranscript('')
-  }, [apiKey, messages, addMessage, setAvatarState, setTranscript, speak])
+  }, [apiKey, messages, addMessage, setAvatarState, setTranscript, speakStreaming, playSound])
 
   // Handle talk button
   const handleTalkStart = useCallback(() => {
     setError('')
     setResponseText('')
     finalTranscriptRef.current = ''
+    playSound('startListening')
     startListening()
-  }, [startListening])
+  }, [startListening, playSound])
 
   const handleTalkEnd = useCallback(() => {
+    playSound('stopListening')
     stopListening()
-  }, [stopListening])
+  }, [stopListening, playSound])
 
   // Spacebar keyboard shortcut for push-to-talk
   useEffect(() => {
