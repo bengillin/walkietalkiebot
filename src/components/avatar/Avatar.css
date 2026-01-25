@@ -1,0 +1,260 @@
+.avatar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* Antenna */
+.avatar__antenna {
+  width: 4px;
+  height: 20px;
+  background: var(--robot-shadow);
+  border-radius: 2px;
+  position: relative;
+}
+
+.avatar__antenna-tip {
+  width: 12px;
+  height: 12px;
+  background: var(--accent);
+  border-radius: 50%;
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0.5;
+  transition: opacity 0.3s, box-shadow 0.3s;
+}
+
+/* Body */
+.avatar__body {
+  width: 140px;
+  height: 140px;
+  background: var(--robot-body);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    inset -10px -10px 20px rgba(0,0,0,0.1),
+    0 10px 30px rgba(0,0,0,0.3);
+  position: relative;
+}
+
+/* Screen/Face */
+.avatar__screen {
+  width: 90px;
+  height: 70px;
+  background: var(--screen-idle);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Eyes */
+.avatar__eyes {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 8px;
+}
+
+.avatar__eye {
+  width: 16px;
+  height: 16px;
+  background: #2d2d2d;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+/* Mouth */
+.avatar__mouth {
+  width: 20px;
+  height: 10px;
+  border: 3px solid #2d2d2d;
+  border-top: none;
+  border-radius: 0 0 20px 20px;
+  transition: all 0.2s;
+}
+
+/* Base */
+.avatar__base {
+  width: 60px;
+  height: 8px;
+  background: var(--robot-shadow);
+  border-radius: 0 0 10px 10px;
+  margin-top: -4px;
+}
+
+/* ============ STATE VARIATIONS ============ */
+
+/* IDLE - relaxed, gentle blink */
+.avatar--idle .avatar__eye {
+  height: 8px;
+  border-radius: 8px;
+}
+
+.avatar--idle .avatar__mouth {
+  opacity: 0;
+}
+
+/* LISTENING - alert, antenna glows */
+.avatar--listening .avatar__antenna-tip {
+  opacity: 1;
+  box-shadow: 0 0 20px var(--accent), 0 0 40px var(--accent);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+.avatar--listening .avatar__screen {
+  background: var(--screen-listening);
+}
+
+.avatar--listening .avatar__eye {
+  height: 20px;
+  width: 20px;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: translateX(-50%) scale(1); }
+  50% { transform: translateX(-50%) scale(1.2); }
+}
+
+/* THINKING - processing */
+.avatar--thinking .avatar__eyes {
+  display: none;
+}
+
+.avatar--thinking .avatar__mouth {
+  display: none;
+}
+
+.avatar--thinking .avatar__thinking-dots {
+  display: flex;
+  gap: 4px;
+  font-size: 32px;
+  font-weight: bold;
+  color: #2d2d2d;
+}
+
+.avatar__thinking-dots span {
+  animation: bounce 1.4s ease-in-out infinite;
+}
+
+.avatar__thinking-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.avatar__thinking-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-10px); }
+}
+
+.avatar__thinking-dots {
+  display: none;
+}
+
+.avatar--thinking .avatar__thinking-dots {
+  display: flex;
+}
+
+/* SPEAKING - animated, happy */
+.avatar--speaking .avatar__screen {
+  background: var(--screen-idle);
+}
+
+.avatar--speaking .avatar__eye {
+  height: 8px;
+  border-radius: 8px;
+}
+
+.avatar--speaking .avatar__mouth {
+  animation: speak 0.3s ease-in-out infinite;
+}
+
+@keyframes speak {
+  0%, 100% { height: 10px; width: 20px; }
+  50% { height: 16px; width: 24px; }
+}
+
+.avatar--speaking {
+  animation: float 3s ease-in-out infinite, talk-bounce 0.3s ease-in-out infinite;
+}
+
+@keyframes talk-bounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-3px) scale(1.02); }
+}
+
+/* HAPPY - celebration */
+.avatar--happy .avatar__screen {
+  background: var(--screen-happy);
+}
+
+.avatar--happy .avatar__eye {
+  height: 6px;
+  border-radius: 6px;
+  transform: translateY(2px);
+}
+
+.avatar--happy .avatar__mouth {
+  width: 30px;
+  height: 15px;
+}
+
+.avatar--happy {
+  animation: celebrate 0.5s ease-in-out;
+}
+
+@keyframes celebrate {
+  0%, 100% { transform: scale(1) rotate(0); }
+  25% { transform: scale(1.1) rotate(-5deg); }
+  75% { transform: scale(1.1) rotate(5deg); }
+}
+
+/* CONFUSED - error state */
+.avatar--confused .avatar__screen {
+  background: var(--screen-error);
+}
+
+.avatar--confused .avatar__eye {
+  width: 22px;
+  height: 22px;
+}
+
+.avatar--confused .avatar__mouth {
+  display: none;
+}
+
+.avatar__question {
+  display: none;
+  font-size: 24px;
+  font-weight: bold;
+  color: #2d2d2d;
+}
+
+.avatar--confused .avatar__question {
+  display: block;
+}
+
+.avatar--confused {
+  animation: float 3s ease-in-out infinite, confused-tilt 0.5s ease-in-out;
+}
+
+@keyframes confused-tilt {
+  0%, 100% { transform: rotate(0); }
+  50% { transform: rotate(10deg); }
+}

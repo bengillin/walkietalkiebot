@@ -1,0 +1,22 @@
+.transcript {
+  max-width: 500px;
+  padding: 16px 24px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  text-align: center;
+}
+
+.transcript__label {
+  display: block;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.transcript__text {
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
