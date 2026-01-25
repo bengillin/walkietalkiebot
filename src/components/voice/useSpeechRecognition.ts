@@ -5,8 +5,10 @@ interface UseSpeechRecognitionOptions {
   onInterimResult?: (transcript: string) => void
   onError?: (error: string) => void
   onEnd?: () => void
+  onTriggerWord?: (transcript: string) => void
   continuous?: boolean
   language?: string
+  triggerWord?: string
 }
 
 interface SpeechRecognitionResult {
@@ -71,18 +73,26 @@ export function useSpeechRecognition({
   onInterimResult,
   onError,
   onEnd,
-  continuous = false,
+  onTriggerWord,
+  continuous = true,
   language = 'en-US',
+  triggerWord,
 }: UseSpeechRecognitionOptions = {}): SpeechRecognitionResult {
   const [isListening, setIsListening] = useState(false)
   const [transcript, setTranscript] = useState('')
   const recognitionRef = useRef<SpeechRecognition | null>(null)
+  const fullTranscriptRef = useRef('')
+  const triggerFiredRef = useRef(false)
+  const triggerTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const pendingTriggerTranscriptRef = useRef('')
 
   // Use refs for callbacks to avoid recreating recognition on every render
   const onResultRef = useRef(onResult)
   const onInterimResultRef = useRef(onInterimResult)
   const onErrorRef = useRef(onError)
   const onEndRef = useRef(onEnd)
+  const onTriggerWordRef = useRef(onTriggerWord)
+  const triggerWordRef = useRef(triggerWord)
 
   // Keep refs up to date
   useEffect(() => {
@@ -90,6 +100,8 @@ export function useSpeechRecognition({
     onInterimResultRef.current = onInterimResult
     onErrorRef.current = onError
     onEndRef.current = onEnd
+    onTriggerWordRef.current = onTriggerWord
+    triggerWordRef.current = triggerWord
   })
 
   const isSupported =
@@ -127,14 +139,58 @@ export function useSpeechRecognition({
 
       console.log('[Speech] Result:', { interimTranscript, finalTranscript })
 
+      // Accumulate final transcripts
+      if (finalTranscript) {
+        fullTranscriptRef.current += finalTranscript
+      }
+
+      // Build display transcript (accumulated + current interim)
+      const displayTranscript = fullTranscriptRef.current + interimTranscript
+      setTranscript(displayTranscript)
+
       if (interimTranscript) {
-        setTranscript(interimTranscript)
-        onInterimResultRef.current?.(interimTranscript)
+        onInterimResultRef.current?.(displayTranscript)
       }
 
       if (finalTranscript) {
-        setTranscript(finalTranscript)
-        onResultRef.current?.(finalTranscript)
+        onResultRef.current?.(displayTranscript)
+      }
+
+      // Check for trigger word only on final results and only once
+      const trigger = triggerWordRef.current
+      if (trigger && finalTranscript && !triggerFiredRef.current) {
+        const lowerFull = fullTranscriptRef.current.toLowerCase().trim()
+        const lowerTrigger = trigger.toLowerCase()
+
+        // Cancel any pending trigger if more speech came in
+        if (triggerTimeoutRef.current) {
+          clearTimeout(triggerTimeoutRef.current)
+          triggerTimeoutRef.current = null
+        }
+
+        // Check if ends with trigger word (with some flexibility)
+        if (lowerFull.endsWith(lowerTrigger) ||
+            lowerFull.endsWith(lowerTrigger + '.') ||
+            lowerFull.endsWith(lowerTrigger + ',')) {
+
+          // Remove trigger word from transcript
+          const cleanTranscript = fullTranscriptRef.current
+            .replace(new RegExp(`\\s*${trigger}[.,]?\\s*$`, 'i'), '')
+            .trim()
+
+          console.log('[Speech] Trigger word detected, waiting for silence...')
+          pendingTriggerTranscriptRef.current = cleanTranscript
+
+          // Wait for silence (1 second) before triggering
+          triggerTimeoutRef.current = setTimeout(() => {
+            if (!triggerFiredRef.current) {
+              triggerFiredRef.current = true
+              console.log('[Speech] Silence confirmed, triggering with:', pendingTriggerTranscriptRef.current)
+              recognition.stop()
+              onTriggerWordRef.current?.(pendingTriggerTranscriptRef.current)
+            }
+          }, 1000)
+        }
       }
     }
 
@@ -154,6 +210,9 @@ export function useSpeechRecognition({
 
     return () => {
       recognition.abort()
+      if (triggerTimeoutRef.current) {
+        clearTimeout(triggerTimeoutRef.current)
+      }
     }
   }, [isSupported, continuous, language])
 
@@ -161,6 +220,13 @@ export function useSpeechRecognition({
     console.log('[Speech] start() called, recognitionRef:', !!recognitionRef.current)
     if (recognitionRef.current) {
       setTranscript('')
+      fullTranscriptRef.current = ''
+      triggerFiredRef.current = false
+      pendingTriggerTranscriptRef.current = ''
+      if (triggerTimeoutRef.current) {
+        clearTimeout(triggerTimeoutRef.current)
+        triggerTimeoutRef.current = null
+      }
       try {
         recognitionRef.current.start()
       } catch (e) {
@@ -171,6 +237,10 @@ export function useSpeechRecognition({
 
   const stop = useCallback(() => {
     console.log('[Speech] stop() called')
+    if (triggerTimeoutRef.current) {
+      clearTimeout(triggerTimeoutRef.current)
+      triggerTimeoutRef.current = null
+    }
     if (recognitionRef.current) {
       recognitionRef.current.stop()
     }

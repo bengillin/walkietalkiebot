@@ -62,6 +62,7 @@ function App() {
 
   // Ref to capture final transcript for use in onEnd
   const finalTranscriptRef = useRef('')
+  const triggerWordUsedRef = useRef(false)
 
   // Speech recognition
   const {
@@ -79,10 +80,25 @@ function App() {
       finalTranscriptRef.current = text
     },
     onEnd: () => {
+      // Skip if trigger word already handled this
+      if (triggerWordUsedRef.current) {
+        triggerWordUsedRef.current = false
+        return
+      }
       const textToSend = finalTranscriptRef.current.trim()
       if (textToSend) {
         handleSendMessage(textToSend)
         finalTranscriptRef.current = ''
+      } else {
+        setAvatarState('idle')
+      }
+    },
+    onTriggerWord: (text) => {
+      // "Over" was said - send the message
+      triggerWordUsedRef.current = true
+      finalTranscriptRef.current = ''
+      if (text.trim()) {
+        handleSendMessage(text)
       } else {
         setAvatarState('idle')
       }
@@ -93,6 +109,7 @@ function App() {
       finalTranscriptRef.current = ''
       setTimeout(() => setAvatarState('idle'), 2000)
     },
+    triggerWord: 'over',
   })
 
   // Speech synthesis
@@ -216,6 +233,7 @@ function App() {
     setError('')
     setResponseText('')
     finalTranscriptRef.current = ''
+    triggerWordUsedRef.current = false
     playSound('startListening')
     startListening()
   }, [startListening, playSound])
