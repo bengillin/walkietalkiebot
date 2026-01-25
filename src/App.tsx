@@ -2,11 +2,12 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import { Avatar } from './components/avatar/Avatar'
 import { TalkButton } from './components/voice/TalkButton'
 import { Transcript } from './components/chat/Transcript'
+import { ChatHistory } from './components/chat/ChatHistory'
+import { TextInput } from './components/chat/TextInput'
 import { useSpeechRecognition } from './components/voice/useSpeechRecognition'
 import { useSpeechSynthesis } from './components/voice/useSpeechSynthesis'
 import { sendMessage } from './lib/claude'
 import { useStore } from './lib/store'
-import type { AvatarState } from './types'
 import './App.css'
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
   const [showApiInput, setShowApiInput] = useState(!apiKey)
   const [responseText, setResponseText] = useState('')
   const [error, setError] = useState('')
+  const [historyCollapsed, setHistoryCollapsed] = useState(true)
 
   const {
     avatarState,
@@ -154,6 +156,40 @@ function App() {
     stopListening()
   }, [stopListening])
 
+  // Spacebar keyboard shortcut for push-to-talk
+  useEffect(() => {
+    const isInputFocused = () => {
+      const active = document.activeElement
+      return active?.tagName === 'INPUT' || active?.tagName === 'TEXTAREA'
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space' && !e.repeat && !isInputFocused()) {
+        e.preventDefault()
+        if (!isListening && !isSpeaking && avatarState !== 'thinking' && apiKey) {
+          handleTalkStart()
+        }
+      }
+    }
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.code === 'Space' && !isInputFocused()) {
+        e.preventDefault()
+        if (isListening) {
+          handleTalkEnd()
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('keyup', handleKeyUp)
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('keyup', handleKeyUp)
+    }
+  }, [isListening, isSpeaking, avatarState, apiKey, handleTalkStart, handleTalkEnd])
+
   // Save API key
   const handleSaveApiKey = (e: React.FormEvent) => {
     e.preventDefault()
@@ -193,6 +229,12 @@ function App() {
         </button>
       </header>
 
+      <ChatHistory
+        messages={messages}
+        isCollapsed={historyCollapsed}
+        onToggle={() => setHistoryCollapsed(!historyCollapsed)}
+      />
+
       <main className="app__main">
         <div className="app__avatar-container">
           <Avatar state={avatarState} />
@@ -216,6 +258,12 @@ function App() {
             isDisabled={!apiKey || isSpeaking || avatarState === 'thinking'}
             onMouseDown={handleTalkStart}
             onMouseUp={handleTalkEnd}
+          />
+          <span className="app__hint">or press spacebar</span>
+          <TextInput
+            onSubmit={handleSendMessage}
+            isDisabled={!apiKey || isSpeaking || avatarState === 'thinking'}
+            placeholder="Or type here..."
           />
         </div>
       </main>
