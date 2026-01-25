@@ -49,9 +49,16 @@ export async function sendMessage(
 export async function sendMessageStreaming(
   messages: Message[],
   apiKey: string,
-  onChunk: (text: string) => void
+  onChunk: (text: string) => void,
+  contextMessages?: Message[]
 ): Promise<string> {
-  const claudeMessages: ClaudeMessage[] = messages.map((m) => ({
+  // If we have context from past conversations, prepend it
+  let allMessages = messages
+  if (contextMessages && contextMessages.length > 0) {
+    allMessages = [...contextMessages, ...messages]
+  }
+
+  const claudeMessages: ClaudeMessage[] = allMessages.map((m) => ({
     role: m.role,
     content: m.content,
   }))
@@ -104,6 +111,59 @@ export async function sendMessageStreaming(
           }
         } catch {
           // Ignore parse errors for incomplete chunks
+        }
+      }
+    }
+  }
+
+  return fullText
+}
+
+// Send message through Claude Code CLI (has full agent capabilities)
+export async function sendMessageViaClaudeCode(
+  message: string,
+  onChunk: (text: string) => void
+): Promise<string> {
+  const response = await fetch('/api/claude-code', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message }),
+  })
+
+  if (!response.ok) {
+    const error = await response.text()
+    throw new Error(`Claude Code error: ${response.status} - ${error}`)
+  }
+
+  const reader = response.body?.getReader()
+  if (!reader) throw new Error('No response body')
+
+  const decoder = new TextDecoder()
+  let fullText = ''
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+
+    const chunk = decoder.decode(value)
+    const lines = chunk.split('\n')
+
+    for (const line of lines) {
+      if (line.startsWith('data: ')) {
+        const data = line.slice(6)
+        try {
+          const parsed = JSON.parse(data)
+          if (parsed.text) {
+            fullText += parsed.text
+            onChunk(parsed.text)
+          }
+          if (parsed.error) {
+            throw new Error(parsed.error)
+          }
+        } catch (e) {
+          if (e instanceof Error && e.message !== 'Unexpected end of JSON input') {
+            throw e
+          }
         }
       }
     }

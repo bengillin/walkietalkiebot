@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { Avatar } from './components/avatar/Avatar'
 import { TalkButton } from './components/voice/TalkButton'
 import { Transcript } from './components/chat/Transcript'
@@ -6,7 +6,7 @@ import { ChatHistory } from './components/chat/ChatHistory'
 import { TextInput } from './components/chat/TextInput'
 import { useSpeechRecognition } from './components/voice/useSpeechRecognition'
 import { useSpeechSynthesis } from './components/voice/useSpeechSynthesis'
-import { sendMessageStreaming } from './lib/claude'
+import { sendMessageStreaming, sendMessageViaClaudeCode } from './lib/claude'
 import { useStore } from './lib/store'
 import { useSoundEffects } from './hooks/useSoundEffects'
 import './App.css'
@@ -15,10 +15,15 @@ function App() {
   const [apiKey, setApiKey] = useState(() =>
     localStorage.getItem('talkboy_api_key') || ''
   )
-  const [showApiInput, setShowApiInput] = useState(!apiKey)
+  const [showSettings, setShowSettings] = useState(!apiKey)
   const [responseText, setResponseText] = useState('')
   const [error, setError] = useState('')
-  const [historyCollapsed, setHistoryCollapsed] = useState(true)
+  const [useClaudeCode, setUseClaudeCode] = useState(() =>
+    localStorage.getItem('talkboy_use_claude_code') === 'true'
+  )
+  const [showTextInput, setShowTextInput] = useState(() =>
+    localStorage.getItem('talkboy_show_text_input') !== 'false'
+  )
 
   const {
     avatarState,
@@ -26,8 +31,31 @@ function App() {
     messages,
     addMessage,
     transcript,
-    setTranscript
+    setTranscript,
+    // Conversation management
+    currentConversationId,
+    conversations,
+    createConversation,
+    loadConversation,
+    deleteConversation,
+    contextConversationIds,
+    toggleContextConversation,
   } = useStore()
+
+  // Get current conversation
+  const currentConversation = useMemo(() =>
+    conversations.find(c => c.id === currentConversationId),
+    [conversations, currentConversationId]
+  )
+
+  // Get messages from context conversations to include in API calls
+  const contextMessages = useMemo(() => {
+    if (contextConversationIds.length === 0) return []
+    return conversations
+      .filter(c => contextConversationIds.includes(c.id))
+      .flatMap(c => c.messages)
+      .sort((a, b) => a.timestamp - b.timestamp)
+  }, [contextConversationIds, conversations])
 
   // Sound effects
   const { play: playSound } = useSoundEffects()
@@ -122,7 +150,9 @@ function App() {
 
   // Handle sending message to Claude
   const handleSendMessage = useCallback(async (text: string) => {
-    if (!text.trim() || !apiKey) return
+    if (!text.trim()) return
+    // Only require API key for direct mode
+    if (!useClaudeCode && !apiKey) return
 
     setAvatarState('thinking')
     playSound('thinking')
@@ -141,16 +171,29 @@ function App() {
     let fullResponse = ''
 
     try {
-      await sendMessageStreaming(
-        updatedMessages,
-        apiKey,
-        (chunk) => {
-          fullResponse += chunk
-          setResponseText(fullResponse)
-          // Stream to TTS - speak complete sentences as they arrive
-          speakStreaming(chunk, false)
-        }
-      )
+      if (useClaudeCode) {
+        // Route through Claude Code CLI
+        await sendMessageViaClaudeCode(
+          text,
+          (chunk) => {
+            fullResponse += chunk
+            setResponseText(fullResponse)
+            speakStreaming(chunk, false)
+          }
+        )
+      } else {
+        // Direct Claude API call
+        await sendMessageStreaming(
+          updatedMessages,
+          apiKey,
+          (chunk) => {
+            fullResponse += chunk
+            setResponseText(fullResponse)
+            speakStreaming(chunk, false)
+          },
+          contextMessages
+        )
+      }
 
       // Signal streaming complete - flush any remaining text
       speakStreaming('', true)
@@ -166,7 +209,7 @@ function App() {
     }
 
     setTranscript('')
-  }, [apiKey, messages, addMessage, setAvatarState, setTranscript, speakStreaming, playSound])
+  }, [apiKey, messages, addMessage, setAvatarState, setTranscript, speakStreaming, playSound, contextMessages, useClaudeCode])
 
   // Handle talk button
   const handleTalkStart = useCallback(() => {
@@ -192,7 +235,8 @@ function App() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.code === 'Space' && !e.repeat && !isInputFocused()) {
         e.preventDefault()
-        if (!isListening && !isSpeaking && avatarState !== 'thinking' && apiKey) {
+        const canTalk = useClaudeCode || apiKey
+        if (!isListening && !isSpeaking && avatarState !== 'thinking' && canTalk) {
           handleTalkStart()
         }
       }
@@ -214,14 +258,14 @@ function App() {
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
     }
-  }, [isListening, isSpeaking, avatarState, apiKey, handleTalkStart, handleTalkEnd])
+  }, [isListening, isSpeaking, avatarState, apiKey, handleTalkStart, handleTalkEnd, useClaudeCode])
 
   // Save API key
   const handleSaveApiKey = (e: React.FormEvent) => {
     e.preventDefault()
     if (apiKey.trim()) {
       localStorage.setItem('talkboy_api_key', apiKey.trim())
-      setShowApiInput(false)
+      setShowSettings(false)
     }
   }
 
@@ -246,10 +290,10 @@ function App() {
         <h1 className="app__title">Talkboy</h1>
         <button
           className="app__settings-btn"
-          onClick={() => setShowApiInput(true)}
+          onClick={() => setShowSettings(true)}
           title="Settings"
         >
-          <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
             <path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
           </svg>
         </button>
@@ -257,8 +301,13 @@ function App() {
 
       <ChatHistory
         messages={messages}
-        isCollapsed={historyCollapsed}
-        onToggle={() => setHistoryCollapsed(!historyCollapsed)}
+        conversations={conversations}
+        currentConversation={currentConversation}
+        contextIds={contextConversationIds}
+        onSelectConversation={loadConversation}
+        onNewConversation={createConversation}
+        onDeleteConversation={deleteConversation}
+        onToggleContext={toggleContextConversation}
       />
 
       <main className="app__main">
@@ -281,44 +330,94 @@ function App() {
         <div className="app__controls">
           <TalkButton
             isListening={isListening}
-            isDisabled={!apiKey || isSpeaking || avatarState === 'thinking'}
+            isDisabled={(!useClaudeCode && !apiKey) || isSpeaking || avatarState === 'thinking'}
             onMouseDown={handleTalkStart}
             onMouseUp={handleTalkEnd}
           />
           <span className="app__hint">or press spacebar</span>
-          <TextInput
-            onSubmit={handleSendMessage}
-            isDisabled={!apiKey || isSpeaking || avatarState === 'thinking'}
-            placeholder="Or type here..."
-          />
+          {showTextInput && (
+            <TextInput
+              onSubmit={handleSendMessage}
+              isDisabled={(!useClaudeCode && !apiKey) || isSpeaking || avatarState === 'thinking'}
+              placeholder="Or type here..."
+            />
+          )}
         </div>
       </main>
 
-      {/* API Key Modal */}
-      {showApiInput && (
-        <div className="modal-overlay" onClick={() => apiKey && setShowApiInput(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h2>Enter Your Claude API Key</h2>
-            <p>Your key is stored locally and never sent anywhere except Anthropic's API.</p>
-            <form onSubmit={handleSaveApiKey}>
-              <input
-                type="password"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder="sk-ant-..."
-                autoFocus
-              />
-              <button type="submit" disabled={!apiKey.trim()}>
-                Save & Start
-              </button>
-            </form>
-            <a
-              href="https://console.anthropic.com/settings/keys"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Get an API key
-            </a>
+      {/* Settings Modal */}
+      {showSettings && (
+        <div className="modal-overlay" onClick={() => (useClaudeCode || apiKey) && setShowSettings(false)}>
+          <div className="modal modal--settings" onClick={(e) => e.stopPropagation()}>
+            <div className="modal__header">
+              <h2>Settings</h2>
+              {(useClaudeCode || apiKey) && (
+                <button className="modal__close" onClick={() => setShowSettings(false)}>
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                  </svg>
+                </button>
+              )}
+            </div>
+
+            <div className="settings__section">
+              <label className="settings__toggle">
+                <span className="settings__toggle-info">
+                  <span className="settings__toggle-label">Claude Code mode</span>
+                  <span className="settings__toggle-desc">Route through CLI for full agent capabilities</span>
+                </span>
+                <input
+                  type="checkbox"
+                  checked={useClaudeCode}
+                  onChange={(e) => {
+                    setUseClaudeCode(e.target.checked)
+                    localStorage.setItem('talkboy_use_claude_code', String(e.target.checked))
+                  }}
+                />
+                <span className="settings__slider" />
+              </label>
+
+              <label className="settings__toggle">
+                <span className="settings__toggle-info">
+                  <span className="settings__toggle-label">Show text input</span>
+                  <span className="settings__toggle-desc">Display keyboard input field</span>
+                </span>
+                <input
+                  type="checkbox"
+                  checked={showTextInput}
+                  onChange={(e) => {
+                    setShowTextInput(e.target.checked)
+                    localStorage.setItem('talkboy_show_text_input', String(e.target.checked))
+                  }}
+                />
+                <span className="settings__slider" />
+              </label>
+            </div>
+
+            {!useClaudeCode && (
+              <div className="settings__section">
+                <h3 className="settings__section-title">API Key</h3>
+                <p className="settings__section-desc">Required when not using Claude Code mode</p>
+                <form onSubmit={handleSaveApiKey}>
+                  <input
+                    type="password"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    placeholder="sk-ant-..."
+                  />
+                  <button type="submit" disabled={!apiKey.trim()}>
+                    Save
+                  </button>
+                </form>
+                <a
+                  href="https://console.anthropic.com/settings/keys"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Get an API key
+                </a>
+              </div>
+            )}
           </div>
         </div>
       )}
