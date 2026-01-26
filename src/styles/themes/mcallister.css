@@ -1,70 +1,70 @@
-/* McAllister Theme - Chunky 90s Talk Boy toy aesthetic */
+/* McAllister Theme - Silver Talkboy cassette recorder aesthetic */
 [data-theme="mcallister"] {
-  /* Background Colors - Dark gray like the Talk Boy device */
-  --bg-primary: #2a2a2a;
-  --bg-secondary: #3d3d3d;
-  --bg-tertiary: #4a4a4a;
+  /* Background Colors - Silver/gray like the Talkboy device body */
+  --bg-primary: #a8a8a8;
+  --bg-secondary: #b8b8b8;
+  --bg-tertiary: #c8c8c8;
 
-  /* Text Colors - High contrast retro feel */
-  --text-primary: #f5f5dc;  /* Beige/cream like old LCD screens */
-  --text-secondary: #b8b894;
-  --text-muted: #8a8a70;
+  /* Text Colors - Black/dark for contrast on silver */
+  --text-primary: #1a1a1a;
+  --text-secondary: #3a3a3a;
+  --text-muted: #5a5a5a;
 
-  /* Accent Colors - Orange/red like the Talk Boy record button */
-  --accent: #ff4d00;
-  --accent-hover: #ff6b2b;
-  --accent-glow: rgba(255, 77, 0, 0.4);
-  --accent-soft: rgba(255, 77, 0, 0.15);
+  /* Accent Colors - Red like the Talkboy record button */
+  --accent: #cc0000;
+  --accent-hover: #ff1a1a;
+  --accent-glow: rgba(204, 0, 0, 0.4);
+  --accent-soft: rgba(204, 0, 0, 0.15);
 
-  /* Secondary accent - Teal like 90s electronics */
-  --accent-secondary: #00b8a9;
+  /* Secondary accent - Green like the play buttons */
+  --accent-secondary: #00802b;
 
   /* Message Colors */
-  --message-user-bg: #ff4d00;
+  --message-user-bg: #3a3a3a;
   --message-user-text: #ffffff;
-  --message-assistant-bg: #4a4a4a;
-  --message-assistant-text: #f5f5dc;
+  --message-assistant-bg: #c8c8c8;
+  --message-assistant-text: #1a1a1a;
 
-  /* Robot Avatar Colors - Cream plastic like the Talk Boy */
-  --robot-body: #e8e4d4;
-  --robot-shadow: #c4c0b0;
-  --robot-highlight: #f8f6ec;
+  /* Robot Avatar Colors */
+  --robot-body: #d0d0d0;
+  --robot-shadow: #909090;
+  --robot-highlight: #e8e8e8;
 
-  /* Screen States - Retro LCD green tints */
-  --screen-idle: #7cb342;
+  /* Screen States */
+  --screen-idle: #00802b;
   --screen-happy: #ffd54f;
-  --screen-error: #ef5350;
-  --screen-listening: #4fc3f7;
-  --screen-thinking: #ba68c8;
+  --screen-error: #cc0000;
+  --screen-listening: #0066cc;
+  --screen-thinking: #6a4c93;
 
-  /* Borders & Shadows - Chunky raised plastic look */
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-light: rgba(255, 255, 255, 0.15);
-  --shadow-soft: 0 4px 0 rgba(0, 0, 0, 0.4);
+  /* Borders & Shadows - Raised plastic look */
+  --border-subtle: rgba(0, 0, 0, 0.1);
+  --border-light: rgba(0, 0, 0, 0.15);
+  --shadow-soft: 0 4px 0 rgba(0, 0, 0, 0.3);
   --shadow-glow: 0 0 30px var(--accent-glow);
-  --shadow-inset: inset 0 2px 4px rgba(0, 0, 0, 0.3);
-  --shadow-raised: 0 4px 0 #1a1a1a, 0 6px 12px rgba(0, 0, 0, 0.4);
+  --shadow-inset: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  --shadow-raised: 0 4px 0 #707070, 0 6px 12px rgba(0, 0, 0, 0.3);
 
-  /* Header specific */
-  --header-bg: linear-gradient(180deg, #3d3d3d 0%, #2a2a2a 100%);
-  --header-border: #1a1a1a;
-  --header-text: #f5f5dc;
+  /* Header specific - Silver gradient like device top */
+  --header-bg: linear-gradient(180deg, #c8c8c8 0%, #b0b0b0 50%, #a0a0a0 100%);
+  --header-border: #707070;
+  --header-text: #1a1a1a;
 
-  /* Button styling - Raised plastic buttons */
-  --btn-bg: linear-gradient(180deg, #5a5a5a 0%, #4a4a4a 100%);
-  --btn-hover: linear-gradient(180deg, #6a6a6a 0%, #5a5a5a 100%);
-  --btn-border: #1a1a1a;
+  /* Button styling - Dark charcoal like Talkboy buttons */
+  --btn-bg: linear-gradient(180deg, #4a4a4a 0%, #3a3a3a 100%);
+  --btn-hover: linear-gradient(180deg, #5a5a5a 0%, #4a4a4a 100%);
+  --btn-border: #2a2a2a;
   --btn-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 3px 0 #1a1a1a;
 
-  /* Input styling */
-  --input-bg: #1a1a1a;
-  --input-border: #0a0a0a;
+  /* Input styling - Dark recessed areas like cassette window */
+  --input-bg: #2a2a2a;
+  --input-border: #1a1a1a;
 
   /* Modal */
-  --modal-bg: #3d3d3d;
-  --modal-overlay: rgba(0, 0, 0, 0.7);
+  --modal-bg: #b8b8b8;
+  --modal-overlay: rgba(0, 0, 0, 0.6);
 
-  /* Typography - Bold, chunky fonts */
+  /* Typography */
   --font-family: 'Arial Black', 'Helvetica Neue', Impact, sans-serif;
   --font-weight-normal: 700;
   --font-weight-medium: 800;
@@ -75,24 +75,28 @@
   --letter-spacing: 0.05em;
 }
 
-/* McAllister body background - Textured dark gray */
+/* McAllister body background - Silver plastic texture */
 [data-theme="mcallister"] body {
-  background: #2a2a2a;
+  background: linear-gradient(180deg, #b8b8b8 0%, #a0a0a0 100%);
   background-image:
     repeating-linear-gradient(
       0deg,
       transparent,
-      transparent 2px,
-      rgba(0, 0, 0, 0.1) 2px,
-      rgba(0, 0, 0, 0.1) 4px
+      transparent 1px,
+      rgba(255, 255, 255, 0.03) 1px,
+      rgba(255, 255, 255, 0.03) 2px
     );
 }
 
-/* McAllister header - Chunky gradient with border */
+/* McAllister header - Silver raised panel like Talkboy top */
 [data-theme="mcallister"] .app__header {
-  background: var(--header-bg);
-  border-bottom: 4px solid var(--header-border);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 8px rgba(0,0,0,0.4);
+  background: linear-gradient(180deg, #d0d0d0 0%, #b8b8b8 30%, #a8a8a8 100%);
+  border-bottom: 4px solid #707070;
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,0.5),
+    inset 0 -2px 0 rgba(0,0,0,0.1),
+    0 4px 0 rgba(0,0,0,0.2),
+    0 6px 12px rgba(0,0,0,0.2);
 }
 
 /* McAllister title - Big bold italic like the Talk Boy logo */
@@ -113,53 +117,204 @@
   filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.5));
 }
 
-/* McAllister header buttons - Raised plastic look */
+/* McAllister header buttons - Big chunky cassette buttons */
 [data-theme="mcallister"] .app__header-btn {
-  background: var(--btn-bg);
-  border: 2px solid var(--btn-border);
-  border-radius: 6px;
+  background: linear-gradient(180deg, #5a5a5a 0%, #3d3d3d 40%, #2a2a2a 100%);
+  border: 3px solid;
+  border-color: #6a6a6a #1a1a1a #1a1a1a #6a6a6a;
+  border-radius: 8px;
   color: var(--text-primary);
-  box-shadow: var(--btn-shadow);
-  transition: all 0.1s ease;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.2),
+    inset 0 -1px 0 rgba(0,0,0,0.2),
+    4px 4px 0 rgba(0,0,0,0.5),
+    6px 6px 12px rgba(0,0,0,0.4);
+  transition: all 0.08s ease;
+  padding: 12px;
 }
 
 [data-theme="mcallister"] .app__header-btn:hover {
-  background: var(--btn-hover);
-  transform: translateY(-1px);
+  background: linear-gradient(180deg, #6a6a6a 0%, #4d4d4d 40%, #3a3a3a 100%);
+  transform: translate(-1px, -1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.25),
+    inset 0 -1px 0 rgba(0,0,0,0.2),
+    5px 5px 0 rgba(0,0,0,0.5),
+    8px 8px 16px rgba(0,0,0,0.4);
 }
 
 [data-theme="mcallister"] .app__header-btn:active {
-  transform: translateY(2px);
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+  transform: translate(2px, 2px);
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(0,0,0,0.2),
+    1px 1px 0 rgba(0,0,0,0.5);
+  border-color: #3a3a3a #5a5a5a #5a5a5a #3a3a3a;
 }
 
-/* McAllister chat bubbles - Chunky with hard shadows */
-[data-theme="mcallister"] .chat-timeline__bubble--user {
-  background: var(--message-user-bg);
-  color: var(--message-user-text);
+/* McAllister chat timeline - Silver background */
+[data-theme="mcallister"] .chat-timeline {
+  background: linear-gradient(180deg, #b0b0b0 0%, #a0a0a0 100%);
+}
+
+/* McAllister chat bubbles - Device-style panels */
+[data-theme="mcallister"] .message-bubble {
   border-radius: 8px;
-  border: 2px solid #cc3d00;
-  box-shadow: 3px 3px 0 rgba(0,0,0,0.4);
+  font-family: var(--font-family);
   font-weight: 700;
 }
 
-[data-theme="mcallister"] .chat-timeline__bubble--assistant {
-  background: var(--message-assistant-bg);
-  color: var(--message-assistant-text);
+[data-theme="mcallister"] .message-bubble.user {
+  background: linear-gradient(180deg, #4a4a4a 0%, #3a3a3a 100%);
+  color: #ffffff;
+  border: 3px solid #2a2a2a;
   border-radius: 8px;
-  border: 2px solid #3a3a3a;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.1),
+    3px 3px 0 rgba(0,0,0,0.3);
+}
+
+[data-theme="mcallister"] .message-bubble.assistant {
+  background: linear-gradient(180deg, #d8d8d8 0%, #c8c8c8 100%);
+  color: #1a1a1a;
+  border: 3px solid #909090;
+  border-radius: 8px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.5),
+    3px 3px 0 rgba(0,0,0,0.2);
+}
+
+/* Remove the iMessage-style tail */
+[data-theme="mcallister"] .message-bubble.assistant::after {
+  display: none;
+}
+
+[data-theme="mcallister"] .message-bubble.listening {
+  background: linear-gradient(180deg, #4fc3f7 0%, #00b8a9 100%);
+  border-color: #008b80;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.3),
+    3px 3px 0 rgba(0,0,0,0.4),
+    0 0 20px rgba(0, 184, 169, 0.4);
+}
+
+[data-theme="mcallister"] .message-bubble.thinking {
+  background: linear-gradient(180deg, #6a5a7a 0%, #5a4a6a 100%);
+  border-color: #3a3a4a;
+}
+
+[data-theme="mcallister"] .message-bubble.streaming {
+  background: linear-gradient(180deg, #5a5a5a 0%, #4a4a4a 100%);
+}
+
+/* McAllister message status badge */
+[data-theme="mcallister"] .message-status {
+  background: var(--input-bg);
+  border: 2px solid var(--input-border);
+  border-radius: 4px;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.65rem;
+  letter-spacing: 0.05em;
+}
+
+/* McAllister typing indicator - Chunky raised dots */
+[data-theme="mcallister"] .typing-indicator span {
+  width: 10px;
+  height: 10px;
+  background: linear-gradient(180deg, #ff6b2b 0%, #ff4d00 100%);
+  border: 2px solid #991f00;
+  border-radius: 50%;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.3),
+    0 2px 0 #661a00;
+}
+
+[data-theme="mcallister"] .message-bubble.user .typing-indicator span {
+  background: linear-gradient(180deg, #ffffff 0%, #e0e0e0 100%);
+  border-color: rgba(0,0,0,0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.8),
+    0 2px 0 rgba(0,0,0,0.3);
+}
+
+/* McAllister avatar thinking dots - Match the typing indicator */
+[data-theme="mcallister"] .avatar__thinking-dots span {
+  width: 10px;
+  height: 10px;
+  background: linear-gradient(180deg, #ff6b2b 0%, #ff4d00 100%);
+  border: 2px solid #991f00;
+  border-radius: 50%;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.3),
+    0 2px 0 #661a00;
+}
+
+[data-theme="mcallister"] .avatar--thinking .avatar__thinking-dots {
+  gap: 8px;
+}
+
+/* McAllister tool badges - Chunky buttons */
+[data-theme="mcallister"] .tool-badge {
+  background: var(--btn-bg);
+  border: 2px solid var(--btn-border);
+  border-radius: 4px;
+  box-shadow: var(--btn-shadow);
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.65rem;
+  letter-spacing: 0.03em;
+}
+
+[data-theme="mcallister"] .tool-badge.running {
+  border-color: var(--accent-secondary);
+  background: linear-gradient(180deg, #00c9b8 0%, #00b8a9 100%);
+  color: white;
+  box-shadow: 0 2px 0 #008b80, 0 0 10px rgba(0, 184, 169, 0.3);
+}
+
+[data-theme="mcallister"] .tool-badge.error {
+  border-color: #991f00;
+  background: linear-gradient(180deg, #ff6b2b 0%, #ff4d00 100%);
+  color: white;
+}
+
+[data-theme="mcallister"] .tool-spinner {
+  border-top-color: white;
+}
+
+[data-theme="mcallister"] .tool-complete {
+  color: var(--accent-secondary);
+}
+
+[data-theme="mcallister"] .tool-error {
+  color: var(--accent);
+}
+
+/* McAllister message images - Chunky frame */
+[data-theme="mcallister"] .message-image-thumb {
+  border-radius: 4px;
+  border: 3px solid #1a1a1a;
   box-shadow: 3px 3px 0 rgba(0,0,0,0.4);
 }
 
-/* McAllister modal - Chunky raised panel */
+[data-theme="mcallister"] .message-image-thumb:hover {
+  transform: scale(1.02) translateY(-2px);
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.4);
+}
+
+/* McAllister modal - Silver raised panel */
 [data-theme="mcallister"] .modal {
-  background: var(--modal-bg);
-  border: 3px solid #1a1a1a;
+  background: linear-gradient(180deg, #c8c8c8 0%, #b0b0b0 100%);
+  border: 3px solid #808080;
   border-radius: 12px;
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.1),
-    0 8px 0 #1a1a1a,
-    0 12px 24px rgba(0,0,0,0.5);
+    inset 0 2px 0 rgba(255,255,255,0.4),
+    0 8px 0 rgba(0,0,0,0.2),
+    0 12px 24px rgba(0,0,0,0.3);
 }
 
 /* McAllister input bar */
@@ -215,33 +370,237 @@
   background: linear-gradient(180deg, #4fc3f7 0%, #00b8a9 100%);
 }
 
-/* McAllister scrollbar - Chunky */
+/* McAllister scrollbar - Silver */
 [data-theme="mcallister"] ::-webkit-scrollbar {
   width: 12px;
 }
 
 [data-theme="mcallister"] ::-webkit-scrollbar-track {
-  background: #1a1a1a;
-  border-left: 2px solid #0a0a0a;
+  background: #909090;
+  border-left: 2px solid #707070;
 }
 
 [data-theme="mcallister"] ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #5a5a5a 0%, #3a3a3a 100%);
-  border: 2px solid #2a2a2a;
+  background: linear-gradient(180deg, #c8c8c8 0%, #a8a8a8 100%);
+  border: 2px solid #808080;
   border-radius: 4px;
 }
 
 [data-theme="mcallister"] ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #6a6a6a 0%, #4a4a4a 100%);
+  background: linear-gradient(180deg, #d8d8d8 0%, #b8b8b8 100%);
 }
 
-/* McAllister avatar container - Chunky frame */
+/* McAllister avatar container - Silver frame */
 [data-theme="mcallister"] .chat-timeline__avatar-container {
-  background: linear-gradient(180deg, #4a4a4a 0%, #3a3a3a 100%);
-  border: 3px solid #1a1a1a;
+  background: linear-gradient(180deg, #c8c8c8 0%, #b0b0b0 100%);
+  border: 3px solid #808080;
   border-radius: 12px;
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.1),
-    0 4px 0 #1a1a1a;
+    inset 0 2px 0 rgba(255,255,255,0.4),
+    0 4px 0 rgba(0,0,0,0.2);
   padding: 16px;
+}
+
+/* McAllister unified input bar - Silver panel */
+[data-theme="mcallister"] .unified-input-bar {
+  background: linear-gradient(180deg, #c0c0c0 0%, #a8a8a8 100%);
+  border-top: 4px solid #808080;
+  box-shadow: inset 0 2px 0 rgba(255,255,255,0.3);
+  padding: 16px;
+}
+
+[data-theme="mcallister"] .unified-input-bar.listening {
+  background: linear-gradient(180deg, #d0c8c8 0%, #b8a8a8 100%);
+  border-top-color: var(--accent);
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,0.3),
+    inset 0 0 30px var(--accent-glow);
+}
+
+[data-theme="mcallister"] .unified-input-bar__field {
+  background: var(--input-bg);
+  border: 3px solid var(--input-border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.5);
+}
+
+[data-theme="mcallister"] .unified-input-bar__field:focus {
+  border-color: var(--accent);
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.5), 0 0 0 2px var(--accent-soft);
+}
+
+[data-theme="mcallister"] .unified-input-bar__icon-btn {
+  background: var(--btn-bg);
+  border: 2px solid var(--btn-border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  box-shadow: var(--btn-shadow);
+}
+
+[data-theme="mcallister"] .unified-input-bar__icon-btn:hover:not(:disabled) {
+  background: var(--btn-hover);
+  transform: translateY(-1px);
+  color: var(--accent);
+  border-color: var(--btn-border);
+}
+
+[data-theme="mcallister"] .unified-input-bar__icon-btn.mic-active {
+  background: linear-gradient(180deg, #ff6b2b 0%, #ff4d00 50%, #cc3d00 100%);
+  border: 3px solid #991f00;
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,0.3),
+    0 4px 0 #661a00,
+    0 0 20px var(--accent-glow);
+  color: white;
+  animation: mcallister-pulse 1s ease-in-out infinite;
+}
+
+@keyframes mcallister-pulse {
+  0%, 100% {
+    box-shadow:
+      inset 0 2px 0 rgba(255,255,255,0.3),
+      0 4px 0 #661a00,
+      0 0 20px var(--accent-glow);
+  }
+  50% {
+    box-shadow:
+      inset 0 2px 0 rgba(255,255,255,0.3),
+      0 4px 0 #661a00,
+      0 0 40px var(--accent-glow);
+  }
+}
+
+[data-theme="mcallister"] .unified-input-bar__send {
+  background: linear-gradient(180deg, #ff6b2b 0%, #ff4d00 50%, #cc3d00 100%);
+  border: 2px solid #991f00;
+  border-radius: 6px;
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,0.3),
+    0 3px 0 #661a00;
+}
+
+[data-theme="mcallister"] .unified-input-bar__send:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,0.3),
+    0 4px 0 #661a00;
+}
+
+[data-theme="mcallister"] .unified-input-bar__send:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* McAllister conversation sidebar - Silver raised panel */
+[data-theme="mcallister"] .conversation-dropdown-panel {
+  background: linear-gradient(180deg, #d0d0d0 0%, #b8b8b8 20%, #a8a8a8 100%);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 4px solid #707070;
+  border-radius: 10px;
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,0.4),
+    inset 0 -2px 0 rgba(0,0,0,0.1),
+    0 8px 0 rgba(0,0,0,0.2),
+    0 12px 30px rgba(0,0,0,0.3);
+}
+
+[data-theme="mcallister"] .dropdown-new-btn {
+  background: linear-gradient(180deg, #4a4a4a 0%, #3a3a3a 100%);
+  border: 3px solid #2a2a2a;
+  border-radius: 6px;
+  color: #fff;
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,0.1),
+    0 4px 0 #1a1a1a;
+  font-family: var(--font-family);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+[data-theme="mcallister"] .dropdown-new-btn:hover {
+  background: linear-gradient(180deg, #00a035 0%, #00802b 100%);
+  border-color: #005a1e;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,0.2),
+    0 5px 0 #003d14;
+}
+
+[data-theme="mcallister"] .dropdown-new-btn:active {
+  transform: translateY(2px);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
+}
+
+[data-theme="mcallister"] .dropdown-item {
+  border-radius: 6px;
+  border: 2px solid transparent;
+  margin-bottom: 6px;
+}
+
+[data-theme="mcallister"] .dropdown-item:hover {
+  background: linear-gradient(180deg, #5a5a5a 0%, #4a4a4a 100%);
+  border-color: #1a1a1a;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.1),
+    0 2px 0 #0a0a0a;
+}
+
+[data-theme="mcallister"] .dropdown-item.active {
+  background: linear-gradient(180deg, #4a4a4a 0%, #3a3a3a 100%);
+  border-color: #2a2a2a;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.1),
+    0 3px 0 #1a1a1a;
+  color: white;
+}
+
+[data-theme="mcallister"] .dropdown-item.active .dropdown-item-title,
+[data-theme="mcallister"] .dropdown-item.active .dropdown-item-meta {
+  color: white;
+}
+
+[data-theme="mcallister"] .dropdown-item-title {
+  font-family: var(--font-family);
+  font-weight: 700;
+}
+
+[data-theme="mcallister"] .dropdown-item-meta {
+  font-family: 'Courier New', monospace;
+  text-transform: uppercase;
+  font-size: 0.65rem;
+  letter-spacing: 0.03em;
+}
+
+[data-theme="mcallister"] .dropdown-item-context,
+[data-theme="mcallister"] .dropdown-item-delete {
+  background: var(--btn-bg);
+  border: 2px solid var(--btn-border);
+  border-radius: 4px;
+  box-shadow: 0 2px 0 #1a1a1a;
+}
+
+[data-theme="mcallister"] .dropdown-item-context:hover {
+  background: linear-gradient(180deg, #00c9b8 0%, #00b8a9 100%);
+  border-color: #008b80;
+  color: white;
+}
+
+[data-theme="mcallister"] .dropdown-item-delete:hover {
+  background: linear-gradient(180deg, #ff6b2b 0%, #ff4d00 100%);
+  border-color: #991f00;
+  color: white;
+}
+
+[data-theme="mcallister"] .dropdown-context-info {
+  background: var(--input-bg);
+  border-top: 3px solid var(--input-border);
+  font-family: 'Courier New', monospace;
+  text-transform: uppercase;
+  color: var(--accent-secondary);
 }

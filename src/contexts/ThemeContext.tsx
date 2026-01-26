@@ -10,14 +10,14 @@ export interface Theme {
 
 export const themes: Theme[] = [
   {
+    name: 'mcallister',
+    displayName: 'Talkboy',
+    description: 'Silver 90s cassette recorder aesthetic'
+  },
+  {
     name: 'imessage',
     displayName: 'iMessage',
     description: 'Clean, modern iOS-inspired design'
-  },
-  {
-    name: 'mcallister',
-    displayName: 'McAllister',
-    description: 'Chunky 90s Talk Boy toy aesthetic'
   }
 ]
 
@@ -32,7 +32,7 @@ const ThemeContext = createContext<ThemeContextValue | null>(null)
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<ThemeName>(() => {
     const saved = localStorage.getItem('talkboy_theme')
-    return (saved as ThemeName) || 'imessage'
+    return (saved as ThemeName) || 'mcallister'
   })
 
   const setTheme = (newTheme: ThemeName) => {

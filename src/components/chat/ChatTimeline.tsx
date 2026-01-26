@@ -1,58 +1,46 @@
 import { useEffect, useRef, useState } from 'react'
-import { Message, Activity, AvatarState } from '../../types'
-import { AvatarSmall } from '../avatar/Avatar'
+import { Message, Activity, AvatarState, StoredActivity } from '../../types'
 import './ChatTimeline.css'
-
-// Timeline item types - unified view of all events
-type TimelineItem =
-  | { type: 'message'; data: Message; timestamp: number }
-  | { type: 'activity'; data: Activity; timestamp: number }
-  | { type: 'thinking'; timestamp: number }
-  | { type: 'streaming'; text: string; timestamp: number }
 
 interface ChatTimelineProps {
   messages: Message[]
-  activities: Activity[]
+  activities: Activity[]              // Live activities (current turn)
+  storedActivities: StoredActivity[]  // Historical activities (persisted)
   avatarState: AvatarState
   streamingText: string
   onImageClick?: (image: { dataUrl: string; description?: string; fileName: string }) => void
 }
 
-// Merge messages and activities into a single timeline
-function buildTimeline(
-  messages: Message[],
-  activities: Activity[],
-  avatarState: AvatarState,
-  streamingText: string
-): TimelineItem[] {
-  const items: TimelineItem[] = []
+// Unified activity type for display (works with both live and stored)
+type DisplayActivity = {
+  id: string
+  tool: string
+  input?: string
+  status: 'running' | 'complete' | 'error'
+  timestamp: number
+}
 
-  // Add all messages
-  for (const msg of messages) {
-    items.push({ type: 'message', data: msg, timestamp: msg.timestamp })
+// Convert StoredActivity to DisplayActivity
+function storedToDisplay(stored: StoredActivity): DisplayActivity {
+  return {
+    id: stored.id,
+    tool: stored.tool,
+    input: stored.input,
+    status: stored.status,
+    timestamp: stored.timestamp,
   }
+}
 
-  // Add activities (only show tool_start, skip tool_end as we update the start)
-  for (const activity of activities) {
-    if (activity.type === 'tool_start' || activity.type === 'thinking') {
-      items.push({ type: 'activity', data: activity, timestamp: activity.timestamp })
-    }
+// Convert live Activity to DisplayActivity
+function liveToDisplay(activity: Activity): DisplayActivity | null {
+  if (!activity.tool) return null
+  return {
+    id: activity.id,
+    tool: activity.tool,
+    input: activity.input,
+    status: activity.status || 'running',
+    timestamp: activity.timestamp,
   }
-
-  // Sort by timestamp
-  items.sort((a, b) => a.timestamp - b.timestamp)
-
-  // Add thinking indicator if currently thinking (and no streaming yet)
-  if (avatarState === 'thinking' && !streamingText && activities.length === 0) {
-    items.push({ type: 'thinking', timestamp: Date.now() })
-  }
-
-  // Add streaming text if present
-  if (streamingText) {
-    items.push({ type: 'streaming', text: streamingText, timestamp: Date.now() })
-  }
-
-  return items
 }
 
 // Typing indicator component (3 dots)
@@ -66,20 +54,21 @@ function TypingIndicator() {
   )
 }
 
-// Tool activity badge component
-function ToolBadge({ activity }: { activity: Activity }) {
-  const toolIcons: Record<string, string> = {
-    Read: '📖',
-    Edit: '✏️',
-    Write: '📝',
-    Bash: '⚡',
-    Glob: '🔍',
-    Grep: '🔎',
-    Task: '📋',
-    default: '🔧',
-  }
+// Tool icons mapping
+const TOOL_ICONS: Record<string, string> = {
+  Read: '📖',
+  Edit: '✏️',
+  Write: '📝',
+  Bash: '⚡',
+  Glob: '🔍',
+  Grep: '🔎',
+  Task: '📋',
+  default: '🔧',
+}
 
-  const icon = toolIcons[activity.tool || ''] || toolIcons.default
+// Tool activity badge component
+function ToolBadge({ activity }: { activity: DisplayActivity }) {
+  const icon = TOOL_ICONS[activity.tool] || TOOL_ICONS.default
   const isRunning = activity.status === 'running'
   const isError = activity.status === 'error'
 
@@ -104,24 +93,103 @@ function ToolBadge({ activity }: { activity: Activity }) {
   )
 }
 
-// Message bubble component
+// Collapsible tools component
+function CollapsibleTools({
+  activities,
+  isLive = false,
+  messageId
+}: {
+  activities: DisplayActivity[]
+  isLive?: boolean
+  messageId: string
+}) {
+  const [isExpanded, setIsExpanded] = useState(isLive)
+
+  // Auto-expand when live
+  useEffect(() => {
+    if (isLive) setIsExpanded(true)
+  }, [isLive])
+
+  if (activities.length === 0) return null
+
+  // Get unique tool names for collapsed indicator
+  const toolNames = [...new Set(activities.map(a => a.tool))]
+
+  const hasRunning = activities.some(a => a.status === 'running')
+  const hasError = activities.some(a => a.status === 'error')
+
+  return (
+    <div className={`collapsible-tools ${isExpanded ? 'expanded' : 'collapsed'}`}>
+      {isExpanded ? (
+        <div className="collapsible-tools__expanded">
+          <button
+            className="collapsible-tools__toggle"
+            onClick={() => !isLive && setIsExpanded(false)}
+            disabled={isLive}
+          >
+            <span className="collapsible-tools__toggle-icon">▼</span>
+            <span className="collapsible-tools__toggle-text">
+              {activities.length} tool{activities.length !== 1 ? 's' : ''} used
+            </span>
+          </button>
+          <div className="activity-group">
+            {activities.map((activity) => (
+              <ToolBadge key={activity.id} activity={activity} />
+            ))}
+          </div>
+        </div>
+      ) : (
+        <button
+          className={`collapsible-tools__indicator ${hasRunning ? 'running' : ''} ${hasError ? 'error' : ''}`}
+          onClick={() => setIsExpanded(true)}
+        >
+          <span className="collapsible-tools__icons">
+            {toolNames.slice(0, 4).map(name => (
+              <span key={name} className="collapsible-tools__icon">
+                {TOOL_ICONS[name] || TOOL_ICONS.default}
+              </span>
+            ))}
+            {toolNames.length > 4 && <span className="collapsible-tools__more">+{toolNames.length - 4}</span>}
+          </span>
+          <span className="collapsible-tools__count">
+            {activities.length} tool{activities.length !== 1 ? 's' : ''}
+          </span>
+          <span className="collapsible-tools__expand-icon">▶</span>
+        </button>
+      )}
+    </div>
+  )
+}
+
+// Format time for tape display
+function formatTapeTime(timestamp: number): string {
+  const date = new Date(timestamp)
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+}
+
+// Message bubble component with optional activities
 function MessageBubble({
   message,
   onImageClick,
-  avatarState,
-  isActive,
+  trackNumber,
+  activities = [],
 }: {
   message: Message
   onImageClick?: (image: { dataUrl: string; description?: string; fileName: string }) => void
-  avatarState?: AvatarState
-  isActive?: boolean
+  trackNumber: number
+  activities?: DisplayActivity[]
 }) {
   const isUser = message.role === 'user'
   const hasImages = message.images && message.images.length > 0
-  const isAssistant = !isUser
 
   return (
-    <div className={`message-wrapper ${isAssistant ? 'assistant' : 'user'}`}>
+    <div className={`message-wrapper ${isUser ? 'user' : 'assistant'}`}>
+      {!isUser && activities.length > 0 && (
+        <CollapsibleTools
+          activities={activities}
+          messageId={message.id}
+        />
+      )}
       <div className={`message-bubble ${isUser ? 'user' : 'assistant'}`}>
         <div className="message-bubble-content">
           {hasImages && (
@@ -144,58 +212,128 @@ function MessageBubble({
           <div className="message-content">{message.content}</div>
         </div>
       </div>
-      {isAssistant && (
-        <div className={`message-footer ${isActive ? '' : 'inactive'}`}>
-          <div className={`message-avatar ${isActive ? 'active' : 'inactive'}`}>
-            <AvatarSmall state={isActive ? avatarState || 'idle' : 'idle'} />
-          </div>
-          <div className="message-status">
-            {new Date(message.timestamp).toLocaleTimeString([], {
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
-            {!isActive && ' · Delivered'}
-          </div>
-        </div>
-      )}
-      {isUser && (
-        <div className="message-time user-time">
-          {new Date(message.timestamp).toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-          })}
-        </div>
-      )}
+      <div className={`message-meta ${isUser ? 'user' : 'assistant'}`}>
+        <span className="message-meta__name">{isUser ? 'You' : 'Talkboy'}</span>
+        <span className="message-meta__time">{formatTapeTime(message.timestamp)}</span>
+        <span className="message-meta__track">#{String(trackNumber).padStart(2, '0')}</span>
+      </div>
     </div>
   )
 }
 
-// Streaming response bubble
-function StreamingBubble({ text, avatarState }: { text: string; avatarState: AvatarState }) {
+// Streaming response bubble with live activities
+function StreamingBubble({
+  text,
+  trackNumber,
+  activities = [],
+}: {
+  text: string
+  trackNumber: number
+  activities?: DisplayActivity[]
+}) {
   return (
     <div className="message-wrapper assistant">
+      {activities.length > 0 && (
+        <CollapsibleTools
+          activities={activities}
+          isLive={true}
+          messageId="streaming"
+        />
+      )}
       <div className="message-bubble assistant streaming">
         <div className="message-bubble-content">
           <div className="message-content">{text}</div>
         </div>
       </div>
-      <div className="message-footer">
-        <div className="message-avatar active">
-          <AvatarSmall state={avatarState} />
-        </div>
-        <div className="message-status">
+      <div className="message-meta assistant">
+        <span className="message-meta__name message-meta__name--recording">Talkboy</span>
+        <span className="message-meta__time">
           <TypingIndicator />
-        </div>
+        </span>
+        <span className="message-meta__track">#{String(trackNumber).padStart(2, '0')}</span>
       </div>
     </div>
   )
 }
 
-// Listening indicator moved to UnifiedInputBar
+// Build timeline with activities attached to their corresponding messages
+// Uses stored activities for historical messages, live activities for current turn
+function buildMessageTimeline(
+  messages: Message[],
+  storedActivities: StoredActivity[],
+  liveActivities: Activity[]
+): Map<string, DisplayActivity[]> {
+  const messageActivities = new Map<string, DisplayActivity[]>()
+
+  // Sort messages by timestamp
+  const sortedMessages = [...messages].sort((a, b) => a.timestamp - b.timestamp)
+
+  // First, map stored activities to their messages
+  for (const stored of storedActivities) {
+    // Find the next assistant message after this activity
+    const nextAssistantMsg = sortedMessages.find(
+      m => m.role === 'assistant' && m.timestamp > stored.timestamp
+    )
+
+    if (nextAssistantMsg) {
+      const existing = messageActivities.get(nextAssistantMsg.id) || []
+      existing.push(storedToDisplay(stored))
+      messageActivities.set(nextAssistantMsg.id, existing)
+    }
+  }
+
+  // Then, map any completed live activities (for the current turn before finalization)
+  const completedLive = liveActivities
+    .filter(a => (a.type === 'tool_start' || a.type === 'thinking') && a.status === 'complete')
+    .map(liveToDisplay)
+    .filter((a): a is DisplayActivity => a !== null)
+
+  for (const activity of completedLive) {
+    const nextAssistantMsg = sortedMessages.find(
+      m => m.role === 'assistant' && m.timestamp > activity.timestamp
+    )
+
+    if (nextAssistantMsg) {
+      const existing = messageActivities.get(nextAssistantMsg.id) || []
+      // Avoid duplicates (in case activity is both stored and live)
+      if (!existing.some(e => e.id === activity.id)) {
+        existing.push(activity)
+        messageActivities.set(nextAssistantMsg.id, existing)
+      }
+    }
+  }
+
+  return messageActivities
+}
+
+// Get live activities that don't belong to any message yet (pending)
+function getPendingActivities(
+  messages: Message[],
+  activities: Activity[]
+): DisplayActivity[] {
+  const toolActivities = activities.filter(
+    a => a.type === 'tool_start' || a.type === 'thinking'
+  )
+
+  if (toolActivities.length === 0) return []
+
+  // Get the latest assistant message timestamp
+  const assistantMessages = messages.filter(m => m.role === 'assistant')
+  const latestAssistantTime = assistantMessages.length > 0
+    ? Math.max(...assistantMessages.map(m => m.timestamp))
+    : 0
+
+  // Return activities that are after the latest assistant message
+  return toolActivities
+    .filter(a => a.timestamp > latestAssistantTime)
+    .map(liveToDisplay)
+    .filter((a): a is DisplayActivity => a !== null)
+}
 
 export function ChatTimeline({
   messages,
   activities,
+  storedActivities,
   avatarState,
   streamingText,
   onImageClick,
@@ -204,43 +342,21 @@ export function ChatTimeline({
   const containerRef = useRef<HTMLDivElement>(null)
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true)
 
-  // Build unified timeline
-  const timeline = buildTimeline(messages, activities, avatarState, streamingText)
+  // Build activity map for messages (combines stored + live)
+  const messageActivities = buildMessageTimeline(messages, storedActivities, activities)
 
-  // Group consecutive activities together
-  const groupedTimeline: (TimelineItem | { type: 'activity-group'; items: Activity[]; timestamp: number })[] = []
-  let currentActivityGroup: Activity[] = []
+  // Get pending live activities (for streaming/thinking states)
+  const pendingActivities = getPendingActivities(messages, activities)
 
-  for (const item of timeline) {
-    if (item.type === 'activity') {
-      currentActivityGroup.push(item.data)
-    } else {
-      if (currentActivityGroup.length > 0) {
-        groupedTimeline.push({
-          type: 'activity-group',
-          items: [...currentActivityGroup],
-          timestamp: currentActivityGroup[0].timestamp,
-        })
-        currentActivityGroup = []
-      }
-      groupedTimeline.push(item)
-    }
-  }
-  // Don't forget trailing activities
-  if (currentActivityGroup.length > 0) {
-    groupedTimeline.push({
-      type: 'activity-group',
-      items: currentActivityGroup,
-      timestamp: currentActivityGroup[0].timestamp,
-    })
-  }
+  // Sort messages by timestamp
+  const sortedMessages = [...messages].sort((a, b) => a.timestamp - b.timestamp)
 
   // Auto-scroll to bottom when new content arrives
   useEffect(() => {
     if (shouldAutoScroll && bottomRef.current) {
       bottomRef.current.scrollIntoView({ behavior: 'smooth' })
     }
-  }, [timeline.length, streamingText, shouldAutoScroll])
+  }, [messages.length, streamingText, activities.length, shouldAutoScroll])
 
   // Detect manual scroll to disable auto-scroll
   const handleScroll = () => {
@@ -250,72 +366,72 @@ export function ChatTimeline({
     setShouldAutoScroll(isAtBottom)
   }
 
+  const isEmpty = sortedMessages.length === 0 && !streamingText && avatarState !== 'thinking'
+
   return (
     <div className="chat-timeline" ref={containerRef} onScroll={handleScroll}>
-      {groupedTimeline.length === 0 && (
+      {isEmpty && (
         <div className="timeline-empty">
           <p>Start a conversation by speaking or typing below</p>
         </div>
       )}
 
-      {groupedTimeline.map((item, index) => {
-        if (item.type === 'message') {
-          // Find if this is the last assistant message and if we're currently active
-          const isAssistant = item.data.role === 'assistant'
-          const isLastAssistantMsg = isAssistant &&
-            !groupedTimeline.slice(index + 1).some(i => i.type === 'message' && i.data.role === 'assistant') &&
-            !streamingText // Not active if there's streaming (that bubble is active instead)
-          const isActive = isLastAssistantMsg && (avatarState === 'speaking' || avatarState === 'happy')
+      {sortedMessages.map((message, index) => {
+        const trackNumber = index + 1
+        const msgActivities = messageActivities.get(message.id) || []
 
-          return (
-            <div
-              key={`msg-${item.data.id}`}
-              className={`timeline-item ${item.data.role === 'user' ? 'right' : 'left'}`}
-            >
-              <MessageBubble
-                message={item.data}
-                onImageClick={onImageClick}
-                avatarState={avatarState}
-                isActive={isActive}
-              />
-            </div>
-          )
-        }
+        return (
+          <div
+            key={`msg-${message.id}`}
+            className={`timeline-item ${message.role === 'user' ? 'right' : 'left'}`}
+          >
+            <MessageBubble
+              message={message}
+              onImageClick={onImageClick}
+              trackNumber={trackNumber}
+              activities={msgActivities}
+            />
+          </div>
+        )
+      })}
 
-        if (item.type === 'activity-group') {
-          return (
-            <div key={`activities-${index}`} className="timeline-item left">
-              <div className="activity-group">
-                {item.items.map((activity) => (
-                  <ToolBadge key={activity.id} activity={activity} />
-                ))}
-              </div>
-            </div>
-          )
-        }
+      {/* Thinking indicator (no streaming yet, no pending activities) */}
+      {avatarState === 'thinking' && !streamingText && pendingActivities.length === 0 && (
+        <div className="timeline-item left">
+          <div className="message-bubble assistant thinking">
+            <TypingIndicator />
+          </div>
+        </div>
+      )}
 
-        if (item.type === 'thinking') {
-          return (
-            <div key="thinking" className="timeline-item left">
+      {/* Live activities (before streaming starts) */}
+      {pendingActivities.length > 0 && !streamingText && (
+        <div className="timeline-item left">
+          <div className="message-wrapper assistant">
+            <CollapsibleTools
+              activities={pendingActivities}
+              isLive={true}
+              messageId="pending"
+            />
+            {avatarState === 'thinking' && (
               <div className="message-bubble assistant thinking">
                 <TypingIndicator />
               </div>
-            </div>
-          )
-        }
+            )}
+          </div>
+        </div>
+      )}
 
-        if (item.type === 'streaming') {
-          return (
-            <div key="streaming" className="timeline-item left">
-              <StreamingBubble text={item.text} avatarState={avatarState} />
-            </div>
-          )
-        }
-
-        return null
-      })}
-
-      {/* Listening indicator moved to unified input bar */}
+      {/* Streaming response */}
+      {streamingText && (
+        <div className="timeline-item left">
+          <StreamingBubble
+            text={streamingText}
+            trackNumber={sortedMessages.length + 1}
+            activities={pendingActivities}
+          />
+        </div>
+      )}
 
       <div ref={bottomRef} />
     </div>

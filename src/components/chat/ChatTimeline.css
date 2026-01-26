@@ -367,3 +367,167 @@
 .chat-timeline::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted, #666);
 }
+
+/* Message meta - tape-themed track info */
+.message-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.375rem;
+  padding: 0 0.5rem;
+  font-family: 'Courier New', monospace;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  color: #444;
+}
+
+.message-meta.user {
+  flex-direction: row-reverse;
+}
+
+.message-meta.assistant {
+  flex-direction: row;
+}
+
+.message-meta__name {
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.message-meta__name--recording {
+  color: #cc0000;
+  animation: recordingPulse 1s ease-in-out infinite;
+}
+
+@keyframes recordingPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.message-meta__time {
+  font-size: 0.95rem;
+}
+
+.message-meta__track {
+  font-weight: 600;
+}
+
+/* Collapsible tools */
+.collapsible-tools {
+  margin-bottom: 0.5rem;
+}
+
+.collapsible-tools__indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  background: var(--bg-tertiary, #333);
+  border: 1px solid var(--border-color, #444);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.8rem;
+  color: var(--text-muted, #888);
+}
+
+.collapsible-tools__indicator:hover {
+  background: var(--bg-secondary, #2a2a2a);
+  border-color: var(--text-muted, #666);
+}
+
+.collapsible-tools__indicator.running {
+  border-color: #007aff;
+  animation: indicatorPulse 2s ease-in-out infinite;
+}
+
+.collapsible-tools__indicator.error {
+  border-color: #ff3b30;
+}
+
+@keyframes indicatorPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(0, 122, 255, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(0, 122, 255, 0);
+  }
+}
+
+.collapsible-tools__icons {
+  display: flex;
+  gap: 0.125rem;
+}
+
+.collapsible-tools__icon {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.collapsible-tools__more {
+  font-size: 0.7rem;
+  opacity: 0.6;
+}
+
+.collapsible-tools__count {
+  font-weight: 500;
+  color: var(--text-secondary, #aaa);
+}
+
+.collapsible-tools__expand-icon {
+  font-size: 0.6rem;
+  opacity: 0.5;
+  transition: transform 0.2s ease;
+}
+
+.collapsible-tools__indicator:hover .collapsible-tools__expand-icon {
+  transform: translateX(2px);
+}
+
+/* Expanded state */
+.collapsible-tools__expanded {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.collapsible-tools__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.5rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: var(--text-muted, #888);
+  transition: color 0.15s ease;
+}
+
+.collapsible-tools__toggle:hover:not(:disabled) {
+  color: var(--text-secondary, #aaa);
+}
+
+.collapsible-tools__toggle:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.collapsible-tools__toggle-icon {
+  font-size: 0.6rem;
+  transition: transform 0.2s ease;
+}
+
+.collapsible-tools__toggle:hover:not(:disabled) .collapsible-tools__toggle-icon {
+  transform: translateY(1px);
+}
+
+.collapsible-tools__toggle-text {
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-weight: 500;
+}

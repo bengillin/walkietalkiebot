@@ -38,6 +38,18 @@ export interface Activity {
   status?: 'running' | 'complete' | 'error'
 }
 
+// Compact, persisted version of Activity for storage
+// Designed to be modular for future analytics, playback, debugging
+export interface StoredActivity {
+  id: string
+  tool: string
+  input?: string        // Truncated for storage
+  status: 'complete' | 'error'
+  timestamp: number
+  duration?: number     // Time taken in ms (useful for performance analysis)
+  error?: string        // Error message if failed
+}
+
 export interface MessageImage {
   id: string
   dataUrl: string
@@ -57,6 +69,7 @@ export interface Conversation {
   id: string
   title: string
   messages: Message[]
+  activities?: StoredActivity[]  // Historical tool use, loaded with conversation
   createdAt: number
   updatedAt: number
 }
@@ -105,11 +118,15 @@ export interface AppState {
   transcript: string
   setTranscript: (text: string) => void
 
-  // Activity feed
+  // Activity feed (live, transient)
   activities: Activity[]
   addActivity: (activity: Omit<Activity, 'id' | 'timestamp'>) => string
   updateActivity: (id: string, updates: Partial<Activity>) => void
   clearActivities: () => void
+
+  // Stored activities (persisted with conversation)
+  storedActivities: StoredActivity[]
+  finalizeActivities: () => void  // Convert live activities to stored when turn ends
 
   // File attachments
   attachedFiles: DroppedFile[]

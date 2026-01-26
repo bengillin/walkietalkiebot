@@ -1,5 +1,21 @@
 import { create } from 'zustand'
-import type { Activity, AppState, AvatarState, Conversation, DroppedFile, ImageAnalysis, Message } from '../types'
+import type { Activity, AppState, AvatarState, Conversation, DroppedFile, ImageAnalysis, Message, StoredActivity } from '../types'
+
+// Convert live activities to compact stored format
+function activityToStored(activity: Activity): StoredActivity | null {
+  // Only store completed tool activities
+  if (activity.type !== 'tool_start' || !activity.tool) return null
+  if (activity.status !== 'complete' && activity.status !== 'error') return null
+
+  return {
+    id: activity.id,
+    tool: activity.tool,
+    input: activity.input ? activity.input.slice(0, 100) : undefined, // Truncate for storage
+    status: activity.status,
+    timestamp: activity.timestamp,
+    error: activity.status === 'error' ? activity.output : undefined,
+  }
+}
 
 const STORAGE_KEY = 'talkboy_conversations'
 
@@ -61,6 +77,7 @@ export const useStore = create<AppState>((set, get) => {
     // Current conversation
     currentConversationId: initialConversation.id,
     messages: initialConversation.messages,
+    storedActivities: initialConversation.activities || [],
 
     addMessage: (message, images) => {
       const newMessage: Message = {
@@ -121,6 +138,8 @@ export const useStore = create<AppState>((set, get) => {
         set({
           currentConversationId: id,
           messages: conversation.messages,
+          storedActivities: conversation.activities || [],
+          activities: [], // Clear live activities when switching conversations
         })
       }
     },
@@ -241,6 +260,41 @@ export const useStore = create<AppState>((set, get) => {
       }))
     },
     clearActivities: () => set({ activities: [] }),
+
+    // Finalize activities - convert live activities to stored format
+    finalizeActivities: () => {
+      const state = get()
+
+      // Convert completed live activities to stored format
+      const newStored: StoredActivity[] = state.activities
+        .map(activityToStored)
+        .filter((a): a is StoredActivity => a !== null)
+
+      if (newStored.length === 0) return
+
+      // Merge with existing stored activities
+      const allStored = [...state.storedActivities, ...newStored]
+
+      // Update conversation in storage
+      const conversations = state.conversations.map((conv) => {
+        if (conv.id === state.currentConversationId) {
+          return {
+            ...conv,
+            activities: allStored,
+            updatedAt: Date.now(),
+          }
+        }
+        return conv
+      })
+
+      saveConversations(conversations)
+
+      set({
+        storedActivities: allStored,
+        activities: [], // Clear live activities after finalizing
+        conversations,
+      })
+    },
 
     // File attachments
     attachedFiles: [],

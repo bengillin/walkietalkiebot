@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { AvatarSmall } from './components/avatar/Avatar'
+import { Logo } from './components/Logo'
 import { ChatTimeline } from './components/chat/ChatTimeline'
-import { ConversationSidebar } from './components/chat/ConversationSidebar'
-import { UnifiedInputBar } from './components/chat/UnifiedInputBar'
+import { TapeDeck, type TapeState } from './components/cassette'
 import { Onboarding, type OnboardingSettings } from './components/onboarding/Onboarding'
 import { FileDropZone } from './components/dropzone/FileDropZone'
 import { ImageLightbox } from './components/media/ImageLightbox'
@@ -17,6 +17,18 @@ import { useSoundEffects } from './hooks/useSoundEffects'
 import { useTheme } from './contexts/ThemeContext'
 import './App.css'
 
+// Map avatar state to cassette tape state
+function mapAvatarToTapeState(avatarState: string, isListening: boolean): TapeState {
+  if (isListening) return 'recording'
+  switch (avatarState) {
+    case 'listening': return 'recording'
+    case 'thinking': return 'thinking'
+    case 'speaking': return 'playing'
+    case 'happy': return 'playing'
+    default: return 'idle'
+  }
+}
+
 function App() {
   const [hasOnboarded, setHasOnboarded] = useState(() =>
     localStorage.getItem('talkboy_onboarded') === 'true'
@@ -26,7 +38,7 @@ function App() {
   )
   const [showSettings, setShowSettings] = useState(false)
   const [showMediaLibrary, setShowMediaLibrary] = useState(false)
-  const [showSidebar, setShowSidebar] = useState(false)
+  const [isTapeEjected, setIsTapeEjected] = useState(false)
   const [responseText, setResponseText] = useState('')
   const [error, setError] = useState('')
   const [useClaudeCode, setUseClaudeCode] = useState(() =>
@@ -72,12 +84,14 @@ function App() {
     loadConversation,
     deleteConversation,
     contextConversationIds,
-    toggleContextConversation,
     // Activity feed
     activities,
     addActivity,
     updateActivity,
     clearActivities,
+    // Stored activities (persisted)
+    storedActivities,
+    finalizeActivities,
     // File attachments
     attachedFiles,
     addFiles,
@@ -437,8 +451,10 @@ function App() {
 
       // Clear streaming text before adding message to avoid duplicate display
       setResponseText('')
-      // Add assistant message
+      // Add assistant message and finalize activities
       addMessage({ role: 'assistant', content: fullResponse })
+      // Persist activities with this conversation
+      finalizeActivities()
     } catch (err) {
       console.error('API error:', err)
       playSound('error')
@@ -448,11 +464,12 @@ function App() {
       // Save partial response if we got anything before the error
       if (fullResponse.trim()) {
         addMessage({ role: 'assistant', content: fullResponse })
+        finalizeActivities()
       }
     }
 
     setTranscript('')
-  }, [apiKey, messages, addMessage, setAvatarState, setTranscript, clearSpeechTranscript, speak, speakStreaming, playSound, contextMessages, useClaudeCode, clearActivities, handleActivity, attachedFiles, clearFiles, clearImageAnalyses, getImageContext, ttsEnabled])
+  }, [apiKey, messages, addMessage, setAvatarState, setTranscript, clearSpeechTranscript, speak, speakStreaming, playSound, contextMessages, useClaudeCode, clearActivities, handleActivity, attachedFiles, clearFiles, clearImageAnalyses, getImageContext, ttsEnabled, finalizeActivities])
 
   // Handle talk button
   const handleTalkStart = useCallback(() => {
@@ -586,54 +603,59 @@ function App() {
 
   return (
     <div className="app app--timeline">
-      {/* Sidebar for conversations */}
-      <ConversationSidebar
-        conversations={conversations}
-        currentConversationId={currentConversationId || ''}
-        contextIds={contextConversationIds}
-        isOpen={showSidebar}
-        onClose={() => setShowSidebar(false)}
-        onSelectConversation={(id) => {
-          loadConversation(id)
-          setShowSidebar(false)
-        }}
-        onNewConversation={() => {
-          createConversation()
-          setShowSidebar(false)
-        }}
-        onDeleteConversation={deleteConversation}
-        onToggleContext={toggleContextConversation}
-      />
-
-      {/* Header with avatar status */}
+      {/* Header - clean with logo and settings */}
       <header className="app__header">
         <div className="app__header-left">
-          <div className="app__avatar-mini">
+          {/* Avatar status indicator */}
+          <div className="app__avatar-status">
             <AvatarSmall state={avatarState} />
           </div>
-          <button
-            className="app__conversation-dropdown"
-            onClick={() => setShowSidebar(true)}
-            title="Switch Conversation"
-          >
-            <span className="app__conversation-title">
-              {conversations.find(c => c.id === currentConversationId)?.title || 'New Conversation'}
-            </span>
-            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-              <path d="M7 10l5 5 5-5z"/>
-            </svg>
-          </button>
+          <div className="app__logo">
+            <Logo />
+          </div>
         </div>
         <div className="app__header-actions">
           <button
-            className="app__header-btn app__header-btn--settings"
+            className="app__header-btn"
+            onClick={() => setShowMediaLibrary(true)}
+            title="Media Library"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+              <path d="M22 16V4c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2zm-11-4l2.03 2.71L16 11l4 5H8l3-4zM2 6v14c0 1.1.9 2 2 2h14v-2H4V6H2z"/>
+            </svg>
+          </button>
+          <button
+            className="app__header-btn"
             onClick={() => setShowSettings(true)}
             title="Settings"
           >
-            {/* Gear icon */}
-            <svg viewBox="0 0 24 24" fill="none" width="24" height="24">
+            <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
               <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="currentColor" strokeWidth="2"/>
               <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" stroke="currentColor" strokeWidth="2"/>
+            </svg>
+          </button>
+          {/* Eject button */}
+          <button
+            className={`app__header-btn app__header-btn--eject ${isTapeEjected ? 'app__header-btn--active' : ''}`}
+            onClick={() => setIsTapeEjected(!isTapeEjected)}
+            title={isTapeEjected ? 'Close tape collection' : 'Eject tape'}
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+              <path d="M5 17h14v2H5zm7-12L5.33 15h13.34z" />
+            </svg>
+          </button>
+          {/* Record button - red like the original Talkboy */}
+          <button
+            className={`app__header-btn app__header-btn--record ${isListening ? 'app__header-btn--recording' : ''}`}
+            onMouseDown={!continuousListeningEnabled ? handleTalkStart : undefined}
+            onMouseUp={!continuousListeningEnabled ? handleTalkEnd : undefined}
+            onMouseLeave={!continuousListeningEnabled && isListening ? handleTalkEnd : undefined}
+            onClick={continuousListeningEnabled ? (isListening ? handleTalkEnd : handleTalkStart) : undefined}
+            disabled={(!useClaudeCode && !apiKey) || isSpeaking || avatarState === 'thinking' || isTapeEjected}
+            title={continuousListeningEnabled ? 'Click to toggle recording' : 'Hold to record'}
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+              <circle cx="12" cy="12" r="8" />
             </svg>
           </button>
         </div>
@@ -644,6 +666,7 @@ function App() {
         <ChatTimeline
           messages={messages}
           activities={activities}
+          storedActivities={storedActivities}
           avatarState={avatarState}
           streamingText={responseText}
           onImageClick={setLightboxImage}
@@ -662,20 +685,30 @@ function App() {
           isDisabled={isSpeaking || avatarState === 'thinking'}
           analysisStatuses={analysisStatuses}
         />
-
-        {/* Unified input bar - text, voice, and gallery combined */}
-        <UnifiedInputBar
-          transcript={transcript}
-          isListening={isListening}
-          onSubmit={handleSendMessage}
-          onTalkStart={handleTalkStart}
-          onTalkEnd={handleTalkEnd}
-          onGalleryOpen={() => setShowMediaLibrary(true)}
-          isDisabled={(!useClaudeCode && !apiKey) || isSpeaking || avatarState === 'thinking'}
-          continuousListening={continuousListeningEnabled}
-          triggerWord={customTriggerWord || 'over'}
-        />
       </main>
+
+      {/* Tape Deck - input area with cassette display */}
+      <TapeDeck
+        currentConversation={conversations.find(c => c.id === currentConversationId) || null}
+        conversations={conversations}
+        tapeState={mapAvatarToTapeState(avatarState, isListening)}
+        transcript={transcript}
+        isListening={isListening}
+        isEjected={isTapeEjected}
+        onSubmit={handleSendMessage}
+        onSelectConversation={(id) => {
+          loadConversation(id)
+          setIsTapeEjected(false)
+        }}
+        onNewConversation={() => {
+          createConversation()
+          setIsTapeEjected(false)
+        }}
+        onDeleteConversation={deleteConversation}
+        onCloseCollection={() => setIsTapeEjected(false)}
+        isDisabled={(!useClaudeCode && !apiKey) || isSpeaking || avatarState === 'thinking'}
+        triggerWord={customTriggerWord || 'over'}
+      />
 
       {/* Image lightbox */}
       {lightboxImage && (
