@@ -42,11 +42,17 @@ export function UnifiedInputBar({
 
   // Sync transcript into text field while listening
   useEffect(() => {
-    // Skip syncing if transcript matches what we just submitted
-    if (transcript && transcript.trim() === lastSubmittedRef.current) {
+    // When transcript is cleared (empty), always clear the text field
+    if (!transcript) {
+      setText('')
       return
     }
-    if (isListening && transcript) {
+    // Skip syncing if transcript matches what we just submitted
+    if (transcript.trim() === lastSubmittedRef.current) {
+      return
+    }
+    // Sync transcript to text while listening
+    if (isListening) {
       setText(transcript)
     }
   }, [transcript, isListening])
@@ -102,46 +108,37 @@ export function UnifiedInputBar({
 
   return (
     <div className={`unified-input-bar ${isListening ? 'listening' : ''}`}>
-      {/* Gallery/Photo button */}
+      {/* Gallery button */}
       <button
-        className="unified-input-bar__gallery"
+        className="unified-input-bar__icon-btn"
         onClick={onGalleryOpen}
         disabled={isDisabled}
         aria-label="Open photo gallery"
         title="Photos"
       >
-        <svg viewBox="0 0 24 24" fill="none" width="22" height="22">
-          <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="2"/>
+        <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
+          <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.5"/>
           <circle cx="8.5" cy="10.5" r="1.5" fill="currentColor"/>
-          <path d="M21 15l-5-5-4 4-2-2-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M21 15l-5-5-4 4-2-2-7 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       </button>
 
-      {/* Text input field */}
-      <div className="unified-input-bar__field-wrapper">
-        <textarea
-          ref={textareaRef}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder={placeholderText}
-          disabled={isDisabled}
-          className={`unified-input-bar__field ${isListening ? 'listening' : ''}`}
-          rows={1}
-        />
-        {isListening && (
-          <div className="unified-input-bar__listening-indicator">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-        )}
-      </div>
+      {/* Text input - no wrapper needed */}
+      <textarea
+        ref={textareaRef}
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        onKeyDown={handleKeyDown}
+        placeholder={placeholderText}
+        disabled={isDisabled}
+        className="unified-input-bar__field"
+        rows={1}
+      />
 
       {/* Mic button - only show if not in continuous mode */}
       {!continuousListening && (
         <button
-          className={`unified-input-bar__mic ${isListening ? 'active' : ''}`}
+          className={`unified-input-bar__icon-btn ${isListening ? 'mic-active' : ''}`}
           onMouseDown={handleMicMouseDown}
           onMouseUp={handleMicMouseUp}
           onTouchStart={handleMicMouseDown}
@@ -152,11 +149,11 @@ export function UnifiedInputBar({
           title={isListening ? 'Release to stop' : 'Hold to speak'}
         >
           {isListening ? (
-            <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
               <rect x="9" y="6" width="6" height="12" rx="1" />
             </svg>
           ) : (
-            <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
               <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
               <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
             </svg>
@@ -172,7 +169,7 @@ export function UnifiedInputBar({
         aria-label="Send message"
         title="Send"
       >
-        <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
           <path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" />
         </svg>
       </button>

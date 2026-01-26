@@ -308,39 +308,47 @@
 }
 
 /* =============================================
-   UNIFIED INPUT BAR - Bottom compose area
+   UNIFIED INPUT BAR - Bottom compose area (matches header)
    ============================================= */
 [data-theme="imessage"] .unified-input-bar {
   background: var(--header-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid var(--border-light);
-  padding: 10px 16px;
-  gap: 10px;
+  border-top: 1px solid var(--header-border);
+  padding: 12px 16px;
+  gap: 12px;
 }
 
 [data-theme="imessage"] .unified-input-bar.listening {
-  background: rgba(10, 132, 255, 0.1);
+  background: var(--header-bg);
   border-top-color: var(--accent);
+  box-shadow: inset 0 1px 0 0 rgba(10, 132, 255, 0.3);
 }
 
-[data-theme="imessage"] .unified-input-bar__gallery {
+/* Gallery button - matches header buttons (transparent, no border) */
+[data-theme="imessage"] .unified-input-bar__icon-btn {
+  background: transparent;
+  border: none;
   color: var(--accent);
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
 }
 
-[data-theme="imessage"] .unified-input-bar__gallery:hover:not(:disabled) {
-  background: rgba(10, 132, 255, 0.15);
+[data-theme="imessage"] .unified-input-bar__icon-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--accent);
+  border: none;
 }
 
+/* Input field - pill shape like iOS */
 [data-theme="imessage"] .unified-input-bar__field {
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-light);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 20px;
   color: var(--text-primary);
   font-size: var(--font-size-base);
-  padding: 12px 18px;
+  padding: 10px 16px;
+  min-height: 40px;
 }
 
 [data-theme="imessage"] .unified-input-bar__field::placeholder {
@@ -349,42 +357,43 @@
 
 [data-theme="imessage"] .unified-input-bar__field:focus {
   border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.1);
   box-shadow: none;
 }
 
 [data-theme="imessage"] .unified-input-bar__field.listening {
   border-color: var(--accent);
-  background: rgba(10, 132, 255, 0.08);
+  background: rgba(10, 132, 255, 0.1);
 }
 
 [data-theme="imessage"] .unified-input-bar__listening-indicator span {
   background: var(--accent);
 }
 
-[data-theme="imessage"] .unified-input-bar__mic {
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-light);
-  color: var(--text-primary);
-  width: 38px;
-  height: 38px;
-}
-
-[data-theme="imessage"] .unified-input-bar__mic:hover:not(:disabled) {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-[data-theme="imessage"] .unified-input-bar__mic.active {
+/* Mic button - transparent like header buttons, blue when active */
+[data-theme="imessage"] .unified-input-bar__icon-btn.mic-active {
   background: var(--accent);
-  border-color: var(--accent);
+  border: none;
   color: white;
-  box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.3);
+  box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.3);
+  animation: imessage-pulse 1.5s ease-in-out infinite;
 }
 
+@keyframes imessage-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(10, 132, 255, 0.2);
+  }
+}
+
+/* Send button - solid accent like iOS */
 [data-theme="imessage"] .unified-input-bar__send {
   background: var(--accent);
-  width: 38px;
-  height: 38px;
+  border: none;
+  width: 36px;
+  height: 36px;
 }
 
 [data-theme="imessage"] .unified-input-bar__send:hover:not(:disabled) {
@@ -392,7 +401,7 @@
 }
 
 [data-theme="imessage"] .unified-input-bar__send:disabled {
-  background: var(--bg-tertiary);
+  background: rgba(255, 255, 255, 0.1);
   color: var(--text-muted);
 }
 

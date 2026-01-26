@@ -1,73 +1,74 @@
 .tape-deck {
   position: relative;
   background: linear-gradient(180deg, #c0c0c0 0%, #a8a8a8 100%);
-  border-top: 4px solid #808080;
-  box-shadow:
-    inset 0 2px 0 rgba(255, 255, 255, 0.3),
-    0 -4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.tape-deck--recording {
-  border-top-color: #cc0000;
-  box-shadow:
-    inset 0 2px 0 rgba(255, 255, 255, 0.3),
-    inset 0 0 30px rgba(204, 0, 0, 0.1),
-    0 -4px 12px rgba(0, 0, 0, 0.1);
+  border-top: 3px solid #909090;
 }
 
 .tape-deck__main {
   padding: 16px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: stretch;
   gap: 12px;
 }
 
 /* Cassette slot */
 .tape-deck__cassette-slot {
+  width: 100px;
+  flex-shrink: 0;
   display: flex;
   justify-content: center;
-  align-items: center;
-  min-height: 110px;
-  background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%);
-  border-radius: 8px;
-  border: 3px solid #0a0a0a;
-  box-shadow:
-    inset 0 4px 8px rgba(0, 0, 0, 0.5),
-    0 2px 0 rgba(255, 255, 255, 0.1);
-  padding: 8px;
+  align-items: stretch;
 }
 
 .tape-deck__empty-slot {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: #606060;
-  font-size: 14px;
+  font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  text-align: center;
+  background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
+  border: 3px solid #000;
+  border-radius: 8px;
 }
 
 /* Controls row */
 .tape-deck__controls {
+  flex: 1;
   display: flex;
-  align-items: center;
-  gap: 8px;
+  align-items: stretch;
+  gap: 12px;
 }
 
 /* Text input */
 .tape-deck__input-wrapper {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .tape-deck__input {
+  flex: 1;
   width: 100%;
-  padding: 12px 16px;
+  min-height: 56px;
+  padding: 14px 18px;
   background: #2a2a2a;
   border: 3px solid #1a1a1a;
-  border-radius: 6px;
+  border-radius: 8px;
   color: #f0f0f0;
-  font-size: 14px;
-  font-family: 'Courier New', monospace;
+  font-size: 18px;
+  line-height: 1.4;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5);
-  transition: all 0.15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  resize: none;
+  overflow-y: auto;
 }
 
 .tape-deck__input:focus {
@@ -79,7 +80,8 @@
 }
 
 .tape-deck__input::placeholder {
-  color: #606060;
+  color: #707070;
+  font-size: 16px;
 }
 
 .tape-deck__input:disabled {
@@ -89,9 +91,9 @@
 
 /* Send button */
 .tape-deck__send-btn {
-  width: 44px;
-  height: 44px;
-  border-radius: 6px;
+  width: 52px;
+  flex-shrink: 0;
+  border-radius: 8px;
   background: linear-gradient(180deg, #00a035 0%, #00802b 100%);
   border: 3px solid #005a1e;
   color: #fff;
@@ -123,7 +125,3 @@
   cursor: not-allowed;
 }
 
-/* Theme adjustments for mcallister */
-[data-theme="mcallister"] .tape-deck {
-  background: linear-gradient(180deg, #c0c0c0 0%, #a8a8a8 100%);
-}

@@ -35,51 +35,44 @@ export function ConversationSidebar({
     return date.toLocaleDateString([], { month: 'short', day: 'numeric' })
   }
 
+  if (!isOpen) return null
+
   return (
     <>
       {/* Backdrop */}
-      {isOpen && <div className="sidebar-backdrop" onClick={onClose} />}
+      <div className="conversation-dropdown-backdrop" onClick={onClose} />
 
-      {/* Sidebar */}
-      <aside className={`conversation-sidebar ${isOpen ? 'open' : ''}`}>
-        <div className="sidebar-header">
-          <h2>Conversations</h2>
-          <button className="sidebar-close" onClick={onClose}>
-            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-            </svg>
-          </button>
-        </div>
-
-        <button className="sidebar-new-btn" onClick={onNewConversation}>
+      {/* Dropdown panel */}
+      <div className="conversation-dropdown-panel">
+        <button className="dropdown-new-btn" onClick={onNewConversation}>
           <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
             <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
           </svg>
           New Conversation
         </button>
 
-        <div className="sidebar-list">
+        <div className="dropdown-list">
           {conversations.length === 0 ? (
-            <div className="sidebar-empty">No conversations yet</div>
+            <div className="dropdown-empty">No conversations yet</div>
           ) : (
             conversations.map((conv) => (
               <div
                 key={conv.id}
-                className={`sidebar-item ${conv.id === currentConversationId ? 'active' : ''}`}
+                className={`dropdown-item ${conv.id === currentConversationId ? 'active' : ''}`}
               >
                 <button
-                  className="sidebar-item-main"
+                  className="dropdown-item-main"
                   onClick={() => onSelectConversation(conv.id)}
                 >
-                  <div className="sidebar-item-title">{conv.title || 'New conversation'}</div>
-                  <div className="sidebar-item-meta">
+                  <div className="dropdown-item-title">{conv.title || 'New conversation'}</div>
+                  <div className="dropdown-item-meta">
                     <span>{conv.messages.length} messages</span>
                     <span>{formatDate(conv.updatedAt)}</span>
                   </div>
                 </button>
-                <div className="sidebar-item-actions">
+                <div className="dropdown-item-actions">
                   <button
-                    className={`sidebar-item-context ${contextIds.includes(conv.id) ? 'active' : ''}`}
+                    className={`dropdown-item-context ${contextIds.includes(conv.id) ? 'active' : ''}`}
                     onClick={(e) => {
                       e.stopPropagation()
                       onToggleContext(conv.id)
@@ -91,7 +84,7 @@ export function ConversationSidebar({
                     </svg>
                   </button>
                   <button
-                    className="sidebar-item-delete"
+                    className="dropdown-item-delete"
                     onClick={(e) => {
                       e.stopPropagation()
                       if (confirm('Delete this conversation?')) {
@@ -111,11 +104,11 @@ export function ConversationSidebar({
         </div>
 
         {contextIds.length > 0 && (
-          <div className="sidebar-context-info">
+          <div className="dropdown-context-info">
             {contextIds.length} conversation{contextIds.length > 1 ? 's' : ''} in context
           </div>
         )}
-      </aside>
+      </div>
     </>
   )
 }

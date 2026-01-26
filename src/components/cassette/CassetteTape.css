@@ -56,6 +56,134 @@
   font-size: 10px;
 }
 
+/* Full width variant - fills container, all elements proportional */
+.cassette--full {
+  width: 100%;
+}
+
+.cassette--full .cassette__body {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1.6 / 1;
+  padding: 2%;
+}
+
+.cassette--full .cassette__top-edge {
+  padding: 1% 5%;
+}
+
+.cassette--full .cassette__screw {
+  width: 3%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+
+.cassette--full .cassette__label {
+  margin: 1% 4%;
+  padding: 3% 5%;
+  min-height: 20%;
+}
+
+.cassette--full .cassette__title {
+  font-size: clamp(10px, 4vw, 24px);
+}
+
+.cassette--full .cassette__subtitle {
+  font-size: clamp(8px, 2.5vw, 16px);
+}
+
+.cassette--full .cassette__window {
+  margin: 2% 5%;
+  height: 28%;
+  padding: 2% 6%;
+}
+
+.cassette--full .cassette__reel {
+  width: 15% !important;
+  height: auto !important;
+  aspect-ratio: 1;
+}
+
+.cassette--full .cassette__tape-path {
+  flex: 1;
+  margin: 0 3%;
+}
+
+.cassette--full .cassette__tape-line {
+  height: 4%;
+  min-height: 2px;
+}
+
+.cassette--full .cassette__bottom {
+  padding: 2% 0;
+}
+
+.cassette--full .cassette__teeth {
+  gap: 3%;
+}
+
+.cassette--full .cassette__tooth {
+  width: 3%;
+  aspect-ratio: 1.3 / 1;
+}
+
+.cassette--full .cassette__record-light {
+  top: 4%;
+  right: 4%;
+  width: 3%;
+  aspect-ratio: 1;
+}
+
+/* Mini variant - just the tape window with reels, stretches to container height */
+.cassette--mini {
+  width: 100%;
+  height: 100%;
+}
+
+.cassette--mini .cassette__body {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
+  border: 3px solid #000;
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.8),
+    0 2px 0 rgba(255, 255, 255, 0.05);
+}
+
+.cassette--mini .cassette__window {
+  margin: 0;
+  height: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  box-shadow: none;
+}
+
+.cassette--mini .cassette__reel {
+  width: auto !important;
+  height: 80% !important;
+  aspect-ratio: 1;
+}
+
+.cassette--mini .cassette__tape-path {
+  flex: 1;
+  margin: 0 8px;
+}
+
+.cassette--mini .cassette__tape-line {
+  height: 3px;
+}
+
+.cassette--mini .cassette__record-light {
+  top: 8px;
+  right: 8px;
+  width: 10px;
+  height: 10px;
+}
+
 /* Main body */
 .cassette__body {
   position: relative;
@@ -292,12 +420,9 @@
   }
 }
 
-/* State animations */
+/* State animations - recording just shows red dot, no body glow */
 .cassette--recording .cassette__body {
-  box-shadow:
-    0 4px 0 rgba(0, 0, 0, 0.4),
-    0 6px 12px rgba(0, 0, 0, 0.3),
-    0 0 20px rgba(255, 0, 0, 0.2);
+  /* No extra styling - red dot indicator is sufficient */
 }
 
 .cassette--playing .cassette__reel,

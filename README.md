@@ -1,24 +1,29 @@
 # Talkboy
 
-A voice-first interface for Claude. Talk naturally instead of typing.
+A voice-first interface for Claude, styled after the classic Talkboy cassette recorder from Home Alone 2.
 
 ## What it does
 
-Talkboy lets you have voice conversations with Claude. Push a button (or say "over"), speak your message, and hear Claude respond. It maintains conversation history so Claude has context across messages.
+Talkboy lets you have voice conversations with Claude. Push a button (or say "over"), speak your message, and hear Claude respond. It features a nostalgic cassette tape UI with spinning reels, a tape deck input area, and maintains full conversation history.
 
 ## Features
 
-- **Push-to-talk**: Hold spacebar or click the mic button to record
-- **Trigger word**: Say "over" to send your message hands-free
+- **Push-to-talk**: Hold spacebar or click the record button to speak
+- **Trigger word**: Say "over" (customizable) to send your message hands-free
+- **Wake word**: Say "hey talkboy" (customizable) to start listening
+- **Continuous listening**: Always-on mode that waits for your trigger word
 - **Streaming TTS**: Responses are spoken back in real-time
+- **Cassette tape UI**: Animated spinning reels, recording indicator, retro aesthetic
+- **Tape deck input**: Mini cassette display with text input and send button
+- **Multiple conversations**: Switch between tapes, create new ones, delete old
+- **Activity tracking**: Collapsible tool usage display with persistence
 - **Animated avatar**: Visual feedback for listening, thinking, speaking states
-- **Conversation history**: Messages persist in localStorage
 - **Two modes**:
+  - **Claude Code**: Routes through the CLI with full agent capabilities (default)
   - **Direct API**: Uses your Anthropic API key
-  - **Claude Code**: Routes through the CLI with conversation context
 - **Image analysis**: Drag and drop images for Claude vision analysis
-- **Activity feed**: Real-time display of Claude Code tool usage
-- **Lightbox viewer**: Full-size image preview with analysis sidebar
+- **Media library**: Browse all images across conversations
+- **Themes**: McAllister (silver Talkboy) and iMessage styles
 
 ## Quick Start
 
@@ -32,11 +37,12 @@ This starts the Talkboy server and opens https://localhost:5173 in your browser.
 
 ### Setup
 
-1. Click the gear icon to open Settings
-2. Choose your mode:
-   - **Direct API**: Enter your Anthropic API key
-   - **Claude Code**: Toggle on (requires `claude` CLI installed)
-3. Close settings and start talking
+1. Complete the onboarding flow to configure voice settings
+2. Choose your preferences:
+   - **Wake word**: Enable "hey talkboy" activation
+   - **Continuous listening**: Always-on with trigger word
+   - **Text-to-speech**: Have responses read aloud
+3. Start talking!
 
 ## Development
 
@@ -53,14 +59,15 @@ npm run build
 
 ## How it works
 
-### Direct API Mode
-Messages go straight to the Anthropic API. Simple and fast.
-
-### Claude Code Mode
+### Claude Code Mode (Default)
 Each message spawns `claude -p` with recent conversation history as context:
-- Last 10 messages are included in the prompt
+- Full conversation history included in the prompt
 - Fresh process per message (no session conflicts)
 - Voice-optimized prompt keeps responses brief
+- Tool usage is tracked and displayed in collapsible panels
+
+### Direct API Mode
+Messages go straight to the Anthropic API. Simple and fast, but no tool usage.
 
 ## Architecture
 
@@ -69,13 +76,22 @@ src/
 ├── App.tsx                 # Main app, state management
 ├── components/
 │   ├── activity/           # Real-time tool usage feed
-│   ├── avatar/Avatar.tsx   # Rive-based animated avatar
-│   ├── chat/               # History, transcript, text input
+│   ├── avatar/             # Animated avatar with states
+│   ├── cassette/           # Tape deck UI components
+│   │   ├── CassetteTape    # Animated cassette with reels
+│   │   ├── TapeDeck        # Input bar with mini cassette
+│   │   └── TapeCollection  # Conversation switcher drawer
+│   ├── chat/               # Timeline, sidebar, input components
 │   ├── dropzone/           # Image drag-and-drop with analysis
-│   └── voice/              # Speech recognition & synthesis hooks
+│   ├── media/              # Image lightbox and library
+│   ├── onboarding/         # First-run setup flow
+│   └── voice/              # Speech recognition, synthesis, wake word
 ├── lib/
 │   ├── claude.ts           # API calls (direct + CLI + vision)
 │   └── store.ts            # Zustand store for conversations
+├── styles/
+│   ├── globals.css         # Base styles and CSS variables
+│   └── themes/             # McAllister (Talkboy) and iMessage themes
 └── hooks/
     └── useSoundEffects.ts  # Audio feedback
 
@@ -88,11 +104,9 @@ server/
 bin/
 ├── talkboy.js              # CLI entry: starts server, opens browser
 └── talkboy-mcp.js          # MCP server entry point
-
-vite.config.ts              # Dev server (for hot reload)
 ```
 
-### API Endpoints (dev server)
+### API Endpoints
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
@@ -104,11 +118,10 @@ vite.config.ts              # Dev server (for hot reload)
 
 ## Roadmap
 
-- [ ] Wake word detection (local, privacy-first using Porcupine)
-- [ ] Always-on listening mode
 - [ ] Interrupt mid-response
-- [ ] Multiple conversation threads
 - [ ] Custom avatar support
+- [ ] Voice selection for TTS
+- [ ] Export conversation transcripts
 
 ## Using with Claude Code (MCP)
 
@@ -143,10 +156,10 @@ Restart Claude Code after adding the configuration.
 ## Tech Stack
 
 - React 18 + TypeScript
-- Vite (dev server + custom API middleware)
+- Vite (dev server + build)
 - Zustand (state management)
-- Rive (avatar animations)
 - Web Speech API (recognition + synthesis)
+- CSS with theme support
 
 ## License
 

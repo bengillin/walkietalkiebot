@@ -17,6 +17,7 @@ interface SpeechRecognitionResult {
   start: () => void
   stop: () => void
   transcript: string
+  clearTranscript: () => void
 }
 
 // Type declarations for Web Speech API

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, type KeyboardEvent } from 'react'
+import { useState, useRef, useEffect, type KeyboardEvent, type ChangeEvent } from 'react'
 import { CassetteTape, type TapeState } from './CassetteTape'
 import { TapeCollection } from './TapeCollection'
 import type { Conversation } from '../../types'
@@ -36,7 +36,7 @@ export function TapeDeck({
   triggerWord = 'over',
 }: TapeDeckProps) {
   const [inputValue, setInputValue] = useState('')
-  const inputRef = useRef<HTMLInputElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   // Sync transcript to input when listening
   useEffect(() => {
@@ -53,11 +53,15 @@ export function TapeDeck({
     }
   }
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       handleSubmit()
     }
+  }
+
+  const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    setInputValue(e.target.value)
   }
 
   const handleSelectTape = (id: string) => {
@@ -81,50 +85,48 @@ export function TapeDeck({
         onClose={onCloseCollection}
       />
 
-      {/* Main deck area */}
+      {/* Main deck area - horizontal layout */}
       <div className="tape-deck__main">
-        {/* Loaded cassette display */}
+        {/* Loaded cassette display - 25% width */}
         <div className="tape-deck__cassette-slot">
           {currentConversation && !isEjected && (
             <CassetteTape
               title={currentConversation.title}
-              subtitle={`${currentConversation.messages.length} messages`}
               state={tapeState}
               messageCount={currentConversation.messages.length}
-              size="medium"
+              size="mini"
               color="black"
             />
           )}
           {isEjected && (
             <div className="tape-deck__empty-slot">
-              <span>No tape loaded</span>
+              <span>No tape</span>
             </div>
           )}
         </div>
 
-        {/* Controls row - just input and send */}
+        {/* Input and send button - flex remaining */}
         <div className="tape-deck__controls">
           <div className="tape-deck__input-wrapper">
-            <input
-              ref={inputRef}
-              type="text"
+            <textarea
+              ref={textareaRef}
               className="tape-deck__input"
               value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
+              onChange={handleChange}
               onKeyDown={handleKeyDown}
               placeholder={isListening ? `Listening... say "${triggerWord}" to send` : 'Type a message...'}
               disabled={isDisabled || isEjected}
+              rows={1}
             />
           </div>
 
-          {/* Send button */}
           <button
             className="tape-deck__send-btn"
             onClick={handleSubmit}
             disabled={isDisabled || isEjected || !inputValue.trim()}
             title="Send message"
           >
-            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
               <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
             </svg>
           </button>

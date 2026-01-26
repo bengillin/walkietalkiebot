@@ -5,42 +5,15 @@
   padding: 12px 16px;
   background: var(--bg-secondary);
   border-top: 1px solid var(--border-light);
+  transition: all 0.2s ease;
 }
 
 .unified-input-bar.listening {
   background: var(--accent-soft);
   border-top-color: var(--accent);
+  box-shadow: inset 0 0 20px var(--accent-glow, rgba(255, 77, 0, 0.2));
 }
 
-/* Gallery button */
-.unified-input-bar__gallery {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  background: transparent;
-  border: none;
-  border-radius: 50%;
-  color: var(--accent);
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: background 0.15s, transform 0.1s;
-}
-
-.unified-input-bar__gallery:hover:not(:disabled) {
-  background: var(--accent-soft);
-  transform: scale(1.05);
-}
-
-.unified-input-bar__gallery:active:not(:disabled) {
-  transform: scale(0.95);
-}
-
-.unified-input-bar__gallery:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
 
 /* Text input wrapper */
 .unified-input-bar__field-wrapper {
@@ -123,8 +96,8 @@
   }
 }
 
-/* Mic button */
-.unified-input-bar__mic {
+/* Icon buttons (gallery, mic) */
+.unified-input-bar__icon-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -133,30 +106,43 @@
   background: var(--bg-tertiary);
   border: 1px solid var(--border-light);
   border-radius: 50%;
-  color: var(--text-primary);
+  color: var(--text-secondary);
   cursor: pointer;
   flex-shrink: 0;
   transition: all 0.15s;
 }
 
-.unified-input-bar__mic:hover:not(:disabled) {
+.unified-input-bar__icon-btn:hover:not(:disabled) {
   border-color: var(--accent);
   color: var(--accent);
-  transform: scale(1.05);
+  background: var(--accent-soft);
 }
 
-.unified-input-bar__mic:active:not(:disabled),
-.unified-input-bar__mic.active {
+.unified-input-bar__icon-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.unified-input-bar__icon-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Mic active state when listening */
+.unified-input-bar__icon-btn.mic-active {
   background: var(--accent);
   border-color: var(--accent);
   color: white;
-  transform: scale(1.1);
-  box-shadow: 0 0 0 4px var(--accent-soft);
+  box-shadow: 0 0 0 4px var(--accent-soft), 0 0 20px var(--accent-glow, rgba(255, 77, 0, 0.4));
+  animation: pulse-mic 1.5s ease-in-out infinite;
 }
 
-.unified-input-bar__mic:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
+@keyframes pulse-mic {
+  0%, 100% {
+    box-shadow: 0 0 0 4px var(--accent-soft), 0 0 20px var(--accent-glow, rgba(255, 77, 0, 0.4));
+  }
+  50% {
+    box-shadow: 0 0 0 8px var(--accent-soft), 0 0 30px var(--accent-glow, rgba(255, 77, 0, 0.6));
+  }
 }
 
 /* Send button */

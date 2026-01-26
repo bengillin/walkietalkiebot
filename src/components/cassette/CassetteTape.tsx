@@ -10,7 +10,7 @@ interface CassetteTapeProps {
   messageCount?: number
   color?: 'black' | 'clear' | 'chrome' | 'white'
   labelColor?: string
-  size?: 'small' | 'medium' | 'large'
+  size?: 'small' | 'medium' | 'large' | 'full' | 'mini'
   onClick?: () => void
   className?: string
 }
@@ -47,6 +47,8 @@ export function CassetteTape({
   const leftReelSize = 12 + (1 - tapeUsage) * 8 // Larger when more tape
   const rightReelSize = 12 + tapeUsage * 8 // Larger as tape fills
 
+  const isMini = size === 'mini'
+
   return (
     <div
       className={`cassette cassette--${size} cassette--${color} cassette--${state} ${className}`}
@@ -56,18 +58,22 @@ export function CassetteTape({
     >
       {/* Main cassette body */}
       <div className="cassette__body">
-        {/* Top edge with screw holes */}
-        <div className="cassette__top-edge">
-          <div className="cassette__screw" />
-          <div className="cassette__screw" />
-        </div>
+        {/* Top edge with screw holes - hide in mini */}
+        {!isMini && (
+          <div className="cassette__top-edge">
+            <div className="cassette__screw" />
+            <div className="cassette__screw" />
+          </div>
+        )}
 
-        {/* Label area */}
-        <div className="cassette__label" style={{ backgroundColor: labelColor }}>
-          <div className="cassette__label-lines" />
-          <span className="cassette__title">{title}</span>
-          {subtitle && <span className="cassette__subtitle">{subtitle}</span>}
-        </div>
+        {/* Label area - hide in mini */}
+        {!isMini && (
+          <div className="cassette__label" style={{ backgroundColor: labelColor }}>
+            <div className="cassette__label-lines" />
+            <span className="cassette__title">{title}</span>
+            {subtitle && <span className="cassette__subtitle">{subtitle}</span>}
+          </div>
+        )}
 
         {/* Tape window */}
         <div className="cassette__window">
@@ -76,8 +82,8 @@ export function CassetteTape({
             className="cassette__reel cassette__reel--left"
             style={{
               transform: `rotate(${reelRotation}deg)`,
-              width: `${leftReelSize}px`,
-              height: `${leftReelSize}px`,
+              width: isMini ? undefined : `${leftReelSize}px`,
+              height: isMini ? undefined : `${leftReelSize}px`,
             }}
           >
             <div className="cassette__reel-spokes" />
@@ -93,22 +99,24 @@ export function CassetteTape({
             className="cassette__reel cassette__reel--right"
             style={{
               transform: `rotate(${reelRotation}deg)`,
-              width: `${rightReelSize}px`,
-              height: `${rightReelSize}px`,
+              width: isMini ? undefined : `${rightReelSize}px`,
+              height: isMini ? undefined : `${rightReelSize}px`,
             }}
           >
             <div className="cassette__reel-spokes" />
           </div>
         </div>
 
-        {/* Bottom details */}
-        <div className="cassette__bottom">
-          <div className="cassette__teeth">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="cassette__tooth" />
-            ))}
+        {/* Bottom details - hide in mini */}
+        {!isMini && (
+          <div className="cassette__bottom">
+            <div className="cassette__teeth">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="cassette__tooth" />
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Recording indicator */}
         {state === 'recording' && (
