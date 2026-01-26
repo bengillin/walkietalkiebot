@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { AppState, AvatarState, Conversation, Message } from '../types'
+import type { Activity, AppState, AvatarState, Conversation, DroppedFile, ImageAnalysis, Message } from '../types'
 
 const STORAGE_KEY = 'talkboy_conversations'
 
@@ -62,11 +62,12 @@ export const useStore = create<AppState>((set, get) => {
     currentConversationId: initialConversation.id,
     messages: initialConversation.messages,
 
-    addMessage: (message) => {
+    addMessage: (message, images) => {
       const newMessage: Message = {
         ...message,
         id: crypto.randomUUID(),
         timestamp: Date.now(),
+        images: images && images.length > 0 ? images : undefined,
       }
 
       set((state) => {
@@ -181,7 +182,88 @@ export const useStore = create<AppState>((set, get) => {
     isVoiceEnabled: true,
     setVoiceEnabled: (isVoiceEnabled) => set({ isVoiceEnabled }),
 
+    // Text-to-speech enabled
+    ttsEnabled: localStorage.getItem('talkboy_tts_enabled') !== 'false',
+    setTtsEnabled: (ttsEnabled) => {
+      localStorage.setItem('talkboy_tts_enabled', String(ttsEnabled))
+      set({ ttsEnabled })
+    },
+
     transcript: '',
     setTranscript: (transcript) => set({ transcript }),
+
+    // Activity feed
+    activities: [],
+    addActivity: (activity) => {
+      const newActivity: Activity = {
+        ...activity,
+        id: crypto.randomUUID(),
+        timestamp: Date.now(),
+      }
+      set((state) => ({
+        activities: [...state.activities, newActivity],
+      }))
+      return newActivity.id
+    },
+    updateActivity: (id, updates) => {
+      set((state) => ({
+        activities: state.activities.map((a) =>
+          a.id === id ? { ...a, ...updates } : a
+        ),
+      }))
+    },
+    clearActivities: () => set({ activities: [] }),
+
+    // File attachments
+    attachedFiles: [],
+    addFiles: (files: DroppedFile[]) => {
+      set((state) => ({
+        attachedFiles: [...state.attachedFiles, ...files],
+      }))
+    },
+    removeFile: (id: string) => {
+      set((state) => ({
+        attachedFiles: state.attachedFiles.filter((f) => f.id !== id),
+      }))
+    },
+    updateFile: (id: string, updates: Partial<DroppedFile>) => {
+      set((state) => ({
+        attachedFiles: state.attachedFiles.map((f) =>
+          f.id === id ? { ...f, ...updates } : f
+        ),
+      }))
+    },
+    clearFiles: () => set({ attachedFiles: [] }),
+
+    // Image analysis (cross-mode context)
+    imageAnalyses: [],
+    addImageAnalysis: (analysis) => {
+      const newAnalysis: ImageAnalysis = {
+        ...analysis,
+        id: crypto.randomUUID(),
+        timestamp: Date.now(),
+      }
+      set((state) => ({
+        imageAnalyses: [...state.imageAnalyses, newAnalysis],
+      }))
+      return newAnalysis.id
+    },
+    updateImageAnalysis: (id, updates) => {
+      set((state) => ({
+        imageAnalyses: state.imageAnalyses.map((a) =>
+          a.id === id ? { ...a, ...updates } : a
+        ),
+      }))
+    },
+    clearImageAnalyses: () => set({ imageAnalyses: [] }),
+    getImageContext: () => {
+      const state = get()
+      const completed = state.imageAnalyses.filter((a) => a.status === 'complete')
+      if (completed.length === 0) return ''
+
+      return completed
+        .map((a) => `[Image: ${a.fileName}]\n${a.description}`)
+        .join('\n\n')
+    },
   }
 })

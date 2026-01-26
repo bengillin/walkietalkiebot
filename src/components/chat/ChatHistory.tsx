@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { Message, Conversation } from '../../types'
+import type { Message, Conversation, MessageImage } from '../../types'
 import './ChatHistory.css'
 
 interface ChatHistoryProps {
@@ -11,6 +11,11 @@ interface ChatHistoryProps {
   onNewConversation: () => void
   onDeleteConversation: (id: string) => void
   onToggleContext: (id: string) => void
+}
+
+interface LightboxState {
+  isOpen: boolean
+  image: MessageImage | null
 }
 
 function formatDate(timestamp: number): string {
@@ -37,10 +42,21 @@ export function ChatHistory({
   const bottomRef = useRef<HTMLDivElement>(null)
   const [showConversations, setShowConversations] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const [lightbox, setLightbox] = useState<LightboxState>({ isOpen: false, image: null })
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && lightbox.isOpen) {
+        setLightbox({ isOpen: false, image: null })
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [lightbox.isOpen])
 
   const otherConversations = conversations.filter(c => c.id !== currentConversation?.id)
 
@@ -152,10 +168,64 @@ export function ChatHistory({
               <span className="chat-history__role">
                 {message.role === 'user' ? 'You' : 'Talkboy'}
               </span>
+              {message.images && message.images.length > 0 && (
+                <div className="chat-history__images">
+                  {message.images.map((img) => (
+                    <div key={img.id} className="chat-history__image-container">
+                      <img
+                        src={img.dataUrl}
+                        alt={img.fileName}
+                        className="chat-history__image-thumb"
+                        onClick={() => setLightbox({ isOpen: true, image: img })}
+                      />
+                      {img.description && (
+                        <p className="chat-history__image-analysis">{img.description}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
               <p className="chat-history__content">{message.content}</p>
             </div>
           ))}
           <div ref={bottomRef} />
+        </div>
+      )}
+
+      {lightbox.isOpen && lightbox.image && (
+        <div
+          className="chat-history__lightbox"
+          onClick={() => setLightbox({ isOpen: false, image: null })}
+        >
+          <div
+            className="chat-history__lightbox-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="chat-history__lightbox-close"
+              onClick={() => setLightbox({ isOpen: false, image: null })}
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+              </svg>
+            </button>
+            <div className="chat-history__lightbox-main">
+              <img
+                src={lightbox.image.dataUrl}
+                alt={lightbox.image.fileName}
+                className="chat-history__lightbox-image"
+              />
+            </div>
+            <div className="chat-history__lightbox-sidebar">
+              <span className="chat-history__lightbox-filename">{lightbox.image.fileName}</span>
+              <h3 className="chat-history__lightbox-heading">Analysis</h3>
+              {lightbox.image.description ? (
+                <p className="chat-history__lightbox-description">{lightbox.image.description}</p>
+              ) : (
+                <p className="chat-history__lightbox-no-analysis">No analysis available</p>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -4,18 +4,24 @@ import { TalkButton } from './components/voice/TalkButton'
 import { Transcript } from './components/chat/Transcript'
 import { ChatHistory } from './components/chat/ChatHistory'
 import { TextInput } from './components/chat/TextInput'
+import { Onboarding } from './components/onboarding/Onboarding'
+import { ActivityFeed } from './components/activity/ActivityFeed'
+import { FileDropZone } from './components/dropzone/FileDropZone'
 import { useSpeechRecognition } from './components/voice/useSpeechRecognition'
 import { useSpeechSynthesis } from './components/voice/useSpeechSynthesis'
-import { sendMessageStreaming, sendMessageViaClaudeCode, sendMessageViaIPC } from './lib/claude'
+import { sendMessageStreaming, sendMessageViaClaudeCode, analyzeImage, analyzeImageViaServer, type ActivityEvent } from './lib/claude'
 import { useStore } from './lib/store'
 import { useSoundEffects } from './hooks/useSoundEffects'
 import './App.css'
 
 function App() {
+  const [hasOnboarded, setHasOnboarded] = useState(() =>
+    localStorage.getItem('talkboy_onboarded') === 'true'
+  )
   const [apiKey, setApiKey] = useState(() =>
     localStorage.getItem('talkboy_api_key') || ''
   )
-  const [showSettings, setShowSettings] = useState(!apiKey)
+  const [showSettings, setShowSettings] = useState(false)
   const [responseText, setResponseText] = useState('')
   const [error, setError] = useState('')
   const [useClaudeCode, setUseClaudeCode] = useState(() =>
@@ -25,6 +31,21 @@ function App() {
     localStorage.getItem('talkboy_show_text_input') !== 'false'
   )
   const [connectedSessionId, setConnectedSessionId] = useState<string | null>(null)
+
+  // Handle onboarding completion
+  const handleOnboardingComplete = useCallback((mode: 'claude-code' | 'api-key', key?: string) => {
+    if (mode === 'claude-code') {
+      setUseClaudeCode(true)
+      localStorage.setItem('talkboy_use_claude_code', 'true')
+    } else if (mode === 'api-key' && key) {
+      setApiKey(key)
+      localStorage.setItem('talkboy_api_key', key)
+      setUseClaudeCode(false)
+      localStorage.setItem('talkboy_use_claude_code', 'false')
+    }
+    setHasOnboarded(true)
+    localStorage.setItem('talkboy_onboarded', 'true')
+  }, [])
 
   // Fetch connected session ID periodically when in Claude Code mode
   useEffect(() => {
@@ -62,6 +83,26 @@ function App() {
     deleteConversation,
     contextConversationIds,
     toggleContextConversation,
+    // Activity feed
+    activities,
+    addActivity,
+    updateActivity,
+    clearActivities,
+    // File attachments
+    attachedFiles,
+    addFiles,
+    removeFile,
+    updateFile,
+    clearFiles,
+    // Image analysis
+    imageAnalyses,
+    addImageAnalysis,
+    updateImageAnalysis,
+    clearImageAnalyses,
+    getImageContext,
+    // TTS setting
+    ttsEnabled,
+    setTtsEnabled,
   } = useStore()
 
   // Get current conversation
@@ -78,6 +119,63 @@ function App() {
       .flatMap(c => c.messages)
       .sort((a, b) => a.timestamp - b.timestamp)
   }, [contextConversationIds, conversations])
+
+  // Handle files being added - trigger analysis for each
+  const handleFilesAdd = useCallback(async (files: import('./types').DroppedFile[]) => {
+    // Check if we have an API key for image analysis
+    if (!apiKey) {
+      setError('API key required for image analysis. Please add one in Settings.')
+      setShowSettings(true)
+      return
+    }
+
+    // Add files to store first
+    addFiles(files)
+
+    // Analyze each file
+    for (const file of files) {
+      // Create analysis record
+      const analysisId = addImageAnalysis({
+        fileId: file.id,
+        fileName: file.name,
+        description: '',
+        status: 'analyzing',
+      })
+
+      // Run analysis (don't block UI)
+      // Use server-side analysis for Claude Code mode (pass API key if available), direct API for API key mode
+      const analyzePromise = useClaudeCode
+        ? analyzeImageViaServer(file, apiKey || undefined)
+        : analyzeImage(file, apiKey)
+
+      analyzePromise
+        .then((description) => {
+          updateImageAnalysis(analysisId, {
+            description,
+            status: 'complete',
+          })
+          // Also attach description directly to the file for use in lightbox
+          updateFile(file.id, { description })
+        })
+        .catch((err) => {
+          console.error('Image analysis failed:', err)
+          updateImageAnalysis(analysisId, {
+            status: 'error',
+            error: err.message,
+          })
+        })
+    }
+  }, [addFiles, addImageAnalysis, updateImageAnalysis, updateFile, apiKey, useClaudeCode])
+
+  // Convert imageAnalyses to format expected by FileDropZone
+  const analysisStatuses = useMemo(() =>
+    imageAnalyses.map(a => ({
+      fileId: a.fileId,
+      status: a.status,
+      description: a.description,
+    })),
+    [imageAnalyses]
+  )
 
   // Sound effects
   const { play: playSound } = useSoundEffects()
@@ -188,6 +286,50 @@ function App() {
     syncState()
   }, [avatarState, transcript, messages])
 
+  // Track tool call IDs to activity IDs for updating status
+  const toolActivityMap = useRef<Map<string, string>>(new Map())
+
+  // Handle activity events from Claude Code
+  const handleActivity = useCallback((event: ActivityEvent) => {
+    if (event.type === 'tool_start') {
+      const activityId = addActivity({
+        type: 'tool_start',
+        tool: event.tool,
+        input: event.input,
+        status: 'running',
+      })
+      if (event.id) {
+        toolActivityMap.current.set(event.id, activityId)
+      }
+    } else if (event.type === 'tool_input') {
+      // Update existing activity with input details
+      if (event.id) {
+        const activityId = toolActivityMap.current.get(event.id)
+        if (activityId) {
+          updateActivity(activityId, { input: event.input })
+        }
+      }
+    } else if (event.type === 'tool_end') {
+      // Match by tool ID from our map
+      if (event.id) {
+        const activityId = toolActivityMap.current.get(event.id)
+        if (activityId) {
+          updateActivity(activityId, {
+            status: event.status || 'complete',
+            output: event.output,
+          })
+        }
+      }
+    } else if (event.type === 'all_complete') {
+      // Mark all tracked activities as complete
+      for (const activityId of toolActivityMap.current.values()) {
+        updateActivity(activityId, {
+          status: event.status || 'complete',
+        })
+      }
+    }
+  }, [addActivity, updateActivity])
+
   // Handle sending message to Claude
   const handleSendMessage = useCallback(async (text: string) => {
     if (!text.trim()) return
@@ -198,9 +340,21 @@ function App() {
     playSound('thinking')
     setError('')
     setResponseText('')
+    clearActivities()
+    toolActivityMap.current.clear()
+
+    // Collect images to attach to this message
+    const messageImages = attachedFiles.length > 0
+      ? attachedFiles.map(f => ({
+          id: f.id,
+          dataUrl: f.dataUrl,
+          fileName: f.name,
+          description: f.description,
+        }))
+      : undefined
 
     // Add user message
-    addMessage({ role: 'user', content: text })
+    addMessage({ role: 'user', content: text }, messageImages)
     const updatedMessages = [...messages, {
       id: 'temp',
       role: 'user' as const,
@@ -213,17 +367,28 @@ function App() {
     try {
       if (useClaudeCode) {
         // Claude Code mode - spawn CLI with conversation context
+        // Include image analysis context if available
+        const imageContext = getImageContext()
+        const messageWithContext = imageContext
+          ? `[Image Context]\n${imageContext}\n\n[User Message]\n${text}`
+          : text
+
         await sendMessageViaClaudeCode(
-          text,
+          messageWithContext,
           (chunk) => {
             fullResponse += chunk
             setResponseText(fullResponse)
           },
-          messages.map(m => ({ role: m.role, content: m.content }))
+          messages.map(m => ({ role: m.role, content: m.content })),
+          handleActivity
         )
-        // Speak the full response at once
-        if (fullResponse.trim()) {
+        // Speak the full response at once (if TTS enabled)
+        if (fullResponse.trim() && ttsEnabled) {
           speak(fullResponse)
+        } else if (fullResponse.trim()) {
+          // If TTS disabled, still update avatar state
+          setAvatarState('happy')
+          setTimeout(() => setAvatarState('idle'), 1500)
         }
       } else {
         // Direct Claude API call
@@ -233,15 +398,26 @@ function App() {
           (chunk) => {
             fullResponse += chunk
             setResponseText(fullResponse)
-            speakStreaming(chunk, false)
+            if (ttsEnabled) speakStreaming(chunk, false)
           },
-          contextMessages
+          contextMessages,
+          attachedFiles
         )
       }
 
+      // Clear attached files and analyses after sending
+      if (attachedFiles.length > 0) {
+        clearFiles()
+        clearImageAnalyses()
+      }
+
       // Signal streaming complete - flush any remaining text (only for streaming mode)
-      if (!useClaudeCode) {
+      if (!useClaudeCode && ttsEnabled) {
         speakStreaming('', true)
+      } else if (!useClaudeCode && !ttsEnabled) {
+        // If TTS disabled, still update avatar state
+        setAvatarState('happy')
+        setTimeout(() => setAvatarState('idle'), 1500)
       }
 
       // Add assistant message
@@ -252,10 +428,14 @@ function App() {
       setError(err instanceof Error ? err.message : 'Something went wrong')
       setAvatarState('confused')
       setTimeout(() => setAvatarState('idle'), 2000)
+      // Save partial response if we got anything before the error
+      if (fullResponse.trim()) {
+        addMessage({ role: 'assistant', content: fullResponse })
+      }
     }
 
     setTranscript('')
-  }, [apiKey, messages, addMessage, setAvatarState, setTranscript, speak, speakStreaming, playSound, contextMessages, useClaudeCode])
+  }, [apiKey, messages, addMessage, setAvatarState, setTranscript, speak, speakStreaming, playSound, contextMessages, useClaudeCode, clearActivities, handleActivity, attachedFiles, clearFiles, clearImageAnalyses, getImageContext, ttsEnabled])
 
   // Handle talk button
   const handleTalkStart = useCallback(() => {
@@ -331,6 +511,11 @@ function App() {
     )
   }
 
+  // Show onboarding for new users
+  if (!hasOnboarded) {
+    return <Onboarding onComplete={handleOnboardingComplete} />
+  }
+
   return (
     <div className="app">
       <header className="app__header">
@@ -390,6 +575,20 @@ function App() {
             />
           )}
         </div>
+
+        <FileDropZone
+          files={attachedFiles}
+          onFilesAdd={handleFilesAdd}
+          onFileRemove={removeFile}
+          onClear={clearFiles}
+          isDisabled={isSpeaking || avatarState === 'thinking'}
+          analysisStatuses={analysisStatuses}
+        />
+
+        <ActivityFeed
+          activities={activities}
+          isVisible={useClaudeCode && activities.length > 0}
+        />
       </main>
 
       {/* Settings Modal */}
@@ -440,6 +639,19 @@ function App() {
                 <span className="settings__slider" />
               </label>
 
+              <label className="settings__toggle">
+                <span className="settings__toggle-info">
+                  <span className="settings__toggle-label">Speak responses</span>
+                  <span className="settings__toggle-desc">Read responses aloud with text-to-speech</span>
+                </span>
+                <input
+                  type="checkbox"
+                  checked={ttsEnabled}
+                  onChange={(e) => setTtsEnabled(e.target.checked)}
+                />
+                <span className="settings__slider" />
+              </label>
+
               {useClaudeCode && (
                 <div className="settings__session">
                   {connectedSessionId ? (
@@ -464,10 +676,9 @@ function App() {
               )}
             </div>
 
-            {!useClaudeCode && (
-              <div className="settings__section">
-                <h3 className="settings__section-title">API Key</h3>
-                <p className="settings__section-desc">Required when not using Claude Code mode</p>
+            <div className="settings__section">
+              <h3 className="settings__section-title">API Key</h3>
+              <p className="settings__section-desc">{useClaudeCode ? 'Optional - needed for image analysis' : 'Required when not using Claude Code mode'}</p>
                 <form onSubmit={handleSaveApiKey}>
                   <input
                     type="password"
@@ -487,7 +698,19 @@ function App() {
                   Get an API key
                 </a>
               </div>
-            )}
+
+            <div className="settings__section settings__section--danger">
+              <button
+                className="settings__reset-btn"
+                onClick={() => {
+                  localStorage.removeItem('talkboy_onboarded')
+                  setHasOnboarded(false)
+                  setShowSettings(false)
+                }}
+              >
+                Reset onboarding
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -1,10 +1,95 @@
-import type { Message } from '../types'
+import type { DroppedFile, Message } from '../types'
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages'
 
+// Analyze an image and return a description
+export async function analyzeImage(
+  file: DroppedFile,
+  apiKey: string
+): Promise<string> {
+  const response = await fetch(ANTHROPIC_API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1024,
+      system: `You are analyzing images for a voice assistant app. Describe the image in detail, focusing on:
+- If it's a UI mockup/wireframe: describe the layout, components, navigation, and user flow
+- If it's a screenshot: describe what app/website it is, the state shown, and key elements
+- If it's a hand-drawn sketch: interpret the drawing and describe what it represents
+- For any image: note colors, text visible, key visual elements
+
+Be thorough but concise. This description will be used as context for building or discussing the content.`,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'image',
+              source: {
+                type: 'base64',
+                media_type: file.type,
+                data: file.dataUrl.split(',')[1],
+              },
+            },
+            {
+              type: 'text',
+              text: 'Describe this image in detail. If it appears to be a UI design, wireframe, or sketch, focus on the structure and components.',
+            },
+          ],
+        },
+      ],
+    }),
+  })
+
+  if (!response.ok) {
+    const error = await response.text()
+    throw new Error(`API error: ${response.status} - ${error}`)
+  }
+
+  const data = await response.json()
+  return data.content[0]?.text || 'Unable to analyze image.'
+}
+
+// Analyze image via server (for Claude Code mode)
+export async function analyzeImageViaServer(
+  file: DroppedFile,
+  apiKey?: string
+): Promise<string> {
+  const response = await fetch('/api/analyze-image', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      dataUrl: file.dataUrl,
+      fileName: file.name,
+      type: file.type,
+      apiKey,
+    }),
+  })
+
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(error.error || `Server error: ${response.status}`)
+  }
+
+  const data = await response.json()
+  return data.description
+}
+
+type ClaudeContentBlock =
+  | { type: 'text'; text: string }
+  | { type: 'image'; source: { type: 'base64'; media_type: string; data: string } }
+
 interface ClaudeMessage {
   role: 'user' | 'assistant'
-  content: string
+  content: string | ClaudeContentBlock[]
 }
 
 interface ClaudeResponse {
@@ -50,7 +135,8 @@ export async function sendMessageStreaming(
   messages: Message[],
   apiKey: string,
   onChunk: (text: string) => void,
-  contextMessages?: Message[]
+  contextMessages?: Message[],
+  attachedFiles?: DroppedFile[]
 ): Promise<string> {
   // If we have context from past conversations, prepend it
   let allMessages = messages
@@ -65,6 +151,38 @@ export async function sendMessageStreaming(
       role: m.role,
       content: m.content,
     }))
+
+  // If we have attached files, add them to the last user message
+  if (attachedFiles && attachedFiles.length > 0 && claudeMessages.length > 0) {
+    let lastUserIdx = -1
+    for (let i = claudeMessages.length - 1; i >= 0; i--) {
+      if (claudeMessages[i].role === 'user') {
+        lastUserIdx = i
+        break
+      }
+    }
+    if (lastUserIdx !== -1) {
+      const lastUserMsg = claudeMessages[lastUserIdx]
+      const textContent = typeof lastUserMsg.content === 'string' ? lastUserMsg.content : ''
+
+      const contentBlocks: ClaudeContentBlock[] = attachedFiles.map((file) => ({
+        type: 'image' as const,
+        source: {
+          type: 'base64' as const,
+          media_type: file.type,
+          data: file.dataUrl.split(',')[1], // Remove data:image/png;base64, prefix
+        },
+      }))
+
+      // Add the text after images
+      contentBlocks.push({ type: 'text', text: textContent })
+
+      claudeMessages[lastUserIdx] = {
+        role: 'user',
+        content: contentBlocks,
+      }
+    }
+  }
 
   const response = await fetch(ANTHROPIC_API_URL, {
     method: 'POST',
@@ -175,11 +293,23 @@ export async function sendMessageViaIPC(
   return fullText
 }
 
+// Activity event from Claude Code
+export interface ActivityEvent {
+  type: 'tool_start' | 'tool_end' | 'tool_input' | 'all_complete'
+  tool?: string
+  id?: string
+  status?: 'running' | 'complete' | 'error'
+  output?: string
+  input?: string
+  partial_json?: string
+}
+
 // Send message through Claude Code CLI (has full agent capabilities)
 export async function sendMessageViaClaudeCode(
   message: string,
   onChunk: (text: string) => void,
-  history?: Array<{ role: string; content: string }>
+  history?: Array<{ role: string; content: string }>,
+  onActivity?: (activity: ActivityEvent) => void
 ): Promise<string> {
   const response = await fetch('/api/claude-code', {
     method: 'POST',
@@ -213,6 +343,9 @@ export async function sendMessageViaClaudeCode(
           if (parsed.text) {
             fullText += parsed.text
             onChunk(parsed.text)
+          }
+          if (parsed.activity && onActivity) {
+            onActivity(parsed.activity)
           }
           if (parsed.error) {
             throw new Error(parsed.error)

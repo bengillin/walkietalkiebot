@@ -416,3 +416,26 @@
   border-color: #f87171;
   color: #f87171;
 }
+
+/* Reset button */
+.settings__section--danger {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-light);
+}
+
+.settings__reset-btn {
+  font-size: 13px;
+  padding: 8px 12px;
+  background: transparent;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.settings__reset-btn:hover {
+  border-color: #f87171;
+  color: #f87171;
+}

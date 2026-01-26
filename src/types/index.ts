@@ -6,11 +6,51 @@ export type AvatarState =
   | 'happy'
   | 'confused'
 
+export type ActivityType = 'tool_start' | 'tool_end' | 'thinking' | 'text'
+
+export interface DroppedFile {
+  id: string
+  name: string
+  type: string
+  size: number
+  dataUrl: string
+  description?: string
+}
+
+export interface ImageAnalysis {
+  id: string
+  fileId: string
+  fileName: string
+  description: string
+  timestamp: number
+  status: 'analyzing' | 'complete' | 'error'
+  error?: string
+}
+
+export interface Activity {
+  id: string
+  type: ActivityType
+  tool?: string
+  input?: string
+  output?: string
+  content?: string
+  timestamp: number
+  status?: 'running' | 'complete' | 'error'
+}
+
+export interface MessageImage {
+  id: string
+  dataUrl: string
+  fileName: string
+  description?: string
+}
+
 export interface Message {
   id: string
   role: 'user' | 'assistant'
   content: string
   timestamp: number
+  images?: MessageImage[]
 }
 
 export interface Conversation {
@@ -28,7 +68,7 @@ export interface AppState {
   // Current conversation
   currentConversationId: string | null
   messages: Message[]
-  addMessage: (message: Omit<Message, 'id' | 'timestamp'>) => void
+  addMessage: (message: Omit<Message, 'id' | 'timestamp' | 'images'>, images?: MessageImage[]) => void
 
   // All conversations
   conversations: Conversation[]
@@ -44,6 +84,30 @@ export interface AppState {
   isVoiceEnabled: boolean
   setVoiceEnabled: (enabled: boolean) => void
 
+  // Text-to-speech enabled
+  ttsEnabled: boolean
+  setTtsEnabled: (enabled: boolean) => void
+
   transcript: string
   setTranscript: (text: string) => void
+
+  // Activity feed
+  activities: Activity[]
+  addActivity: (activity: Omit<Activity, 'id' | 'timestamp'>) => string
+  updateActivity: (id: string, updates: Partial<Activity>) => void
+  clearActivities: () => void
+
+  // File attachments
+  attachedFiles: DroppedFile[]
+  addFiles: (files: DroppedFile[]) => void
+  removeFile: (id: string) => void
+  updateFile: (id: string, updates: Partial<DroppedFile>) => void
+  clearFiles: () => void
+
+  // Image analysis (cross-mode context)
+  imageAnalyses: ImageAnalysis[]
+  addImageAnalysis: (analysis: Omit<ImageAnalysis, 'id' | 'timestamp'>) => string
+  updateImageAnalysis: (id: string, updates: Partial<ImageAnalysis>) => void
+  clearImageAnalyses: () => void
+  getImageContext: () => string // Returns formatted string of all analyzed images for context
 }

@@ -253,6 +253,101 @@ function talkboyApi(): Plugin {
         }
       })
 
+      // POST /api/analyze-image - Analyze image via Claude API (for Claude Code mode)
+      server.middlewares.use('/api/analyze-image', (req, res, next) => {
+        if (req.method === 'POST') {
+          let body = ''
+          req.on('data', chunk => { body += chunk })
+          req.on('end', async () => {
+            try {
+              const { dataUrl, fileName, type, apiKey: clientApiKey } = JSON.parse(body)
+              if (!dataUrl) {
+                res.statusCode = 400
+                res.end(JSON.stringify({ error: 'Image data required' }))
+                return
+              }
+
+              // Get API key from request body or environment
+              const apiKey = clientApiKey || process.env.ANTHROPIC_API_KEY
+              if (!apiKey) {
+                res.statusCode = 400
+                res.end(JSON.stringify({ error: 'API key required for image analysis - please add one in Settings even when using Claude Code mode' }))
+                return
+              }
+
+              // Extract base64 data
+              const base64Data = dataUrl.split(',')[1]
+              const mediaType = type || 'image/png'
+
+              // Call Claude API to analyze image
+              const response = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'x-api-key': apiKey,
+                  'anthropic-version': '2023-06-01',
+                },
+                body: JSON.stringify({
+                  model: 'claude-sonnet-4-20250514',
+                  max_tokens: 1024,
+                  system: `You are analyzing images for a voice assistant app. Describe the image in detail, focusing on:
+- If it's a UI mockup/wireframe: describe the layout, components, navigation, and user flow
+- If it's a screenshot: describe what app/website it is, the state shown, and key elements
+- If it's a hand-drawn sketch: interpret the drawing and describe what it represents
+- For any image: note colors, text visible, key visual elements
+
+Be thorough but concise. This description will be used as context for building or discussing the content.`,
+                  messages: [
+                    {
+                      role: 'user',
+                      content: [
+                        {
+                          type: 'image',
+                          source: {
+                            type: 'base64',
+                            media_type: mediaType,
+                            data: base64Data,
+                          },
+                        },
+                        {
+                          type: 'text',
+                          text: 'Describe this image in detail. If it appears to be a UI design, wireframe, or sketch, focus on the structure and components.',
+                        },
+                      ],
+                    },
+                  ],
+                }),
+              })
+
+              if (!response.ok) {
+                const error = await response.text()
+                res.statusCode = response.status
+                res.end(JSON.stringify({ error: `API error: ${error}` }))
+                return
+              }
+
+              const data = await response.json()
+              const description = data.content[0]?.text || 'Unable to analyze image.'
+
+              res.setHeader('Content-Type', 'application/json')
+              res.setHeader('Access-Control-Allow-Origin', '*')
+              res.end(JSON.stringify({ description, fileName }))
+
+            } catch (err) {
+              res.statusCode = 500
+              res.end(JSON.stringify({ error: err instanceof Error ? err.message : 'Unknown error' }))
+            }
+          })
+        } else if (req.method === 'OPTIONS') {
+          res.setHeader('Access-Control-Allow-Origin', '*')
+          res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
+          res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+          res.end()
+        } else {
+          next()
+        }
+      })
+
       // POST /api/claude-code - Execute claude CLI and stream response
       server.middlewares.use('/api/claude-code', (req, res, next) => {
         if (req.method === 'POST') {
@@ -284,7 +379,8 @@ function talkboyApi(): Plugin {
               const voiceMessage = `${contextBlock}[VOICE MODE - Keep responses to 1-2 sentences, no markdown, speak naturally]
 
 User: ${message}`
-              const args = ['-p', voiceMessage, '--output-format', 'text']
+              // Use stream-json format for structured output with tool call visibility
+              const args = ['-p', voiceMessage, '--output-format', 'stream-json', '--verbose', '--allowedTools', 'Read,Edit,Write,Bash']
               const claudePath = '/Users/ben/.local/bin/claude'
               console.log('Spawning claude:', claudePath, args, state.claudeSessionId ? '(resuming session)' : '(new session)')
               const claude = spawn(claudePath, args, {
@@ -294,14 +390,159 @@ User: ${message}`
                 detached: false,
               })
 
+              let buffer = ''
+              // Track tool inputs for showing details in activity feed
+              const toolInputs: Record<string, string> = {}
+              // Track tool names by their IDs so we can match results to starts
+              const toolNames: Record<string, string> = {}
+              let currentToolId: string | null = null
+              let currentToolName: string | null = null
+
               claude.stdout.on('data', (data: Buffer) => {
-                let text = data.toString()
-                console.log('Claude stdout:', text)
-                // Strip thinking blocks from output
-                text = text.replace(/<thinking>[\s\S]*?<\/thinking>\s*/g, '')
-                // Plain text output - send directly
-                if (text.trim()) {
-                  res.write(`data: ${JSON.stringify({ text })}\n\n`)
+                buffer += data.toString()
+
+                // Process complete JSON lines
+                const lines = buffer.split('\n')
+                buffer = lines.pop() || '' // Keep incomplete line in buffer
+
+                for (const line of lines) {
+                  if (!line.trim()) continue
+
+                  try {
+                    const event = JSON.parse(line)
+                    console.log('Claude event:', event.type, event.subtype || '')
+
+                    // Handle different event types from stream-json format
+                    if (event.type === 'assistant') {
+                      // Text response from Claude
+                      const textContent = event.message?.content?.find((c: any) => c.type === 'text')
+                      if (textContent?.text) {
+                        // Strip thinking blocks
+                        let text = textContent.text.replace(/<thinking>[\s\S]*?<\/thinking>\s*/g, '')
+                        if (text.trim()) {
+                          res.write(`data: ${JSON.stringify({ text })}\n\n`)
+                        }
+                      }
+                      // Also check for tool_use blocks in message content
+                      const toolUseBlocks = event.message?.content?.filter((c: any) => c.type === 'tool_use') || []
+                      for (const toolBlock of toolUseBlocks) {
+                        // Store full input for display
+                        if (toolBlock.id && toolBlock.input) {
+                          toolInputs[toolBlock.id] = JSON.stringify(toolBlock.input)
+                        }
+                        // Extract human-readable input detail
+                        let inputDetail = ''
+                        if (toolBlock.input) {
+                          if (toolBlock.input.file_path) {
+                            inputDetail = toolBlock.input.file_path
+                          } else if (toolBlock.input.command) {
+                            inputDetail = toolBlock.input.command
+                          } else if (toolBlock.input.pattern) {
+                            inputDetail = toolBlock.input.pattern
+                          }
+                        }
+                        res.write(`data: ${JSON.stringify({
+                          activity: {
+                            type: 'tool_start',
+                            tool: toolBlock.name,
+                            id: toolBlock.id,
+                            input: inputDetail
+                          }
+                        })}\n\n`)
+                      }
+                    } else if (event.type === 'content_block_start') {
+                      // Starting a new content block (could be tool use)
+                      if (event.content_block?.type === 'tool_use') {
+                        currentToolId = event.content_block.id
+                        currentToolName = event.content_block.name
+                        toolInputs[currentToolId] = ''
+                        toolNames[currentToolId] = event.content_block.name
+                        res.write(`data: ${JSON.stringify({
+                          activity: {
+                            type: 'tool_start',
+                            tool: event.content_block.name,
+                            id: event.content_block.id
+                          }
+                        })}\n\n`)
+                      }
+                    } else if (event.type === 'content_block_delta') {
+                      // Delta update - could be text or tool input
+                      if (event.delta?.type === 'text_delta' && event.delta?.text) {
+                        let text = event.delta.text.replace(/<thinking>[\s\S]*?<\/thinking>\s*/g, '')
+                        if (text) {
+                          res.write(`data: ${JSON.stringify({ text })}\n\n`)
+                        }
+                      } else if (event.delta?.type === 'input_json_delta' && currentToolId) {
+                        // Accumulate tool input JSON
+                        toolInputs[currentToolId] = (toolInputs[currentToolId] || '') + event.delta.partial_json
+                      }
+                    } else if (event.type === 'content_block_stop' && currentToolId) {
+                      // Tool input complete - send the input details
+                      try {
+                        const inputJson = toolInputs[currentToolId]
+                        if (inputJson) {
+                          const input = JSON.parse(inputJson)
+                          let inputDetail = ''
+                          if (input.file_path) {
+                            inputDetail = input.file_path
+                          } else if (input.command) {
+                            inputDetail = input.command
+                          } else if (input.pattern) {
+                            inputDetail = input.pattern
+                          }
+                          if (inputDetail) {
+                            res.write(`data: ${JSON.stringify({
+                              activity: {
+                                type: 'tool_input',
+                                id: currentToolId,
+                                input: inputDetail
+                              }
+                            })}\n\n`)
+                          }
+                        }
+                      } catch {
+                        // Ignore parse errors
+                      }
+                      currentToolId = null
+                    } else if (event.type === 'result') {
+                      // Final result - mark all running tools as complete
+                      const subtype = event.subtype || 'complete'
+                      // Send a general completion signal
+                      res.write(`data: ${JSON.stringify({
+                        activity: {
+                          type: 'all_complete',
+                          status: subtype === 'error' ? 'error' : 'complete'
+                        }
+                      })}\n\n`)
+                    } else if (event.type === 'user') {
+                      // User message contains tool_result blocks
+                      const toolResults = event.message?.content?.filter((c: any) => c.type === 'tool_result') || []
+                      for (const result of toolResults) {
+                        const toolId = result.tool_use_id
+                        const toolName = toolNames[toolId] || 'tool'
+                        const isError = result.is_error === true
+                        let output = ''
+                        if (typeof result.content === 'string') {
+                          output = result.content.slice(0, 200)
+                        } else if (Array.isArray(result.content)) {
+                          const textContent = result.content.find((c: any) => c.type === 'text')
+                          output = textContent?.text?.slice(0, 200) || ''
+                        }
+                        res.write(`data: ${JSON.stringify({
+                          activity: {
+                            type: 'tool_end',
+                            tool: toolName,
+                            id: toolId,
+                            status: isError ? 'error' : 'complete',
+                            output
+                          }
+                        })}\n\n`)
+                      }
+                    }
+                  } catch (e) {
+                    // Not valid JSON, might be partial - ignore
+                    console.log('Parse error for line:', line.slice(0, 100))
+                  }
                 }
               })
 
