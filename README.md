@@ -16,6 +16,9 @@ Talkboy lets you have voice conversations with Claude. Push a button (or say "ov
 - **Two modes**:
   - **Direct API**: Uses your Anthropic API key
   - **Claude Code**: Routes through the CLI with conversation context
+- **Image analysis**: Drag and drop images for Claude vision analysis
+- **Activity feed**: Real-time display of Claude Code tool usage
+- **Lightbox viewer**: Full-size image preview with analysis sidebar
 
 ## Getting Started
 
@@ -54,11 +57,13 @@ Each message spawns `claude -p` with recent conversation history as context:
 src/
 ├── App.tsx                 # Main app, state management
 ├── components/
+│   ├── activity/           # Real-time tool usage feed
 │   ├── avatar/Avatar.tsx   # Rive-based animated avatar
 │   ├── chat/               # History, transcript, text input
+│   ├── dropzone/           # Image drag-and-drop with analysis
 │   └── voice/              # Speech recognition & synthesis hooks
 ├── lib/
-│   ├── claude.ts           # API calls (direct + CLI)
+│   ├── claude.ts           # API calls (direct + CLI + vision)
 │   └── store.ts            # Zustand store for conversations
 └── hooks/
     └── useSoundEffects.ts  # Audio feedback

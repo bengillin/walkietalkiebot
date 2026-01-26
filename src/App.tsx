@@ -8,6 +8,7 @@ import { Onboarding } from './components/onboarding/Onboarding'
 import { ActivityFeed } from './components/activity/ActivityFeed'
 import { FileDropZone } from './components/dropzone/FileDropZone'
 import { useSpeechRecognition } from './components/voice/useSpeechRecognition'
+import { useWakeWord } from './components/voice/useWakeWord'
 import { useSpeechSynthesis } from './components/voice/useSpeechSynthesis'
 import { sendMessageStreaming, sendMessageViaClaudeCode, analyzeImage, analyzeImageViaServer, type ActivityEvent } from './lib/claude'
 import { useStore } from './lib/store'
@@ -103,6 +104,12 @@ function App() {
     // TTS setting
     ttsEnabled,
     setTtsEnabled,
+    // Continuous listening setting
+    continuousListeningEnabled,
+    setContinuousListeningEnabled,
+    // Wake word setting
+    wakeWordEnabled,
+    setWakeWordEnabled,
   } = useStore()
 
   // Get current conversation
@@ -452,8 +459,21 @@ function App() {
     stopListening()
   }, [stopListening, playSound])
 
-  // Spacebar keyboard shortcut for push-to-talk
+  // Wake word detection for hands-free activation
+  useWakeWord({
+    wakeWord: 'hey talkboy',
+    enabled: wakeWordEnabled && !isListening && !isSpeaking && avatarState !== 'thinking',
+    onWakeWord: () => {
+      console.log('[App] Wake word detected, starting recording')
+      handleTalkStart()
+    },
+  })
+
+  // Spacebar keyboard shortcut for push-to-talk (disabled in continuous mode)
   useEffect(() => {
+    // Skip if continuous listening is enabled
+    if (continuousListeningEnabled) return
+
     const isInputFocused = () => {
       const active = document.activeElement
       return active?.tagName === 'INPUT' || active?.tagName === 'TEXTAREA'
@@ -485,7 +505,31 @@ function App() {
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
     }
-  }, [isListening, isSpeaking, avatarState, apiKey, handleTalkStart, handleTalkEnd, useClaudeCode])
+  }, [isListening, isSpeaking, avatarState, apiKey, handleTalkStart, handleTalkEnd, useClaudeCode, continuousListeningEnabled])
+
+  // Auto-start listening when continuous mode is enabled
+  useEffect(() => {
+    if (continuousListeningEnabled && !isListening && avatarState === 'idle') {
+      const canTalk = useClaudeCode || apiKey
+      if (canTalk && !isSpeaking) {
+        handleTalkStart()
+      }
+    }
+  }, [continuousListeningEnabled, isListening, avatarState, useClaudeCode, apiKey, isSpeaking, handleTalkStart])
+
+  // Restart listening after response in continuous mode
+  useEffect(() => {
+    if (continuousListeningEnabled && avatarState === 'idle' && !isListening && !isSpeaking) {
+      const canTalk = useClaudeCode || apiKey
+      if (canTalk) {
+        // Small delay to allow speech synthesis to fully complete
+        const timer = setTimeout(() => {
+          handleTalkStart()
+        }, 500)
+        return () => clearTimeout(timer)
+      }
+    }
+  }, [continuousListeningEnabled, avatarState, isListening, isSpeaking, useClaudeCode, apiKey, handleTalkStart])
 
   // Save API key
   const handleSaveApiKey = (e: React.FormEvent) => {
@@ -560,13 +604,17 @@ function App() {
         </div>
 
         <div className="app__controls">
-          <TalkButton
-            isListening={isListening}
-            isDisabled={(!useClaudeCode && !apiKey) || isSpeaking || avatarState === 'thinking'}
-            onMouseDown={handleTalkStart}
-            onMouseUp={handleTalkEnd}
-          />
-          <span className="app__hint">or press spacebar</span>
+          {!continuousListeningEnabled && (
+            <TalkButton
+              isListening={isListening}
+              isDisabled={(!useClaudeCode && !apiKey) || isSpeaking || avatarState === 'thinking'}
+              onMouseDown={handleTalkStart}
+              onMouseUp={handleTalkEnd}
+            />
+          )}
+          <span className="app__hint">
+            {continuousListeningEnabled ? 'Say "over" to send' : 'or press spacebar'}
+          </span>
           {showTextInput && (
             <TextInput
               onSubmit={handleSendMessage}
@@ -648,6 +696,32 @@ function App() {
                   type="checkbox"
                   checked={ttsEnabled}
                   onChange={(e) => setTtsEnabled(e.target.checked)}
+                />
+                <span className="settings__slider" />
+              </label>
+
+              <label className="settings__toggle">
+                <span className="settings__toggle-info">
+                  <span className="settings__toggle-label">Continuous listening</span>
+                  <span className="settings__toggle-desc">Always listen, say "over" to send</span>
+                </span>
+                <input
+                  type="checkbox"
+                  checked={continuousListeningEnabled}
+                  onChange={(e) => setContinuousListeningEnabled(e.target.checked)}
+                />
+                <span className="settings__slider" />
+              </label>
+
+              <label className="settings__toggle">
+                <span className="settings__toggle-info">
+                  <span className="settings__toggle-label">Wake word</span>
+                  <span className="settings__toggle-desc">Say "hey talkboy" to activate</span>
+                </span>
+                <input
+                  type="checkbox"
+                  checked={wakeWordEnabled}
+                  onChange={(e) => setWakeWordEnabled(e.target.checked)}
                 />
                 <span className="settings__slider" />
               </label>

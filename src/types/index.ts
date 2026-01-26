@@ -88,6 +88,14 @@ export interface AppState {
   ttsEnabled: boolean
   setTtsEnabled: (enabled: boolean) => void
 
+  // Continuous listening (always-on with "over" trigger)
+  continuousListeningEnabled: boolean
+  setContinuousListeningEnabled: (enabled: boolean) => void
+
+  // Wake word detection (hands-free activation)
+  wakeWordEnabled: boolean
+  setWakeWordEnabled: (enabled: boolean) => void
+
   transcript: string
   setTranscript: (text: string) => void
 

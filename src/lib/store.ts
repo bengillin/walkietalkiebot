@@ -189,6 +189,20 @@ export const useStore = create<AppState>((set, get) => {
       set({ ttsEnabled })
     },
 
+    // Continuous listening (always-on with "over" trigger)
+    continuousListeningEnabled: localStorage.getItem('talkboy_continuous_listening') === 'true',
+    setContinuousListeningEnabled: (enabled) => {
+      localStorage.setItem('talkboy_continuous_listening', String(enabled))
+      set({ continuousListeningEnabled: enabled })
+    },
+
+    // Wake word detection (hands-free activation)
+    wakeWordEnabled: localStorage.getItem('talkboy_wake_word') === 'true',
+    setWakeWordEnabled: (enabled) => {
+      localStorage.setItem('talkboy_wake_word', String(enabled))
+      set({ wakeWordEnabled: enabled })
+    },
+
     transcript: '',
     setTranscript: (transcript) => set({ transcript }),
 
