@@ -95,6 +95,12 @@ export interface AppState {
   // Wake word detection (hands-free activation)
   wakeWordEnabled: boolean
   setWakeWordEnabled: (enabled: boolean) => void
+  customWakeWord: string
+  setCustomWakeWord: (word: string) => void
+
+  // Custom trigger word for ending messages
+  customTriggerWord: string
+  setCustomTriggerWord: (word: string) => void
 
   transcript: string
   setTranscript: (text: string) => void

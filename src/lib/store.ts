@@ -203,6 +203,20 @@ export const useStore = create<AppState>((set, get) => {
       set({ wakeWordEnabled: enabled })
     },
 
+    // Custom wake word
+    customWakeWord: localStorage.getItem('talkboy_custom_wake_word') || '',
+    setCustomWakeWord: (word) => {
+      localStorage.setItem('talkboy_custom_wake_word', word)
+      set({ customWakeWord: word })
+    },
+
+    // Custom trigger word for ending messages
+    customTriggerWord: localStorage.getItem('talkboy_custom_trigger_word') || '',
+    setCustomTriggerWord: (word) => {
+      localStorage.setItem('talkboy_custom_trigger_word', word)
+      set({ customTriggerWord: word })
+    },
+
     transcript: '',
     setTranscript: (transcript) => set({ transcript }),
 

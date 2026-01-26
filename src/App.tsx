@@ -96,6 +96,11 @@ function App() {
     // Wake word setting
     wakeWordEnabled,
     setWakeWordEnabled,
+    // Custom words
+    customWakeWord,
+    setCustomWakeWord,
+    customTriggerWord,
+    setCustomTriggerWord,
   } = useStore()
 
   // Handle onboarding completion - Claude Code is always the default mode
@@ -242,7 +247,7 @@ function App() {
       finalTranscriptRef.current = ''
       setTimeout(() => setAvatarState('idle'), 2000)
     },
-    triggerWord: 'over',
+    triggerWord: customTriggerWord || 'over',
   })
 
   // Speech synthesis
@@ -467,7 +472,7 @@ function App() {
 
   // Wake word detection for hands-free activation
   useWakeWord({
-    wakeWord: 'hey talkboy',
+    wakeWord: customWakeWord || 'hey talkboy',
     enabled: wakeWordEnabled && !isListening && !isSpeaking && avatarState !== 'thinking',
     onWakeWord: () => {
       console.log('[App] Wake word detected, starting recording')
@@ -636,7 +641,7 @@ function App() {
             />
           )}
           <span className="app__hint">
-            {continuousListeningEnabled ? 'Say "over" to send' : 'or press spacebar'}
+            {continuousListeningEnabled ? `Say "${customTriggerWord || 'over'}" to send` : 'or press spacebar'}
           </span>
           {showTextInput && (
             <TextInput
@@ -726,7 +731,7 @@ function App() {
               <label className="settings__toggle">
                 <span className="settings__toggle-info">
                   <span className="settings__toggle-label">Continuous listening</span>
-                  <span className="settings__toggle-desc">Always listen, say "over" to send</span>
+                  <span className="settings__toggle-desc">Always listen, say "{customTriggerWord || 'over'}" to send</span>
                 </span>
                 <input
                   type="checkbox"
@@ -736,10 +741,23 @@ function App() {
                 <span className="settings__slider" />
               </label>
 
+              {continuousListeningEnabled && (
+                <div className="settings__input-group">
+                  <label className="settings__input-label">Trigger word</label>
+                  <input
+                    type="text"
+                    className="settings__text-input"
+                    value={customTriggerWord}
+                    onChange={(e) => setCustomTriggerWord(e.target.value)}
+                    placeholder="over"
+                  />
+                </div>
+              )}
+
               <label className="settings__toggle">
                 <span className="settings__toggle-info">
                   <span className="settings__toggle-label">Wake word</span>
-                  <span className="settings__toggle-desc">Say "hey talkboy" to activate</span>
+                  <span className="settings__toggle-desc">Say "{customWakeWord || 'hey talkboy'}" to activate</span>
                 </span>
                 <input
                   type="checkbox"
@@ -748,6 +766,19 @@ function App() {
                 />
                 <span className="settings__slider" />
               </label>
+
+              {wakeWordEnabled && (
+                <div className="settings__input-group">
+                  <label className="settings__input-label">Wake phrase</label>
+                  <input
+                    type="text"
+                    className="settings__text-input"
+                    value={customWakeWord}
+                    onChange={(e) => setCustomWakeWord(e.target.value)}
+                    placeholder="hey talkboy"
+                  />
+                </div>
+              )}
 
               {useClaudeCode && (
                 <div className="settings__session">

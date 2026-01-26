@@ -356,6 +356,41 @@
   border-color: var(--accent);
 }
 
+/* Settings text inputs */
+.settings__input-group {
+  padding: 12px 16px 16px;
+  margin-top: -8px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.settings__input-label {
+  display: block;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.settings__text-input {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.settings__text-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--bg-secondary);
+}
+
+.settings__text-input::placeholder {
+  color: var(--text-muted);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .app__main {
