@@ -469,6 +469,27 @@
   background: rgba(0, 0, 0, 0.25);
 }
 
+.chat-history__link {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.chat-history__link:hover {
+  opacity: 0.8;
+}
+
+.chat-history__message--user .chat-history__link {
+  color: #000;
+  opacity: 0.85;
+}
+
+.chat-history__message--user .chat-history__link:hover {
+  opacity: 1;
+}
+
 .chat-history__message--selected {
   outline: 2px solid var(--accent);
   outline-offset: 2px;

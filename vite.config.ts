@@ -348,6 +348,62 @@ Be thorough but concise. This description will be used as context for building o
         }
       })
 
+      // POST /api/open-url - Open URL in default browser
+      server.middlewares.use('/api/open-url', (req, res, next) => {
+        if (req.method === 'POST') {
+          let body = ''
+          req.on('data', chunk => { body += chunk })
+          req.on('end', () => {
+            try {
+              const { url } = JSON.parse(body)
+              if (!url || typeof url !== 'string') {
+                res.statusCode = 400
+                res.end(JSON.stringify({ error: 'URL required' }))
+                return
+              }
+
+              // Only allow http/https URLs for security
+              if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                res.statusCode = 400
+                res.end(JSON.stringify({ error: 'Only http/https URLs allowed' }))
+                return
+              }
+
+              console.log('Opening URL in browser:', url)
+
+              // Use macOS 'open' command to open in default browser
+              const open = spawn('open', [url])
+
+              open.on('error', (err) => {
+                res.statusCode = 500
+                res.end(JSON.stringify({ error: err.message }))
+              })
+
+              open.on('close', (code) => {
+                if (code === 0) {
+                  res.setHeader('Content-Type', 'application/json')
+                  res.setHeader('Access-Control-Allow-Origin', '*')
+                  res.end(JSON.stringify({ success: true }))
+                } else {
+                  res.statusCode = 500
+                  res.end(JSON.stringify({ error: `Failed to open URL (code ${code})` }))
+                }
+              })
+            } catch {
+              res.statusCode = 400
+              res.end(JSON.stringify({ error: 'Invalid JSON' }))
+            }
+          })
+        } else if (req.method === 'OPTIONS') {
+          res.setHeader('Access-Control-Allow-Origin', '*')
+          res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
+          res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+          res.end()
+        } else {
+          next()
+        }
+      })
+
       // POST /api/claude-code - Execute claude CLI and stream response
       server.middlewares.use('/api/claude-code', (req, res, next) => {
         if (req.method === 'POST') {

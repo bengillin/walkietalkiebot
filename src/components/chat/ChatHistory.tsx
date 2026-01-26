@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useMemo, useImperativeHandle, forwardRef } from 'react'
 import type { Message, Conversation, MessageImage } from '../../types'
 import { exportConversation } from '../../utils/export'
+import { openUrl } from '../../lib/claude'
 import './ChatHistory.css'
 
 interface ChatHistoryProps {
@@ -36,13 +37,63 @@ function formatDate(timestamp: number): string {
   return date.toLocaleDateString()
 }
 
-function highlightText(text: string, query: string): React.ReactNode {
-  if (!query.trim()) return text
-  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
-  const parts = text.split(regex)
-  return parts.map((part, i) =>
-    regex.test(part) ? <mark key={i} className="chat-history__highlight">{part}</mark> : part
-  )
+function renderTextWithLinks(
+  text: string,
+  query: string,
+  onOpenUrl: (url: string) => void
+): React.ReactNode {
+  // URL pattern
+  const urlRegex = /(https?:\/\/[^\s<>"{}|\\^`[\]]*[^\s<>"{}|\\^`[\].,:;!?)])/g
+
+  // Split by URLs first
+  const parts: Array<{ type: 'text' | 'url'; value: string }> = []
+  let lastIndex = 0
+  let match
+
+  while ((match = urlRegex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push({ type: 'text', value: text.slice(lastIndex, match.index) })
+    }
+    parts.push({ type: 'url', value: match[1] })
+    lastIndex = match.index + match[0].length
+  }
+  if (lastIndex < text.length) {
+    parts.push({ type: 'text', value: text.slice(lastIndex) })
+  }
+
+  // Helper to highlight search matches
+  const highlightMatches = (str: string, idx: number): React.ReactNode => {
+    if (!query.trim()) return str
+    const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
+    const segments = str.split(regex)
+    return segments.map((seg, i) =>
+      regex.test(seg) ? (
+        <mark key={`${idx}-${i}`} className="chat-history__highlight">{seg}</mark>
+      ) : (
+        seg
+      )
+    )
+  }
+
+  return parts.map((part, i) => {
+    if (part.type === 'url') {
+      return (
+        <a
+          key={i}
+          href={part.value}
+          className="chat-history__link"
+          onClick={(e) => {
+            e.preventDefault()
+            onOpenUrl(part.value)
+          }}
+          title={`Open ${part.value}`}
+        >
+          {highlightMatches(part.value, i)}
+        </a>
+      )
+    }
+    return <span key={i}>{highlightMatches(part.value, i)}</span>
+  })
 }
 
 export const ChatHistory = forwardRef<ChatHistoryHandle, ChatHistoryProps>(function ChatHistory({
@@ -84,6 +135,14 @@ export const ChatHistory = forwardRef<ChatHistoryHandle, ChatHistoryProps>(funct
     const query = searchQuery.toLowerCase()
     return messages.filter(m => m.content.toLowerCase().includes(query))
   }, [messages, searchQuery])
+
+  const handleOpenUrl = async (url: string) => {
+    try {
+      await openUrl(url)
+    } catch (err) {
+      console.error('Failed to open URL:', err)
+    }
+  }
 
   useEffect(() => {
     if (!searchQuery) {
@@ -318,7 +377,7 @@ export const ChatHistory = forwardRef<ChatHistoryHandle, ChatHistoryProps>(funct
                   ))}
                 </div>
               )}
-              <p className="chat-history__content">{highlightText(message.content, searchQuery)}</p>
+              <p className="chat-history__content">{renderTextWithLinks(message.content, searchQuery, handleOpenUrl)}</p>
             </div>
           ))}
           <div ref={bottomRef} />

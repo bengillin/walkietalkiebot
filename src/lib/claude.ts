@@ -92,45 +92,6 @@ interface ClaudeMessage {
   content: string | ClaudeContentBlock[]
 }
 
-interface ClaudeResponse {
-  content: Array<{ type: 'text'; text: string }>
-}
-
-export async function sendMessage(
-  messages: Message[],
-  apiKey: string
-): Promise<string> {
-  // Convert our messages to Claude format
-  const claudeMessages: ClaudeMessage[] = messages.map((m) => ({
-    role: m.role,
-    content: m.content,
-  }))
-
-  const response = await fetch(ANTHROPIC_API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1024,
-      system: `You are Talkboy. Be direct and brief - responses are spoken aloud. One to two sentences max unless asked for more. No filler phrases, no "Great question!", no "I'd be happy to help!". Just answer. Kind but not performative.`,
-      messages: claudeMessages,
-    }),
-  })
-
-  if (!response.ok) {
-    const error = await response.text()
-    throw new Error(`API error: ${response.status} - ${error}`)
-  }
-
-  const data: ClaudeResponse = await response.json()
-  return data.content[0]?.text || 'Sorry, I didn\'t get a response.'
-}
-
 export async function sendMessageStreaming(
   messages: Message[],
   apiKey: string,
@@ -240,59 +201,6 @@ export async function sendMessageStreaming(
   return fullText
 }
 
-// Send message via IPC (Claude session responds directly)
-export async function sendMessageViaIPC(
-  message: string,
-  onChunk: (text: string) => void
-): Promise<string> {
-  const response = await fetch('/api/send', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message }),
-  })
-
-  if (!response.ok) {
-    const error = await response.text()
-    throw new Error(`IPC error: ${response.status} - ${error}`)
-  }
-
-  const reader = response.body?.getReader()
-  if (!reader) throw new Error('No response body')
-
-  const decoder = new TextDecoder()
-  let fullText = ''
-
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
-
-    const chunk = decoder.decode(value)
-    const lines = chunk.split('\n')
-
-    for (const line of lines) {
-      if (line.startsWith('data: ')) {
-        const data = line.slice(6)
-        try {
-          const parsed = JSON.parse(data)
-          if (parsed.text) {
-            fullText += parsed.text
-            onChunk(parsed.text)
-          }
-          if (parsed.error) {
-            throw new Error(parsed.error)
-          }
-        } catch (e) {
-          if (e instanceof Error && e.message !== 'Unexpected end of JSON input') {
-            throw e
-          }
-        }
-      }
-    }
-  }
-
-  return fullText
-}
-
 // Activity event from Claude Code
 export interface ActivityEvent {
   type: 'tool_start' | 'tool_end' | 'tool_input' | 'all_complete'
@@ -360,4 +268,28 @@ export async function sendMessageViaClaudeCode(
   }
 
   return fullText
+}
+
+// Open URL in default browser via server
+export async function openUrl(url: string): Promise<void> {
+  const response = await fetch('/api/open-url', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ url }),
+  })
+
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(error.error || `Failed to open URL: ${response.status}`)
+  }
+}
+
+// Extract URLs from text
+export function extractUrls(text: string): string[] {
+  const urlRegex = /(https?:\/\/[^\s<>"{}|\\^`[\]]*[^\s<>"{}|\\^`[\].,:;!?)])/g
+  const matches = text.match(urlRegex) || []
+  return matches
+    .map(url => url.replace(/[.,;:!?)\]]+$/, '')) // Remove trailing punctuation
+    .filter(url => url.length > 0)
+    .filter((url, index, arr) => arr.indexOf(url) === index) // Deduplicate
 }
