@@ -2,43 +2,18 @@
   display: flex;
   align-items: flex-end;
   gap: 8px;
-  padding: 12px;
-  margin: 12px;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-md);
-  transition: all 0.2s ease;
-  position: relative;
+  padding: 12px 16px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-light);
 }
 
-/* Listening state - subtle animated glow instead of dots */
 .unified-input-bar.listening {
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.1),
-    0 0 20px rgba(255, 255, 255, 0.08),
-    inset 0 0 20px rgba(255, 255, 255, 0.03);
-  animation: listening-pulse 2s ease-in-out infinite;
+  background: var(--accent-soft);
+  border-top-color: var(--accent);
 }
 
-@keyframes listening-pulse {
-  0%, 100% {
-    box-shadow:
-      0 0 0 1px rgba(255, 255, 255, 0.1),
-      0 0 20px rgba(255, 255, 255, 0.08),
-      inset 0 0 20px rgba(255, 255, 255, 0.03);
-  }
-  50% {
-    box-shadow:
-      0 0 0 2px rgba(255, 255, 255, 0.15),
-      0 0 30px rgba(255, 255, 255, 0.12),
-      inset 0 0 30px rgba(255, 255, 255, 0.05);
-  }
-}
-
-/* Icon buttons - consistent pill style */
-.unified-input-bar__icon-btn {
+/* Gallery button */
+.unified-input-bar__gallery {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -46,48 +21,56 @@
   height: 36px;
   background: transparent;
   border: none;
-  border-radius: 12px;
-  color: var(--text-muted, #888);
+  border-radius: 50%;
+  color: var(--accent);
   cursor: pointer;
   flex-shrink: 0;
-  transition: all 0.15s ease;
+  transition: background 0.15s, transform 0.1s;
 }
 
-.unified-input-bar__icon-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text-primary, #fff);
+.unified-input-bar__gallery:hover:not(:disabled) {
+  background: var(--accent-soft);
+  transform: scale(1.05);
 }
 
-.unified-input-bar__icon-btn:active:not(:disabled) {
-  transform: scale(0.94);
+.unified-input-bar__gallery:active:not(:disabled) {
+  transform: scale(0.95);
 }
 
-.unified-input-bar__icon-btn:disabled {
-  opacity: 0.3;
+.unified-input-bar__gallery:disabled {
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
-/* Mic button active state */
-.unified-input-bar__icon-btn.mic-active {
-  background: var(--accent);
-  color: white;
+/* Text input wrapper */
+.unified-input-bar__field-wrapper {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
 }
 
-/* Text input - seamless integration */
 .unified-input-bar__field {
-  flex: 1;
-  min-height: 36px;
+  width: 100%;
+  min-height: 48px;
   max-height: 200px;
-  padding: 8px 4px;
-  background: transparent;
-  border: none;
+  padding: 12px 18px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-light);
+  border-radius: 24px;
   color: var(--text-primary);
-  font-size: 16px;
+  font-size: 17px;
   line-height: 1.4;
   outline: none;
   resize: none;
   overflow-y: auto;
+  transition: border-color 0.15s, box-shadow 0.15s;
   font-family: inherit;
+}
+
+.unified-input-bar__field:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .unified-input-bar__field:disabled {
@@ -96,46 +79,117 @@
 }
 
 .unified-input-bar__field::placeholder {
-  color: var(--text-muted, #666);
+  color: var(--text-muted);
 }
 
-.unified-input-bar__field:focus,
-.unified-input-bar__field:focus-visible {
-  outline: none !important;
-  box-shadow: none !important;
-  border: none !important;
+.unified-input-bar__field.listening {
+  border-color: var(--accent);
+  background: var(--bg-tertiary);
 }
 
-/* Send button - accent when active */
+/* Listening indicator inside input */
+.unified-input-bar__listening-indicator {
+  position: absolute;
+  right: 14px;
+  bottom: 16px;
+  display: flex;
+  gap: 4px;
+}
+
+.unified-input-bar__listening-indicator span {
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.unified-input-bar__listening-indicator span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.unified-input-bar__listening-indicator span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes bounce {
+  0%, 80%, 100% {
+    transform: scale(0.6);
+    opacity: 0.6;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Mic button */
+.unified-input-bar__mic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-light);
+  border-radius: 50%;
+  color: var(--text-primary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.unified-input-bar__mic:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: scale(1.05);
+}
+
+.unified-input-bar__mic:active:not(:disabled),
+.unified-input-bar__mic.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+  transform: scale(1.1);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+.unified-input-bar__mic:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Send button */
 .unified-input-bar__send {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   background: var(--accent);
   border: none;
-  border-radius: 12px;
+  border-radius: 50%;
   color: white;
   cursor: pointer;
   flex-shrink: 0;
-  transition: all 0.15s ease;
+  transition: background 0.15s, transform 0.1s;
 }
 
 .unified-input-bar__send:hover:not(:disabled) {
-  filter: brightness(1.15);
+  background: var(--accent-hover);
+  transform: scale(1.05);
 }
 
 .unified-input-bar__send:active:not(:disabled) {
-  transform: scale(0.94);
+  transform: scale(0.95);
 }
 
 .unified-input-bar__send:disabled {
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--text-muted, #555);
+  opacity: 0.4;
   cursor: not-allowed;
+  transform: none;
 }
 
 .unified-input-bar__send svg {
-  margin-left: 1px;
+  margin-left: 2px;
 }
