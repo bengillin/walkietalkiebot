@@ -6,7 +6,7 @@ import { ChatHistory } from './components/chat/ChatHistory'
 import { TextInput } from './components/chat/TextInput'
 import { useSpeechRecognition } from './components/voice/useSpeechRecognition'
 import { useSpeechSynthesis } from './components/voice/useSpeechSynthesis'
-import { sendMessageStreaming, sendMessageViaClaudeCode } from './lib/claude'
+import { sendMessageStreaming, sendMessageViaClaudeCode, sendMessageViaIPC } from './lib/claude'
 import { useStore } from './lib/store'
 import { useSoundEffects } from './hooks/useSoundEffects'
 import './App.css'
@@ -24,6 +24,28 @@ function App() {
   const [showTextInput, setShowTextInput] = useState(() =>
     localStorage.getItem('talkboy_show_text_input') !== 'false'
   )
+  const [connectedSessionId, setConnectedSessionId] = useState<string | null>(null)
+
+  // Fetch connected session ID periodically when in Claude Code mode
+  useEffect(() => {
+    if (!useClaudeCode) return
+
+    const checkSession = () => {
+      fetch('/api/session')
+        .then(res => res.json())
+        .then(data => setConnectedSessionId(data.sessionId))
+        .catch(() => setConnectedSessionId(null))
+    }
+
+    checkSession()
+    const interval = setInterval(checkSession, 3000)
+    return () => clearInterval(interval)
+  }, [useClaudeCode])
+
+  const disconnectSession = async () => {
+    await fetch('/api/session', { method: 'DELETE' })
+    setConnectedSessionId(null)
+  }
 
   const {
     avatarState,
@@ -114,6 +136,7 @@ function App() {
 
   // Speech synthesis
   const {
+    speak,
     speakStreaming,
     isSpeaking,
     isSupported: ttsSupported
@@ -189,15 +212,19 @@ function App() {
 
     try {
       if (useClaudeCode) {
-        // Route through Claude Code CLI
+        // Claude Code mode - spawn CLI with conversation context
         await sendMessageViaClaudeCode(
           text,
           (chunk) => {
             fullResponse += chunk
             setResponseText(fullResponse)
-            speakStreaming(chunk, false)
-          }
+          },
+          messages.map(m => ({ role: m.role, content: m.content }))
         )
+        // Speak the full response at once
+        if (fullResponse.trim()) {
+          speak(fullResponse)
+        }
       } else {
         // Direct Claude API call
         await sendMessageStreaming(
@@ -212,8 +239,10 @@ function App() {
         )
       }
 
-      // Signal streaming complete - flush any remaining text
-      speakStreaming('', true)
+      // Signal streaming complete - flush any remaining text (only for streaming mode)
+      if (!useClaudeCode) {
+        speakStreaming('', true)
+      }
 
       // Add assistant message
       addMessage({ role: 'assistant', content: fullResponse })
@@ -226,7 +255,7 @@ function App() {
     }
 
     setTranscript('')
-  }, [apiKey, messages, addMessage, setAvatarState, setTranscript, speakStreaming, playSound, contextMessages, useClaudeCode])
+  }, [apiKey, messages, addMessage, setAvatarState, setTranscript, speak, speakStreaming, playSound, contextMessages, useClaudeCode])
 
   // Handle talk button
   const handleTalkStart = useCallback(() => {
@@ -410,6 +439,29 @@ function App() {
                 />
                 <span className="settings__slider" />
               </label>
+
+              {useClaudeCode && (
+                <div className="settings__session">
+                  {connectedSessionId ? (
+                    <>
+                      <span className="settings__session-status settings__session-status--connected">
+                        Connected to session
+                      </span>
+                      <code className="settings__session-id">{connectedSessionId.slice(0, 8)}...</code>
+                      <button
+                        className="settings__session-disconnect"
+                        onClick={disconnectSession}
+                      >
+                        Disconnect
+                      </button>
+                    </>
+                  ) : (
+                    <span className="settings__session-status">
+                      No session connected - run "connect to talkboy" in Claude Code
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
 
             {!useClaudeCode && (

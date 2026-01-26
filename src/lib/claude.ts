@@ -58,10 +58,13 @@ export async function sendMessageStreaming(
     allMessages = [...contextMessages, ...messages]
   }
 
-  const claudeMessages: ClaudeMessage[] = allMessages.map((m) => ({
-    role: m.role,
-    content: m.content,
-  }))
+  // Filter out any messages with empty content
+  const claudeMessages: ClaudeMessage[] = allMessages
+    .filter((m) => m.content && m.content.trim())
+    .map((m) => ({
+      role: m.role,
+      content: m.content,
+    }))
 
   const response = await fetch(ANTHROPIC_API_URL, {
     method: 'POST',
@@ -119,15 +122,69 @@ export async function sendMessageStreaming(
   return fullText
 }
 
+// Send message via IPC (Claude session responds directly)
+export async function sendMessageViaIPC(
+  message: string,
+  onChunk: (text: string) => void
+): Promise<string> {
+  const response = await fetch('/api/send', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message }),
+  })
+
+  if (!response.ok) {
+    const error = await response.text()
+    throw new Error(`IPC error: ${response.status} - ${error}`)
+  }
+
+  const reader = response.body?.getReader()
+  if (!reader) throw new Error('No response body')
+
+  const decoder = new TextDecoder()
+  let fullText = ''
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+
+    const chunk = decoder.decode(value)
+    const lines = chunk.split('\n')
+
+    for (const line of lines) {
+      if (line.startsWith('data: ')) {
+        const data = line.slice(6)
+        try {
+          const parsed = JSON.parse(data)
+          if (parsed.text) {
+            fullText += parsed.text
+            onChunk(parsed.text)
+          }
+          if (parsed.error) {
+            throw new Error(parsed.error)
+          }
+        } catch (e) {
+          if (e instanceof Error && e.message !== 'Unexpected end of JSON input') {
+            throw e
+          }
+        }
+      }
+    }
+  }
+
+  return fullText
+}
+
 // Send message through Claude Code CLI (has full agent capabilities)
 export async function sendMessageViaClaudeCode(
   message: string,
-  onChunk: (text: string) => void
+  onChunk: (text: string) => void,
+  history?: Array<{ role: string; content: string }>
 ): Promise<string> {
   const response = await fetch('/api/claude-code', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message }),
+    body: JSON.stringify({ message, history }),
   })
 
   if (!response.ok) {

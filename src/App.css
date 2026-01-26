@@ -371,3 +371,48 @@
     padding: 0 16px;
   }
 }
+
+/* Session status */
+.settings__session {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.settings__session-status {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.settings__session-status--connected {
+  color: #4ade80;
+}
+
+.settings__session-id {
+  font-size: 12px;
+  padding: 2px 6px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+}
+
+.settings__session-disconnect {
+  font-size: 12px;
+  padding: 4px 8px;
+  background: transparent;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.settings__session-disconnect:hover {
+  border-color: #f87171;
+  color: #f87171;
+}
