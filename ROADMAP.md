@@ -44,13 +44,30 @@ Talkboy is a voice-first interface for Claude with approximately 6,400 lines of 
 
 ---
 
+## Recently Completed
+
+### Browser URL Opening (Tier 1) - DONE
+URLs in messages are now clickable and open in the default browser.
+- URLs detected and rendered as links in chat history
+- Click opens via server-side `open` command
+- Works with http/https URLs
+
+### Test Coverage - DONE
+Added Vitest testing framework with initial tests:
+- `src/lib/claude.test.ts` - URL extraction tests (9 tests)
+- `src/lib/store.test.ts` - Zustand store tests (15 tests)
+- Run with `npm run test` or `npm run test:watch`
+
+### Code Cleanup - DONE
+- Removed dead code: `sendMessage()`, `sendMessageViaIPC()`
+- Removed unused `@rive-app/react-canvas` dependency
+- Archived old planning docs to `docs/archive/`
+
+---
+
 ## Planned Features (Not Yet Built)
 
 ### Tier 1: High Impact
-
-#### Browser URL Opening
-Open URLs mentioned in conversation in the default browser via macOS `open` command.
-- Useful for directing users to documentation, PRs, etc.
 
 #### Media Library
 Central repository for all images/files shared across conversations.
@@ -119,32 +136,6 @@ Full system access, native notifications, auto-updates.
 
 ---
 
-## Technical Debt & Cleanup
-
-### Code to Remove
-1. **`sendMessageViaIPC()`** in `src/lib/claude.ts` (lines 244-294) - never called
-2. **`sendMessage()`** in `src/lib/claude.ts` (lines 99-132) - never called (streaming version used instead)
-
-### Unused Dependency
-- **`@rive-app/react-canvas`** - in package.json but never imported (Avatar uses CSS animations)
-
-### Planning Docs to Archive
-These planning docs can be moved to `/docs/archive/` or deleted:
-- `PLAN-keyboard-shortcuts.md` - feature shipped
-- `PLAN-response-formatting.md` - behavioral guideline, not code
-- `PLAN-search-export.md` - feature shipped
-- `PLANNING.md` (root) - superseded by this roadmap
-- `docs/ARCHITECTURE.md` - describes planned structure, not actual
-- `docs/DECISIONS.md` - ADRs are useful history, keep
-
-### Documentation to Keep
-- `README.md` - needs minor updates to reflect all features
-- `PLAN.md` - current sprint tracking
-- `docs/PLANNING.md` - vision document
-- `docs/CHARACTER.md` - avatar design spec
-
----
-
 ## Branch Strategy Going Forward
 
 Create feature branches for new work:
@@ -199,7 +190,6 @@ talkboy/
 
 ## Recommended Next Steps
 
-1. **Cleanup** - Remove dead code and unused dependency
-2. **Archive old docs** - Move completed planning docs
-3. **Update README** - Reflect all current features
-4. **Pick first Tier 1 feature** - Browser URL opening is probably easiest win
+1. **Pick next Tier 1 feature** - Media Library or Picovoice wake word
+2. **Update README** - Reflect all current features
+3. **Expand test coverage** - Add component tests, integration tests
