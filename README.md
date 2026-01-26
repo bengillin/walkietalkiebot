@@ -89,6 +89,41 @@ vite.config.ts              # Dev server + API endpoints
 - [ ] Multiple conversation threads
 - [ ] Custom avatar support
 
+## Using with Claude Code (MCP)
+
+You can launch Talkboy from any project using Claude Code by saying "launch talkboy".
+
+### Setup
+
+1. Install the MCP server dependencies:
+   ```bash
+   cd /path/to/talkboy/mcp-server
+   npm install
+   ```
+
+2. Add to your Claude Code settings (`~/.claude/settings.json`):
+   ```json
+   {
+     "mcpServers": {
+       "talkboy": {
+         "command": "node",
+         "args": ["/path/to/talkboy/mcp-server/index.js"]
+       }
+     }
+   }
+   ```
+
+3. Restart Claude Code
+
+### Available Tools
+
+| Tool | Description |
+|------|-------------|
+| `launch_talkboy` | Start Talkboy and open in browser |
+| `get_talkboy_status` | Check if running and current state |
+| `get_transcript` | Get latest voice transcript |
+| `get_conversation_history` | Get full chat history |
+
 ## Tech Stack
 
 - React 18 + TypeScript
