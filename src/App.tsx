@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { Avatar } from './components/avatar/Avatar'
 import { TalkButton } from './components/voice/TalkButton'
 import { Transcript } from './components/chat/Transcript'
-import { ChatHistory } from './components/chat/ChatHistory'
+import { ChatHistory, type ChatHistoryHandle } from './components/chat/ChatHistory'
 import { TextInput } from './components/chat/TextInput'
 import { Onboarding } from './components/onboarding/Onboarding'
 import { ActivityFeed } from './components/activity/ActivityFeed'
@@ -10,6 +10,7 @@ import { FileDropZone } from './components/dropzone/FileDropZone'
 import { useSpeechRecognition } from './components/voice/useSpeechRecognition'
 import { useWakeWord } from './components/voice/useWakeWord'
 import { useSpeechSynthesis } from './components/voice/useSpeechSynthesis'
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
 import { sendMessageStreaming, sendMessageViaClaudeCode, analyzeImage, analyzeImageViaServer, type ActivityEvent } from './lib/claude'
 import { useStore } from './lib/store'
 import { useSoundEffects } from './hooks/useSoundEffects'
@@ -186,6 +187,9 @@ function App() {
 
   // Sound effects
   const { play: playSound } = useSoundEffects()
+
+  // Ref to ChatHistory for keyboard shortcuts
+  const chatHistoryRef = useRef<ChatHistoryHandle>(null)
 
   // Ref to capture final transcript for use in onEnd
   const finalTranscriptRef = useRef('')
@@ -469,6 +473,22 @@ function App() {
     },
   })
 
+  // Keyboard shortcuts (Escape, Cmd+K, Cmd+E)
+  useKeyboardShortcuts({
+    isRecording: isListening,
+    onEscape: () => {
+      if (isListening) {
+        playSound('stopListening')
+        stopListening()
+        setTranscript('')
+        finalTranscriptRef.current = ''
+        setAvatarState('idle')
+      }
+    },
+    onCmdK: () => chatHistoryRef.current?.focusSearch(),
+    onCmdE: () => chatHistoryRef.current?.openExportMenu(),
+  })
+
   // Spacebar keyboard shortcut for push-to-talk (disabled in continuous mode)
   useEffect(() => {
     // Skip if continuous listening is enabled
@@ -576,6 +596,7 @@ function App() {
       </header>
 
       <ChatHistory
+        ref={chatHistoryRef}
         messages={messages}
         conversations={conversations}
         currentConversation={currentConversation}

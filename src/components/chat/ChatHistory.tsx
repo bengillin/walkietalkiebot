@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useMemo, useImperativeHandle, forwardRef } from 'react'
 import type { Message, Conversation, MessageImage } from '../../types'
+import { exportConversation } from '../../utils/export'
 import './ChatHistory.css'
 
 interface ChatHistoryProps {
@@ -11,6 +12,12 @@ interface ChatHistoryProps {
   onNewConversation: () => void
   onDeleteConversation: (id: string) => void
   onToggleContext: (id: string) => void
+}
+
+export interface ChatHistoryHandle {
+  focusSearch: () => void
+  openExportMenu: () => void
+  isSearchFocused: () => boolean
 }
 
 interface LightboxState {
@@ -29,7 +36,16 @@ function formatDate(timestamp: number): string {
   return date.toLocaleDateString()
 }
 
-export function ChatHistory({
+function highlightText(text: string, query: string): React.ReactNode {
+  if (!query.trim()) return text
+  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
+  const parts = text.split(regex)
+  return parts.map((part, i) =>
+    regex.test(part) ? <mark key={i} className="chat-history__highlight">{part}</mark> : part
+  )
+}
+
+export const ChatHistory = forwardRef<ChatHistoryHandle, ChatHistoryProps>(function ChatHistory({
   messages,
   conversations,
   currentConversation,
@@ -38,25 +54,81 @@ export function ChatHistory({
   onNewConversation,
   onDeleteConversation,
   onToggleContext,
-}: ChatHistoryProps) {
+}, ref) {
   const bottomRef = useRef<HTMLDivElement>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
+  const messageRefs = useRef<Map<string, HTMLDivElement>>(new Map())
   const [showConversations, setShowConversations] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [lightbox, setLightbox] = useState<LightboxState>({ isOpen: false, image: null })
+  const [searchQuery, setSearchQuery] = useState('')
+  const [showExportMenu, setShowExportMenu] = useState(false)
+  const [selectedResultIndex, setSelectedResultIndex] = useState(-1)
+
+  useImperativeHandle(ref, () => ({
+    focusSearch: () => {
+      // Uncollapse if needed so search is visible
+      if (isCollapsed) setIsCollapsed(false)
+      // Focus search input after a tick to allow re-render
+      setTimeout(() => searchInputRef.current?.focus(), 0)
+    },
+    openExportMenu: () => {
+      if (isCollapsed) setIsCollapsed(false)
+      setShowExportMenu(true)
+    },
+    isSearchFocused: () => document.activeElement === searchInputRef.current,
+  }))
+
+  const filteredMessages = useMemo(() => {
+    if (!searchQuery.trim()) return messages
+    const query = searchQuery.toLowerCase()
+    return messages.filter(m => m.content.toLowerCase().includes(query))
+  }, [messages, searchQuery])
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+    if (!searchQuery) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [messages, searchQuery])
+
+  // Reset selected index when search query changes
+  useEffect(() => {
+    setSelectedResultIndex(-1)
+  }, [searchQuery])
+
+  // Scroll to selected result
+  useEffect(() => {
+    if (selectedResultIndex >= 0 && selectedResultIndex < filteredMessages.length) {
+      const message = filteredMessages[selectedResultIndex]
+      const el = messageRefs.current.get(message.id)
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }, [selectedResultIndex, filteredMessages])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && lightbox.isOpen) {
         setLightbox({ isOpen: false, image: null })
       }
+
+      // Arrow navigation when search input is focused and there are results
+      if (document.activeElement === searchInputRef.current && searchQuery && filteredMessages.length > 0) {
+        if (e.key === 'ArrowDown') {
+          e.preventDefault()
+          setSelectedResultIndex(prev =>
+            prev < filteredMessages.length - 1 ? prev + 1 : 0
+          )
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault()
+          setSelectedResultIndex(prev =>
+            prev > 0 ? prev - 1 : filteredMessages.length - 1
+          )
+        }
+      }
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [lightbox.isOpen])
+  }, [lightbox.isOpen, searchQuery, filteredMessages.length])
 
   const otherConversations = conversations.filter(c => c.id !== currentConversation?.id)
 
@@ -104,6 +176,58 @@ export function ChatHistory({
           </svg>
         </button>
       </div>
+
+      {!isCollapsed && messages.length > 0 && (
+        <div className="chat-history__toolbar">
+          <div className="chat-history__search">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+              <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+            <input
+              ref={searchInputRef}
+              type="text"
+              placeholder="Search messages..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="chat-history__search-input"
+            />
+            {searchQuery && (
+              <button
+                className="chat-history__search-clear"
+                onClick={() => setSearchQuery('')}
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+              </button>
+            )}
+          </div>
+          <div className="chat-history__export">
+            <button
+              className="chat-history__export-btn"
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              title="Export conversation"
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+              </svg>
+            </button>
+            {showExportMenu && currentConversation && (
+              <div className="chat-history__export-menu">
+                <button onClick={() => { exportConversation(currentConversation, 'markdown'); setShowExportMenu(false); }}>
+                  Markdown (.md)
+                </button>
+                <button onClick={() => { exportConversation(currentConversation, 'json'); setShowExportMenu(false); }}>
+                  JSON (.json)
+                </button>
+                <button onClick={() => { exportConversation(currentConversation, 'text'); setShowExportMenu(false); }}>
+                  Plain Text (.txt)
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {showConversations && (
         <div className="chat-history__conversations">
@@ -160,10 +284,19 @@ export function ChatHistory({
 
       {!isCollapsed && messages.length > 0 && (
         <div className="chat-history__messages">
-          {messages.map((message) => (
+          {searchQuery && (
+            <div className="chat-history__search-results">
+              {filteredMessages.length} of {messages.length} messages
+            </div>
+          )}
+          {filteredMessages.map((message, index) => (
             <div
               key={message.id}
-              className={`chat-history__message chat-history__message--${message.role}`}
+              ref={(el) => {
+                if (el) messageRefs.current.set(message.id, el)
+                else messageRefs.current.delete(message.id)
+              }}
+              className={`chat-history__message chat-history__message--${message.role}${searchQuery && selectedResultIndex === index ? ' chat-history__message--selected' : ''}`}
             >
               <span className="chat-history__role">
                 {message.role === 'user' ? 'You' : 'Talkboy'}
@@ -185,7 +318,7 @@ export function ChatHistory({
                   ))}
                 </div>
               )}
-              <p className="chat-history__content">{message.content}</p>
+              <p className="chat-history__content">{highlightText(message.content, searchQuery)}</p>
             </div>
           ))}
           <div ref={bottomRef} />
@@ -230,4 +363,4 @@ export function ChatHistory({
       )}
     </div>
   )
-}
+})
