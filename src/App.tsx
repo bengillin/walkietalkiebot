@@ -4,7 +4,7 @@ import { TalkButton } from './components/voice/TalkButton'
 import { Transcript } from './components/chat/Transcript'
 import { ChatHistory, type ChatHistoryHandle } from './components/chat/ChatHistory'
 import { TextInput } from './components/chat/TextInput'
-import { Onboarding } from './components/onboarding/Onboarding'
+import { Onboarding, type OnboardingSettings } from './components/onboarding/Onboarding'
 import { ActivityFeed } from './components/activity/ActivityFeed'
 import { FileDropZone } from './components/dropzone/FileDropZone'
 import { useSpeechRecognition } from './components/voice/useSpeechRecognition'
@@ -33,21 +33,6 @@ function App() {
     localStorage.getItem('talkboy_show_text_input') !== 'false'
   )
   const [connectedSessionId, setConnectedSessionId] = useState<string | null>(null)
-
-  // Handle onboarding completion
-  const handleOnboardingComplete = useCallback((mode: 'claude-code' | 'api-key', key?: string) => {
-    if (mode === 'claude-code') {
-      setUseClaudeCode(true)
-      localStorage.setItem('talkboy_use_claude_code', 'true')
-    } else if (mode === 'api-key' && key) {
-      setApiKey(key)
-      localStorage.setItem('talkboy_api_key', key)
-      setUseClaudeCode(false)
-      localStorage.setItem('talkboy_use_claude_code', 'false')
-    }
-    setHasOnboarded(true)
-    localStorage.setItem('talkboy_onboarded', 'true')
-  }, [])
 
   // Fetch connected session ID periodically when in Claude Code mode
   useEffect(() => {
@@ -112,6 +97,23 @@ function App() {
     wakeWordEnabled,
     setWakeWordEnabled,
   } = useStore()
+
+  // Handle onboarding completion - Claude Code is always the default mode
+  const handleOnboardingComplete = useCallback((settings: OnboardingSettings) => {
+    // Claude Code is the default
+    setUseClaudeCode(true)
+    localStorage.setItem('talkboy_use_claude_code', 'true')
+
+    // Apply onboarding settings
+    setWakeWordEnabled(settings.wakeWordEnabled)
+    setContinuousListeningEnabled(settings.continuousListening)
+    setTtsEnabled(settings.ttsEnabled)
+    setShowTextInput(settings.showTextInput)
+    localStorage.setItem('talkboy_show_text_input', settings.showTextInput ? 'true' : 'false')
+
+    setHasOnboarded(true)
+    localStorage.setItem('talkboy_onboarded', 'true')
+  }, [setWakeWordEnabled, setContinuousListeningEnabled, setTtsEnabled])
 
   // Get current conversation
   const currentConversation = useMemo(() =>

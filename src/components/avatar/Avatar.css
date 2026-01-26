@@ -17,7 +17,8 @@
   height: 24px;
   background: linear-gradient(to bottom, var(--robot-shadow), var(--robot-body));
   border-radius: 3px;
-  position: relative;
+  display: flex;
+  justify-content: center;
 }
 
 .avatar__antenna-tip {
@@ -25,10 +26,7 @@
   height: 14px;
   background: var(--accent);
   border-radius: 50%;
-  position: absolute;
-  top: -9px;
-  left: 50%;
-  transform: translateX(-50%);
+  margin-top: -9px;
   opacity: 0.4;
   transition: all 0.3s ease;
   box-shadow: 0 0 10px transparent;
