@@ -20,17 +20,15 @@ Talkboy lets you have voice conversations with Claude. Push a button (or say "ov
 - **Activity feed**: Real-time display of Claude Code tool usage
 - **Lightbox viewer**: Full-size image preview with analysis sidebar
 
-## Getting Started
+## Quick Start
 
 ```bash
-# Install dependencies
-npm install
-
-# Start dev server
-npm run dev
+npx talkboy
 ```
 
-Open https://localhost:5173
+This starts the Talkboy server and opens https://localhost:5173 in your browser.
+
+**Browser requirement:** Chrome, Edge, or another Chromium-based browser. Firefox and Safari do not support the Web Speech API used for voice recognition.
 
 ### Setup
 
@@ -39,6 +37,19 @@ Open https://localhost:5173
    - **Direct API**: Enter your Anthropic API key
    - **Claude Code**: Toggle on (requires `claude` CLI installed)
 3. Close settings and start talking
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Start dev server (with hot reload)
+npm run dev
+
+# Build for production
+npm run build
+```
 
 ## How it works
 
@@ -68,7 +79,17 @@ src/
 └── hooks/
     └── useSoundEffects.ts  # Audio feedback
 
-vite.config.ts              # Dev server + API endpoints
+server/
+├── index.ts                # HTTPS server with Hono
+├── api.ts                  # API route handlers
+├── state.ts                # In-memory state management
+└── ssl.ts                  # Self-signed certificate generation
+
+bin/
+├── talkboy.js              # CLI entry: starts server, opens browser
+└── talkboy-mcp.js          # MCP server entry point
+
+vite.config.ts              # Dev server (for hot reload)
 ```
 
 ### API Endpoints (dev server)
@@ -95,25 +116,20 @@ You can launch Talkboy from any project using Claude Code by saying "launch talk
 
 ### Setup
 
-1. Install the MCP server dependencies:
-   ```bash
-   cd /path/to/talkboy/mcp-server
-   npm install
-   ```
+Add to your Claude Code settings (`~/.claude/settings.json`):
 
-2. Add to your Claude Code settings (`~/.claude/settings.json`):
-   ```json
-   {
-     "mcpServers": {
-       "talkboy": {
-         "command": "node",
-         "args": ["/path/to/talkboy/mcp-server/index.js"]
-       }
-     }
-   }
-   ```
+```json
+{
+  "mcpServers": {
+    "talkboy": {
+      "command": "npx",
+      "args": ["talkboy-mcp"]
+    }
+  }
+}
+```
 
-3. Restart Claude Code
+Restart Claude Code after adding the configuration.
 
 ### Available Tools
 

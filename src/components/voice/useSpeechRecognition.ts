@@ -246,11 +246,17 @@ export function useSpeechRecognition({
     }
   }, [])
 
+  const clearTranscript = useCallback(() => {
+    setTranscript('')
+    fullTranscriptRef.current = ''
+  }, [])
+
   return {
     isListening,
     isSupported,
     start,
     stop,
     transcript,
+    clearTranscript,
   }
 }

@@ -61,25 +61,26 @@ export function MediaLibrary({ conversations, onClose }: MediaLibraryProps) {
   }, [conversations, sortOrder])
 
   return (
-    <div className="media-library">
-      <div className="media-library__header">
-        <h2 className="media-library__title">Media Library</h2>
-        <div className="media-library__controls">
-          <select
-            className="media-library__sort"
-            value={sortOrder}
-            onChange={(e) => setSortOrder(e.target.value as 'newest' | 'oldest')}
-          >
-            <option value="newest">Newest first</option>
-            <option value="oldest">Oldest first</option>
-          </select>
-          <button className="media-library__close" onClick={onClose}>
-            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-            </svg>
-          </button>
+    <div className="modal-overlay media-library-overlay" onClick={onClose}>
+      <div className="modal modal--media-library" onClick={(e) => e.stopPropagation()}>
+        <div className="modal__header">
+          <h2>Media Library</h2>
+          <div className="media-library__controls">
+            <select
+              className="media-library__sort"
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value as 'newest' | 'oldest')}
+            >
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+            </select>
+            <button className="modal__close" onClick={onClose}>
+              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+              </svg>
+            </button>
+          </div>
         </div>
-      </div>
 
       {mediaItems.length === 0 ? (
         <div className="media-library__empty">
@@ -158,6 +159,7 @@ export function MediaLibrary({ conversations, onClose }: MediaLibraryProps) {
           </div>
         </div>
       )}
+      </div>
     </div>
   )
 }

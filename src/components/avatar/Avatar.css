@@ -6,6 +6,108 @@
   filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.4));
 }
 
+/* Small avatar variant - 64px native size */
+.avatar--small {
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4));
+}
+
+.avatar--small .avatar__antenna {
+  width: 2.4px;
+  height: 9.6px;
+  border-radius: 1.2px;
+}
+
+.avatar--small .avatar__antenna-tip {
+  top: -4px;
+  width: 5.6px;
+  height: 5.6px;
+}
+
+.avatar--small .avatar__body {
+  width: 64px;
+  height: 64px;
+}
+
+.avatar--small .avatar__body::before {
+  top: 3.2px;
+}
+
+.avatar--small .avatar__screen {
+  width: 40px;
+  height: 30.4px;
+  border-radius: 6.4px;
+}
+
+.avatar--small .avatar__screen::before {
+  border-radius: 6.4px 6.4px 0 0;
+}
+
+.avatar--small .avatar__eyes {
+  gap: 9.6px;
+  margin-bottom: 4px;
+}
+
+.avatar--small .avatar__eye {
+  width: 7.2px;
+  height: 7.2px;
+}
+
+.avatar--small .avatar__mouth {
+  width: 9.6px;
+  height: 4.8px;
+  border-width: 1.2px;
+  border-radius: 0 0 9.6px 9.6px;
+}
+
+.avatar--small .avatar__base {
+  width: 28px;
+  height: 4px;
+  border-radius: 0 0 4.8px 4.8px;
+  margin-top: -2px;
+}
+
+.avatar--small .avatar__thinking-dots {
+  gap: 2.4px;
+  font-size: 11.2px;
+}
+
+.avatar--small .avatar__question {
+  font-size: 10.4px;
+}
+
+/* Small avatar state overrides */
+.avatar--small.avatar--idle .avatar__eye {
+  height: 4px;
+  border-radius: 4px;
+}
+
+.avatar--small.avatar--listening .avatar__eye {
+  height: 8.8px;
+  width: 8.8px;
+}
+
+.avatar--small.avatar--speaking .avatar__eye {
+  height: 4px;
+  border-radius: 4px;
+}
+
+.avatar--small.avatar--happy .avatar__eye {
+  height: 2.4px;
+  width: 8px;
+  border-radius: 2.4px;
+  transform: translateY(1.2px);
+}
+
+.avatar--small.avatar--happy .avatar__mouth {
+  width: 12.8px;
+  height: 6.4px;
+}
+
+.avatar--small.avatar--confused .avatar__eye {
+  width: 9.6px;
+  height: 9.6px;
+}
+
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-12px); }

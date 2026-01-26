@@ -1,12 +1,11 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
-import { Avatar } from './components/avatar/Avatar'
-import { TalkButton } from './components/voice/TalkButton'
-import { Transcript } from './components/chat/Transcript'
-import { ChatHistory, type ChatHistoryHandle } from './components/chat/ChatHistory'
-import { TextInput } from './components/chat/TextInput'
+import { AvatarSmall } from './components/avatar/Avatar'
+import { ChatTimeline } from './components/chat/ChatTimeline'
+import { ConversationSidebar } from './components/chat/ConversationSidebar'
+import { UnifiedInputBar } from './components/chat/UnifiedInputBar'
 import { Onboarding, type OnboardingSettings } from './components/onboarding/Onboarding'
-import { ActivityFeed } from './components/activity/ActivityFeed'
 import { FileDropZone } from './components/dropzone/FileDropZone'
+import { ImageLightbox } from './components/media/ImageLightbox'
 import { MediaLibrary } from './components/media/MediaLibrary'
 import { useSpeechRecognition } from './components/voice/useSpeechRecognition'
 import { useWakeWord } from './components/voice/useWakeWord'
@@ -15,6 +14,7 @@ import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
 import { sendMessageStreaming, sendMessageViaClaudeCode, analyzeImage, analyzeImageViaServer, type ActivityEvent } from './lib/claude'
 import { useStore } from './lib/store'
 import { useSoundEffects } from './hooks/useSoundEffects'
+import { useTheme } from './contexts/ThemeContext'
 import './App.css'
 
 function App() {
@@ -26,15 +26,14 @@ function App() {
   )
   const [showSettings, setShowSettings] = useState(false)
   const [showMediaLibrary, setShowMediaLibrary] = useState(false)
+  const [showSidebar, setShowSidebar] = useState(false)
   const [responseText, setResponseText] = useState('')
   const [error, setError] = useState('')
   const [useClaudeCode, setUseClaudeCode] = useState(() =>
     localStorage.getItem('talkboy_use_claude_code') === 'true'
   )
-  const [showTextInput, setShowTextInput] = useState(() =>
-    localStorage.getItem('talkboy_show_text_input') !== 'false'
-  )
   const [connectedSessionId, setConnectedSessionId] = useState<string | null>(null)
+  const [lightboxImage, setLightboxImage] = useState<{ dataUrl: string; description?: string; fileName: string } | null>(null)
 
   // Fetch connected session ID periodically when in Claude Code mode
   useEffect(() => {
@@ -56,6 +55,8 @@ function App() {
     await fetch('/api/session', { method: 'DELETE' })
     setConnectedSessionId(null)
   }
+
+  const { theme, setTheme, themes } = useTheme()
 
   const {
     avatarState,
@@ -115,18 +116,10 @@ function App() {
     setWakeWordEnabled(settings.wakeWordEnabled)
     setContinuousListeningEnabled(settings.continuousListening)
     setTtsEnabled(settings.ttsEnabled)
-    setShowTextInput(settings.showTextInput)
-    localStorage.setItem('talkboy_show_text_input', settings.showTextInput ? 'true' : 'false')
 
     setHasOnboarded(true)
     localStorage.setItem('talkboy_onboarded', 'true')
   }, [setWakeWordEnabled, setContinuousListeningEnabled, setTtsEnabled])
-
-  // Get current conversation
-  const currentConversation = useMemo(() =>
-    conversations.find(c => c.id === currentConversationId),
-    [conversations, currentConversationId]
-  )
 
   // Get messages from context conversations to include in API calls
   const contextMessages = useMemo(() => {
@@ -197,9 +190,6 @@ function App() {
   // Sound effects
   const { play: playSound } = useSoundEffects()
 
-  // Ref to ChatHistory for keyboard shortcuts
-  const chatHistoryRef = useRef<ChatHistoryHandle>(null)
-
   // Ref to capture final transcript for use in onEnd
   const finalTranscriptRef = useRef('')
   const triggerWordUsedRef = useRef(false)
@@ -209,7 +199,8 @@ function App() {
     isListening,
     isSupported: sttSupported,
     start: startListening,
-    stop: stopListening
+    stop: stopListening,
+    clearTranscript: clearSpeechTranscript
   } = useSpeechRecognition({
     onInterimResult: (text) => {
       setTranscript(text)
@@ -356,6 +347,10 @@ function App() {
     // Only require API key for direct mode
     if (!useClaudeCode && !apiKey) return
 
+    // Clear transcript immediately so input field clears right away
+    setTranscript('')
+    clearSpeechTranscript()
+
     setAvatarState('thinking')
     playSound('thinking')
     setError('')
@@ -440,6 +435,8 @@ function App() {
         setTimeout(() => setAvatarState('idle'), 1500)
       }
 
+      // Clear streaming text before adding message to avoid duplicate display
+      setResponseText('')
       // Add assistant message
       addMessage({ role: 'assistant', content: fullResponse })
     } catch (err) {
@@ -455,7 +452,7 @@ function App() {
     }
 
     setTranscript('')
-  }, [apiKey, messages, addMessage, setAvatarState, setTranscript, speak, speakStreaming, playSound, contextMessages, useClaudeCode, clearActivities, handleActivity, attachedFiles, clearFiles, clearImageAnalyses, getImageContext, ttsEnabled])
+  }, [apiKey, messages, addMessage, setAvatarState, setTranscript, clearSpeechTranscript, speak, speakStreaming, playSound, contextMessages, useClaudeCode, clearActivities, handleActivity, attachedFiles, clearFiles, clearImageAnalyses, getImageContext, ttsEnabled])
 
   // Handle talk button
   const handleTalkStart = useCallback(() => {
@@ -482,7 +479,7 @@ function App() {
     },
   })
 
-  // Keyboard shortcuts (Escape, Cmd+K, Cmd+E)
+  // Keyboard shortcuts (Escape to cancel recording)
   useKeyboardShortcuts({
     isRecording: isListening,
     onEscape: () => {
@@ -494,8 +491,6 @@ function App() {
         setAvatarState('idle')
       }
     },
-    onCmdK: () => chatHistoryRef.current?.focusSearch(),
-    onCmdE: () => chatHistoryRef.current?.openExportMenu(),
   })
 
   // Spacebar keyboard shortcut for push-to-talk (disabled in continuous mode)
@@ -590,81 +585,75 @@ function App() {
   }
 
   return (
-    <div className="app">
+    <div className="app app--timeline">
+      {/* Sidebar for conversations */}
+      <ConversationSidebar
+        conversations={conversations}
+        currentConversationId={currentConversationId || ''}
+        contextIds={contextConversationIds}
+        isOpen={showSidebar}
+        onClose={() => setShowSidebar(false)}
+        onSelectConversation={(id) => {
+          loadConversation(id)
+          setShowSidebar(false)
+        }}
+        onNewConversation={() => {
+          createConversation()
+          setShowSidebar(false)
+        }}
+        onDeleteConversation={deleteConversation}
+        onToggleContext={toggleContextConversation}
+      />
+
+      {/* Header with avatar status */}
       <header className="app__header">
-        <h1 className="app__title">Talkboy</h1>
-        <div className="app__header-actions">
+        <div className="app__header-left">
+          <div className="app__avatar-mini">
+            <AvatarSmall state={avatarState} />
+          </div>
           <button
-            className="app__header-btn"
-            onClick={() => setShowMediaLibrary(true)}
-            title="Media Library"
+            className="app__conversation-dropdown"
+            onClick={() => setShowSidebar(true)}
+            title="Switch Conversation"
           >
-            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
-              <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+            <span className="app__conversation-title">
+              {conversations.find(c => c.id === currentConversationId)?.title || 'New Conversation'}
+            </span>
+            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+              <path d="M7 10l5 5 5-5z"/>
             </svg>
           </button>
+        </div>
+        <div className="app__header-actions">
           <button
-            className="app__header-btn"
+            className="app__header-btn app__header-btn--settings"
             onClick={() => setShowSettings(true)}
             title="Settings"
           >
-            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
-              <path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+            {/* Gear icon */}
+            <svg viewBox="0 0 24 24" fill="none" width="24" height="24">
+              <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="currentColor" strokeWidth="2"/>
+              <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" stroke="currentColor" strokeWidth="2"/>
             </svg>
           </button>
         </div>
       </header>
 
-      <ChatHistory
-        ref={chatHistoryRef}
-        messages={messages}
-        conversations={conversations}
-        currentConversation={currentConversation}
-        contextIds={contextConversationIds}
-        onSelectConversation={loadConversation}
-        onNewConversation={createConversation}
-        onDeleteConversation={deleteConversation}
-        onToggleContext={toggleContextConversation}
-      />
-
+      {/* Main chat timeline */}
       <main className="app__main">
-        <div className="app__avatar-container">
-          <Avatar state={avatarState} />
-        </div>
+        <ChatTimeline
+          messages={messages}
+          activities={activities}
+          avatarState={avatarState}
+          streamingText={responseText}
+          onImageClick={setLightboxImage}
+        />
 
-        <div className="app__transcript-container">
-          {isListening && transcript && (
-            <Transcript text={transcript} label="You're saying" />
-          )}
-          {!isListening && responseText && (
-            <Transcript text={responseText} label="Talkboy" />
-          )}
-          {error && (
-            <div className="app__error">{error}</div>
-          )}
-        </div>
+        {error && (
+          <div className="app__error">{error}</div>
+        )}
 
-        <div className="app__controls">
-          {!continuousListeningEnabled && (
-            <TalkButton
-              isListening={isListening}
-              isDisabled={(!useClaudeCode && !apiKey) || isSpeaking || avatarState === 'thinking'}
-              onMouseDown={handleTalkStart}
-              onMouseUp={handleTalkEnd}
-            />
-          )}
-          <span className="app__hint">
-            {continuousListeningEnabled ? `Say "${customTriggerWord || 'over'}" to send` : 'or press spacebar'}
-          </span>
-          {showTextInput && (
-            <TextInput
-              onSubmit={handleSendMessage}
-              isDisabled={(!useClaudeCode && !apiKey) || isSpeaking || avatarState === 'thinking'}
-              placeholder="Or type here..."
-            />
-          )}
-        </div>
-
+        {/* File attachments preview */}
         <FileDropZone
           files={attachedFiles}
           onFilesAdd={handleFilesAdd}
@@ -674,11 +663,27 @@ function App() {
           analysisStatuses={analysisStatuses}
         />
 
-        <ActivityFeed
-          activities={activities}
-          isVisible={useClaudeCode && activities.length > 0}
+        {/* Unified input bar - text, voice, and gallery combined */}
+        <UnifiedInputBar
+          transcript={transcript}
+          isListening={isListening}
+          onSubmit={handleSendMessage}
+          onTalkStart={handleTalkStart}
+          onTalkEnd={handleTalkEnd}
+          onGalleryOpen={() => setShowMediaLibrary(true)}
+          isDisabled={(!useClaudeCode && !apiKey) || isSpeaking || avatarState === 'thinking'}
+          continuousListening={continuousListeningEnabled}
+          triggerWord={customTriggerWord || 'over'}
         />
       </main>
+
+      {/* Image lightbox */}
+      {lightboxImage && (
+        <ImageLightbox
+          image={lightboxImage}
+          onClose={() => setLightboxImage(null)}
+        />
+      )}
 
       {/* Settings Modal */}
       {showSettings && (
@@ -696,162 +701,168 @@ function App() {
             </div>
 
             <div className="settings__section">
-              <label className="settings__toggle">
-                <span className="settings__toggle-info">
-                  <span className="settings__toggle-label">Claude Code mode</span>
-                  <span className="settings__toggle-desc">Route through CLI for full agent capabilities</span>
-                </span>
-                <input
-                  type="checkbox"
-                  checked={useClaudeCode}
-                  onChange={(e) => {
-                    setUseClaudeCode(e.target.checked)
-                    localStorage.setItem('talkboy_use_claude_code', String(e.target.checked))
-                  }}
-                />
-                <span className="settings__slider" />
-              </label>
-
-              <label className="settings__toggle">
-                <span className="settings__toggle-info">
-                  <span className="settings__toggle-label">Show text input</span>
-                  <span className="settings__toggle-desc">Display keyboard input field</span>
-                </span>
-                <input
-                  type="checkbox"
-                  checked={showTextInput}
-                  onChange={(e) => {
-                    setShowTextInput(e.target.checked)
-                    localStorage.setItem('talkboy_show_text_input', String(e.target.checked))
-                  }}
-                />
-                <span className="settings__slider" />
-              </label>
-
-              <label className="settings__toggle">
-                <span className="settings__toggle-info">
-                  <span className="settings__toggle-label">Speak responses</span>
-                  <span className="settings__toggle-desc">Read responses aloud with text-to-speech</span>
-                </span>
-                <input
-                  type="checkbox"
-                  checked={ttsEnabled}
-                  onChange={(e) => setTtsEnabled(e.target.checked)}
-                />
-                <span className="settings__slider" />
-              </label>
-
-              <label className="settings__toggle">
-                <span className="settings__toggle-info">
-                  <span className="settings__toggle-label">Continuous listening</span>
-                  <span className="settings__toggle-desc">Always listen, say "{customTriggerWord || 'over'}" to send</span>
-                </span>
-                <input
-                  type="checkbox"
-                  checked={continuousListeningEnabled}
-                  onChange={(e) => setContinuousListeningEnabled(e.target.checked)}
-                />
-                <span className="settings__slider" />
-              </label>
-
-              {continuousListeningEnabled && (
-                <div className="settings__input-group">
-                  <label className="settings__input-label">Trigger word</label>
-                  <input
-                    type="text"
-                    className="settings__text-input"
-                    value={customTriggerWord}
-                    onChange={(e) => setCustomTriggerWord(e.target.value)}
-                    placeholder="over"
-                  />
-                </div>
-              )}
-
-              <label className="settings__toggle">
-                <span className="settings__toggle-info">
-                  <span className="settings__toggle-label">Wake word</span>
-                  <span className="settings__toggle-desc">Say "{customWakeWord || 'hey talkboy'}" to activate</span>
-                </span>
-                <input
-                  type="checkbox"
-                  checked={wakeWordEnabled}
-                  onChange={(e) => setWakeWordEnabled(e.target.checked)}
-                />
-                <span className="settings__slider" />
-              </label>
-
-              {wakeWordEnabled && (
-                <div className="settings__input-group">
-                  <label className="settings__input-label">Wake phrase</label>
-                  <input
-                    type="text"
-                    className="settings__text-input"
-                    value={customWakeWord}
-                    onChange={(e) => setCustomWakeWord(e.target.value)}
-                    placeholder="hey talkboy"
-                  />
-                </div>
-              )}
-
-              {useClaudeCode && (
-                <div className="settings__session">
-                  {connectedSessionId ? (
-                    <>
-                      <span className="settings__session-status settings__session-status--connected">
-                        Connected to session
-                      </span>
-                      <code className="settings__session-id">{connectedSessionId.slice(0, 8)}...</code>
-                      <button
-                        className="settings__session-disconnect"
-                        onClick={disconnectSession}
-                      >
-                        Disconnect
-                      </button>
-                    </>
-                  ) : (
-                    <span className="settings__session-status">
-                      No session connected - run "connect to talkboy" in Claude Code
+              <h3 className="settings__section-title">Theme</h3>
+              <div className="settings__theme-grid">
+                {themes.map((t) => (
+                  <label
+                    key={t.name}
+                    className={`settings__theme-option ${theme === t.name ? 'settings__theme-option--active' : ''}`}
+                  >
+                    <input
+                      type="radio"
+                      name="theme"
+                      value={t.name}
+                      checked={theme === t.name}
+                      onChange={() => setTheme(t.name)}
+                    />
+                    <span className="settings__theme-name">{t.displayName}</span>
+                    <span className="settings__theme-desc">{t.description}</span>
+                    <span className="settings__theme-check">
+                      <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                      </svg>
                     </span>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div className="settings__section">
-              <h3 className="settings__section-title">API Key</h3>
-              <p className="settings__section-desc">{useClaudeCode ? 'Optional - needed for image analysis' : 'Required when not using Claude Code mode'}</p>
-                <form onSubmit={handleSaveApiKey}>
-                  <input
-                    type="password"
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
-                    placeholder="sk-ant-..."
-                  />
-                  <button type="submit" disabled={!apiKey.trim()}>
-                    Save
-                  </button>
-                </form>
-                <a
-                  href="https://console.anthropic.com/settings/keys"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Get an API key
-                </a>
+                  </label>
+                ))}
               </div>
-
-            <div className="settings__section settings__section--danger">
-              <button
-                className="settings__reset-btn"
-                onClick={() => {
-                  localStorage.removeItem('talkboy_onboarded')
-                  setHasOnboarded(false)
-                  setShowSettings(false)
-                }}
-              >
-                Reset onboarding
-              </button>
             </div>
+
+            <label className="settings__toggle">
+              <span className="settings__toggle-info">
+                <span className="settings__toggle-label">Claude Code mode</span>
+                <span className="settings__toggle-desc">Route through CLI for full agent capabilities</span>
+              </span>
+              <input
+                type="checkbox"
+                checked={useClaudeCode}
+                onChange={(e) => {
+                  setUseClaudeCode(e.target.checked)
+                  localStorage.setItem('talkboy_use_claude_code', String(e.target.checked))
+                }}
+              />
+              <span className="settings__slider" />
+            </label>
+
+            <label className="settings__toggle">
+              <span className="settings__toggle-info">
+                <span className="settings__toggle-label">Speak responses</span>
+                <span className="settings__toggle-desc">Read responses aloud with text-to-speech</span>
+              </span>
+              <input
+                type="checkbox"
+                checked={ttsEnabled}
+                onChange={(e) => setTtsEnabled(e.target.checked)}
+              />
+              <span className="settings__slider" />
+            </label>
+
+            <label className="settings__toggle">
+              <span className="settings__toggle-info">
+                <span className="settings__toggle-label">Continuous listening</span>
+                <span className="settings__toggle-desc">Always listen, say "{customTriggerWord || 'over'}" to send</span>
+              </span>
+              <input
+                type="checkbox"
+                checked={continuousListeningEnabled}
+                onChange={(e) => setContinuousListeningEnabled(e.target.checked)}
+              />
+              <span className="settings__slider" />
+            </label>
+
+            {continuousListeningEnabled && (
+              <div className="settings__input-group">
+                <label className="settings__input-label">Trigger word</label>
+                <input
+                  type="text"
+                  className="settings__text-input"
+                  value={customTriggerWord}
+                  onChange={(e) => setCustomTriggerWord(e.target.value)}
+                  placeholder="over"
+                />
+              </div>
+            )}
+
+            <label className="settings__toggle">
+              <span className="settings__toggle-info">
+                <span className="settings__toggle-label">Wake word</span>
+                <span className="settings__toggle-desc">Say "{customWakeWord || 'hey talkboy'}" to activate</span>
+              </span>
+              <input
+                type="checkbox"
+                checked={wakeWordEnabled}
+                onChange={(e) => setWakeWordEnabled(e.target.checked)}
+              />
+              <span className="settings__slider" />
+            </label>
+
+            {wakeWordEnabled && (
+              <div className="settings__input-group">
+                <label className="settings__input-label">Wake phrase</label>
+                <input
+                  type="text"
+                  className="settings__text-input"
+                  value={customWakeWord}
+                  onChange={(e) => setCustomWakeWord(e.target.value)}
+                  placeholder="hey talkboy"
+                />
+              </div>
+            )}
+
+            {useClaudeCode && (
+              <div className="settings__session">
+                {connectedSessionId ? (
+                  <>
+                    <span className="settings__session-status settings__session-status--connected">
+                      Connected to session
+                    </span>
+                    <code className="settings__session-id">{connectedSessionId.slice(0, 8)}...</code>
+                    <button
+                      className="settings__session-disconnect"
+                      onClick={disconnectSession}
+                    >
+                      Disconnect
+                    </button>
+                  </>
+                ) : (
+                  <span className="settings__session-status">
+                    No session connected - run "connect to talkboy" in Claude Code
+                  </span>
+                )}
+              </div>
+            )}
+
+            <h3 className="settings__section-title">API Key</h3>
+            <p className="settings__section-desc">{useClaudeCode ? 'Optional - needed for image analysis' : 'Required when not using Claude Code mode'}</p>
+            <form className="settings__api-form" onSubmit={handleSaveApiKey}>
+              <input
+                type="password"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                placeholder="sk-ant-..."
+              />
+              <button type="submit" disabled={!apiKey.trim()}>
+                Save
+              </button>
+            </form>
+            <a
+              className="settings__api-link"
+              href="https://console.anthropic.com/settings/keys"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Get an API key
+            </a>
+
+            <button
+              className="settings__reset-btn"
+              onClick={() => {
+                localStorage.removeItem('talkboy_onboarded')
+                setHasOnboarded(false)
+                setShowSettings(false)
+              }}
+            >
+              Reset onboarding
+            </button>
           </div>
         </div>
       )}

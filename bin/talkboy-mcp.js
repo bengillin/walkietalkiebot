@@ -8,13 +8,9 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import { spawn, exec } from 'child_process';
 import { promisify } from 'util';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
 
 const execAsync = promisify(exec);
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const TALKBOY_DIR = join(__dirname, '..');
-const TALKBOY_PORT = 5173;
+const TALKBOY_PORT = parseInt(process.env.TALKBOY_PORT || '5173', 10);
 const TALKBOY_URL = `https://localhost:${TALKBOY_PORT}`;
 
 // Allow self-signed certificates for local dev

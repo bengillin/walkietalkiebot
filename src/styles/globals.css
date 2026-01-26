@@ -1,3 +1,6 @@
+@import './themes/imessage.css';
+@import './themes/mcallister.css';
+
 * {
   margin: 0;
   padding: 0;

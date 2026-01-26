@@ -1,0 +1,839 @@
+/* iMessage Theme - Dark iOS Messages-inspired design */
+[data-theme="imessage"] {
+  /* Background Colors - Dark mode like iOS Messages */
+  --bg-primary: #000000;
+  --bg-secondary: #1c1c1e;
+  --bg-tertiary: #2c2c2e;
+
+  /* Text Colors - High contrast for accessibility */
+  --text-primary: #ffffff;
+  --text-secondary: #f0f0f5;
+  --text-muted: #a1a1a6;
+  --text-tertiary: #c7c7cc;
+
+  /* Accent Colors - Classic iMessage blue */
+  --accent: #0a84ff;
+  --accent-hover: #409cff;
+  --accent-glow: rgba(10, 132, 255, 0.3);
+  --accent-soft: rgba(10, 132, 255, 0.15);
+
+  /* Message Colors - True iMessage bubbles */
+  --message-user-bg: #0a84ff;
+  --message-user-text: #ffffff;
+  --message-assistant-bg: #3a3a3c;
+  --message-assistant-text: #ffffff;
+
+  /* Robot Avatar Colors */
+  --robot-body: #ffffff;
+  --robot-shadow: #d1d1d6;
+  --robot-highlight: #ffffff;
+
+  /* Screen States (Avatar Display) */
+  --screen-idle: #0a84ff;
+  --screen-happy: #30d158;
+  --screen-error: #ff453a;
+  --screen-listening: #5e5ce6;
+  --screen-thinking: #bf5af2;
+
+  /* Borders & Shadows */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-light: rgba(255, 255, 255, 0.15);
+  --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 20px var(--accent-glow);
+
+  /* Header specific */
+  --header-bg: #1c1c1e;
+  --header-border: rgba(255, 255, 255, 0.1);
+  --header-text: #ffffff;
+
+  /* Button styling */
+  --btn-bg: #2c2c2e;
+  --btn-hover: #3a3a3c;
+  --btn-border: rgba(255, 255, 255, 0.1);
+
+  /* Input styling */
+  --input-bg: #1c1c1e;
+  --input-border: rgba(255, 255, 255, 0.2);
+
+  /* Modal */
+  --modal-bg: #2c2c2e;
+  --modal-overlay: rgba(0, 0, 0, 0.7);
+
+  /* Typography - Larger, more readable sizes */
+  --font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 600;
+  --title-font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+  --title-style: normal;
+  --title-transform: none;
+  --letter-spacing: -0.02em;
+
+  /* Font sizes */
+  --font-size-xs: 13px;
+  --font-size-sm: 15px;
+  --font-size-base: 17px;
+  --font-size-lg: 20px;
+  --font-size-xl: 24px;
+  --font-size-2xl: 28px;
+}
+
+/* iMessage body background - pure black like iOS */
+[data-theme="imessage"] body {
+  background: var(--bg-primary);
+  background-image: none;
+}
+
+/* =============================================
+   HEADER - iOS Navigation Bar style
+   ============================================= */
+[data-theme="imessage"] .app__header {
+  background: var(--header-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--header-border);
+  min-height: auto;
+  padding: 16px 20px;
+}
+
+[data-theme="imessage"] .app__title {
+  font-family: var(--title-font);
+  font-weight: 700;
+  font-size: var(--font-size-xl);
+  letter-spacing: -0.02em;
+  text-transform: none;
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: var(--header-text);
+  color: var(--header-text);
+  text-shadow: none;
+  filter: none;
+}
+
+[data-theme="imessage"] .app__header-btn {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  box-shadow: none;
+  padding: 10px;
+  font-size: 20px;
+}
+
+[data-theme="imessage"] .app__header-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+[data-theme="imessage"] .app__header-btn--settings {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+}
+
+[data-theme="imessage"] .app__header-btn--settings:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="imessage"] .app__header-btn svg {
+  width: 26px;
+  height: 26px;
+}
+
+/* Conversation dropdown as bubble */
+[data-theme="imessage"] .app__conversation-dropdown {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border-radius: 20px;
+  padding: 10px 16px;
+}
+
+[data-theme="imessage"] .app__conversation-dropdown:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="imessage"] .app__conversation-title {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* Mini avatar in header - full size */
+[data-theme="imessage"] .app__avatar-mini {
+  width: 80px;
+  height: 80px;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* =============================================
+   CHAT TIMELINE - Message feed area
+   ============================================= */
+[data-theme="imessage"] .chat-timeline {
+  background: var(--bg-primary);
+  padding: 16px;
+}
+
+[data-theme="imessage"] .timeline-empty {
+  color: var(--text-muted);
+  font-size: var(--font-size-base);
+}
+
+/* =============================================
+   MESSAGE BUBBLES - iMessage style
+   ============================================= */
+[data-theme="imessage"] .message-bubble {
+  font-size: var(--font-size-base);
+  line-height: 1.4;
+  padding: 12px 16px;
+  border-radius: 20px;
+}
+
+[data-theme="imessage"] .message-bubble-content {
+  font-size: var(--font-size-base);
+}
+
+/* User messages - Blue bubble */
+[data-theme="imessage"] .message-bubble.user {
+  background: var(--message-user-bg);
+  color: var(--message-user-text);
+  border-radius: 20px 20px 6px 20px;
+}
+
+/* Assistant messages - Gray bubble */
+[data-theme="imessage"] .message-bubble.assistant {
+  background: var(--message-assistant-bg);
+  color: var(--message-assistant-text);
+  border-radius: 20px 20px 20px 6px;
+}
+
+/* Remove the tail for cleaner iOS look */
+[data-theme="imessage"] .message-bubble.assistant::after {
+  display: none;
+}
+
+/* Listening state */
+[data-theme="imessage"] .message-bubble.listening {
+  background: rgba(10, 132, 255, 0.4);
+}
+
+/* Thinking/streaming states */
+[data-theme="imessage"] .message-bubble.thinking,
+[data-theme="imessage"] .message-bubble.streaming {
+  background: var(--message-assistant-bg);
+}
+
+/* Typing indicator dots */
+[data-theme="imessage"] .typing-indicator span {
+  background: var(--text-muted);
+  width: 10px;
+  height: 10px;
+}
+
+[data-theme="imessage"] .message-bubble.user .typing-indicator span {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+/* Message timestamps */
+[data-theme="imessage"] .message-time,
+[data-theme="imessage"] .user-time {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+/* Message avatar - active is full size, inactive is smaller */
+[data-theme="imessage"] .message-avatar.active {
+  width: 60px;
+  height: 60px;
+}
+
+[data-theme="imessage"] .message-avatar.inactive {
+  width: 28px;
+  height: 28px;
+}
+
+[data-theme="imessage"] .message-avatar.inactive .avatar {
+  transform: scale(0.44);
+  transform-origin: top left;
+  filter: grayscale(100%) opacity(0.4);
+}
+
+/* Message status badges */
+[data-theme="imessage"] .message-status {
+  font-size: var(--font-size-xs);
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border-radius: 12px;
+  padding: 4px 10px;
+}
+
+/* =============================================
+   TOOL BADGES - Activity indicators
+   ============================================= */
+[data-theme="imessage"] .tool-badge {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-light);
+  border-radius: 14px;
+  font-size: var(--font-size-sm);
+  padding: 6px 12px;
+}
+
+[data-theme="imessage"] .tool-badge.running {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+[data-theme="imessage"] .tool-badge.error {
+  border-color: var(--screen-error);
+  background: rgba(255, 69, 58, 0.15);
+}
+
+[data-theme="imessage"] .tool-name {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+[data-theme="imessage"] .tool-input {
+  color: var(--text-muted);
+}
+
+[data-theme="imessage"] .tool-spinner {
+  border-top-color: var(--accent);
+}
+
+[data-theme="imessage"] .tool-complete {
+  color: var(--screen-happy);
+}
+
+[data-theme="imessage"] .tool-error {
+  color: var(--screen-error);
+}
+
+/* =============================================
+   UNIFIED INPUT BAR - Bottom compose area
+   ============================================= */
+[data-theme="imessage"] .unified-input-bar {
+  background: var(--header-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border-light);
+  padding: 10px 16px;
+  gap: 10px;
+}
+
+[data-theme="imessage"] .unified-input-bar.listening {
+  background: rgba(10, 132, 255, 0.1);
+  border-top-color: var(--accent);
+}
+
+[data-theme="imessage"] .unified-input-bar__gallery {
+  color: var(--accent);
+  width: 38px;
+  height: 38px;
+}
+
+[data-theme="imessage"] .unified-input-bar__gallery:hover:not(:disabled) {
+  background: rgba(10, 132, 255, 0.15);
+}
+
+[data-theme="imessage"] .unified-input-bar__field {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-light);
+  border-radius: 20px;
+  color: var(--text-primary);
+  font-size: var(--font-size-base);
+  padding: 12px 18px;
+}
+
+[data-theme="imessage"] .unified-input-bar__field::placeholder {
+  color: var(--text-muted);
+}
+
+[data-theme="imessage"] .unified-input-bar__field:focus {
+  border-color: var(--accent);
+  box-shadow: none;
+}
+
+[data-theme="imessage"] .unified-input-bar__field.listening {
+  border-color: var(--accent);
+  background: rgba(10, 132, 255, 0.08);
+}
+
+[data-theme="imessage"] .unified-input-bar__listening-indicator span {
+  background: var(--accent);
+}
+
+[data-theme="imessage"] .unified-input-bar__mic {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-light);
+  color: var(--text-primary);
+  width: 38px;
+  height: 38px;
+}
+
+[data-theme="imessage"] .unified-input-bar__mic:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+[data-theme="imessage"] .unified-input-bar__mic.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+  box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.3);
+}
+
+[data-theme="imessage"] .unified-input-bar__send {
+  background: var(--accent);
+  width: 38px;
+  height: 38px;
+}
+
+[data-theme="imessage"] .unified-input-bar__send:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+[data-theme="imessage"] .unified-input-bar__send:disabled {
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+}
+
+/* =============================================
+   MODAL - Settings and dialogs (iOS Settings style)
+   ============================================= */
+[data-theme="imessage"] .modal-overlay {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+[data-theme="imessage"] .modal {
+  background: #1c1c1e;
+  border: none;
+  border-radius: 14px;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6);
+  padding: 0;
+  overflow: hidden;
+}
+
+[data-theme="imessage"] .modal--settings {
+  max-width: 480px;
+}
+
+[data-theme="imessage"] .modal__header {
+  padding: 20px 20px 16px;
+  margin-bottom: 0;
+}
+
+[data-theme="imessage"] .modal__header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+}
+
+[data-theme="imessage"] .modal__close {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  color: #ffffff;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-theme="imessage"] .modal__close svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+[data-theme="imessage"] .modal__close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+[data-theme="imessage"] .modal h2 {
+  font-size: var(--font-size-xl);
+  color: #ffffff;
+}
+
+[data-theme="imessage"] .modal p {
+  font-size: var(--font-size-sm);
+  color: #ebebf5;
+}
+
+[data-theme="imessage"] .modal input {
+  background: #000000;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-size: var(--font-size-base);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+[data-theme="imessage"] .modal input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.3);
+}
+
+[data-theme="imessage"] .modal input::placeholder {
+  color: #8e8e93;
+}
+
+[data-theme="imessage"] .modal button {
+  background: #3a3a3c;
+  color: #ffffff;
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  border-radius: 10px;
+  padding: 12px 20px;
+  border: none;
+}
+
+[data-theme="imessage"] .modal button:hover:not(:disabled) {
+  background: #48484a;
+}
+
+[data-theme="imessage"] .modal a {
+  color: var(--accent);
+  font-size: var(--font-size-sm);
+}
+
+/* Settings section titles */
+[data-theme="imessage"] .settings__section-title {
+  font-size: 13px;
+  font-weight: 400;
+  color: #8e8e93;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding: 24px 16px 8px;
+  background: transparent;
+  margin: 0;
+}
+
+[data-theme="imessage"] .settings__section-desc {
+  font-size: var(--font-size-sm);
+  color: #8e8e93;
+  padding: 0 16px 12px;
+  margin: 0;
+}
+
+/* API form styling */
+[data-theme="imessage"] .settings__api-form {
+  padding: 0 16px 12px;
+}
+
+[data-theme="imessage"] .settings__api-link {
+  display: block;
+  padding: 0 16px 16px;
+}
+
+/* Toggle rows - iOS Settings style */
+[data-theme="imessage"] .settings__toggle {
+  background: transparent;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin: 0;
+}
+
+[data-theme="imessage"] .settings__toggle:last-child {
+  border-bottom: none;
+}
+
+[data-theme="imessage"] .settings__toggle-label {
+  font-size: 17px;
+  font-weight: 400;
+  color: #ffffff;
+}
+
+[data-theme="imessage"] .settings__toggle-desc {
+  font-size: 13px;
+  color: #8e8e93;
+  margin-top: 2px;
+}
+
+/* iOS-style toggle switch */
+[data-theme="imessage"] .settings__slider {
+  width: 51px;
+  height: 31px;
+  background: #39393d;
+  border: none;
+  border-radius: 16px;
+}
+
+[data-theme="imessage"] .settings__slider::before {
+  width: 27px;
+  height: 27px;
+  top: 2px;
+  left: 2px;
+  background: #ffffff;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 1px 1px rgba(0, 0, 0, 0.16);
+}
+
+[data-theme="imessage"] .settings__toggle input:checked + .settings__slider {
+  background: #30d158;
+  border-color: #30d158;
+}
+
+[data-theme="imessage"] .settings__toggle input:checked + .settings__slider::before {
+  transform: translateX(20px);
+  background: #ffffff;
+}
+
+/* Text inputs in settings */
+[data-theme="imessage"] .settings__input-group {
+  background: transparent;
+  padding: 12px 16px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: 0;
+}
+
+[data-theme="imessage"] .settings__input-label {
+  font-size: 13px;
+  color: #8e8e93;
+  margin-bottom: 8px;
+}
+
+[data-theme="imessage"] .settings__text-input {
+  background: #000000;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 17px;
+  padding: 12px 14px;
+}
+
+[data-theme="imessage"] .settings__text-input:focus {
+  border-color: var(--accent);
+  background: #000000;
+}
+
+[data-theme="imessage"] .settings__text-input::placeholder {
+  color: #636366;
+}
+
+/* Session status */
+[data-theme="imessage"] .settings__session {
+  background: #1c1c1e;
+  border-radius: 8px;
+  margin: 12px 16px;
+}
+
+[data-theme="imessage"] .settings__session-status {
+  font-size: 15px;
+  color: #8e8e93;
+}
+
+[data-theme="imessage"] .settings__session-status--connected {
+  color: #30d158;
+}
+
+[data-theme="imessage"] .settings__session-id {
+  background: #3a3a3c;
+  color: #ebebf5;
+  font-size: 13px;
+}
+
+[data-theme="imessage"] .settings__session-disconnect {
+  background: transparent;
+  border: 1px solid #48484a;
+  color: #ff453a;
+  font-size: 13px;
+  border-radius: 6px;
+}
+
+[data-theme="imessage"] .settings__session-disconnect:hover {
+  background: rgba(255, 69, 58, 0.1);
+  border-color: #ff453a;
+}
+
+/* Theme selector cards */
+[data-theme="imessage"] .settings__theme-grid {
+  padding: 0 16px 16px;
+  gap: 10px;
+}
+
+[data-theme="imessage"] .settings__theme-option {
+  background: #3a3a3c;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 14px;
+}
+
+[data-theme="imessage"] .settings__theme-option:hover {
+  border-color: #48484a;
+}
+
+[data-theme="imessage"] .settings__theme-option--active {
+  border-color: var(--accent);
+  background: rgba(10, 132, 255, 0.15);
+}
+
+[data-theme="imessage"] .settings__theme-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+[data-theme="imessage"] .settings__theme-desc {
+  font-size: 12px;
+  color: #8e8e93;
+  line-height: 1.3;
+}
+
+[data-theme="imessage"] .settings__theme-check {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+/* Reset button */
+[data-theme="imessage"] .settings__reset-btn {
+  background: #3a3a3c;
+  border: none;
+  color: #8e8e93;
+  font-size: 15px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 400;
+  margin: 24px 16px 16px;
+}
+
+[data-theme="imessage"] .settings__reset-btn:hover {
+  background: #48484a;
+  color: #ebebf5;
+}
+
+/* =============================================
+   SCROLLBAR - Subtle iOS style
+   ============================================= */
+[data-theme="imessage"] ::-webkit-scrollbar {
+  width: 6px;
+}
+
+[data-theme="imessage"] ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+[data-theme="imessage"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* =============================================
+   MESSAGE IMAGES
+   ============================================= */
+[data-theme="imessage"] .message-image-thumb {
+  border-radius: 16px;
+}
+
+/* =============================================
+   AVATAR SECTION
+   ============================================= */
+[data-theme="imessage"] .app__avatar-section {
+  background: var(--bg-secondary);
+  border-bottom-color: var(--border-light);
+}
+
+/* =============================================
+   ERROR STATES
+   ============================================= */
+[data-theme="imessage"] .app__error {
+  background: rgba(255, 69, 58, 0.15);
+  border-color: rgba(255, 69, 58, 0.3);
+  color: var(--screen-error);
+  font-size: var(--font-size-sm);
+  border-radius: 12px;
+}
+
+/* =============================================
+   HINTS & HELPER TEXT
+   ============================================= */
+[data-theme="imessage"] .app__hint {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+/* =============================================
+   MEDIA LIBRARY - iOS style
+   ============================================= */
+[data-theme="imessage"] .modal--media-library {
+  background: #1c1c1e;
+}
+
+[data-theme="imessage"] .media-library__sort {
+  background: #3a3a3c;
+  border: none;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 15px;
+  padding: 8px 12px;
+}
+
+[data-theme="imessage"] .media-library__sort:hover,
+[data-theme="imessage"] .media-library__sort:focus {
+  background: #48484a;
+  border: none;
+}
+
+[data-theme="imessage"] .media-library__count {
+  color: #8e8e93;
+  font-size: 13px;
+}
+
+[data-theme="imessage"] .media-library__empty {
+  color: #8e8e93;
+}
+
+[data-theme="imessage"] .media-library__empty p {
+  color: #ffffff;
+}
+
+[data-theme="imessage"] .media-library__item {
+  border-radius: 12px;
+  border: none;
+  background: #2c2c2e;
+}
+
+[data-theme="imessage"] .media-library__item:hover {
+  border: none;
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+[data-theme="imessage"] .media-library__lightbox-content {
+  background: #1c1c1e;
+  border: none;
+  border-radius: 14px;
+}
+
+[data-theme="imessage"] .media-library__lightbox-close {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+}
+
+[data-theme="imessage"] .media-library__lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="imessage"] .media-library__lightbox-main {
+  background: #000000;
+}
+
+[data-theme="imessage"] .media-library__lightbox-sidebar {
+  background: #1c1c1e;
+  border-left-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="imessage"] .media-library__lightbox-filename,
+[data-theme="imessage"] .media-library__lightbox-meta {
+  color: #8e8e93;
+}
+
+[data-theme="imessage"] .media-library__lightbox-heading {
+  color: #ffffff;
+}
+
+[data-theme="imessage"] .media-library__lightbox-description {
+  color: #ebebf5;
+}

@@ -1,0 +1,369 @@
+.chat-timeline {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: var(--bg-primary, #1a1a1a);
+}
+
+.timeline-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted, #666);
+  font-size: 0.9rem;
+}
+
+/* Timeline items - left or right aligned */
+.timeline-item {
+  display: flex;
+  max-width: 80%;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.timeline-item.left {
+  align-self: flex-start;
+}
+
+.timeline-item.right {
+  align-self: flex-end;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Message wrapper - contains bubble + footer */
+.message-wrapper {
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+}
+
+.message-wrapper.assistant {
+  align-items: flex-start;
+}
+
+.message-wrapper.user {
+  align-items: flex-end;
+}
+
+/* Message bubbles - iMessage style */
+.message-bubble {
+  padding: 1.125rem 1.5rem;
+  border-radius: 27px;
+  max-width: 100%;
+  word-wrap: break-word;
+  position: relative;
+}
+
+.message-bubble-content {
+  min-width: 0;
+  font-size: 1.125rem;
+  line-height: 1.5;
+}
+
+/* Message footer - avatar + status below bubble */
+.message-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding-left: 0.5rem;
+}
+
+/* When footer is for inactive (small) avatar, keep timestamp inline */
+.message-footer.inactive {
+  align-items: center;
+  gap: 0.375rem;
+}
+
+/* Message avatar styling */
+.message-avatar {
+  flex-shrink: 0;
+  overflow: visible;
+  position: relative;
+  transition: width 0.2s, height 0.2s;
+}
+
+/* Active avatar - full size */
+.message-avatar.active {
+  width: 80px;
+  height: 80px;
+}
+
+.message-avatar.active .avatar {
+  filter: none;
+}
+
+/* Inactive avatars: smaller, static, and monochrome */
+.message-avatar.inactive {
+  width: 32px;
+  height: 32px;
+}
+
+.message-avatar.inactive .avatar {
+  transform: scale(0.5);
+  transform-origin: top left;
+  animation: none !important;
+  filter: grayscale(100%) opacity(0.5);
+}
+
+.message-avatar.inactive .avatar * {
+  animation: none !important;
+}
+
+/* Message status next to avatar */
+.message-status {
+  font-size: 0.75rem;
+  color: var(--text-muted, #888);
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  background: var(--bg-tertiary, #333);
+  padding: 0.25rem 0.625rem;
+  border-radius: 10px;
+}
+
+/* For active footer, status stays at bottom */
+.message-footer:not(.inactive) .message-status {
+  margin-bottom: 0.5rem;
+  align-self: flex-end;
+}
+
+/* User message time */
+.user-time {
+  font-size: 0.65rem;
+  color: var(--text-muted, #888);
+  margin-top: 0.25rem;
+  padding-right: 0.25rem;
+}
+
+.message-bubble.user {
+  background: #007aff;
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.message-bubble.assistant {
+  background: var(--bg-secondary, #2a2a2a);
+  color: var(--text-primary, #e0e0e0);
+  border-radius: 27px;
+  border-bottom-left-radius: 4px;
+}
+
+/* Bubble tail pointing down at avatar */
+.message-bubble.assistant::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 16px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid var(--bg-secondary, #2a2a2a);
+}
+
+.message-bubble.listening {
+  background: rgba(0, 122, 255, 0.6);
+  min-width: 60px;
+}
+
+.message-bubble.thinking {
+  background: var(--bg-secondary, #2a2a2a);
+  padding: 0.75rem 1.25rem;
+}
+
+.message-bubble.streaming {
+  background: var(--bg-secondary, #2a2a2a);
+}
+
+.message-content {
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+
+.message-time {
+  font-size: 0.65rem;
+  opacity: 0.6;
+  margin-top: 0.25rem;
+  text-align: right;
+}
+
+.message-bubble.user .message-time {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Message images */
+.message-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.message-image-thumb {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.message-image-thumb:hover {
+  transform: scale(1.05);
+}
+
+/* Typing indicator - 3 dots */
+.typing-indicator {
+  display: flex;
+  gap: 4px;
+  padding: 4px 0;
+}
+
+.typing-indicator span {
+  width: 8px;
+  height: 8px;
+  background: var(--text-muted, #888);
+  border-radius: 50%;
+  animation: typingBounce 1.4s infinite ease-in-out;
+}
+
+.typing-indicator span:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+.message-bubble.user .typing-indicator span {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+@keyframes typingBounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-4px);
+  }
+}
+
+/* Streaming bubble shows typing indicator below text */
+.streaming .typing-indicator {
+  margin-top: 0.5rem;
+  justify-content: flex-start;
+}
+
+/* Smooth transition for streaming to final message */
+.message-bubble.assistant {
+  transition: opacity 0.15s ease-out;
+}
+
+/* Activity group - compact tool badges */
+.activity-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+/* Tool badge - compact inline style */
+.tool-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  background: var(--bg-tertiary, #333);
+  border-radius: 12px;
+  font-size: 0.75rem;
+  color: var(--text-secondary, #aaa);
+  border: 1px solid var(--border-color, #444);
+  transition: all 0.2s ease;
+}
+
+.tool-badge.running {
+  border-color: #007aff;
+  background: rgba(0, 122, 255, 0.1);
+}
+
+.tool-badge.error {
+  border-color: #ff3b30;
+  background: rgba(255, 59, 48, 0.1);
+}
+
+.tool-icon {
+  font-size: 0.8rem;
+}
+
+.tool-name {
+  font-weight: 500;
+  color: var(--text-primary, #e0e0e0);
+}
+
+.tool-input {
+  color: var(--text-muted, #888);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tool-spinner {
+  width: 10px;
+  height: 10px;
+  border: 2px solid transparent;
+  border-top-color: #007aff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.tool-complete {
+  color: #34c759;
+  font-weight: bold;
+}
+
+.tool-error {
+  color: #ff3b30;
+  font-weight: bold;
+}
+
+/* Scrollbar styling */
+.chat-timeline::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-timeline::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-timeline::-webkit-scrollbar-thumb {
+  background: var(--border-color, #444);
+  border-radius: 3px;
+}
+
+.chat-timeline::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted, #666);
+}

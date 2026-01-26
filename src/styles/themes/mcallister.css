@@ -1,0 +1,247 @@
+/* McAllister Theme - Chunky 90s Talk Boy toy aesthetic */
+[data-theme="mcallister"] {
+  /* Background Colors - Dark gray like the Talk Boy device */
+  --bg-primary: #2a2a2a;
+  --bg-secondary: #3d3d3d;
+  --bg-tertiary: #4a4a4a;
+
+  /* Text Colors - High contrast retro feel */
+  --text-primary: #f5f5dc;  /* Beige/cream like old LCD screens */
+  --text-secondary: #b8b894;
+  --text-muted: #8a8a70;
+
+  /* Accent Colors - Orange/red like the Talk Boy record button */
+  --accent: #ff4d00;
+  --accent-hover: #ff6b2b;
+  --accent-glow: rgba(255, 77, 0, 0.4);
+  --accent-soft: rgba(255, 77, 0, 0.15);
+
+  /* Secondary accent - Teal like 90s electronics */
+  --accent-secondary: #00b8a9;
+
+  /* Message Colors */
+  --message-user-bg: #ff4d00;
+  --message-user-text: #ffffff;
+  --message-assistant-bg: #4a4a4a;
+  --message-assistant-text: #f5f5dc;
+
+  /* Robot Avatar Colors - Cream plastic like the Talk Boy */
+  --robot-body: #e8e4d4;
+  --robot-shadow: #c4c0b0;
+  --robot-highlight: #f8f6ec;
+
+  /* Screen States - Retro LCD green tints */
+  --screen-idle: #7cb342;
+  --screen-happy: #ffd54f;
+  --screen-error: #ef5350;
+  --screen-listening: #4fc3f7;
+  --screen-thinking: #ba68c8;
+
+  /* Borders & Shadows - Chunky raised plastic look */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-light: rgba(255, 255, 255, 0.15);
+  --shadow-soft: 0 4px 0 rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 30px var(--accent-glow);
+  --shadow-inset: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-raised: 0 4px 0 #1a1a1a, 0 6px 12px rgba(0, 0, 0, 0.4);
+
+  /* Header specific */
+  --header-bg: linear-gradient(180deg, #3d3d3d 0%, #2a2a2a 100%);
+  --header-border: #1a1a1a;
+  --header-text: #f5f5dc;
+
+  /* Button styling - Raised plastic buttons */
+  --btn-bg: linear-gradient(180deg, #5a5a5a 0%, #4a4a4a 100%);
+  --btn-hover: linear-gradient(180deg, #6a6a6a 0%, #5a5a5a 100%);
+  --btn-border: #1a1a1a;
+  --btn-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 3px 0 #1a1a1a;
+
+  /* Input styling */
+  --input-bg: #1a1a1a;
+  --input-border: #0a0a0a;
+
+  /* Modal */
+  --modal-bg: #3d3d3d;
+  --modal-overlay: rgba(0, 0, 0, 0.7);
+
+  /* Typography - Bold, chunky fonts */
+  --font-family: 'Arial Black', 'Helvetica Neue', Impact, sans-serif;
+  --font-weight-normal: 700;
+  --font-weight-medium: 800;
+  --font-weight-bold: 900;
+  --title-font: Impact, 'Arial Black', sans-serif;
+  --title-style: italic;
+  --title-transform: uppercase;
+  --letter-spacing: 0.05em;
+}
+
+/* McAllister body background - Textured dark gray */
+[data-theme="mcallister"] body {
+  background: #2a2a2a;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.1) 2px,
+      rgba(0, 0, 0, 0.1) 4px
+    );
+}
+
+/* McAllister header - Chunky gradient with border */
+[data-theme="mcallister"] .app__header {
+  background: var(--header-bg);
+  border-bottom: 4px solid var(--header-border);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 8px rgba(0,0,0,0.4);
+}
+
+/* McAllister title - Big bold italic like the Talk Boy logo */
+[data-theme="mcallister"] .app__title {
+  font-family: var(--title-font);
+  font-weight: 900;
+  font-size: 44px;
+  font-style: italic;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: linear-gradient(180deg, #ffffff 0%, #d4d4c4 50%, #a8a898 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow:
+    3px 3px 0 rgba(0,0,0,0.4),
+    -1px -1px 0 rgba(255,255,255,0.2);
+  filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.5));
+}
+
+/* McAllister header buttons - Raised plastic look */
+[data-theme="mcallister"] .app__header-btn {
+  background: var(--btn-bg);
+  border: 2px solid var(--btn-border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  box-shadow: var(--btn-shadow);
+  transition: all 0.1s ease;
+}
+
+[data-theme="mcallister"] .app__header-btn:hover {
+  background: var(--btn-hover);
+  transform: translateY(-1px);
+}
+
+[data-theme="mcallister"] .app__header-btn:active {
+  transform: translateY(2px);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* McAllister chat bubbles - Chunky with hard shadows */
+[data-theme="mcallister"] .chat-timeline__bubble--user {
+  background: var(--message-user-bg);
+  color: var(--message-user-text);
+  border-radius: 8px;
+  border: 2px solid #cc3d00;
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.4);
+  font-weight: 700;
+}
+
+[data-theme="mcallister"] .chat-timeline__bubble--assistant {
+  background: var(--message-assistant-bg);
+  color: var(--message-assistant-text);
+  border-radius: 8px;
+  border: 2px solid #3a3a3a;
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.4);
+}
+
+/* McAllister modal - Chunky raised panel */
+[data-theme="mcallister"] .modal {
+  background: var(--modal-bg);
+  border: 3px solid #1a1a1a;
+  border-radius: 12px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.1),
+    0 8px 0 #1a1a1a,
+    0 12px 24px rgba(0,0,0,0.5);
+}
+
+/* McAllister input bar */
+[data-theme="mcallister"] .app__input-bar {
+  background: var(--header-bg);
+  border-top: 4px solid var(--header-border);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+/* McAllister text input - Recessed LCD look */
+[data-theme="mcallister"] .text-input__field {
+  background: var(--input-bg);
+  border: 3px solid var(--input-border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.5);
+}
+
+/* McAllister talk button - Big red record button */
+[data-theme="mcallister"] .talk-button {
+  background: linear-gradient(180deg, #ff6b2b 0%, #ff4d00 50%, #cc3d00 100%);
+  border: 3px solid #991f00;
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,0.3),
+    0 6px 0 #661a00,
+    0 8px 12px rgba(0,0,0,0.4);
+}
+
+[data-theme="mcallister"] .talk-button:active,
+[data-theme="mcallister"] .talk-button--active {
+  box-shadow:
+    inset 0 4px 8px rgba(0,0,0,0.4),
+    0 2px 0 #661a00;
+  transform: translateY(4px);
+}
+
+/* McAllister settings toggles */
+[data-theme="mcallister"] .settings__slider {
+  background: #1a1a1a;
+  border: 2px solid #0a0a0a;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+}
+
+[data-theme="mcallister"] .settings__slider::before {
+  background: linear-gradient(180deg, #6a6a6a 0%, #4a4a4a 100%);
+  border: 2px solid #2a2a2a;
+  box-shadow: 0 2px 0 #1a1a1a;
+}
+
+[data-theme="mcallister"] input:checked + .settings__slider {
+  background: linear-gradient(180deg, #4fc3f7 0%, #00b8a9 100%);
+}
+
+/* McAllister scrollbar - Chunky */
+[data-theme="mcallister"] ::-webkit-scrollbar {
+  width: 12px;
+}
+
+[data-theme="mcallister"] ::-webkit-scrollbar-track {
+  background: #1a1a1a;
+  border-left: 2px solid #0a0a0a;
+}
+
+[data-theme="mcallister"] ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #5a5a5a 0%, #3a3a3a 100%);
+  border: 2px solid #2a2a2a;
+  border-radius: 4px;
+}
+
+[data-theme="mcallister"] ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #6a6a6a 0%, #4a4a4a 100%);
+}
+
+/* McAllister avatar container - Chunky frame */
+[data-theme="mcallister"] .chat-timeline__avatar-container {
+  background: linear-gradient(180deg, #4a4a4a 0%, #3a3a3a 100%);
+  border: 3px solid #1a1a1a;
+  border-radius: 12px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.1),
+    0 4px 0 #1a1a1a;
+  padding: 16px;
+}
