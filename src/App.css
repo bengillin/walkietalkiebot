@@ -24,7 +24,13 @@
   background-clip: text;
 }
 
-.app__settings-btn {
+.app__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.app__header-btn {
   background: transparent;
   border: 1px solid var(--border-light);
   color: var(--text-secondary);
@@ -34,9 +40,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s ease;
 }
 
-.app__settings-btn:hover {
+.app__header-btn:hover {
   color: var(--text-primary);
   background: var(--accent-soft);
   border-color: var(--accent);

@@ -63,24 +63,18 @@ Added Vitest testing framework with initial tests:
 - Removed unused `@rive-app/react-canvas` dependency
 - Archived old planning docs to `docs/archive/`
 
+### Media Library (Tier 1) - DONE
+Central repository for all images shared across conversations.
+- Grid view with thumbnails
+- Sort by newest/oldest
+- Click to view full image with lightbox
+- Shows conversation title and analysis description
+- Accessible via image icon in header
+- 11 tests in `src/components/media/MediaLibrary.test.tsx`
+
 ---
 
 ## Planned Features (Not Yet Built)
-
-### Tier 1: High Impact
-
-#### Media Library
-Central repository for all images/files shared across conversations.
-- Thumbnail grid view
-- Search and filtering
-- Link back to original conversation
-- Organize by project, date, or tags
-
-#### Better Wake Word (Picovoice Porcupine)
-Current Web Speech API wake word is unreliable. Picovoice offers:
-- More reliable always-on detection
-- Built-in "Computer" wake word
-- Lower false-positive rate
 
 ### Tier 2: Nice to Have
 
@@ -142,7 +136,6 @@ Create feature branches for new work:
 ```
 feature/browser-url-opening
 feature/media-library
-feature/porcupine-wake-word
 ```
 
 Merge via PR with squash commits to keep main history clean.
@@ -190,6 +183,6 @@ talkboy/
 
 ## Recommended Next Steps
 
-1. **Pick next Tier 1 feature** - Media Library or Picovoice wake word
+1. **Pick next feature** - Copy/Paste from Activity Feed or Voice Command Shortcuts
 2. **Update README** - Reflect all current features
 3. **Expand test coverage** - Add component tests, integration tests

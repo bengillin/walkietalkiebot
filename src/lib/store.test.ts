@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { useStore } from './store'
 
 // Mock localStorage
@@ -103,13 +103,13 @@ describe('useStore', () => {
 
   describe('attachedFiles', () => {
     it('adds files', () => {
-      const file = { id: '1', name: 'test.png', type: 'image/png', dataUrl: 'data:...' }
+      const file = { id: '1', name: 'test.png', type: 'image/png', size: 1024, dataUrl: 'data:...' }
       useStore.getState().addFiles([file])
       expect(useStore.getState().attachedFiles).toHaveLength(1)
     })
 
     it('removes file', () => {
-      const file = { id: '1', name: 'test.png', type: 'image/png', dataUrl: 'data:...' }
+      const file = { id: '1', name: 'test.png', type: 'image/png', size: 1024, dataUrl: 'data:...' }
       useStore.getState().addFiles([file])
       useStore.getState().removeFile('1')
       expect(useStore.getState().attachedFiles).toHaveLength(0)
@@ -117,8 +117,8 @@ describe('useStore', () => {
 
     it('clears all files', () => {
       useStore.getState().addFiles([
-        { id: '1', name: 'a.png', type: 'image/png', dataUrl: 'data:...' },
-        { id: '2', name: 'b.png', type: 'image/png', dataUrl: 'data:...' },
+        { id: '1', name: 'a.png', type: 'image/png', size: 1024, dataUrl: 'data:...' },
+        { id: '2', name: 'b.png', type: 'image/png', size: 2048, dataUrl: 'data:...' },
       ])
       useStore.getState().clearFiles()
       expect(useStore.getState().attachedFiles).toHaveLength(0)
