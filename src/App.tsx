@@ -7,6 +7,7 @@ import { Onboarding, type OnboardingSettings } from './components/onboarding/Onb
 import { FileDropZone } from './components/dropzone/FileDropZone'
 import { ImageLightbox } from './components/media/ImageLightbox'
 import { MediaLibrary } from './components/media/MediaLibrary'
+import { Settings } from './components/settings/Settings'
 import { useSpeechRecognition } from './components/voice/useSpeechRecognition'
 import { useWakeWord } from './components/voice/useWakeWord'
 import { useSpeechSynthesis } from './components/voice/useSpeechSynthesis'
@@ -711,138 +712,31 @@ function App() {
         />
       )}
 
-      {/* Settings Modal */}
+      {/* Settings Drawer */}
       {showSettings && (
-        <div className="modal-overlay" onClick={() => (useClaudeCode || apiKey) && setShowSettings(false)}>
-          <div className="modal modal--settings" onClick={(e) => e.stopPropagation()}>
-            <div className="modal__header">
-              <h2>Settings</h2>
-              {(useClaudeCode || apiKey) && (
-                <button className="modal__close" onClick={() => setShowSettings(false)}>
-                  <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                  </svg>
-                </button>
-              )}
-            </div>
-
-            <label className="settings__toggle">
-              <span className="settings__toggle-label">Claude Code mode</span>
-              <input
-                type="checkbox"
-                checked={useClaudeCode}
-                onChange={(e) => {
-                  setUseClaudeCode(e.target.checked)
-                  localStorage.setItem('talkboy_use_claude_code', String(e.target.checked))
-                }}
-              />
-              <span className="settings__slider" />
-            </label>
-
-            {useClaudeCode && connectedSessionId && (
-              <div className="settings__session">
-                <span className="settings__session-status settings__session-status--connected">
-                  Session {connectedSessionId.slice(0, 8)}...
-                </span>
-                <button
-                  className="settings__session-disconnect"
-                  onClick={disconnectSession}
-                >
-                  Disconnect
-                </button>
-              </div>
-            )}
-
-            <label className="settings__toggle">
-              <span className="settings__toggle-label">Speak responses</span>
-              <input
-                type="checkbox"
-                checked={ttsEnabled}
-                onChange={(e) => setTtsEnabled(e.target.checked)}
-              />
-              <span className="settings__slider" />
-            </label>
-
-            <label className="settings__toggle">
-              <span className="settings__toggle-label">Continuous listening</span>
-              <input
-                type="checkbox"
-                checked={continuousListeningEnabled}
-                onChange={(e) => setContinuousListeningEnabled(e.target.checked)}
-              />
-              <span className="settings__slider" />
-            </label>
-
-            {continuousListeningEnabled && (
-              <div className="settings__subsection">
-                <label className="settings__input-label">End-of-turn word</label>
-                <input
-                  type="text"
-                  className="settings__text-input"
-                  value={customTriggerWord}
-                  onChange={(e) => setCustomTriggerWord(e.target.value)}
-                  placeholder="over"
-                />
-                <p className="settings__hint">
-                  Say this word to end your turn. You can use it mid-sentence — only triggers after {triggerWordDelay / 1000}s of silence.
-                </p>
-
-                <label className="settings__input-label">Silence delay</label>
-                <div className="settings__range-row">
-                  <input
-                    type="range"
-                    min="500"
-                    max="3000"
-                    step="100"
-                    value={triggerWordDelay}
-                    onChange={(e) => setTriggerWordDelay(Number(e.target.value))}
-                  />
-                  <span className="settings__range-value">{(triggerWordDelay / 1000).toFixed(1)}s</span>
-                </div>
-                <p className="settings__hint">
-                  How long to wait after the trigger word before sending your message.
-                </p>
-              </div>
-            )}
-
-            <div className="settings__divider" />
-
-            <label className="settings__input-label">API Key {useClaudeCode && <span className="settings__optional">(optional)</span>}</label>
-            <form className="settings__api-form" onSubmit={handleSaveApiKey}>
-              <input
-                type="password"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder="sk-ant-..."
-              />
-              <button type="submit" disabled={!apiKey.trim()}>
-                Save
-              </button>
-            </form>
-            <a
-              className="settings__api-link"
-              href="https://console.anthropic.com/settings/keys"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Get an API key →
-            </a>
-
-            <details className="settings__advanced">
-              <summary className="settings__advanced-toggle">Advanced</summary>
-              <button
-                className="settings__reset-btn"
-                onClick={() => {
-                  localStorage.removeItem('talkboy_onboarded')
-                  setHasOnboarded(false)
-                  setShowSettings(false)
-                }}
-              >
-                Reset onboarding
-              </button>
-            </details>
-          </div>
-        </div>
+        <Settings
+          useClaudeCode={useClaudeCode}
+          setUseClaudeCode={setUseClaudeCode}
+          connectedSessionId={connectedSessionId}
+          onDisconnectSession={disconnectSession}
+          ttsEnabled={ttsEnabled}
+          setTtsEnabled={setTtsEnabled}
+          continuousListeningEnabled={continuousListeningEnabled}
+          setContinuousListeningEnabled={setContinuousListeningEnabled}
+          customTriggerWord={customTriggerWord}
+          setCustomTriggerWord={setCustomTriggerWord}
+          triggerWordDelay={triggerWordDelay}
+          setTriggerWordDelay={setTriggerWordDelay}
+          apiKey={apiKey}
+          setApiKey={setApiKey}
+          onSaveApiKey={handleSaveApiKey}
+          onResetOnboarding={() => {
+            localStorage.removeItem('talkboy_onboarded')
+            setHasOnboarded(false)
+            setShowSettings(false)
+          }}
+          onClose={() => setShowSettings(false)}
+        />
       )}
 
       {showMediaLibrary && (

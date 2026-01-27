@@ -98,7 +98,33 @@
 }
 
 .tape-collection__item {
+  width: 100%;
+}
+
+/* Single column for very small screens */
+@media (max-width: 320px) {
+  .tape-collection__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 3 columns at tablet size */
+@media (min-width: 768px) {
+  .tape-collection__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* 4 columns max at desktop */
+@media (min-width: 1280px) {
+  .tape-collection__grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.tape-collection__item {
   position: relative;
+  width: 100%;
 }
 
 .tape-collection__item--current {

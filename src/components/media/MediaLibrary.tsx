@@ -14,11 +14,6 @@ interface MediaLibraryProps {
   onClose: () => void
 }
 
-interface LightboxState {
-  isOpen: boolean
-  item: MediaItem | null
-}
-
 function formatDate(timestamp: number): string {
   return new Date(timestamp).toLocaleDateString(undefined, {
     month: 'short',
@@ -28,7 +23,7 @@ function formatDate(timestamp: number): string {
 }
 
 export function MediaLibrary({ conversations, onClose }: MediaLibraryProps) {
-  const [lightbox, setLightbox] = useState<LightboxState>({ isOpen: false, item: null })
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest')
 
   // Extract all images from all conversations
@@ -60,105 +55,124 @@ export function MediaLibrary({ conversations, onClose }: MediaLibraryProps) {
     return items
   }, [conversations, sortOrder])
 
+  const selectedItem = selectedIndex !== null ? mediaItems[selectedIndex] : null
+  const hasPrev = selectedIndex !== null && selectedIndex > 0
+  const hasNext = selectedIndex !== null && selectedIndex < mediaItems.length - 1
+
+  const goToPrev = () => {
+    if (hasPrev) setSelectedIndex(selectedIndex - 1)
+  }
+
+  const goToNext = () => {
+    if (hasNext) setSelectedIndex(selectedIndex + 1)
+  }
+
   return (
-    <div className="modal-overlay media-library-overlay" onClick={onClose}>
-      <div className="modal modal--media-library" onClick={(e) => e.stopPropagation()}>
-        <div className="modal__header">
-          <h2>Media Library</h2>
-          <div className="media-library__controls">
-            <select
-              className="media-library__sort"
-              value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value as 'newest' | 'oldest')}
-            >
-              <option value="newest">Newest first</option>
-              <option value="oldest">Oldest first</option>
-            </select>
-            <button className="modal__close" onClick={onClose}>
-              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-              </svg>
-            </button>
-          </div>
-        </div>
+    <div className="media-library">
+      <div className="media-library__backdrop" onClick={onClose} />
 
-      {mediaItems.length === 0 ? (
-        <div className="media-library__empty">
-          <svg viewBox="0 0 24 24" fill="currentColor" width="48" height="48">
-            <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
-          </svg>
-          <p>No images yet</p>
-          <span>Images shared in conversations will appear here</span>
-        </div>
-      ) : (
-        <>
-          <div className="media-library__count">
-            {mediaItems.length} image{mediaItems.length !== 1 ? 's' : ''}
-          </div>
-          <div className="media-library__grid">
-            {mediaItems.map((item, index) => (
-              <div
-                key={`${item.image.id}-${index}`}
-                className="media-library__item"
-                onClick={() => setLightbox({ isOpen: true, item })}
+      <div className={`media-library__drawer ${selectedIndex !== null ? 'media-library__drawer--expanded' : ''}`}>
+        <div className="media-library__header">
+          {selectedItem ? (
+            <>
+              <button
+                className="media-library__back"
+                onClick={() => setSelectedIndex(null)}
               >
-                <img
-                  src={item.image.dataUrl}
-                  alt={item.image.fileName}
-                  className="media-library__thumbnail"
-                />
-                <div className="media-library__item-overlay">
-                  <span className="media-library__item-name">{item.image.fileName}</span>
-                  <span className="media-library__item-date">{formatDate(item.messageTimestamp)}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
+                <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                  <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                </svg>
+                Back
+              </button>
+              <h3 className="media-library__title">Details</h3>
+            </>
+          ) : (
+            <>
+              <h3 className="media-library__title">Media Library</h3>
+              <select
+                className="media-library__sort"
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value as 'newest' | 'oldest')}
+              >
+                <option value="newest">Newest first</option>
+                <option value="oldest">Oldest first</option>
+              </select>
+            </>
+          )}
+        </div>
 
-      {lightbox.isOpen && lightbox.item && (
-        <div
-          className="media-library__lightbox"
-          onClick={() => setLightbox({ isOpen: false, item: null })}
-        >
-          <div
-            className="media-library__lightbox-content"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              className="media-library__lightbox-close"
-              onClick={() => setLightbox({ isOpen: false, item: null })}
-            >
-              <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-              </svg>
-            </button>
-            <div className="media-library__lightbox-main">
+        {selectedItem ? (
+          <div className="media-library__detail">
+            <div className="media-library__detail-image-container">
+              <button
+                className="media-library__nav media-library__nav--prev"
+                onClick={goToPrev}
+                disabled={!hasPrev}
+                aria-label="Previous image"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                  <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                </svg>
+              </button>
               <img
-                src={lightbox.item.image.dataUrl}
-                alt={lightbox.item.image.fileName}
-                className="media-library__lightbox-image"
+                src={selectedItem.image.dataUrl}
+                alt={selectedItem.image.fileName}
+                className="media-library__detail-image"
               />
+              <button
+                className="media-library__nav media-library__nav--next"
+                onClick={goToNext}
+                disabled={!hasNext}
+                aria-label="Next image"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                  <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/>
+                </svg>
+              </button>
             </div>
-            <div className="media-library__lightbox-sidebar">
-              <span className="media-library__lightbox-filename">{lightbox.item.image.fileName}</span>
-              <span className="media-library__lightbox-meta">
-                From: {lightbox.item.conversationTitle}
+            <div className="media-library__detail-info">
+              <span className="media-library__detail-filename">{selectedItem.image.fileName}</span>
+              <span className="media-library__detail-meta">
+                From: {selectedItem.conversationTitle}
               </span>
-              <span className="media-library__lightbox-meta">
-                {formatDate(lightbox.item.messageTimestamp)}
+              <span className="media-library__detail-meta">
+                {formatDate(selectedItem.messageTimestamp)}
               </span>
-              <h3 className="media-library__lightbox-heading">Analysis</h3>
-              {lightbox.item.image.description ? (
-                <p className="media-library__lightbox-description">{lightbox.item.image.description}</p>
+              <h3 className="media-library__detail-heading">Analysis</h3>
+              {selectedItem.image.description ? (
+                <p className="media-library__detail-description">{selectedItem.image.description}</p>
               ) : (
-                <p className="media-library__lightbox-no-analysis">No analysis available</p>
+                <p className="media-library__detail-no-analysis">No analysis available</p>
               )}
             </div>
           </div>
-        </div>
-      )}
+        ) : mediaItems.length === 0 ? (
+          <div className="media-library__empty">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="48" height="48">
+              <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+            </svg>
+            <p>No images yet</p>
+            <span>Images shared in conversations will appear here</span>
+          </div>
+        ) : (
+          mediaItems.map((item, index) => (
+            <div
+              key={`${item.image.id}-${index}`}
+              className="media-library__item"
+              onClick={() => setSelectedIndex(index)}
+            >
+              <img
+                src={item.image.dataUrl}
+                alt={item.image.fileName}
+                className="media-library__thumbnail"
+              />
+              <div className="media-library__item-overlay">
+                <span className="media-library__item-name">{item.image.fileName}</span>
+                <span className="media-library__item-date">{formatDate(item.messageTimestamp)}</span>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   )

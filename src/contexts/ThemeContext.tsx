@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 
-export type ThemeName = 'mcallister'
+export type ThemeName = 'mccallister'
 
 export interface Theme {
   name: ThemeName
@@ -10,7 +10,7 @@ export interface Theme {
 
 export const themes: Theme[] = [
   {
-    name: 'mcallister',
+    name: 'mccallister',
     displayName: 'Talkboy',
     description: 'Silver 90s cassette recorder aesthetic'
   }
@@ -27,7 +27,12 @@ const ThemeContext = createContext<ThemeContextValue | null>(null)
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<ThemeName>(() => {
     const saved = localStorage.getItem('talkboy_theme')
-    return (saved as ThemeName) || 'mcallister'
+    // Migrate old spelling to new spelling
+    if (saved === 'mcallister') {
+      localStorage.setItem('talkboy_theme', 'mccallister')
+      return 'mccallister'
+    }
+    return (saved as ThemeName) || 'mccallister'
   })
 
   const setTheme = (newTheme: ThemeName) => {
