@@ -82,9 +82,18 @@ export function useSpeechRecognition({
   triggerWordDelay = 1000,
 }: UseSpeechRecognitionOptions = {}): SpeechRecognitionResult {
   const [isListening, setIsListening] = useState(false)
-  const [transcript, setTranscript] = useState('')
+  const [transcript, setTranscriptState] = useState('')
+  const transcriptRef = useRef('')
   const recognitionRef = useRef<SpeechRecognition | null>(null)
   const fullTranscriptRef = useRef('')
+
+  // Wrapper to avoid re-renders when transcript hasn't changed
+  const setTranscript = useCallback((value: string) => {
+    if (transcriptRef.current !== value) {
+      transcriptRef.current = value
+      setTranscriptState(value)
+    }
+  }, [])
   const triggerFiredRef = useRef(false)
   const triggerTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const pendingTriggerTranscriptRef = useRef('')
@@ -224,6 +233,7 @@ export function useSpeechRecognition({
   const start = useCallback(() => {
     console.log('[Speech] start() called, recognitionRef:', !!recognitionRef.current)
     if (recognitionRef.current) {
+      // Only update transcript state if needed to avoid re-renders
       setTranscript('')
       fullTranscriptRef.current = ''
       triggerFiredRef.current = false
@@ -238,7 +248,7 @@ export function useSpeechRecognition({
         console.error('Failed to start recognition:', e)
       }
     }
-  }, [])
+  }, [setTranscript])
 
   const stop = useCallback(() => {
     console.log('[Speech] stop() called')
@@ -254,7 +264,7 @@ export function useSpeechRecognition({
   const clearTranscript = useCallback(() => {
     setTranscript('')
     fullTranscriptRef.current = ''
-  }, [])
+  }, [setTranscript])
 
   return {
     isListening,

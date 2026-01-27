@@ -558,12 +558,13 @@ function App() {
       if (canTalk) {
         // Small delay to allow speech synthesis to fully complete
         const timer = setTimeout(() => {
-          handleTalkStart()
+          // Just restart listening without clearing state to avoid UI flash
+          startListening()
         }, 500)
         return () => clearTimeout(timer)
       }
     }
-  }, [continuousListeningEnabled, avatarState, isListening, isSpeaking, useClaudeCode, apiKey, handleTalkStart])
+  }, [continuousListeningEnabled, avatarState, isListening, isSpeaking, useClaudeCode, apiKey, startListening])
 
   // Save API key
   const handleSaveApiKey = (e: React.FormEvent) => {

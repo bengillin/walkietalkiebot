@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, memo } from 'react'
 import { Message, Activity, AvatarState, StoredActivity } from '../../types'
 import './ChatTimeline.css'
 
@@ -338,7 +338,7 @@ function getPendingActivities(
     .filter((a): a is DisplayActivity => a !== null)
 }
 
-export function ChatTimeline({
+export const ChatTimeline = memo(function ChatTimeline({
   messages,
   activities,
   storedActivities,
@@ -444,4 +444,4 @@ export function ChatTimeline({
       <div ref={bottomRef} />
     </div>
   )
-}
+})
