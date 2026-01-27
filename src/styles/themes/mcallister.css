@@ -258,20 +258,56 @@
     0 2px 0 rgba(0,0,0,0.3);
 }
 
-/* McAllister avatar thinking dots - Match the typing indicator */
-[data-theme="mcallister"] .avatar__thinking-dots span {
-  width: 10px;
-  height: 10px;
-  background: linear-gradient(180deg, #ff6b2b 0%, #ff4d00 100%);
-  border: 2px solid #991f00;
-  border-radius: 50%;
+/* McAllister speaker avatar - TalkBoy style grille */
+[data-theme="mcallister"] .speaker-avatar__grille {
+  background: linear-gradient(145deg, #1a1a1a 0%, #0a0a0a 100%);
+  border: 4px solid #3a3a3a;
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.3),
-    0 2px 0 #661a00;
+    inset 0 -4px 8px rgba(255, 255, 255, 0.05),
+    inset 0 4px 8px rgba(0, 0, 0, 0.6),
+    0 6px 0 #2a2a2a,
+    0 8px 16px rgba(0, 0, 0, 0.5);
 }
 
-[data-theme="mcallister"] .avatar--thinking .avatar__thinking-dots {
-  gap: 8px;
+/* Listening state - use TalkBoy orange/red accent */
+[data-theme="mcallister"] .speaker-avatar--listening .speaker-avatar__grille {
+  box-shadow:
+    inset 0 -4px 8px rgba(255, 255, 255, 0.05),
+    inset 0 4px 8px rgba(0, 0, 0, 0.6),
+    0 6px 0 #2a2a2a,
+    0 8px 16px rgba(0, 0, 0, 0.5),
+    0 0 30px rgba(255, 77, 0, 0.5);
+}
+
+[data-theme="mcallister"] .speaker-avatar--listening .speaker-avatar__hole {
+  background: radial-gradient(circle at 50% 50%, #ff6b2b, #cc4400);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.3),
+    0 0 8px rgba(255, 77, 0, 0.6);
+}
+
+/* Speaking state - warm orange glow */
+[data-theme="mcallister"] .speaker-avatar--speaking .speaker-avatar__grille {
+  box-shadow:
+    inset 0 -4px 8px rgba(255, 255, 255, 0.05),
+    inset 0 4px 8px rgba(0, 0, 0, 0.6),
+    0 6px 0 #2a2a2a,
+    0 8px 16px rgba(0, 0, 0, 0.5),
+    0 0 25px rgba(255, 140, 50, 0.4);
+}
+
+[data-theme="mcallister"] .speaker-avatar--speaking .speaker-avatar__hole {
+  background: radial-gradient(circle at 50% 50%, #ff8c32, #cc5500);
+}
+
+/* Happy state - bright gold/yellow */
+[data-theme="mcallister"] .speaker-avatar--happy .speaker-avatar__grille {
+  box-shadow:
+    inset 0 -4px 8px rgba(255, 255, 255, 0.1),
+    inset 0 4px 8px rgba(0, 0, 0, 0.5),
+    0 6px 0 #2a2a2a,
+    0 8px 16px rgba(0, 0, 0, 0.5),
+    0 0 30px rgba(255, 200, 0, 0.5);
 }
 
 /* McAllister tool badges - Chunky cassette-style buttons */

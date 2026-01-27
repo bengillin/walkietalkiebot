@@ -1,456 +1,270 @@
-.avatar {
+/* Speaker Grille Avatar - TalkBoy style 4x4 grid */
+.speaker-avatar {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  animation: float 4s ease-in-out infinite;
-  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.4));
+  justify-content: center;
+  animation: speaker-float 4s ease-in-out infinite;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
 }
 
-/* Small avatar variant - 64px native size */
-.avatar--small {
-  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4));
-}
-
-.avatar--small .avatar__antenna {
-  width: 2.4px;
-  height: 9.6px;
-  border-radius: 1.2px;
-}
-
-.avatar--small .avatar__antenna-tip {
-  top: -4px;
-  width: 5.6px;
-  height: 5.6px;
-}
-
-.avatar--small .avatar__body {
-  width: 64px;
-  height: 64px;
-}
-
-.avatar--small .avatar__body::before {
-  top: 3.2px;
-}
-
-.avatar--small .avatar__screen {
-  width: 40px;
-  height: 30.4px;
-  border-radius: 6.4px;
-}
-
-.avatar--small .avatar__screen::before {
-  border-radius: 6.4px 6.4px 0 0;
-}
-
-.avatar--small .avatar__eyes {
-  gap: 9.6px;
-  margin-bottom: 4px;
-}
-
-.avatar--small .avatar__eye {
-  width: 7.2px;
-  height: 7.2px;
-}
-
-.avatar--small .avatar__mouth {
-  width: 9.6px;
-  height: 4.8px;
-  border-width: 1.2px;
-  border-radius: 0 0 9.6px 9.6px;
-}
-
-.avatar--small .avatar__base {
-  width: 28px;
-  height: 4px;
-  border-radius: 0 0 4.8px 4.8px;
-  margin-top: -2px;
-}
-
-.avatar--small .avatar__thinking-dots {
-  gap: 2.4px;
-  font-size: 11.2px;
-}
-
-.avatar--small .avatar__question {
-  font-size: 10.4px;
-}
-
-/* Small avatar state overrides */
-.avatar--small.avatar--idle .avatar__eye {
-  height: 4px;
-  border-radius: 4px;
-}
-
-.avatar--small.avatar--listening .avatar__eye {
-  height: 8.8px;
-  width: 8.8px;
-}
-
-.avatar--small.avatar--speaking .avatar__eye {
-  height: 4px;
-  border-radius: 4px;
-}
-
-.avatar--small.avatar--happy .avatar__eye {
-  height: 2.4px;
-  width: 8px;
-  border-radius: 2.4px;
-  transform: translateY(1.2px);
-}
-
-.avatar--small.avatar--happy .avatar__mouth {
-  width: 12.8px;
-  height: 6.4px;
-}
-
-.avatar--small.avatar--confused .avatar__eye {
-  width: 9.6px;
-  height: 9.6px;
-}
-
-@keyframes float {
+@keyframes speaker-float {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-12px); }
+  50% { transform: translateY(-8px); }
 }
 
-/* Antenna */
-.avatar__antenna {
-  width: 6px;
-  height: 24px;
-  background: linear-gradient(to bottom, var(--robot-shadow), var(--robot-body));
-  border-radius: 3px;
-  position: relative;
-}
-
-.avatar__antenna-tip {
-  position: absolute;
-  top: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 14px;
-  height: 14px;
-  background: var(--accent);
+/* Main grille container */
+.speaker-avatar__grille {
+  width: 120px;
+  height: 120px;
+  background: linear-gradient(145deg, #2a2a2a 0%, #1a1a1a 50%, #0a0a0a 100%);
   border-radius: 50%;
-  opacity: 0.4;
-  transition: all 0.3s ease;
-  box-shadow: 0 0 10px transparent;
-}
-
-/* Body */
-.avatar__body {
-  width: 160px;
-  height: 160px;
-  background: linear-gradient(145deg, var(--robot-highlight) 0%, var(--robot-body) 50%, var(--robot-shadow) 100%);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 6px;
+  padding: 18px;
   box-shadow:
-    inset -8px -8px 20px rgba(0, 0, 0, 0.08),
-    inset 4px 4px 10px rgba(255, 255, 255, 0.5),
-    0 8px 32px rgba(0, 0, 0, 0.25);
-  position: relative;
+    inset 0 -4px 8px rgba(255, 255, 255, 0.1),
+    inset 0 4px 8px rgba(0, 0, 0, 0.4),
+    0 4px 16px rgba(0, 0, 0, 0.4);
+  border: 3px solid #3a3a3a;
 }
 
-.avatar__body::before {
-  content: '';
-  position: absolute;
-  top: 8px;
-  left: 20%;
-  width: 30%;
-  height: 20%;
-  background: linear-gradient(to bottom, rgba(255,255,255,0.6), transparent);
+/* Individual speaker holes */
+.speaker-avatar__hole {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 30% 30%, #1a1a1a, #000000);
   border-radius: 50%;
-  filter: blur(4px);
-}
-
-/* Screen/Face */
-.avatar__screen {
-  width: 100px;
-  height: 76px;
-  background: var(--screen-idle);
-  border-radius: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
   box-shadow:
-    inset 0 2px 4px rgba(255, 255, 255, 0.3),
-    inset 0 -2px 4px rgba(0, 0, 0, 0.1),
-    0 0 20px rgba(74, 159, 212, 0.3);
+    inset 0 2px 4px rgba(0, 0, 0, 0.8),
+    inset 0 -1px 2px rgba(255, 255, 255, 0.05);
+  transition: all 0.15s ease;
 }
 
-.avatar__screen::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 40%;
-  background: linear-gradient(to bottom, rgba(255,255,255,0.2), transparent);
-  border-radius: 16px 16px 0 0;
+/* Small variant */
+.speaker-avatar--small {
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
 }
 
-/* Eyes */
-.avatar__eyes {
-  display: flex;
-  gap: 24px;
-  margin-bottom: 10px;
-  position: relative;
-  z-index: 1;
-}
-
-.avatar__eye {
-  width: 18px;
-  height: 18px;
-  background: radial-gradient(circle at 30% 30%, #4a4a4a, #1a1a1a);
-  border-radius: 50%;
-  transition: all 0.25s ease;
-  box-shadow: inset 1px 1px 2px rgba(255,255,255,0.2);
-}
-
-/* Mouth */
-.avatar__mouth {
-  width: 24px;
-  height: 12px;
-  border: 3px solid #2a2a2a;
-  border-top: none;
-  border-radius: 0 0 24px 24px;
-  transition: all 0.25s ease;
-  position: relative;
-  z-index: 1;
-}
-
-/* Base */
-.avatar__base {
-  width: 70px;
-  height: 10px;
-  background: linear-gradient(to bottom, var(--robot-shadow), #c8c6c0);
-  border-radius: 0 0 12px 12px;
-  margin-top: -5px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+.speaker-avatar--small .speaker-avatar__grille {
+  width: 56px;
+  height: 56px;
+  gap: 3px;
+  padding: 8px;
+  border-width: 2px;
 }
 
 /* ============ STATE VARIATIONS ============ */
 
-/* IDLE - relaxed, gentle blink */
-.avatar--idle .avatar__eye {
-  height: 10px;
-  border-radius: 10px;
+/* IDLE - subtle pulsing glow */
+.speaker-avatar--idle .speaker-avatar__hole {
+  animation: idle-pulse 3s ease-in-out infinite;
 }
 
-.avatar--idle .avatar__mouth {
-  opacity: 0;
+.speaker-avatar--idle .speaker-avatar__hole:nth-child(odd) {
+  animation-delay: 0.5s;
 }
 
-/* Occasional blink */
-.avatar--idle .avatar__eye {
-  animation: blink 4s ease-in-out infinite;
+@keyframes idle-pulse {
+  0%, 100% {
+    box-shadow:
+      inset 0 2px 4px rgba(0, 0, 0, 0.8),
+      inset 0 -1px 2px rgba(255, 255, 255, 0.05);
+  }
+  50% {
+    box-shadow:
+      inset 0 2px 4px rgba(0, 0, 0, 0.8),
+      inset 0 -1px 2px rgba(255, 255, 255, 0.05),
+      0 0 4px rgba(74, 159, 212, 0.2);
+  }
 }
 
-@keyframes blink {
-  0%, 90%, 100% { height: 10px; }
-  95% { height: 2px; }
-}
-
-/* LISTENING - alert, antenna glows */
-.avatar--listening .avatar__antenna-tip {
-  opacity: 1;
-  box-shadow: 0 0 20px var(--accent), 0 0 40px var(--accent), 0 0 60px var(--accent);
-  animation: pulse 0.8s ease-in-out infinite;
-}
-
-.avatar--listening .avatar__screen {
-  background: var(--screen-listening);
+/* LISTENING - cyan glow, all holes light up */
+.speaker-avatar--listening .speaker-avatar__grille {
   box-shadow:
-    inset 0 2px 4px rgba(255, 255, 255, 0.3),
-    inset 0 -2px 4px rgba(0, 0, 0, 0.1),
-    0 0 30px rgba(0, 212, 255, 0.5);
+    inset 0 -4px 8px rgba(255, 255, 255, 0.1),
+    inset 0 4px 8px rgba(0, 0, 0, 0.4),
+    0 4px 16px rgba(0, 0, 0, 0.4),
+    0 0 30px rgba(0, 212, 255, 0.4);
 }
 
-.avatar--listening .avatar__eye {
-  height: 22px;
-  width: 22px;
-  animation: none;
-}
-
-.avatar--listening .avatar__mouth {
-  opacity: 0;
-}
-
-@keyframes pulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.2); opacity: 0.9; }
-}
-
-.avatar--listening .avatar__antenna-tip {
-  left: 50%;
-  transform: translateX(-50%);
-  transform-origin: center;
-}
-
-/* THINKING - processing */
-.avatar--thinking .avatar__screen {
-  background: var(--screen-thinking);
+.speaker-avatar--listening .speaker-avatar__hole {
+  background: radial-gradient(circle at 50% 50%, #00d4ff, #006688);
   box-shadow:
-    inset 0 2px 4px rgba(255, 255, 255, 0.3),
-    inset 0 -2px 4px rgba(0, 0, 0, 0.1),
-    0 0 30px rgba(167, 139, 250, 0.4);
+    inset 0 1px 2px rgba(255, 255, 255, 0.4),
+    0 0 8px rgba(0, 212, 255, 0.6);
+  animation: listening-glow 0.8s ease-in-out infinite;
 }
 
-.avatar--thinking .avatar__eyes {
-  display: none;
+@keyframes listening-glow {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
 }
 
-.avatar--thinking .avatar__mouth {
-  display: none;
-}
-
-.avatar--thinking .avatar__thinking-dots {
-  display: flex;
-  gap: 6px;
-  font-size: 28px;
-  font-weight: bold;
-  color: rgba(0, 0, 0, 0.6);
-}
-
-.avatar__thinking-dots span {
-  animation: bounce 1.2s ease-in-out infinite;
-}
-
-.avatar__thinking-dots span:nth-child(2) {
-  animation-delay: 0.15s;
-}
-
-.avatar__thinking-dots span:nth-child(3) {
-  animation-delay: 0.3s;
-}
-
-@keyframes bounce {
-  0%, 60%, 100% { transform: translateY(0); }
-  30% { transform: translateY(-8px); }
-}
-
-.avatar__thinking-dots {
-  display: none;
-}
-
-.avatar--thinking .avatar__thinking-dots {
-  display: flex;
-}
-
-/* SPEAKING - animated, happy */
-.avatar--speaking .avatar__screen {
-  background: linear-gradient(135deg, #5ab0e0 0%, #3a9fd0 100%);
-}
-
-.avatar--speaking .avatar__eye {
-  height: 10px;
-  border-radius: 10px;
-  animation: none;
-}
-
-.avatar--speaking .avatar__mouth {
-  animation: speak 0.25s ease-in-out infinite;
-  opacity: 1;
-}
-
-@keyframes speak {
-  0%, 100% { height: 12px; width: 24px; }
-  50% { height: 18px; width: 28px; }
-}
-
-.avatar--speaking {
-  animation: float 4s ease-in-out infinite, talk-bounce 0.25s ease-in-out infinite;
-}
-
-@keyframes talk-bounce {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-2px) scale(1.015); }
-}
-
-/* HAPPY - celebration */
-.avatar--happy .avatar__screen {
-  background: var(--screen-happy);
+/* THINKING - purple, wave pattern across holes */
+.speaker-avatar--thinking .speaker-avatar__grille {
   box-shadow:
-    inset 0 2px 4px rgba(255, 255, 255, 0.4),
-    inset 0 -2px 4px rgba(0, 0, 0, 0.05),
+    inset 0 -4px 8px rgba(255, 255, 255, 0.1),
+    inset 0 4px 8px rgba(0, 0, 0, 0.4),
+    0 4px 16px rgba(0, 0, 0, 0.4),
+    0 0 20px rgba(167, 139, 250, 0.3);
+}
+
+.speaker-avatar--thinking .speaker-avatar__hole {
+  background: radial-gradient(circle at 50% 50%, #a78bfa, #6b4bb8);
+  animation: thinking-wave 1.5s ease-in-out infinite;
+}
+
+.speaker-avatar--thinking .speaker-avatar__hole:nth-child(1) { animation-delay: 0s; }
+.speaker-avatar--thinking .speaker-avatar__hole:nth-child(2) { animation-delay: 0.1s; }
+.speaker-avatar--thinking .speaker-avatar__hole:nth-child(3) { animation-delay: 0.2s; }
+.speaker-avatar--thinking .speaker-avatar__hole:nth-child(4) { animation-delay: 0.3s; }
+.speaker-avatar--thinking .speaker-avatar__hole:nth-child(5) { animation-delay: 0.1s; }
+.speaker-avatar--thinking .speaker-avatar__hole:nth-child(6) { animation-delay: 0.2s; }
+.speaker-avatar--thinking .speaker-avatar__hole:nth-child(7) { animation-delay: 0.3s; }
+.speaker-avatar--thinking .speaker-avatar__hole:nth-child(8) { animation-delay: 0.4s; }
+.speaker-avatar--thinking .speaker-avatar__hole:nth-child(9) { animation-delay: 0.2s; }
+.speaker-avatar--thinking .speaker-avatar__hole:nth-child(10) { animation-delay: 0.3s; }
+.speaker-avatar--thinking .speaker-avatar__hole:nth-child(11) { animation-delay: 0.4s; }
+.speaker-avatar--thinking .speaker-avatar__hole:nth-child(12) { animation-delay: 0.5s; }
+.speaker-avatar--thinking .speaker-avatar__hole:nth-child(13) { animation-delay: 0.3s; }
+.speaker-avatar--thinking .speaker-avatar__hole:nth-child(14) { animation-delay: 0.4s; }
+.speaker-avatar--thinking .speaker-avatar__hole:nth-child(15) { animation-delay: 0.5s; }
+.speaker-avatar--thinking .speaker-avatar__hole:nth-child(16) { animation-delay: 0.6s; }
+
+@keyframes thinking-wave {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow:
+      inset 0 1px 2px rgba(255, 255, 255, 0.3),
+      0 0 6px rgba(167, 139, 250, 0.5);
+  }
+}
+
+/* SPEAKING - animated equalizer effect */
+.speaker-avatar--speaking .speaker-avatar__grille {
+  box-shadow:
+    inset 0 -4px 8px rgba(255, 255, 255, 0.1),
+    inset 0 4px 8px rgba(0, 0, 0, 0.4),
+    0 4px 16px rgba(0, 0, 0, 0.4),
+    0 0 25px rgba(90, 176, 224, 0.4);
+}
+
+.speaker-avatar--speaking .speaker-avatar__hole {
+  background: radial-gradient(circle at 50% 50%, #5ab0e0, #2a7ab0);
+  animation: speaking-bounce 0.3s ease-in-out infinite alternate;
+}
+
+/* Equalizer pattern - different rows bounce differently */
+.speaker-avatar--speaking .speaker-avatar__hole:nth-child(1),
+.speaker-avatar--speaking .speaker-avatar__hole:nth-child(4),
+.speaker-avatar--speaking .speaker-avatar__hole:nth-child(13),
+.speaker-avatar--speaking .speaker-avatar__hole:nth-child(16) {
+  animation-delay: 0s;
+  animation-duration: 0.25s;
+}
+
+.speaker-avatar--speaking .speaker-avatar__hole:nth-child(2),
+.speaker-avatar--speaking .speaker-avatar__hole:nth-child(3),
+.speaker-avatar--speaking .speaker-avatar__hole:nth-child(14),
+.speaker-avatar--speaking .speaker-avatar__hole:nth-child(15) {
+  animation-delay: 0.05s;
+  animation-duration: 0.2s;
+}
+
+.speaker-avatar--speaking .speaker-avatar__hole:nth-child(5),
+.speaker-avatar--speaking .speaker-avatar__hole:nth-child(8),
+.speaker-avatar--speaking .speaker-avatar__hole:nth-child(9),
+.speaker-avatar--speaking .speaker-avatar__hole:nth-child(12) {
+  animation-delay: 0.1s;
+  animation-duration: 0.35s;
+}
+
+.speaker-avatar--speaking .speaker-avatar__hole:nth-child(6),
+.speaker-avatar--speaking .speaker-avatar__hole:nth-child(7),
+.speaker-avatar--speaking .speaker-avatar__hole:nth-child(10),
+.speaker-avatar--speaking .speaker-avatar__hole:nth-child(11) {
+  animation-delay: 0.08s;
+  animation-duration: 0.28s;
+}
+
+@keyframes speaking-bounce {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.05);
+    opacity: 1;
+    box-shadow:
+      inset 0 1px 2px rgba(255, 255, 255, 0.4),
+      0 0 8px rgba(90, 176, 224, 0.6);
+  }
+}
+
+/* HAPPY - golden celebration */
+.speaker-avatar--happy .speaker-avatar__grille {
+  box-shadow:
+    inset 0 -4px 8px rgba(255, 255, 255, 0.15),
+    inset 0 4px 8px rgba(0, 0, 0, 0.3),
+    0 4px 16px rgba(0, 0, 0, 0.4),
     0 0 30px rgba(255, 217, 61, 0.5);
 }
 
-.avatar--happy .avatar__eye {
-  height: 6px;
-  width: 20px;
-  border-radius: 6px;
-  transform: translateY(3px);
-  animation: none;
+.speaker-avatar--happy .speaker-avatar__hole {
+  background: radial-gradient(circle at 40% 40%, #ffd93d, #f5a623);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.5),
+    0 0 6px rgba(255, 217, 61, 0.6);
 }
 
-.avatar--happy .avatar__mouth {
-  width: 32px;
-  height: 16px;
-  opacity: 1;
+.speaker-avatar--happy {
+  animation: speaker-float 4s ease-in-out infinite, happy-bounce 0.5s ease-out;
 }
 
-.avatar--happy {
-  animation: celebrate 0.6s ease-out;
-}
-
-@keyframes celebrate {
-  0% { transform: scale(1) rotate(0); }
-  20% { transform: scale(1.12) rotate(-6deg); }
-  40% { transform: scale(1.12) rotate(6deg); }
-  60% { transform: scale(1.08) rotate(-3deg); }
-  80% { transform: scale(1.08) rotate(3deg); }
+@keyframes happy-bounce {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.1) rotate(-5deg); }
+  50% { transform: scale(1.1) rotate(5deg); }
+  75% { transform: scale(1.05) rotate(-2deg); }
   100% { transform: scale(1) rotate(0); }
 }
 
-/* CONFUSED - error state */
-.avatar--confused .avatar__screen {
-  background: var(--screen-error);
+/* CONFUSED - red/orange error state */
+.speaker-avatar--confused .speaker-avatar__grille {
   box-shadow:
-    inset 0 2px 4px rgba(255, 255, 255, 0.3),
-    inset 0 -2px 4px rgba(0, 0, 0, 0.1),
-    0 0 30px rgba(255, 107, 107, 0.4);
+    inset 0 -4px 8px rgba(255, 255, 255, 0.1),
+    inset 0 4px 8px rgba(0, 0, 0, 0.4),
+    0 4px 16px rgba(0, 0, 0, 0.4),
+    0 0 20px rgba(255, 107, 107, 0.4);
 }
 
-.avatar--confused .avatar__eye {
-  width: 24px;
-  height: 24px;
-  animation: none;
+.speaker-avatar--confused .speaker-avatar__hole {
+  background: radial-gradient(circle at 50% 50%, #ff6b6b, #cc4444);
+  animation: confused-flicker 0.5s ease-in-out infinite;
 }
 
-.avatar--confused .avatar__mouth {
-  display: none;
+.speaker-avatar--confused .speaker-avatar__hole:nth-child(odd) {
+  animation-delay: 0.15s;
 }
 
-.avatar__question {
-  display: none;
-  font-size: 26px;
-  font-weight: bold;
-  color: rgba(0, 0, 0, 0.6);
+@keyframes confused-flicker {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
 }
 
-.avatar--confused .avatar__question {
-  display: block;
-  animation: wiggle 0.5s ease-in-out;
-}
-
-@keyframes wiggle {
-  0%, 100% { transform: rotate(0); }
-  25% { transform: rotate(-10deg); }
-  75% { transform: rotate(10deg); }
-}
-
-.avatar--confused {
-  animation: float 4s ease-in-out infinite, confused-shake 0.4s ease-in-out;
+.speaker-avatar--confused {
+  animation: speaker-float 4s ease-in-out infinite, confused-shake 0.4s ease-in-out;
 }
 
 @keyframes confused-shake {
   0%, 100% { transform: translateX(0); }
-  20%, 60% { transform: translateX(-4px); }
-  40%, 80% { transform: translateX(4px); }
+  20%, 60% { transform: translateX(-3px); }
+  40%, 80% { transform: translateX(3px); }
 }
