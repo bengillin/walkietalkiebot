@@ -343,6 +343,7 @@
 .tool-complete {
   color: #34c759;
   font-weight: bold;
+  font-size: 0.8rem;
 }
 
 .tool-error {
