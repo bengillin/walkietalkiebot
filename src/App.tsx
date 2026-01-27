@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { AvatarSmall } from './components/avatar/Avatar'
 import { Logo } from './components/Logo'
 import { ChatTimeline } from './components/chat/ChatTimeline'
-import { TapeDeck, type TapeState } from './components/cassette'
+import { TapeDeck } from './components/cassette'
 import { Onboarding, type OnboardingSettings } from './components/onboarding/Onboarding'
 import { FileDropZone } from './components/dropzone/FileDropZone'
 import { ImageLightbox } from './components/media/ImageLightbox'
@@ -16,18 +16,6 @@ import { useStore } from './lib/store'
 import { useSoundEffects } from './hooks/useSoundEffects'
 import { useTheme } from './contexts/ThemeContext'
 import './App.css'
-
-// Map avatar state to cassette tape state
-function mapAvatarToTapeState(avatarState: string, isListening: boolean): TapeState {
-  if (isListening) return 'recording'
-  switch (avatarState) {
-    case 'listening': return 'recording'
-    case 'thinking': return 'thinking'
-    case 'speaking': return 'playing'
-    case 'happy': return 'playing'
-    default: return 'idle'
-  }
-}
 
 function App() {
   const [hasOnboarded, setHasOnboarded] = useState(() =>
@@ -116,9 +104,11 @@ function App() {
     setWakeWordEnabled,
     // Custom words
     customWakeWord,
-    setCustomWakeWord,
     customTriggerWord,
     setCustomTriggerWord,
+    // Trigger word delay
+    triggerWordDelay,
+    setTriggerWordDelay,
   } = useStore()
 
   // Handle onboarding completion - Claude Code is always the default mode
@@ -256,6 +246,7 @@ function App() {
       setTimeout(() => setAvatarState('idle'), 2000)
     },
     triggerWord: customTriggerWord || 'over',
+    triggerWordDelay,
   })
 
   // Speech synthesis
@@ -692,7 +683,6 @@ function App() {
       <TapeDeck
         currentConversation={conversations.find(c => c.id === currentConversationId) || null}
         conversations={conversations}
-        tapeState={mapAvatarToTapeState(avatarState, isListening)}
         transcript={transcript}
         isListening={isListening}
         isEjected={isTapeEjected}
@@ -707,8 +697,10 @@ function App() {
         }}
         onDeleteConversation={deleteConversation}
         onCloseCollection={() => setIsTapeEjected(false)}
+        onOpenCollection={() => setIsTapeEjected(true)}
         isDisabled={(!useClaudeCode && !apiKey) || isSpeaking || avatarState === 'thinking'}
         triggerWord={customTriggerWord || 'over'}
+        onClearTranscript={() => setTranscript('')}
       />
 
       {/* Image lightbox */}
@@ -735,10 +727,7 @@ function App() {
             </div>
 
             <label className="settings__toggle">
-              <span className="settings__toggle-info">
-                <span className="settings__toggle-label">Claude Code mode</span>
-                <span className="settings__toggle-desc">Route through CLI for full agent capabilities</span>
-              </span>
+              <span className="settings__toggle-label">Claude Code mode</span>
               <input
                 type="checkbox"
                 checked={useClaudeCode}
@@ -750,11 +739,22 @@ function App() {
               <span className="settings__slider" />
             </label>
 
+            {useClaudeCode && connectedSessionId && (
+              <div className="settings__session">
+                <span className="settings__session-status settings__session-status--connected">
+                  Session {connectedSessionId.slice(0, 8)}...
+                </span>
+                <button
+                  className="settings__session-disconnect"
+                  onClick={disconnectSession}
+                >
+                  Disconnect
+                </button>
+              </div>
+            )}
+
             <label className="settings__toggle">
-              <span className="settings__toggle-info">
-                <span className="settings__toggle-label">Speak responses</span>
-                <span className="settings__toggle-desc">Read responses aloud with text-to-speech</span>
-              </span>
+              <span className="settings__toggle-label">Speak responses</span>
               <input
                 type="checkbox"
                 checked={ttsEnabled}
@@ -764,10 +764,7 @@ function App() {
             </label>
 
             <label className="settings__toggle">
-              <span className="settings__toggle-info">
-                <span className="settings__toggle-label">Continuous listening</span>
-                <span className="settings__toggle-desc">Always listen, say "{customTriggerWord || 'over'}" to send</span>
-              </span>
+              <span className="settings__toggle-label">Continuous listening</span>
               <input
                 type="checkbox"
                 checked={continuousListeningEnabled}
@@ -777,8 +774,8 @@ function App() {
             </label>
 
             {continuousListeningEnabled && (
-              <div className="settings__input-group">
-                <label className="settings__input-label">Trigger word</label>
+              <div className="settings__subsection">
+                <label className="settings__input-label">End-of-turn word</label>
                 <input
                   type="text"
                   className="settings__text-input"
@@ -786,60 +783,31 @@ function App() {
                   onChange={(e) => setCustomTriggerWord(e.target.value)}
                   placeholder="over"
                 />
+                <p className="settings__hint">
+                  Say this word to end your turn. You can use it mid-sentence — only triggers after {triggerWordDelay / 1000}s of silence.
+                </p>
+
+                <label className="settings__input-label">Silence delay</label>
+                <div className="settings__range-row">
+                  <input
+                    type="range"
+                    min="500"
+                    max="3000"
+                    step="100"
+                    value={triggerWordDelay}
+                    onChange={(e) => setTriggerWordDelay(Number(e.target.value))}
+                  />
+                  <span className="settings__range-value">{(triggerWordDelay / 1000).toFixed(1)}s</span>
+                </div>
+                <p className="settings__hint">
+                  How long to wait after the trigger word before sending your message.
+                </p>
               </div>
             )}
 
-            <label className="settings__toggle">
-              <span className="settings__toggle-info">
-                <span className="settings__toggle-label">Wake word</span>
-                <span className="settings__toggle-desc">Say "{customWakeWord || 'hey talkboy'}" to activate</span>
-              </span>
-              <input
-                type="checkbox"
-                checked={wakeWordEnabled}
-                onChange={(e) => setWakeWordEnabled(e.target.checked)}
-              />
-              <span className="settings__slider" />
-            </label>
+            <div className="settings__divider" />
 
-            {wakeWordEnabled && (
-              <div className="settings__input-group">
-                <label className="settings__input-label">Wake phrase</label>
-                <input
-                  type="text"
-                  className="settings__text-input"
-                  value={customWakeWord}
-                  onChange={(e) => setCustomWakeWord(e.target.value)}
-                  placeholder="hey talkboy"
-                />
-              </div>
-            )}
-
-            {useClaudeCode && (
-              <div className="settings__session">
-                {connectedSessionId ? (
-                  <>
-                    <span className="settings__session-status settings__session-status--connected">
-                      Connected to session
-                    </span>
-                    <code className="settings__session-id">{connectedSessionId.slice(0, 8)}...</code>
-                    <button
-                      className="settings__session-disconnect"
-                      onClick={disconnectSession}
-                    >
-                      Disconnect
-                    </button>
-                  </>
-                ) : (
-                  <span className="settings__session-status">
-                    No session connected - run "connect to talkboy" in Claude Code
-                  </span>
-                )}
-              </div>
-            )}
-
-            <h3 className="settings__section-title">API Key</h3>
-            <p className="settings__section-desc">{useClaudeCode ? 'Optional - needed for image analysis' : 'Required when not using Claude Code mode'}</p>
+            <label className="settings__input-label">API Key {useClaudeCode && <span className="settings__optional">(optional)</span>}</label>
             <form className="settings__api-form" onSubmit={handleSaveApiKey}>
               <input
                 type="password"
@@ -857,19 +825,22 @@ function App() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              Get an API key
+              Get an API key →
             </a>
 
-            <button
-              className="settings__reset-btn"
-              onClick={() => {
-                localStorage.removeItem('talkboy_onboarded')
-                setHasOnboarded(false)
-                setShowSettings(false)
-              }}
-            >
-              Reset onboarding
-            </button>
+            <details className="settings__advanced">
+              <summary className="settings__advanced-toggle">Advanced</summary>
+              <button
+                className="settings__reset-btn"
+                onClick={() => {
+                  localStorage.removeItem('talkboy_onboarded')
+                  setHasOnboarded(false)
+                  setShowSettings(false)
+                }}
+              >
+                Reset onboarding
+              </button>
+            </details>
           </div>
         </div>
       )}

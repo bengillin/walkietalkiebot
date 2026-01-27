@@ -20,6 +20,12 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.tape-deck__cassette-slot:hover {
+  transform: scale(1.05);
 }
 
 .tape-deck__empty-slot {

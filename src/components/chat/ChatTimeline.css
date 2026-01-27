@@ -434,6 +434,12 @@
   transition: all 0.2s ease;
   font-size: 0.8rem;
   color: var(--text-muted, #888);
+  width: fit-content;
+}
+
+.collapsible-tools__indicator:disabled {
+  cursor: default;
+  opacity: 0.85;
 }
 
 .collapsible-tools__indicator:hover {
@@ -496,39 +502,3 @@
   gap: 0.5rem;
 }
 
-.collapsible-tools__toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.25rem 0.5rem;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-size: 0.75rem;
-  color: var(--text-muted, #888);
-  transition: color 0.15s ease;
-}
-
-.collapsible-tools__toggle:hover:not(:disabled) {
-  color: var(--text-secondary, #aaa);
-}
-
-.collapsible-tools__toggle:disabled {
-  cursor: default;
-  opacity: 0.7;
-}
-
-.collapsible-tools__toggle-icon {
-  font-size: 0.6rem;
-  transition: transform 0.2s ease;
-}
-
-.collapsible-tools__toggle:hover:not(:disabled) .collapsible-tools__toggle-icon {
-  transform: translateY(1px);
-}
-
-.collapsible-tools__toggle-text {
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  font-weight: 500;
-}

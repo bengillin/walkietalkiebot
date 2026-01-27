@@ -115,6 +115,10 @@ export interface AppState {
   customTriggerWord: string
   setCustomTriggerWord: (word: string) => void
 
+  // Trigger word delay (ms of silence required after trigger word)
+  triggerWordDelay: number
+  setTriggerWordDelay: (delay: number) => void
+
   transcript: string
   setTranscript: (text: string) => void
 

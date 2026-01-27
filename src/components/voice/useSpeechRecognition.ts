@@ -9,6 +9,7 @@ interface UseSpeechRecognitionOptions {
   continuous?: boolean
   language?: string
   triggerWord?: string
+  triggerWordDelay?: number  // ms of silence required after trigger word (default 1000)
 }
 
 interface SpeechRecognitionResult {
@@ -78,6 +79,7 @@ export function useSpeechRecognition({
   continuous = true,
   language = 'en-US',
   triggerWord,
+  triggerWordDelay = 1000,
 }: UseSpeechRecognitionOptions = {}): SpeechRecognitionResult {
   const [isListening, setIsListening] = useState(false)
   const [transcript, setTranscript] = useState('')
@@ -94,6 +96,7 @@ export function useSpeechRecognition({
   const onEndRef = useRef(onEnd)
   const onTriggerWordRef = useRef(onTriggerWord)
   const triggerWordRef = useRef(triggerWord)
+  const triggerWordDelayRef = useRef(triggerWordDelay)
 
   // Keep refs up to date
   useEffect(() => {
@@ -103,6 +106,7 @@ export function useSpeechRecognition({
     onEndRef.current = onEnd
     onTriggerWordRef.current = onTriggerWord
     triggerWordRef.current = triggerWord
+    triggerWordDelayRef.current = triggerWordDelay
   })
 
   const isSupported =
@@ -182,7 +186,7 @@ export function useSpeechRecognition({
           console.log('[Speech] Trigger word detected, waiting for silence...')
           pendingTriggerTranscriptRef.current = cleanTranscript
 
-          // Wait for silence (1 second) before triggering
+          // Wait for silence before triggering (configurable delay)
           triggerTimeoutRef.current = setTimeout(() => {
             if (!triggerFiredRef.current) {
               triggerFiredRef.current = true
@@ -190,7 +194,7 @@ export function useSpeechRecognition({
               recognition.stop()
               onTriggerWordRef.current?.(pendingTriggerTranscriptRef.current)
             }
-          }, 1000)
+          }, triggerWordDelayRef.current)
         }
       }
     }

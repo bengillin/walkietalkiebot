@@ -1,37 +1,40 @@
 .tape-collection {
-  position: absolute;
-  bottom: 100%;
-  left: 0;
-  right: 0;
-  z-index: 100;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  pointer-events: none;
 }
 
 .tape-collection__backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: -1;
+  background: transparent;
+  pointer-events: auto;
 }
 
 .tape-collection__drawer {
-  background: linear-gradient(180deg, #d0d0d0 0%, #b8b8b8 100%);
-  border: 4px solid #808080;
-  border-bottom: none;
-  border-radius: 12px 12px 0 0;
+  position: fixed;
+  bottom: 110px;
+  left: 0;
+  right: 0;
+  background: var(--color-bg-secondary, #e8e4d9);
+  border-top: 4px solid var(--color-border, #c4bfb0);
+  border-radius: 16px 16px 0 0;
   box-shadow:
-    inset 0 2px 0 rgba(255, 255, 255, 0.4),
-    0 -8px 24px rgba(0, 0, 0, 0.3);
-  max-height: 60vh;
+    inset 0 2px 0 rgba(255, 255, 255, 0.3),
+    0 -4px 20px rgba(0, 0, 0, 0.2);
+  max-height: 70vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   animation: drawer-slide-up 0.25s ease-out;
+  pointer-events: auto;
 }
 
 @keyframes drawer-slide-up {
   from {
     transform: translateY(100%);
-    opacity: 0;
+    opacity: 0.8;
   }
   to {
     transform: translateY(0);
@@ -43,35 +46,37 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
-  border-bottom: 3px solid #909090;
-  background: linear-gradient(180deg, #c8c8c8 0%, #b8b8b8 100%);
+  padding: 12px 20px;
+  border-bottom: 2px solid var(--color-border, #c4bfb0);
+  background: var(--color-bg-secondary, #e8e4d9);
+  flex-shrink: 0;
 }
 
 .tape-collection__title {
-  font-size: 18px;
-  font-weight: 800;
-  color: #1a1a1a;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-primary, #2c2416);
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.1em;
+  margin: 0;
 }
 
 .tape-collection__new-btn {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 16px;
+  padding: 6px 12px;
   background: linear-gradient(180deg, #00a035 0%, #00802b 100%);
-  border: 3px solid #005a1e;
+  border: 2px solid #005a1e;
   border-radius: 6px;
   color: white;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   cursor: pointer;
   box-shadow:
-    inset 0 2px 0 rgba(255, 255, 255, 0.2),
-    0 3px 0 #003d14;
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 2px 0 #003d14;
   transition: all 0.1s ease;
 }
 
@@ -79,17 +84,17 @@
   background: linear-gradient(180deg, #00b83e 0%, #009933 100%);
   transform: translateY(-1px);
   box-shadow:
-    inset 0 2px 0 rgba(255, 255, 255, 0.2),
-    0 4px 0 #003d14;
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 3px 0 #003d14;
 }
 
 .tape-collection__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
   padding: 20px;
   overflow-y: auto;
-  max-height: calc(60vh - 80px);
+  max-height: calc(70vh - 56px);
 }
 
 .tape-collection__item {
@@ -116,7 +121,8 @@
   cursor: pointer;
   opacity: 0;
   transition: all 0.15s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  z-index: 10;
 }
 
 .tape-collection__item:hover .tape-collection__delete-btn {
@@ -128,47 +134,116 @@
   transform: scale(1.1);
 }
 
-.tape-collection__current-badge {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  padding: 4px 10px;
-  background: linear-gradient(180deg, #4a4a4a 0%, #3a3a3a 100%);
-  border: 2px solid #2a2a2a;
-  border-radius: 12px;
-  color: white;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
 .tape-collection__empty {
   padding: 40px 20px;
   text-align: center;
-  color: #5a5a5a;
+  color: #666;
 }
 
 .tape-collection__empty p {
-  font-size: 16px;
+  font-size: 14px;
   margin-bottom: 16px;
 }
 
 .tape-collection__empty-btn {
-  padding: 12px 24px;
+  padding: 10px 20px;
   background: linear-gradient(180deg, #4a4a4a 0%, #3a3a3a 100%);
-  border: 3px solid #2a2a2a;
+  border: 2px solid #2a2a2a;
   border-radius: 6px;
   color: white;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 3px 0 #1a1a1a;
+  box-shadow: 0 2px 0 #1a1a1a;
   transition: all 0.1s ease;
 }
 
 .tape-collection__empty-btn:hover {
   background: linear-gradient(180deg, #5a5a5a 0%, #4a4a4a 100%);
   transform: translateY(-1px);
-  box-shadow: 0 4px 0 #1a1a1a;
+  box-shadow: 0 3px 0 #1a1a1a;
+}
+
+/* Confirmation dialog */
+.tape-collection__confirm {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fade-in 0.15s ease;
+  z-index: 20;
+  border-radius: 16px 16px 0 0;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.tape-collection__confirm-content {
+  background: var(--color-bg-secondary, #e8e4d9);
+  padding: 24px 32px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  border: 3px solid var(--color-border, #c4bfb0);
+}
+
+.tape-collection__confirm-content p {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text-primary, #2c2416);
+}
+
+.tape-collection__confirm-content span {
+  display: block;
+  font-size: 13px;
+  color: var(--color-text-secondary, #5a5040);
+  margin-bottom: 20px;
+}
+
+.tape-collection__confirm-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.tape-collection__confirm-cancel,
+.tape-collection__confirm-ok {
+  padding: 10px 24px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+.tape-collection__confirm-cancel {
+  background: linear-gradient(180deg, #666 0%, #555 100%);
+  border: 2px solid #444;
+  color: white;
+  box-shadow: 0 2px 0 #333;
+}
+
+.tape-collection__confirm-cancel:hover {
+  background: linear-gradient(180deg, #777 0%, #666 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 0 #333;
+}
+
+.tape-collection__confirm-ok {
+  background: linear-gradient(180deg, #00a035 0%, #00802b 100%);
+  border: 2px solid #005a1e;
+  color: white;
+  box-shadow: 0 2px 0 #003d14;
+}
+
+.tape-collection__confirm-ok:hover {
+  background: linear-gradient(180deg, #00b83e 0%, #009933 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 0 #003d14;
 }

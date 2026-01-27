@@ -123,14 +123,22 @@ function CollapsibleTools({
       {isExpanded ? (
         <div className="collapsible-tools__expanded">
           <button
-            className="collapsible-tools__toggle"
+            className={`collapsible-tools__indicator ${hasRunning ? 'running' : ''} ${hasError ? 'error' : ''}`}
             onClick={() => !isLive && setIsExpanded(false)}
             disabled={isLive}
           >
-            <span className="collapsible-tools__toggle-icon">▼</span>
-            <span className="collapsible-tools__toggle-text">
-              {activities.length} tool{activities.length !== 1 ? 's' : ''} used
+            <span className="collapsible-tools__icons">
+              {toolNames.slice(0, 4).map(name => (
+                <span key={name} className="collapsible-tools__icon">
+                  {TOOL_ICONS[name] || TOOL_ICONS.default}
+                </span>
+              ))}
+              {toolNames.length > 4 && <span className="collapsible-tools__more">+{toolNames.length - 4}</span>}
             </span>
+            <span className="collapsible-tools__count">
+              {activities.length} tool{activities.length !== 1 ? 's' : ''}
+            </span>
+            <span className="collapsible-tools__expand-icon">▼</span>
           </button>
           <div className="activity-group">
             {activities.map((activity) => (

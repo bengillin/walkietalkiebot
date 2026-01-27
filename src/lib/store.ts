@@ -236,6 +236,13 @@ export const useStore = create<AppState>((set, get) => {
       set({ customTriggerWord: word })
     },
 
+    // Trigger word delay (silence required after trigger word before ending turn)
+    triggerWordDelay: parseInt(localStorage.getItem('talkboy_trigger_delay') || '1000', 10),
+    setTriggerWordDelay: (delay) => {
+      localStorage.setItem('talkboy_trigger_delay', String(delay))
+      set({ triggerWordDelay: delay })
+    },
+
     transcript: '',
     setTranscript: (transcript) => set({ transcript }),
 
