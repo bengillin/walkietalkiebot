@@ -100,11 +100,138 @@ async function getHistory() {
   }
 }
 
+// Get Claude Code session info
+async function getSession() {
+  try {
+    const response = await fetch(`${TALKBOY_URL}/api/session`);
+    if (response.ok) {
+      return await response.json();
+    }
+    return { sessionId: null, error: 'Failed to get session' };
+  } catch {
+    return { sessionId: null, error: 'Talkboy not running' };
+  }
+}
+
+// Set Claude Code session ID
+async function setSession(sessionId) {
+  try {
+    const response = await fetch(`${TALKBOY_URL}/api/session`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId }),
+    });
+    if (response.ok) {
+      return await response.json();
+    }
+    return { success: false, error: 'Failed to set session' };
+  } catch {
+    return { success: false, error: 'Talkboy not running' };
+  }
+}
+
+// Disconnect Claude Code session
+async function disconnectSession() {
+  try {
+    const response = await fetch(`${TALKBOY_URL}/api/session`, {
+      method: 'DELETE',
+    });
+    if (response.ok) {
+      return await response.json();
+    }
+    return { success: false, error: 'Failed to disconnect session' };
+  } catch {
+    return { success: false, error: 'Talkboy not running' };
+  }
+}
+
+// Get pending message (for IPC mode)
+async function getPendingMessage() {
+  try {
+    const response = await fetch(`${TALKBOY_URL}/api/pending`);
+    if (response.ok) {
+      return await response.json();
+    }
+    return { pending: null, error: 'Failed to get pending message' };
+  } catch {
+    return { pending: null, error: 'Talkboy not running' };
+  }
+}
+
+// Respond to pending message (for IPC mode)
+async function respondToMessage(content) {
+  try {
+    const response = await fetch(`${TALKBOY_URL}/api/respond`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content }),
+    });
+    if (response.ok) {
+      return await response.json();
+    }
+    return { success: false, error: 'Failed to respond' };
+  } catch {
+    return { success: false, error: 'Talkboy not running' };
+  }
+}
+
+// Update state
+async function updateState(stateUpdate) {
+  try {
+    const response = await fetch(`${TALKBOY_URL}/api/state`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(stateUpdate),
+    });
+    if (response.ok) {
+      return await response.json();
+    }
+    return { success: false, error: 'Failed to update state' };
+  } catch {
+    return { success: false, error: 'Talkboy not running' };
+  }
+}
+
+// Analyze an image
+async function analyzeImage(dataUrl, fileName, apiKey) {
+  try {
+    const response = await fetch(`${TALKBOY_URL}/api/analyze-image`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dataUrl, fileName, apiKey }),
+    });
+    if (response.ok) {
+      return await response.json();
+    }
+    const error = await response.text();
+    return { error: `Failed to analyze image: ${error}` };
+  } catch {
+    return { error: 'Talkboy not running' };
+  }
+}
+
+// Open URL in browser
+async function openUrl(url) {
+  try {
+    const response = await fetch(`${TALKBOY_URL}/api/open-url`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url }),
+    });
+    if (response.ok) {
+      return await response.json();
+    }
+    return { success: false, error: 'Failed to open URL' };
+  } catch {
+    return { success: false, error: 'Talkboy not running' };
+  }
+}
+
 // Create MCP server
 const server = new Server(
   {
     name: 'talkboy',
-    version: '0.1.0',
+    version: '0.2.0',
   },
   {
     capabilities: {
@@ -117,6 +244,7 @@ const server = new Server(
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
     tools: [
+      // Core tools
       {
         name: 'launch_talkboy',
         description: 'Launch the Talkboy voice interface in a browser. Use this when the user wants to interact with voice.',
@@ -146,11 +274,125 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: 'get_conversation_history',
-        description: 'Get the full conversation history from Talkboy.',
+        description: 'Get the full conversation history from the current tape/conversation in Talkboy.',
         inputSchema: {
           type: 'object',
           properties: {},
           required: [],
+        },
+      },
+      // Session management tools
+      {
+        name: 'get_claude_session',
+        description: 'Get the current Claude Code session ID if one is connected.',
+        inputSchema: {
+          type: 'object',
+          properties: {},
+          required: [],
+        },
+      },
+      {
+        name: 'set_claude_session',
+        description: 'Set the Claude Code session ID to connect Talkboy to your session.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            sessionId: {
+              type: 'string',
+              description: 'The Claude Code session ID to connect to',
+            },
+          },
+          required: ['sessionId'],
+        },
+      },
+      {
+        name: 'disconnect_claude_session',
+        description: 'Disconnect the current Claude Code session.',
+        inputSchema: {
+          type: 'object',
+          properties: {},
+          required: [],
+        },
+      },
+      // IPC tools for Claude Code integration
+      {
+        name: 'get_pending_message',
+        description: 'Check if there is a pending message from Talkboy waiting for a response. Use this to poll for user messages in IPC mode.',
+        inputSchema: {
+          type: 'object',
+          properties: {},
+          required: [],
+        },
+      },
+      {
+        name: 'respond_to_talkboy',
+        description: 'Send a response back to Talkboy. Use this in IPC mode to respond to a pending message.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            content: {
+              type: 'string',
+              description: 'The response content to send to Talkboy',
+            },
+          },
+          required: ['content'],
+        },
+      },
+      // State management
+      {
+        name: 'update_talkboy_state',
+        description: 'Update Talkboy state (avatar state, transcript, messages, etc.).',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            avatarState: {
+              type: 'string',
+              enum: ['idle', 'listening', 'thinking', 'speaking'],
+              description: 'The avatar state to set',
+            },
+            transcript: {
+              type: 'string',
+              description: 'Set the current transcript text',
+            },
+          },
+          required: [],
+        },
+      },
+      // Media tools
+      {
+        name: 'analyze_image',
+        description: 'Analyze an image using Claude vision API. Returns a description of the image content.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            dataUrl: {
+              type: 'string',
+              description: 'Base64 data URL of the image (e.g., data:image/png;base64,...)',
+            },
+            fileName: {
+              type: 'string',
+              description: 'Optional filename for the image',
+            },
+            apiKey: {
+              type: 'string',
+              description: 'Optional Anthropic API key (uses ANTHROPIC_API_KEY env var if not provided)',
+            },
+          },
+          required: ['dataUrl'],
+        },
+      },
+      {
+        name: 'open_url',
+        description: 'Open a URL in the default browser.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            url: {
+              type: 'string',
+              description: 'The URL to open (must be http or https)',
+            },
+          },
+          required: ['url'],
         },
       },
     ],
@@ -159,7 +401,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
 
 // Handle tool calls
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  const { name } = request.params;
+  const { name, arguments: args } = request.params;
 
   switch (name) {
     case 'launch_talkboy': {
@@ -205,6 +447,102 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           {
             type: 'text',
             text: JSON.stringify(history, null, 2),
+          },
+        ],
+      };
+    }
+
+    case 'get_claude_session': {
+      const session = await getSession();
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(session, null, 2),
+          },
+        ],
+      };
+    }
+
+    case 'set_claude_session': {
+      const result = await setSession(args.sessionId);
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(result, null, 2),
+          },
+        ],
+      };
+    }
+
+    case 'disconnect_claude_session': {
+      const result = await disconnectSession();
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(result, null, 2),
+          },
+        ],
+      };
+    }
+
+    case 'get_pending_message': {
+      const pending = await getPendingMessage();
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(pending, null, 2),
+          },
+        ],
+      };
+    }
+
+    case 'respond_to_talkboy': {
+      const result = await respondToMessage(args.content);
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(result, null, 2),
+          },
+        ],
+      };
+    }
+
+    case 'update_talkboy_state': {
+      const result = await updateState(args);
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(result, null, 2),
+          },
+        ],
+      };
+    }
+
+    case 'analyze_image': {
+      const result = await analyzeImage(args.dataUrl, args.fileName, args.apiKey);
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(result, null, 2),
+          },
+        ],
+      };
+    }
+
+    case 'open_url': {
+      const result = await openUrl(args.url);
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(result, null, 2),
           },
         ],
       };

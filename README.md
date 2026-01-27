@@ -111,10 +111,16 @@ bin/
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/api/status` | GET | Health check, avatar state |
-| `/api/session` | GET/POST/DELETE | Manage Claude session ID |
-| `/api/claude-code` | POST | Send message, get streaming response |
+| `/api/transcript` | GET | Latest voice transcript |
 | `/api/history` | GET | Get conversation messages |
 | `/api/state` | POST | Sync state from browser |
+| `/api/session` | GET/POST/DELETE | Manage Claude session ID |
+| `/api/pending` | GET | Check for pending IPC messages |
+| `/api/respond` | POST | Send response via IPC |
+| `/api/send` | POST | Send message (SSE streaming) |
+| `/api/analyze-image` | POST | Analyze image via Claude vision |
+| `/api/open-url` | POST | Open URL in browser |
+| `/api/claude-code` | POST | Send message, get streaming response |
 
 ## Roadmap
 
@@ -146,12 +152,37 @@ Restart Claude Code after adding the configuration.
 
 ### Available Tools
 
+**Core Tools**
+
 | Tool | Description |
 |------|-------------|
 | `launch_talkboy` | Start Talkboy and open in browser |
 | `get_talkboy_status` | Check if running and current state |
 | `get_transcript` | Get latest voice transcript |
-| `get_conversation_history` | Get full chat history |
+| `get_conversation_history` | Get full chat history from current tape |
+
+**Session Management**
+
+| Tool | Description |
+|------|-------------|
+| `get_claude_session` | Get current Claude Code session ID |
+| `set_claude_session` | Connect Talkboy to a Claude session |
+| `disconnect_claude_session` | Disconnect current session |
+
+**IPC Mode** (for Claude Code integration)
+
+| Tool | Description |
+|------|-------------|
+| `get_pending_message` | Poll for user messages awaiting response |
+| `respond_to_talkboy` | Send response back to Talkboy |
+| `update_talkboy_state` | Update avatar state, transcript, etc. |
+
+**Media**
+
+| Tool | Description |
+|------|-------------|
+| `analyze_image` | Analyze image via Claude vision API |
+| `open_url` | Open URL in default browser |
 
 ## Tech Stack
 
