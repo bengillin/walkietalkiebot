@@ -97,7 +97,7 @@ function ToolBadge({ activity }: { activity: DisplayActivity }) {
 function CollapsibleTools({
   activities,
   isLive = false,
-  messageId
+  messageId: _messageId
 }: {
   activities: DisplayActivity[]
   isLive?: boolean

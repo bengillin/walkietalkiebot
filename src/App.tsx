@@ -68,7 +68,8 @@ function App() {
     setConnectedSessionId(null)
   }
 
-  const { theme, setTheme, themes } = useTheme()
+  // Theme context applies mcallister theme via data-theme attribute
+  useTheme()
 
   const {
     avatarState,
@@ -731,33 +732,6 @@ function App() {
                   </svg>
                 </button>
               )}
-            </div>
-
-            <div className="settings__section">
-              <h3 className="settings__section-title">Theme</h3>
-              <div className="settings__theme-grid">
-                {themes.map((t) => (
-                  <label
-                    key={t.name}
-                    className={`settings__theme-option ${theme === t.name ? 'settings__theme-option--active' : ''}`}
-                  >
-                    <input
-                      type="radio"
-                      name="theme"
-                      value={t.name}
-                      checked={theme === t.name}
-                      onChange={() => setTheme(t.name)}
-                    />
-                    <span className="settings__theme-name">{t.displayName}</span>
-                    <span className="settings__theme-desc">{t.description}</span>
-                    <span className="settings__theme-check">
-                      <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
-                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                      </svg>
-                    </span>
-                  </label>
-                ))}
-              </div>
             </div>
 
             <label className="settings__toggle">

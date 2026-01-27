@@ -24,9 +24,10 @@
 }
 
 .unified-input-bar__field {
-  width: 100%;
-  min-height: 48px;
+  flex: 1;
+  min-height: 44px;
   max-height: 200px;
+  height: auto;
   padding: 12px 18px;
   background: var(--bg-tertiary);
   border: 1px solid var(--border-light);
@@ -37,7 +38,7 @@
   outline: none;
   resize: none;
   overflow-y: auto;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s, height 0.1s ease;
   font-family: inherit;
 }
 

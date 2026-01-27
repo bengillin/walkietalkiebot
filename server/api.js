@@ -191,7 +191,7 @@ api.post("/claude-code", async (c) => {
     const voiceMessage = `${contextBlock}[VOICE MODE - Keep responses to 1-2 sentences, no markdown, speak naturally]
 
 User: ${message}`;
-    const args = ["-p", voiceMessage, "--output-format", "stream-json", "--verbose", "--allowedTools", "Read,Edit,Write,Bash"];
+    const args = ["-p", voiceMessage, "--output-format", "stream-json", "--verbose", "--permission-mode", "bypassPermissions", "--no-session-persistence"];
     const claudePath = process.env.CLAUDE_PATH || "claude";
     console.log("Spawning claude:", claudePath, args, state.claudeSessionId ? "(resuming session)" : "(new session)");
     const claude = spawn(claudePath, args, {

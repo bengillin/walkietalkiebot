@@ -29,7 +29,7 @@ export function UnifiedInputBar({
 }: UnifiedInputBarProps) {
   const [text, setText] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const lastSubmittedRef = useRef<string>('')
+  const justSubmittedRef = useRef(false)
 
   // Auto-resize textarea based on content
   const adjustTextareaHeight = useCallback(() => {
@@ -42,13 +42,13 @@ export function UnifiedInputBar({
 
   // Sync transcript into text field while listening
   useEffect(() => {
-    // When transcript is cleared (empty), always clear the text field
-    if (!transcript) {
-      setText('')
+    // Don't sync transcript right after submission - it might be stale
+    if (justSubmittedRef.current) {
       return
     }
-    // Skip syncing if transcript matches what we just submitted
-    if (transcript.trim() === lastSubmittedRef.current) {
+    // When transcript is cleared (empty), clear the text field
+    if (!transcript) {
+      setText('')
       return
     }
     // Sync transcript to text while listening
@@ -65,16 +65,17 @@ export function UnifiedInputBar({
   const handleSubmit = useCallback(() => {
     const toSend = text.trim()
     if (toSend && !isDisabled) {
-      lastSubmittedRef.current = toSend
+      // Mark that we just submitted to ignore stale transcript updates
+      justSubmittedRef.current = true
       onSubmit(toSend)
       setText('')
       // Reset textarea height
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto'
       }
-      // Clear lastSubmittedRef after a short delay so future transcripts can sync
+      // Allow transcript syncing again after a short delay
       setTimeout(() => {
-        lastSubmittedRef.current = ''
+        justSubmittedRef.current = false
       }, 500)
     }
   }, [text, isDisabled, onSubmit])

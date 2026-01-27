@@ -37,10 +37,14 @@ export function TapeDeck({
 }: TapeDeckProps) {
   const [inputValue, setInputValue] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const justSubmittedRef = useRef(false)
 
-  // Sync transcript to input when listening
+  // Sync transcript to input when listening, but not right after submit
   useEffect(() => {
-    if (isListening && transcript) {
+    if (justSubmittedRef.current) {
+      return
+    }
+    if (isListening) {
       setInputValue(transcript)
     }
   }, [isListening, transcript])
@@ -48,8 +52,13 @@ export function TapeDeck({
   const handleSubmit = () => {
     const text = inputValue.trim()
     if (text && !isDisabled) {
+      justSubmittedRef.current = true
       onSubmit(text)
       setInputValue('')
+      // Reset the flag after a short delay
+      setTimeout(() => {
+        justSubmittedRef.current = false
+      }, 500)
     }
   }
 
@@ -60,9 +69,23 @@ export function TapeDeck({
     }
   }
 
+  const adjustTextareaHeight = () => {
+    const textarea = textareaRef.current
+    if (textarea) {
+      textarea.style.height = 'auto'
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`
+    }
+  }
+
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setInputValue(e.target.value)
+    adjustTextareaHeight()
   }
+
+  // Adjust height when input value changes (e.g., from transcript)
+  useEffect(() => {
+    adjustTextareaHeight()
+  }, [inputValue])
 
   const handleSelectTape = (id: string) => {
     onSelectConversation(id)

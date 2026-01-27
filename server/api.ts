@@ -258,7 +258,8 @@ api.post('/claude-code', async (c) => {
 
 User: ${message}`
     // Use stream-json format for structured output with tool call visibility
-    const args = ['-p', voiceMessage, '--output-format', 'stream-json', '--verbose', '--allowedTools', 'Read,Edit,Write,Bash']
+    // Use bypassPermissions mode and no-session-persistence to avoid concurrency conflicts
+    const args = ['-p', voiceMessage, '--output-format', 'stream-json', '--verbose', '--permission-mode', 'bypassPermissions', '--no-session-persistence']
 
     // Find claude in PATH
     const claudePath = process.env.CLAUDE_PATH || 'claude'
