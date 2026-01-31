@@ -13,7 +13,8 @@ import { useWakeWord } from './components/voice/useWakeWord'
 import { useSpeechSynthesis } from './components/voice/useSpeechSynthesis'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
 import { sendMessageStreaming, sendMessageViaClaudeCode, analyzeImage, analyzeImageViaServer, type ActivityEvent } from './lib/claude'
-import { useStore } from './lib/store'
+import { useStore, enableServerSync } from './lib/store'
+import * as api from './lib/api'
 import { useSoundEffects } from './hooks/useSoundEffects'
 import { useTheme } from './contexts/ThemeContext'
 import './App.css'
@@ -28,7 +29,23 @@ function App() {
   const [showSettings, setShowSettings] = useState(false)
   const [showMediaLibrary, setShowMediaLibrary] = useState(false)
   const [isTapeEjected, setIsTapeEjected] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [responseText, setResponseText] = useState('')
+
+  // FAB position and size (draggable/resizable)
+  const [fabPosition, setFabPosition] = useState(() => {
+    const saved = localStorage.getItem('talkboy_fab_position')
+    return saved ? JSON.parse(saved) : { x: 20, y: 100 } // Default: bottom-right offset from edges
+  })
+  const [fabSize, setFabSize] = useState(() => {
+    const saved = localStorage.getItem('talkboy_fab_size')
+    return saved ? parseInt(saved, 10) : 64
+  })
+  const [isDraggingFab, setIsDraggingFab] = useState(false)
+  const [isResizingFab, setIsResizingFab] = useState(false)
+  const fabRef = useRef<HTMLButtonElement>(null)
+  const dragStartRef = useRef<{ x: number; y: number; fabX: number; fabY: number } | null>(null)
+  const resizeStartRef = useRef<{ size: number; startY: number } | null>(null)
   const [error, setError] = useState('')
   const [useClaudeCode, setUseClaudeCode] = useState(() =>
     localStorage.getItem('talkboy_use_claude_code') === 'true'
@@ -110,7 +127,40 @@ function App() {
     // Trigger word delay
     triggerWordDelay,
     setTriggerWordDelay,
+    // Server sync
+    syncFromServer,
+    migrateToServer,
   } = useStore()
+
+  // Initialize server sync and handle migration
+  useEffect(() => {
+    const initServerSync = async () => {
+      try {
+        const dbAvailable = await api.isDatabaseAvailable()
+        if (dbAvailable) {
+          enableServerSync()
+
+          // Check if migration is needed
+          if (api.needsMigration()) {
+            console.log('Migrating localStorage data to server...')
+            const success = await migrateToServer()
+            if (success) {
+              console.log('Migration complete')
+              // Refresh from server
+              await syncFromServer()
+            }
+          } else {
+            // Just sync from server
+            await syncFromServer()
+          }
+        }
+      } catch (err) {
+        console.warn('Server sync unavailable:', err)
+      }
+    }
+
+    initServerSync()
+  }, [migrateToServer, syncFromServer])
 
   // Handle onboarding completion - Claude Code is always the default mode
   const handleOnboardingComplete = useCallback((settings: OnboardingSettings) => {
@@ -551,8 +601,14 @@ function App() {
     }
   }, [continuousListeningEnabled, isListening, avatarState, useClaudeCode, apiKey, isSpeaking, handleTalkStart])
 
-  // Restart listening after response in continuous mode
+  // Detect mobile (iOS Safari doesn't allow auto-starting mic without user gesture)
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+
+  // Restart listening after response in continuous mode (desktop only)
   useEffect(() => {
+    // Skip auto-restart on mobile - iOS requires user gesture for mic access
+    if (isMobile) return
+
     if (continuousListeningEnabled && avatarState === 'idle' && !isListening && !isSpeaking) {
       const canTalk = useClaudeCode || apiKey
       if (canTalk) {
@@ -564,7 +620,109 @@ function App() {
         return () => clearTimeout(timer)
       }
     }
-  }, [continuousListeningEnabled, avatarState, isListening, isSpeaking, useClaudeCode, apiKey, startListening])
+  }, [continuousListeningEnabled, avatarState, isListening, isSpeaking, useClaudeCode, apiKey, startListening, isMobile])
+
+  // On mobile, show visual prompt to tap when ready for next turn
+  const showTapToTalk = isMobile && continuousListeningEnabled && avatarState === 'idle' && !isListening && !isSpeaking
+
+  // FAB drag handlers
+  const handleFabDragStart = useCallback((e: React.TouchEvent | React.MouseEvent) => {
+    // Don't start drag if clicking the resize handle
+    if ((e.target as HTMLElement).classList.contains('app__record-fab-resize')) return
+
+    e.preventDefault()
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
+
+    dragStartRef.current = {
+      x: clientX,
+      y: clientY,
+      fabX: fabPosition.x,
+      fabY: fabPosition.y
+    }
+    setIsDraggingFab(true)
+  }, [fabPosition])
+
+  const handleFabDragMove = useCallback((e: TouchEvent | MouseEvent) => {
+    if (!dragStartRef.current || !isDraggingFab) return
+
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
+
+    const deltaX = dragStartRef.current.x - clientX
+    const deltaY = dragStartRef.current.y - clientY
+
+    // Position is from bottom-right, so invert the deltas
+    const newX = Math.max(10, Math.min(window.innerWidth - fabSize - 10, dragStartRef.current.fabX + deltaX))
+    const newY = Math.max(10, Math.min(window.innerHeight - fabSize - 10, dragStartRef.current.fabY + deltaY))
+
+    setFabPosition({ x: newX, y: newY })
+  }, [isDraggingFab, fabSize])
+
+  const handleFabDragEnd = useCallback(() => {
+    if (isDraggingFab) {
+      localStorage.setItem('talkboy_fab_position', JSON.stringify(fabPosition))
+    }
+    dragStartRef.current = null
+    setIsDraggingFab(false)
+  }, [isDraggingFab, fabPosition])
+
+  // FAB resize handlers
+  const handleFabResizeStart = useCallback((e: React.TouchEvent | React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
+    resizeStartRef.current = { size: fabSize, startY: clientY }
+    setIsResizingFab(true)
+  }, [fabSize])
+
+  const handleFabResizeMove = useCallback((e: TouchEvent | MouseEvent) => {
+    if (!resizeStartRef.current || !isResizingFab) return
+
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
+    const deltaY = resizeStartRef.current.startY - clientY
+    const newSize = Math.max(48, Math.min(120, resizeStartRef.current.size + deltaY))
+    setFabSize(newSize)
+  }, [isResizingFab])
+
+  const handleFabResizeEnd = useCallback(() => {
+    if (isResizingFab) {
+      localStorage.setItem('talkboy_fab_size', String(fabSize))
+    }
+    resizeStartRef.current = null
+    setIsResizingFab(false)
+  }, [isResizingFab, fabSize])
+
+  // Global listeners for drag/resize
+  useEffect(() => {
+    if (isDraggingFab) {
+      window.addEventListener('mousemove', handleFabDragMove)
+      window.addEventListener('mouseup', handleFabDragEnd)
+      window.addEventListener('touchmove', handleFabDragMove)
+      window.addEventListener('touchend', handleFabDragEnd)
+      return () => {
+        window.removeEventListener('mousemove', handleFabDragMove)
+        window.removeEventListener('mouseup', handleFabDragEnd)
+        window.removeEventListener('touchmove', handleFabDragMove)
+        window.removeEventListener('touchend', handleFabDragEnd)
+      }
+    }
+  }, [isDraggingFab, handleFabDragMove, handleFabDragEnd])
+
+  useEffect(() => {
+    if (isResizingFab) {
+      window.addEventListener('mousemove', handleFabResizeMove)
+      window.addEventListener('mouseup', handleFabResizeEnd)
+      window.addEventListener('touchmove', handleFabResizeMove)
+      window.addEventListener('touchend', handleFabResizeEnd)
+      return () => {
+        window.removeEventListener('mousemove', handleFabResizeMove)
+        window.removeEventListener('mouseup', handleFabResizeEnd)
+        window.removeEventListener('touchmove', handleFabResizeMove)
+        window.removeEventListener('touchend', handleFabResizeEnd)
+      }
+    }
+  }, [isResizingFab, handleFabResizeMove, handleFabResizeEnd])
 
   // Save API key
   const handleSaveApiKey = (e: React.FormEvent) => {
@@ -608,6 +766,7 @@ function App() {
             <Logo />
           </div>
         </div>
+        {/* Desktop header actions - hidden on mobile */}
         <div className="app__header-actions">
           <button
             className="app__header-btn"
@@ -640,19 +799,80 @@ function App() {
           </button>
           {/* Record button - red like the original Talkboy */}
           <button
-            className={`app__header-btn app__header-btn--record ${isListening ? 'app__header-btn--recording' : ''}`}
+            className={`app__header-btn app__header-btn--record ${isListening ? 'app__header-btn--recording' : ''} ${showTapToTalk ? 'app__header-btn--tap-to-talk' : ''}`}
             onMouseDown={!continuousListeningEnabled ? handleTalkStart : undefined}
             onMouseUp={!continuousListeningEnabled ? handleTalkEnd : undefined}
             onMouseLeave={!continuousListeningEnabled && isListening ? handleTalkEnd : undefined}
             onClick={continuousListeningEnabled ? (isListening ? handleTalkEnd : handleTalkStart) : undefined}
+            onTouchStart={continuousListeningEnabled ? handleTalkStart : undefined}
             disabled={(!useClaudeCode && !apiKey) || isSpeaking || avatarState === 'thinking' || isTapeEjected}
-            title={continuousListeningEnabled ? 'Click to toggle recording' : 'Hold to record'}
+            title={showTapToTalk ? 'Tap to talk' : (continuousListeningEnabled ? 'Click to toggle recording' : 'Hold to record')}
           >
             <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
               <circle cx="12" cy="12" r="8" />
             </svg>
           </button>
         </div>
+
+        {/* Mobile menu button - shown only on mobile */}
+        <button
+          className="app__mobile-menu-btn"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          title="Menu"
+        >
+          <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+          </svg>
+        </button>
+
+        {/* Mobile dropdown menu */}
+        {mobileMenuOpen && (
+          <>
+            <div
+              className="app__mobile-menu-backdrop"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+            <div className="app__mobile-menu">
+              <button
+                className="app__mobile-menu-item"
+                onClick={() => {
+                  setShowMediaLibrary(true)
+                  setMobileMenuOpen(false)
+                }}
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M22 16V4c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2zm-11-4l2.03 2.71L16 11l4 5H8l3-4zM2 6v14c0 1.1.9 2 2 2h14v-2H4V6H2z"/>
+                </svg>
+                Media Library
+              </button>
+              <button
+                className="app__mobile-menu-item"
+                onClick={() => {
+                  setShowSettings(true)
+                  setMobileMenuOpen(false)
+                }}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/>
+                  <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+                </svg>
+                Settings
+              </button>
+              <button
+                className="app__mobile-menu-item"
+                onClick={() => {
+                  setIsTapeEjected(!isTapeEjected)
+                  setMobileMenuOpen(false)
+                }}
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M5 17h14v2H5zm7-12L5.33 15h13.34z" />
+                </svg>
+                {isTapeEjected ? 'Close Tapes' : 'Eject Tape'}
+              </button>
+            </div>
+          </>
+        )}
       </header>
 
       {/* Main chat timeline */}
@@ -746,6 +966,79 @@ function App() {
           onClose={() => setShowMediaLibrary(false)}
         />
       )}
+
+      {/* Floating Record Button for mobile - draggable and resizable */}
+      <button
+        ref={fabRef}
+        className={`app__record-fab ${isListening ? 'app__record-fab--recording' : ''} ${showTapToTalk ? 'app__record-fab--tap-to-talk' : ''} ${isDraggingFab ? 'app__record-fab--dragging' : ''}`}
+        style={{
+          right: fabPosition.x,
+          bottom: fabPosition.y,
+          width: fabSize,
+          height: fabSize
+        }}
+        onClick={() => {
+          // Don't trigger click if we just finished dragging
+          if (dragStartRef.current) return
+          if (continuousListeningEnabled) {
+            isListening ? handleTalkEnd() : handleTalkStart()
+          } else {
+            handleTalkStart()
+          }
+        }}
+        onMouseDown={handleFabDragStart}
+        onTouchStart={(e) => {
+          // Long press for drag, tap for record
+          const touchStart = Date.now()
+          const touch = e.touches[0]
+          const startX = touch.clientX
+          const startY = touch.clientY
+
+          const checkForDrag = setTimeout(() => {
+            handleFabDragStart(e)
+          }, 300) // 300ms hold to start drag
+
+          const handleTouchMove = (moveE: TouchEvent) => {
+            const moveTouch = moveE.touches[0]
+            const dx = Math.abs(moveTouch.clientX - startX)
+            const dy = Math.abs(moveTouch.clientY - startY)
+            if (dx > 10 || dy > 10) {
+              clearTimeout(checkForDrag)
+              handleFabDragStart(e)
+            }
+          }
+
+          const handleTouchEnd = () => {
+            clearTimeout(checkForDrag)
+            window.removeEventListener('touchmove', handleTouchMove)
+            window.removeEventListener('touchend', handleTouchEnd)
+
+            // If not dragging and quick tap, trigger record
+            if (!isDraggingFab && Date.now() - touchStart < 300) {
+              if (continuousListeningEnabled) {
+                isListening ? handleTalkEnd() : handleTalkStart()
+              } else {
+                handleTalkStart()
+              }
+            }
+          }
+
+          window.addEventListener('touchmove', handleTouchMove)
+          window.addEventListener('touchend', handleTouchEnd)
+        }}
+        disabled={(!useClaudeCode && !apiKey) || isSpeaking || avatarState === 'thinking' || isTapeEjected}
+        aria-label={isListening ? 'Stop recording' : 'Start recording'}
+      >
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <circle cx="12" cy="12" r="10" />
+        </svg>
+        {/* Resize handle */}
+        <div
+          className="app__record-fab-resize"
+          onMouseDown={handleFabResizeStart}
+          onTouchStart={handleFabResizeStart}
+        />
+      </button>
     </div>
   )
 }

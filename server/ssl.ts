@@ -6,10 +6,13 @@ import selfsigned from 'selfsigned'
 const TALKBOY_DIR = join(homedir(), '.talkboy')
 const CERT_PATH = join(TALKBOY_DIR, 'cert.pem')
 const KEY_PATH = join(TALKBOY_DIR, 'key.pem')
+const TAILSCALE_CERT_PATH = join(TALKBOY_DIR, 'tailscale.crt')
+const TAILSCALE_KEY_PATH = join(TALKBOY_DIR, 'tailscale.key')
 
 export interface SSLCerts {
   cert: string
   key: string
+  isTailscale?: boolean
 }
 
 export function getSSLCerts(): SSLCerts {
@@ -18,7 +21,17 @@ export function getSSLCerts(): SSLCerts {
     mkdirSync(TALKBOY_DIR, { recursive: true })
   }
 
-  // Check if certs already exist
+  // Prefer Tailscale certs if available (real certs, no browser warnings)
+  if (existsSync(TAILSCALE_CERT_PATH) && existsSync(TAILSCALE_KEY_PATH)) {
+    console.log('Using Tailscale HTTPS certificates')
+    return {
+      cert: readFileSync(TAILSCALE_CERT_PATH, 'utf-8'),
+      key: readFileSync(TAILSCALE_KEY_PATH, 'utf-8'),
+      isTailscale: true,
+    }
+  }
+
+  // Fall back to self-signed certs
   if (existsSync(CERT_PATH) && existsSync(KEY_PATH)) {
     return {
       cert: readFileSync(CERT_PATH, 'utf-8'),

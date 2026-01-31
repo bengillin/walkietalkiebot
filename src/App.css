@@ -35,6 +35,72 @@
   gap: 8px;
 }
 
+/* Mobile menu - hidden on desktop */
+.app__mobile-menu-btn {
+  display: none;
+  background: linear-gradient(180deg, #404040 0%, #2a2a2a 100%);
+  border: 2px solid #555;
+  border-bottom-color: #222;
+  border-right-color: #222;
+  color: #ccc;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 6px;
+  align-items: center;
+  justify-content: center;
+}
+
+.app__mobile-menu {
+  position: absolute;
+  top: 100%;
+  right: 12px;
+  background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 100%);
+  border: 2px solid #555;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  z-index: 200;
+  min-width: 160px;
+  overflow: hidden;
+}
+
+.app__mobile-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  background: transparent;
+  border: none;
+  color: #ddd;
+  font-size: 15px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.app__mobile-menu-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.app__mobile-menu-item:active {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.app__mobile-menu-item svg {
+  width: 20px;
+  height: 20px;
+  opacity: 0.8;
+}
+
+.app__mobile-menu-item--danger {
+  color: #ff6b6b;
+}
+
+.app__mobile-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 199;
+}
+
 .app__logo {
   height: 56px;
   margin-top: 24px;
@@ -50,6 +116,8 @@
 .app__avatar-status {
   width: 60px;
   height: 60px;
+  flex-shrink: 0;
+  aspect-ratio: 1;
 }
 
 /* Conversation dropdown as bubble next to avatar */
@@ -277,6 +345,29 @@
   50% {
     transform: scale(1.15);
     opacity: 0.8;
+  }
+}
+
+/* Tap to talk pulse for mobile continuous mode */
+.app__header-btn--record.app__header-btn--tap-to-talk {
+  animation: tap-to-talk-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes tap-to-talk-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.3),
+      0 0 15px rgba(255, 0, 0, 0.5),
+      0 2px 0 rgba(80, 0, 0, 0.8);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.3),
+      0 0 30px rgba(255, 0, 0, 0.8),
+      0 0 60px rgba(255, 0, 0, 0.4),
+      0 2px 0 rgba(80, 0, 0, 0.8);
   }
 }
 
@@ -653,7 +744,7 @@
   color: var(--text-muted);
 }
 
-/* Responsive */
+/* Responsive - Tablet */
 @media (max-width: 768px) {
   .app__main {
     padding: 24px 16px 40px;
@@ -666,6 +757,216 @@
 
   .app__controls {
     padding: 0 16px;
+  }
+}
+
+/* Responsive - Mobile */
+@media (max-width: 480px) {
+  /* Header - simplified for mobile */
+  .app__header {
+    padding: 8px 12px;
+    min-height: auto;
+  }
+
+  .app__header-left {
+    gap: 10px;
+  }
+
+  /* Avatar - ensure circular and proper size */
+  .app__avatar-status {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    flex-shrink: 0;
+  }
+
+  .app__avatar-status .speaker-avatar--small .speaker-avatar__grille {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* Logo - smaller on mobile */
+  .app__logo {
+    height: 28px;
+    margin-top: 8px;
+    margin-bottom: 4px;
+  }
+
+  /* Hide all individual header buttons on mobile - use menu instead */
+  .app__header-actions {
+    display: none;
+  }
+
+  /* Show mobile menu button */
+  .app__mobile-menu-btn {
+    display: flex;
+  }
+
+  /* Chat area needs bottom padding for FAB */
+  .app__main {
+    padding-bottom: 80px;
+  }
+
+  /* Error message */
+  .app__error {
+    margin: 8px 12px;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  /* Settings drawer full width on mobile */
+  .settings__drawer {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Media library full width */
+  .media-library__drawer {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+/* Floating Record Button (FAB) for mobile - draggable and resizable */
+.app__record-fab {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .app__record-fab {
+    display: flex;
+    position: fixed;
+    /* bottom/right/width/height set via inline style */
+    border-radius: 50%;
+    background: linear-gradient(180deg,
+      rgba(220, 50, 50, 0.95) 0%,
+      rgba(180, 30, 30, 0.95) 50%,
+      rgba(140, 20, 20, 0.95) 100%
+    );
+    border: 3px solid #8b0000;
+    box-shadow:
+      inset 0 2px 0 rgba(255, 255, 255, 0.3),
+      inset 0 -2px 4px rgba(0, 0, 0, 0.3),
+      0 4px 12px rgba(0, 0, 0, 0.4),
+      0 0 20px rgba(255, 0, 0, 0.3);
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 100;
+    transition: box-shadow 0.15s ease, background 0.15s ease;
+    touch-action: none;
+    user-select: none;
+  }
+
+  .app__record-fab:active:not(.app__record-fab--dragging) {
+    transform: scale(0.95);
+  }
+
+  .app__record-fab--dragging {
+    opacity: 0.8;
+    cursor: grabbing;
+  }
+
+  .app__record-fab svg {
+    width: 45%;
+    height: 45%;
+    fill: white;
+    pointer-events: none;
+  }
+
+  /* Resize handle - small corner grip */
+  .app__record-fab-resize {
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(135deg, #666 0%, #444 100%);
+    border: 2px solid #888;
+    border-radius: 50%;
+    cursor: nwse-resize;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .app__record-fab-resize::after {
+    content: '⤢';
+    font-size: 12px;
+    color: #ccc;
+    transform: rotate(90deg);
+  }
+
+  .app__record-fab:hover .app__record-fab-resize,
+  .app__record-fab:active .app__record-fab-resize {
+    opacity: 1;
+  }
+
+  .app__record-fab--recording {
+    background: linear-gradient(180deg,
+      rgba(255, 100, 100, 0.95) 0%,
+      rgba(255, 50, 50, 0.95) 50%,
+      rgba(220, 30, 30, 0.95) 100%
+    );
+    box-shadow:
+      inset 0 2px 0 rgba(255, 255, 255, 0.3),
+      inset 0 -2px 4px rgba(0, 0, 0, 0.3),
+      0 4px 12px rgba(0, 0, 0, 0.4),
+      0 0 30px rgba(255, 0, 0, 0.6),
+      0 0 60px rgba(255, 0, 0, 0.3);
+    animation: fab-recording-pulse 1s ease-in-out infinite;
+  }
+
+  @keyframes fab-recording-pulse {
+    0%, 100% {
+      box-shadow:
+        inset 0 2px 0 rgba(255, 255, 255, 0.3),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.3),
+        0 4px 12px rgba(0, 0, 0, 0.4),
+        0 0 30px rgba(255, 0, 0, 0.6),
+        0 0 60px rgba(255, 0, 0, 0.3);
+    }
+    50% {
+      box-shadow:
+        inset 0 2px 0 rgba(255, 255, 255, 0.3),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.3),
+        0 4px 12px rgba(0, 0, 0, 0.4),
+        0 0 40px rgba(255, 0, 0, 0.8),
+        0 0 80px rgba(255, 0, 0, 0.4);
+    }
+  }
+
+  .app__record-fab--tap-to-talk {
+    animation: fab-tap-pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes fab-tap-pulse {
+    0%, 100% {
+      transform: scale(1);
+      box-shadow:
+        inset 0 2px 0 rgba(255, 255, 255, 0.3),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.3),
+        0 4px 12px rgba(0, 0, 0, 0.4),
+        0 0 20px rgba(255, 0, 0, 0.3);
+    }
+    50% {
+      transform: scale(1.1);
+      box-shadow:
+        inset 0 2px 0 rgba(255, 255, 255, 0.3),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.3),
+        0 4px 12px rgba(0, 0, 0, 0.4),
+        0 0 40px rgba(255, 0, 0, 0.6),
+        0 0 60px rgba(255, 0, 0, 0.3);
+    }
+  }
+
+  .app__record-fab:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 }
 

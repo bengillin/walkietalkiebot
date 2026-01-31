@@ -135,3 +135,51 @@
   cursor: not-allowed;
 }
 
+/* Mobile styles */
+@media (max-width: 480px) {
+  .tape-deck__main {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  /* Cassette slot 2/3 size on mobile */
+  .tape-deck__cassette-slot {
+    width: 80px;
+    height: 50px;
+  }
+
+  .tape-deck__input {
+    min-height: 44px;
+    padding: 10px 12px;
+    font-size: 16px;
+    border-radius: 6px;
+  }
+
+  .tape-deck__input::placeholder {
+    font-size: 14px;
+  }
+
+  .tape-deck__send-btn {
+    width: 50px;
+    min-height: 44px;
+    border-radius: 6px;
+  }
+
+  .tape-deck__send-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 360px) {
+  .tape-deck__cassette-slot {
+    width: 60px;
+    height: 40px;
+  }
+
+  .tape-deck__send-btn {
+    width: 44px;
+  }
+}
+

@@ -5,9 +5,19 @@ import selfsigned from "selfsigned";
 const TALKBOY_DIR = join(homedir(), ".talkboy");
 const CERT_PATH = join(TALKBOY_DIR, "cert.pem");
 const KEY_PATH = join(TALKBOY_DIR, "key.pem");
+const TAILSCALE_CERT_PATH = join(TALKBOY_DIR, "tailscale.crt");
+const TAILSCALE_KEY_PATH = join(TALKBOY_DIR, "tailscale.key");
 function getSSLCerts() {
   if (!existsSync(TALKBOY_DIR)) {
     mkdirSync(TALKBOY_DIR, { recursive: true });
+  }
+  if (existsSync(TAILSCALE_CERT_PATH) && existsSync(TAILSCALE_KEY_PATH)) {
+    console.log("Using Tailscale HTTPS certificates");
+    return {
+      cert: readFileSync(TAILSCALE_CERT_PATH, "utf-8"),
+      key: readFileSync(TAILSCALE_KEY_PATH, "utf-8"),
+      isTailscale: true
+    };
   }
   if (existsSync(CERT_PATH) && existsSync(KEY_PATH)) {
     return {

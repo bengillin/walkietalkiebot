@@ -6,14 +6,27 @@ import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import { getSSLCerts } from "./ssl.js";
 import { api } from "./api.js";
+import { initDb, closeDb } from "./db/index.js";
+import { startTelegramBot, stopTelegramBot } from "./telegram/index.js";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const distPath = join(__dirname, "..", "dist");
+let server = null;
 function startServer(port = 5173) {
   return new Promise((resolve, reject) => {
     if (!existsSync(distPath)) {
       reject(new Error(`dist/ not found at ${distPath}. Run 'npm run build' first.`));
       return;
     }
+    try {
+      initDb();
+    } catch (err) {
+      console.error("Failed to initialize database:", err);
+      reject(err);
+      return;
+    }
+    startTelegramBot().catch((err) => {
+      console.log("Telegram bot not started:", err.message);
+    });
     const app = new Hono();
     app.route("/api", api);
     app.use("/*", serveStatic({ root: distPath.replace(process.cwd(), ".") }));
@@ -30,7 +43,7 @@ function startServer(port = 5173) {
       key: certs.key,
       cert: certs.cert
     };
-    const server = createHttpsServer(serverOptions, async (req, res) => {
+    server = createHttpsServer(serverOptions, async (req, res) => {
       const url = new URL(req.url || "/", `https://localhost:${port}`);
       const headers = new Headers();
       for (const [key, value] of Object.entries(req.headers)) {
@@ -86,10 +99,32 @@ function startServer(port = 5173) {
     });
   });
 }
+async function stopServer() {
+  stopTelegramBot();
+  closeDb();
+  if (server) {
+    await new Promise((resolve) => {
+      server.close(() => resolve());
+    });
+    server = null;
+  }
+}
+function setupShutdownHandlers() {
+  const shutdown = async (signal) => {
+    console.log(`
+Received ${signal}, shutting down gracefully...`);
+    await stopServer();
+    process.exit(0);
+  };
+  process.on("SIGINT", () => shutdown("SIGINT"));
+  process.on("SIGTERM", () => shutdown("SIGTERM"));
+}
 if (import.meta.url === `file://${process.argv[1]}`) {
+  setupShutdownHandlers();
   const port = parseInt(process.env.PORT || "5173", 10);
   startServer(port).catch(console.error);
 }
 export {
-  startServer
+  startServer,
+  stopServer
 };

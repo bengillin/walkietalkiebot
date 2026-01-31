@@ -88,6 +88,7 @@ export interface AppState {
   createConversation: () => void
   loadConversation: (id: string) => void
   deleteConversation: (id: string) => void
+  renameConversation: (id: string, title: string) => void
 
   // Context from past conversations
   contextConversationIds: string[]
@@ -145,4 +146,10 @@ export interface AppState {
   updateImageAnalysis: (id: string, updates: Partial<ImageAnalysis>) => void
   clearImageAnalyses: () => void
   getImageContext: () => string // Returns formatted string of all analyzed images for context
+
+  // Server sync
+  serverSyncEnabled: boolean
+  setServerSyncEnabled: (enabled: boolean) => void
+  syncFromServer: () => Promise<void>
+  migrateToServer: () => Promise<boolean>
 }

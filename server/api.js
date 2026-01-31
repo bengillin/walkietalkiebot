@@ -3,12 +3,230 @@ import { cors } from "hono/cors";
 import { streamSSE } from "hono/streaming";
 import { spawn } from "child_process";
 import { state, updateState } from "./state.js";
+import { isDbConnected } from "./db/index.js";
+import * as conversations from "./db/repositories/conversations.js";
+import * as messages from "./db/repositories/messages.js";
+import * as activities from "./db/repositories/activities.js";
+import * as search from "./db/repositories/search.js";
 const api = new Hono();
 api.use("*", cors());
 api.get("/status", (c) => {
   return c.json({
     running: true,
-    avatarState: state.avatarState
+    avatarState: state.avatarState,
+    dbStatus: isDbConnected() ? "connected" : "unavailable"
+  });
+});
+api.get("/conversations", (c) => {
+  const limit = parseInt(c.req.query("limit") || "50", 10);
+  const offset = parseInt(c.req.query("offset") || "0", 10);
+  const convos = conversations.listConversations(limit, offset);
+  const total = conversations.countConversations();
+  return c.json({
+    conversations: convos.map((conv) => ({
+      id: conv.id,
+      title: conv.title,
+      createdAt: conv.created_at,
+      updatedAt: conv.updated_at,
+      projectId: conv.project_id,
+      parentId: conv.parent_id
+    })),
+    total,
+    limit,
+    offset
+  });
+});
+api.get("/conversations/:id", (c) => {
+  const id = c.req.param("id");
+  const conv = conversations.getConversation(id);
+  if (!conv) {
+    return c.json({ error: "Conversation not found" }, 404);
+  }
+  const msgs = messages.getMessagesForConversation(id);
+  const messageIds = msgs.map((m) => m.id);
+  const imageMap = messages.getImagesForMessages(messageIds);
+  const acts = activities.getActivitiesForConversation(id);
+  return c.json({
+    id: conv.id,
+    title: conv.title,
+    createdAt: conv.created_at,
+    updatedAt: conv.updated_at,
+    projectId: conv.project_id,
+    parentId: conv.parent_id,
+    messages: msgs.map((m) => ({
+      id: m.id,
+      role: m.role,
+      content: m.content,
+      timestamp: m.timestamp,
+      source: m.source,
+      images: (imageMap.get(m.id) || []).map((img) => ({
+        id: img.id,
+        dataUrl: img.data_url,
+        fileName: img.file_name,
+        description: img.description
+      }))
+    })),
+    activities: acts.map((a) => ({
+      id: a.id,
+      tool: a.tool,
+      input: a.input,
+      status: a.status,
+      timestamp: a.timestamp,
+      duration: a.duration,
+      error: a.error
+    }))
+  });
+});
+api.post("/conversations", async (c) => {
+  const body = await c.req.json().catch(() => ({}));
+  const id = body.id || crypto.randomUUID();
+  const title = body.title || "New conversation";
+  const conv = conversations.createConversation({ id, title });
+  return c.json({
+    id: conv.id,
+    title: conv.title,
+    createdAt: conv.created_at,
+    updatedAt: conv.updated_at
+  }, 201);
+});
+api.patch("/conversations/:id", async (c) => {
+  const id = c.req.param("id");
+  const body = await c.req.json();
+  const conv = conversations.updateConversation(id, {
+    title: body.title,
+    projectId: body.projectId,
+    parentId: body.parentId
+  });
+  if (!conv) {
+    return c.json({ error: "Conversation not found" }, 404);
+  }
+  return c.json({
+    id: conv.id,
+    title: conv.title,
+    createdAt: conv.created_at,
+    updatedAt: conv.updated_at
+  });
+});
+api.delete("/conversations/:id", (c) => {
+  const id = c.req.param("id");
+  const deleted = conversations.deleteConversation(id);
+  if (!deleted) {
+    return c.json({ error: "Conversation not found" }, 404);
+  }
+  return c.json({ success: true });
+});
+api.post("/conversations/:id/messages", async (c) => {
+  const conversationId = c.req.param("id");
+  const body = await c.req.json();
+  const conv = conversations.getConversation(conversationId);
+  if (!conv) {
+    return c.json({ error: "Conversation not found" }, 404);
+  }
+  const msg = messages.createMessage({
+    id: body.id || crypto.randomUUID(),
+    conversationId,
+    role: body.role,
+    content: body.content,
+    timestamp: body.timestamp,
+    source: body.source || "web",
+    images: body.images
+  });
+  if (msg.role === "user" && msg.position === 0) {
+    const title = msg.content.length > 40 ? msg.content.slice(0, 40) + "..." : msg.content;
+    conversations.updateConversation(conversationId, { title });
+  }
+  if (body.activities && Array.isArray(body.activities)) {
+    activities.createActivitiesBatch(
+      body.activities.map((a) => ({
+        id: a.id || crypto.randomUUID(),
+        conversationId,
+        messageId: msg.id,
+        tool: a.tool,
+        input: a.input,
+        status: a.status,
+        timestamp: a.timestamp,
+        duration: a.duration,
+        error: a.error
+      }))
+    );
+  }
+  return c.json({
+    id: msg.id,
+    role: msg.role,
+    content: msg.content,
+    timestamp: msg.timestamp,
+    source: msg.source
+  }, 201);
+});
+api.get("/search", (c) => {
+  const query = c.req.query("q") || "";
+  const limit = parseInt(c.req.query("limit") || "50", 10);
+  if (!query.trim()) {
+    return c.json({ results: [] });
+  }
+  const results = search.searchMessages(query, limit);
+  return c.json({
+    query,
+    results: results.map((r) => ({
+      messageId: r.message_id,
+      conversationId: r.conversation_id,
+      conversationTitle: r.conversation_title,
+      role: r.role,
+      content: r.content,
+      timestamp: r.timestamp,
+      snippet: r.snippet
+    }))
+  });
+});
+api.post("/migrate", async (c) => {
+  const body = await c.req.json();
+  const localConversations = body.conversations;
+  if (!localConversations || !Array.isArray(localConversations)) {
+    return c.json({ error: "Invalid conversations data" }, 400);
+  }
+  let imported = 0;
+  let skipped = 0;
+  for (const conv of localConversations) {
+    if (conversations.getConversation(conv.id)) {
+      skipped++;
+      continue;
+    }
+    conversations.createConversation({
+      id: conv.id,
+      title: conv.title
+    });
+    for (const msg of conv.messages || []) {
+      messages.createMessage({
+        id: msg.id,
+        conversationId: conv.id,
+        role: msg.role,
+        content: msg.content,
+        timestamp: msg.timestamp,
+        source: "web",
+        images: msg.images
+      });
+    }
+    if (conv.activities && conv.activities.length > 0) {
+      activities.createActivitiesBatch(
+        conv.activities.map((a) => ({
+          id: a.id,
+          conversationId: conv.id,
+          tool: a.tool,
+          input: a.input,
+          status: a.status,
+          timestamp: a.timestamp,
+          duration: a.duration,
+          error: a.error
+        }))
+      );
+    }
+    imported++;
+  }
+  return c.json({
+    success: true,
+    imported,
+    skipped,
+    total: localConversations.length
   });
 });
 api.get("/transcript", (c) => {

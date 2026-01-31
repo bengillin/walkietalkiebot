@@ -1,15 +1,19 @@
 import { Hono } from 'hono'
 import { serveStatic } from '@hono/node-server/serve-static'
-import { createServer as createHttpsServer, ServerOptions } from 'https'
+import { createServer as createHttpsServer, ServerOptions, Server } from 'https'
 import { IncomingMessage, ServerResponse } from 'http'
 import { readFileSync, existsSync } from 'fs'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 import { getSSLCerts } from './ssl.js'
 import { api } from './api.js'
+import { initDb, closeDb } from './db/index.js'
+import { startTelegramBot, stopTelegramBot } from './telegram/index.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const distPath = join(__dirname, '..', 'dist')
+
+let server: Server | null = null
 
 export function startServer(port: number = 5173): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -18,6 +22,20 @@ export function startServer(port: number = 5173): Promise<void> {
       reject(new Error(`dist/ not found at ${distPath}. Run 'npm run build' first.`))
       return
     }
+
+    // Initialize database
+    try {
+      initDb()
+    } catch (err) {
+      console.error('Failed to initialize database:', err)
+      reject(err)
+      return
+    }
+
+    // Start Telegram bot (non-blocking, will log if token not found)
+    startTelegramBot().catch(err => {
+      console.log('Telegram bot not started:', err.message)
+    })
 
     const app = new Hono()
 
@@ -46,7 +64,7 @@ export function startServer(port: number = 5173): Promise<void> {
       cert: certs.cert,
     }
 
-    const server = createHttpsServer(serverOptions, async (req: IncomingMessage, res: ServerResponse) => {
+    server = createHttpsServer(serverOptions, async (req: IncomingMessage, res: ServerResponse) => {
       // Convert Node request to Web Request
       const url = new URL(req.url || '/', `https://localhost:${port}`)
       const headers = new Headers()
@@ -115,8 +133,33 @@ export function startServer(port: number = 5173): Promise<void> {
   })
 }
 
+export async function stopServer(): Promise<void> {
+  stopTelegramBot()
+  closeDb()
+
+  if (server) {
+    await new Promise<void>((resolve) => {
+      server!.close(() => resolve())
+    })
+    server = null
+  }
+}
+
+// Graceful shutdown handlers
+function setupShutdownHandlers(): void {
+  const shutdown = async (signal: string) => {
+    console.log(`\nReceived ${signal}, shutting down gracefully...`)
+    await stopServer()
+    process.exit(0)
+  }
+
+  process.on('SIGINT', () => shutdown('SIGINT'))
+  process.on('SIGTERM', () => shutdown('SIGTERM'))
+}
+
 // If run directly
 if (import.meta.url === `file://${process.argv[1]}`) {
+  setupShutdownHandlers()
   const port = parseInt(process.env.PORT || '5173', 10)
   startServer(port).catch(console.error)
 }

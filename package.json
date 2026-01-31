@@ -12,6 +12,7 @@
   "type": "module",
   "bin": {
     "talkboy": "bin/talkboy.js",
+    "talkboy-server": "bin/talkboy-server.js",
     "talkboy-mcp": "bin/talkboy-mcp.js"
   },
   "files": [
@@ -22,7 +23,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build && npm run build:server",
-    "build:server": "esbuild server/index.ts server/api.ts server/state.ts server/ssl.ts --outdir=server --format=esm --platform=node --packages=external",
+    "build:server": "node scripts/build-server.js",
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx",
     "test": "vitest run",
@@ -46,16 +47,20 @@
   "dependencies": {
     "@hono/node-server": "^1.12.0",
     "@modelcontextprotocol/sdk": "^1.0.0",
+    "better-sqlite3": "^11.0.0",
+    "grammy": "^1.21.0",
     "hono": "^4.4.0",
     "open": "^10.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "selfsigned": "^2.4.1",
+    "undici": "^7.19.2",
     "zustand": "^4.5.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
+    "@types/better-sqlite3": "^7.6.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "@vitejs/plugin-basic-ssl": "^1.1.0",
