@@ -83,6 +83,30 @@ export async function analyzeImageViaServer(
   return data.description
 }
 
+// Analyze image via Claude Code CLI (no API key needed)
+export async function analyzeImageViaClaudeCode(
+  file: DroppedFile
+): Promise<string> {
+  const response = await fetch('/api/analyze-image-cc', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      dataUrl: file.dataUrl,
+      fileName: file.name,
+    }),
+  })
+
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(error.error || `Server error: ${response.status}`)
+  }
+
+  const data = await response.json()
+  return data.description
+}
+
 type ClaudeContentBlock =
   | { type: 'text'; text: string }
   | { type: 'image'; source: { type: 'base64'; media_type: string; data: string } }
@@ -218,12 +242,13 @@ export async function sendMessageViaClaudeCode(
   message: string,
   onChunk: (text: string) => void,
   history?: Array<{ role: string; content: string }>,
-  onActivity?: (activity: ActivityEvent) => void
+  onActivity?: (activity: ActivityEvent) => void,
+  images?: Array<{ dataUrl: string; fileName: string }>
 ): Promise<string> {
   const response = await fetch('/api/claude-code', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message, history }),
+    body: JSON.stringify({ message, history, images }),
   })
 
   if (!response.ok) {

@@ -1,6 +1,6 @@
 import type Database from 'better-sqlite3'
 
-const SCHEMA_VERSION = 3
+const SCHEMA_VERSION = 4
 
 export function initSchema(db: Database.Database): void {
   // Create schema version table
@@ -24,6 +24,7 @@ function runMigrations(db: Database.Database, fromVersion: number): void {
     migrateV1,
     migrateV2,
     migrateV3,
+    migrateV4,
   ]
 
   for (let i = fromVersion; i < migrations.length; i++) {
@@ -120,6 +121,24 @@ function migrateV3(db: Database.Database): void {
   db.exec(`
     -- Liner notes (artifact viewer) for conversations
     ALTER TABLE conversations ADD COLUMN liner_notes TEXT;
+  `)
+}
+
+function migrateV4(db: Database.Database): void {
+  db.exec(`
+    -- Plans (implementation plans from Claude Code plan mode)
+    CREATE TABLE plans (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      content TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'approved', 'in_progress', 'completed', 'archived')),
+      conversation_id TEXT REFERENCES conversations(id) ON DELETE SET NULL,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL
+    );
+
+    CREATE INDEX idx_plans_status ON plans(status);
+    CREATE INDEX idx_plans_updated ON plans(updated_at DESC);
   `)
 }
 

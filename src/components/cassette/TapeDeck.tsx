@@ -165,9 +165,13 @@ export function TapeDeck({
     const files = e.target.files
     if (!files || files.length === 0 || !onFilesAdd) return
 
+    const imageFiles = Array.from(files).filter(f =>
+      f.type.startsWith('image/') || /\.(png|jpe?g|gif|webp|heic|heif|svg|bmp|tiff?)$/i.test(f.name)
+    )
+    if (imageFiles.length === 0) return
+
     const droppedFiles: import('../../types').DroppedFile[] = []
-    Array.from(files).forEach(file => {
-      if (!file.type.startsWith('image/')) return
+    imageFiles.forEach(file => {
       const reader = new FileReader()
       reader.onload = () => {
         droppedFiles.push({
@@ -177,7 +181,7 @@ export function TapeDeck({
           size: file.size,
           dataUrl: reader.result as string,
         })
-        if (droppedFiles.length === files.length) {
+        if (droppedFiles.length === imageFiles.length) {
           onFilesAdd(droppedFiles)
         }
       }
@@ -251,15 +255,17 @@ export function TapeDeck({
         <div className="tape-deck__right-actions">
           {/* File attachment button */}
           {onFilesAdd && (
-            <button
-              className="tape-deck__action-btn tape-deck__action-btn--attach"
-              onClick={handleFileClick}
-              disabled={isDisabled || isEjected}
-              title="Attach image"
-            >
-              <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
-                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
-              </svg>
+            <>
+              <button
+                className="tape-deck__action-btn tape-deck__action-btn--attach"
+                onClick={handleFileClick}
+                disabled={isDisabled || isEjected}
+                title="Attach image"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+                  <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                </svg>
+              </button>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -268,7 +274,7 @@ export function TapeDeck({
                 style={{ display: 'none' }}
                 onChange={handleFileChange}
               />
-            </button>
+            </>
           )}
 
           {/* Mic button (shown when not in continuous listening mode) */}

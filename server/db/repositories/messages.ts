@@ -121,6 +121,12 @@ export function createMessage(input: CreateMessageInput): MessageRow {
   }
 }
 
+export function updateImageDescription(imageId: string, description: string): boolean {
+  const db = getDb()
+  const result = db.prepare('UPDATE message_images SET description = ? WHERE id = ?').run(description, imageId)
+  return result.changes > 0
+}
+
 export function deleteMessage(id: string): boolean {
   const db = getDb()
   const result = db.prepare('DELETE FROM messages WHERE id = ?').run(id)

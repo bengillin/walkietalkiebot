@@ -133,6 +133,14 @@ export async function addMessage(
   })
 }
 
+// Images
+export async function updateImageDescription(imageId: string, description: string): Promise<{ success: boolean }> {
+  return fetchJson(`${API_BASE}/images/${imageId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ description }),
+  })
+}
+
 // Search
 export async function searchMessages(query: string, limit = 50): Promise<{ results: SearchResult[] }> {
   return fetchJson(`${API_BASE}/search?q=${encodeURIComponent(query)}&limit=${limit}`)
@@ -184,6 +192,54 @@ export async function saveLinerNotes(conversationId: string, linerNotes: string 
   return fetchJson(`${API_BASE}/conversations/${conversationId}/liner-notes`, {
     method: 'PUT',
     body: JSON.stringify({ linerNotes }),
+  })
+}
+
+// Plans
+export interface Plan {
+  id: string
+  title: string
+  content: string
+  status: 'draft' | 'approved' | 'in_progress' | 'completed' | 'archived'
+  conversationId: string | null
+  createdAt: number
+  updatedAt: number
+}
+
+export async function listPlans(limit = 50): Promise<{ plans: Plan[] }> {
+  return fetchJson(`${API_BASE}/plans?limit=${limit}`)
+}
+
+export async function getPlan(id: string): Promise<Plan> {
+  return fetchJson(`${API_BASE}/plans/${id}`)
+}
+
+export async function createPlan(plan: {
+  title: string
+  content: string
+  status?: string
+  conversationId?: string | null
+}): Promise<Plan> {
+  return fetchJson(`${API_BASE}/plans`, {
+    method: 'POST',
+    body: JSON.stringify(plan),
+  })
+}
+
+export async function updatePlan(id: string, updates: {
+  title?: string
+  content?: string
+  status?: string
+}): Promise<{ success: boolean }> {
+  return fetchJson(`${API_BASE}/plans/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(updates),
+  })
+}
+
+export async function deletePlan(id: string): Promise<{ success: boolean }> {
+  return fetchJson(`${API_BASE}/plans/${id}`, {
+    method: 'DELETE',
   })
 }
 

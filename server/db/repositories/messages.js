@@ -72,6 +72,11 @@ function createMessage(input) {
     source
   };
 }
+function updateImageDescription(imageId, description) {
+  const db = getDb();
+  const result = db.prepare("UPDATE message_images SET description = ? WHERE id = ?").run(description, imageId);
+  return result.changes > 0;
+}
 function deleteMessage(id) {
   const db = getDb();
   const result = db.prepare("DELETE FROM messages WHERE id = ?").run(id);
@@ -88,5 +93,6 @@ export {
   deleteMessage,
   getImagesForMessage,
   getImagesForMessages,
-  getMessagesForConversation
+  getMessagesForConversation,
+  updateImageDescription
 };

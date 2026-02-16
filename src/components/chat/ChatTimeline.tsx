@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, memo } from 'react'
 import { Message, Activity, AvatarState, StoredActivity } from '../../types'
 import { openUrl } from '../../lib/claude'
+import { MessageContent } from './MessageContent'
 import './ChatTimeline.css'
 
 interface ChatTimelineProps {
@@ -225,16 +226,19 @@ function MessageBubble({
   onPinToLinerNotes,
   trackNumber,
   activities = [],
+  referencedImages,
 }: {
   message: Message
   onImageClick?: (image: { dataUrl: string; description?: string; fileName: string }, allImages?: { dataUrl: string; description?: string; fileName: string }[]) => void
   onPinToLinerNotes?: (content: string) => void
   trackNumber: number
   activities?: DisplayActivity[]
+  referencedImages?: { dataUrl: string; description?: string; fileName: string }[]
 }) {
   const isUser = message.role === 'user'
   const hasImages = message.images && message.images.length > 0
   const imageCount = message.images?.length || 0
+  const hasRefImages = !isUser && referencedImages && referencedImages.length > 0
   const showPinButton = !isUser && onPinToLinerNotes && hasStructuredContent(message.content)
 
   // Build gallery array for lightbox navigation
@@ -244,6 +248,8 @@ function MessageBubble({
         description: img.description,
         fileName: img.fileName,
       }))
+    : hasRefImages
+    ? referencedImages
     : undefined
 
   return (
@@ -284,7 +290,24 @@ function MessageBubble({
               )}
             </div>
           )}
-          <div className="message-content">{renderTextWithLinks(message.content)}</div>
+          {hasRefImages && (
+            <div className="message-ref-images">
+              {referencedImages.map((img, idx) => (
+                <img
+                  key={idx}
+                  src={img.dataUrl}
+                  alt={img.fileName}
+                  className="message-ref-image"
+                  onClick={() => onImageClick?.(img, galleryImages)}
+                />
+              ))}
+            </div>
+          )}
+          {isUser ? (
+            <div className="message-content">{renderTextWithLinks(message.content)}</div>
+          ) : (
+            <MessageContent content={message.content} />
+          )}
         </div>
         {showPinButton && (
           <button
@@ -316,11 +339,16 @@ function StreamingBubble({
   text,
   trackNumber,
   activities = [],
+  referencedImages,
+  onImageClick,
 }: {
   text: string
   trackNumber: number
   activities?: DisplayActivity[]
+  referencedImages?: { dataUrl: string; description?: string; fileName: string }[]
+  onImageClick?: (image: { dataUrl: string; description?: string; fileName: string }, allImages?: { dataUrl: string; description?: string; fileName: string }[]) => void
 }) {
+  const hasRefImages = referencedImages && referencedImages.length > 0
   return (
     <div className="message-wrapper assistant">
       {activities.length > 0 && (
@@ -332,7 +360,20 @@ function StreamingBubble({
       )}
       <div className="message-bubble assistant streaming">
         <div className="message-bubble-content">
-          <div className="message-content">{renderTextWithLinks(text)}</div>
+          {hasRefImages && (
+            <div className="message-ref-images">
+              {referencedImages.map((img, idx) => (
+                <img
+                  key={idx}
+                  src={img.dataUrl}
+                  alt={img.fileName}
+                  className="message-ref-image"
+                  onClick={() => onImageClick?.(img, referencedImages)}
+                />
+              ))}
+            </div>
+          )}
+          <MessageContent content={text} />
         </div>
       </div>
       <div className="message-meta assistant">
@@ -471,6 +512,19 @@ export const ChatTimeline = memo(function ChatTimeline({
         const trackNumber = index + 1
         const msgActivities = messageActivities.get(message.id) || []
 
+        // For assistant messages, find images from the preceding user message
+        let referencedImages: { dataUrl: string; description?: string; fileName: string }[] | undefined
+        if (message.role === 'assistant' && index > 0) {
+          const prevMsg = sortedMessages[index - 1]
+          if (prevMsg.role === 'user' && prevMsg.images && prevMsg.images.length > 0) {
+            referencedImages = prevMsg.images.map(img => ({
+              dataUrl: img.dataUrl,
+              description: img.description,
+              fileName: img.fileName,
+            }))
+          }
+        }
+
         return (
           <div
             key={`msg-${message.id}`}
@@ -482,6 +536,7 @@ export const ChatTimeline = memo(function ChatTimeline({
               onPinToLinerNotes={onPinToLinerNotes}
               trackNumber={trackNumber}
               activities={msgActivities}
+              referencedImages={referencedImages}
             />
           </div>
         )
@@ -521,6 +576,12 @@ export const ChatTimeline = memo(function ChatTimeline({
             text={streamingText}
             trackNumber={sortedMessages.length + 1}
             activities={pendingActivities}
+            referencedImages={
+              sortedMessages.length > 0 && sortedMessages[sortedMessages.length - 1].role === 'user' && sortedMessages[sortedMessages.length - 1].images?.length
+                ? sortedMessages[sortedMessages.length - 1].images!.map(img => ({ dataUrl: img.dataUrl, description: img.description, fileName: img.fileName }))
+                : undefined
+            }
+            onImageClick={onImageClick}
           />
         </div>
       )}

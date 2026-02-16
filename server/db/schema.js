@@ -1,4 +1,4 @@
-const SCHEMA_VERSION = 3;
+const SCHEMA_VERSION = 4;
 function initSchema(db) {
   db.exec(`
     CREATE TABLE IF NOT EXISTS schema_version (
@@ -15,7 +15,8 @@ function runMigrations(db, fromVersion) {
   const migrations = [
     migrateV1,
     migrateV2,
-    migrateV3
+    migrateV3,
+    migrateV4
   ];
   for (let i = fromVersion; i < migrations.length; i++) {
     console.log(`Running migration to version ${i + 1}...`);
@@ -108,6 +109,23 @@ function migrateV3(db) {
   db.exec(`
     -- Liner notes (artifact viewer) for conversations
     ALTER TABLE conversations ADD COLUMN liner_notes TEXT;
+  `);
+}
+function migrateV4(db) {
+  db.exec(`
+    -- Plans (implementation plans from Claude Code plan mode)
+    CREATE TABLE plans (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      content TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'approved', 'in_progress', 'completed', 'archived')),
+      conversation_id TEXT REFERENCES conversations(id) ON DELETE SET NULL,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL
+    );
+
+    CREATE INDEX idx_plans_status ON plans(status);
+    CREATE INDEX idx_plans_updated ON plans(updated_at DESC);
   `);
 }
 function migrateV2(db) {

@@ -12,7 +12,7 @@ import { useSpeechRecognition } from './components/voice/useSpeechRecognition'
 import { useWakeWord } from './components/voice/useWakeWord'
 import { useSpeechSynthesis } from './components/voice/useSpeechSynthesis'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
-import { sendMessageStreaming, sendMessageViaClaudeCode, analyzeImage, analyzeImageViaServer, type ActivityEvent } from './lib/claude'
+import { sendMessageStreaming, sendMessageViaClaudeCode, analyzeImage, analyzeImageViaClaudeCode, type ActivityEvent } from './lib/claude'
 import { useStore, enableServerSync } from './lib/store'
 import * as api from './lib/api'
 import { exportConversation } from './lib/export'
@@ -22,6 +22,7 @@ import { JobStatusBar } from './components/jobs/JobStatusBar'
 import { LinerNotes } from './components/linernotes/LinerNotes'
 import { KeyboardShortcuts } from './components/shortcuts/KeyboardShortcuts'
 import { SearchOverlay } from './components/search/SearchOverlay'
+import { Plans } from './components/plans/Plans'
 import './App.css'
 
 function App() {
@@ -36,6 +37,7 @@ function App() {
   const [showLinerNotes, setShowLinerNotes] = useState(false)
   const [showShortcuts, setShowShortcuts] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
+  const [showPlans, setShowPlans] = useState(false)
   const [isTapeEjected, setIsTapeEjected] = useState(false)
   const [responseText, setResponseText] = useState('')
 
@@ -213,19 +215,16 @@ function App() {
 
   // Handle files being added - trigger analysis for each
   const handleFilesAdd = useCallback(async (files: import('./types').DroppedFile[]) => {
-    // Check if we have an API key for image analysis
-    if (!apiKey) {
-      setError('API key required for image analysis. Please add one in Settings.')
-      setShowSettings(true)
+    // Add files to store first so preview shows immediately
+    addFiles(files)
+
+    // Skip analysis if no API key and not using Claude Code
+    if (!useClaudeCode && !apiKey) {
       return
     }
 
-    // Add files to store first
-    addFiles(files)
-
     // Analyze each file
     for (const file of files) {
-      // Create analysis record
       const analysisId = addImageAnalysis({
         fileId: file.id,
         fileName: file.name,
@@ -233,10 +232,8 @@ function App() {
         status: 'analyzing',
       })
 
-      // Run analysis (don't block UI)
-      // Use server-side analysis for Claude Code mode (pass API key if available), direct API for API key mode
       const analyzePromise = useClaudeCode
-        ? analyzeImageViaServer(file, apiKey || undefined)
+        ? analyzeImageViaClaudeCode(file)
         : analyzeImage(file, apiKey)
 
       analyzePromise
@@ -245,8 +242,9 @@ function App() {
             description,
             status: 'complete',
           })
-          // Also attach description directly to the file for use in lightbox
           updateFile(file.id, { description })
+          // Also persist to DB in case the message was already saved
+          api.updateImageDescription(file.id, description).catch(() => {})
         })
         .catch((err) => {
           console.error('Image analysis failed:', err)
@@ -465,8 +463,13 @@ function App() {
     try {
       if (useClaudeCode) {
         // Claude Code mode - spawn CLI with conversation context
-        // Include image analysis context if available
-        const imageContext = getImageContext()
+        // Pass attached images directly to Claude Code (it reads them natively)
+        const imageAttachments = attachedFiles.length > 0
+          ? attachedFiles.map(f => ({ dataUrl: f.dataUrl, fileName: f.name }))
+          : undefined
+
+        // If no images attached, still include text analysis context if available
+        const imageContext = !imageAttachments ? getImageContext() : null
         const messageWithContext = imageContext
           ? `[Image Context]\n${imageContext}\n\n[User Message]\n${text}`
           : text
@@ -478,7 +481,8 @@ function App() {
             setResponseText(fullResponse)
           },
           messages.map(m => ({ role: m.role, content: m.content })),
-          handleActivity
+          handleActivity,
+          imageAttachments
         )
         // Speak the full response at once (if TTS enabled)
         if (fullResponse.trim() && ttsEnabled) {
@@ -823,6 +827,16 @@ function App() {
               <span className="app__recording-label">REC</span>
             </div>
           )}
+          {/* Plans button */}
+          <button
+            className="app__header-btn"
+            onClick={() => setShowPlans(true)}
+            title="Plans"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+            </svg>
+          </button>
           {/* Liner Notes button */}
           <button
             className={`app__header-btn ${linerNotes ? 'app__header-btn--has-notes' : ''}`}
@@ -878,16 +892,17 @@ function App() {
           <div className="app__error">{error}</div>
         )}
 
-        {/* File attachments preview */}
-        <FileDropZone
-          files={attachedFiles}
-          onFilesAdd={handleFilesAdd}
-          onFileRemove={removeFile}
-          onClear={clearFiles}
-          isDisabled={isSpeaking || avatarState === 'thinking'}
-          analysisStatuses={analysisStatuses}
-        />
       </main>
+
+      {/* File attachments preview - positioned above tape deck */}
+      <FileDropZone
+        files={attachedFiles}
+        onFilesAdd={handleFilesAdd}
+        onFileRemove={removeFile}
+        onClear={clearFiles}
+        isDisabled={isSpeaking || avatarState === 'thinking'}
+        analysisStatuses={analysisStatuses}
+      />
 
       {/* Tape Deck - unified input bar with drawer triggers */}
       <TapeDeck
@@ -1009,6 +1024,13 @@ function App() {
           loadConversation(conversationId)
           setIsTapeEjected(false)
         }}
+      />
+
+      {/* Plans panel */}
+      <Plans
+        isOpen={showPlans}
+        onClose={() => setShowPlans(false)}
+        conversationId={currentConversationId || undefined}
       />
 
       {/* Keyboard shortcuts guide */}

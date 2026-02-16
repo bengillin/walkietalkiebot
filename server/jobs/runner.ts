@@ -1,4 +1,7 @@
 import { spawn, type ChildProcess } from 'child_process'
+import { writeFileSync, mkdirSync, unlinkSync } from 'fs'
+import { join } from 'path'
+import { tmpdir } from 'os'
 
 export interface ActivityEvent {
   type: 'tool_start' | 'tool_end' | 'tool_input' | 'all_complete'
@@ -16,9 +19,16 @@ export interface RunnerCallbacks {
   onComplete: (code: number) => void
 }
 
+export interface ImageAttachment {
+  dataUrl: string
+  fileName: string
+}
+
 export interface RunnerOptions {
   prompt: string
   history?: Array<{ role: string; content: string }>
+  images?: ImageAttachment[]
+  rawMode?: boolean // Skip voice mode wrapping, send prompt as-is with image paths
   callbacks: RunnerCallbacks
 }
 
@@ -29,21 +39,55 @@ export interface RunnerHandle {
 }
 
 export function spawnClaude(options: RunnerOptions): RunnerHandle {
-  const { prompt, history, callbacks } = options
+  const { prompt, history, images, rawMode, callbacks } = options
 
-  // Build context from history
-  const recentMessages = (history || []).slice(-10)
-  let contextBlock = ''
-  if (recentMessages.length > 0) {
-    contextBlock = '[Recent conversation]\n' +
-      recentMessages.map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n') +
-      '\n[/Recent conversation]\n\n'
+  // Save attached images to temp files so Claude Code can read them natively
+  const tempImagePaths: string[] = []
+  if (images && images.length > 0) {
+    const tempDir = join(tmpdir(), 'talkboy-images')
+    mkdirSync(tempDir, { recursive: true })
+    for (const img of images) {
+      const base64Data = img.dataUrl.split(',')[1]
+      if (!base64Data) continue
+      const ext = img.fileName.split('.').pop() || 'png'
+      const tempPath = join(tempDir, `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`)
+      writeFileSync(tempPath, Buffer.from(base64Data, 'base64'))
+      tempImagePaths.push(tempPath)
+    }
   }
 
-  const voiceMessage = `${contextBlock}[VOICE MODE - Keep responses to 1-2 sentences, no markdown, speak naturally]\n\nUser: ${prompt}`
+  let fullPrompt: string
+  if (rawMode) {
+    // Raw mode: send prompt as-is with image file paths prepended
+    let imageBlock = ''
+    if (tempImagePaths.length > 0) {
+      imageBlock = 'Read these image files and then follow the instructions below:\n' +
+        tempImagePaths.map(p => p).join('\n') +
+        '\n\n'
+    }
+    fullPrompt = `${imageBlock}${prompt}`
+  } else {
+    // Voice mode: wrap prompt with context and voice mode instructions
+    const recentMessages = (history || []).slice(-10)
+    let contextBlock = ''
+    if (recentMessages.length > 0) {
+      contextBlock = '[Recent conversation]\n' +
+        recentMessages.map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n') +
+        '\n[/Recent conversation]\n\n'
+    }
+
+    let imageBlock = ''
+    if (tempImagePaths.length > 0) {
+      imageBlock = '[Attached Images - Use the Read tool to view these image files]\n' +
+        tempImagePaths.map(p => p).join('\n') +
+        '\n[/Attached Images]\n\n'
+    }
+
+    fullPrompt = `${contextBlock}${imageBlock}[VOICE MODE - Keep responses to 1-2 sentences, no markdown, speak naturally]\n\nUser: ${prompt}`
+  }
 
   const args = [
-    '-p', voiceMessage,
+    '-p', fullPrompt,
     '--output-format', 'stream-json',
     '--verbose',
     '--permission-mode', 'bypassPermissions',
@@ -51,7 +95,7 @@ export function spawnClaude(options: RunnerOptions): RunnerHandle {
   ]
 
   const claudePath = process.env.CLAUDE_PATH || 'claude'
-  console.log('Spawning claude:', claudePath, 'prompt length:', voiceMessage.length)
+  console.log('Spawning claude:', claudePath, 'prompt length:', fullPrompt.length, rawMode ? '(raw mode)' : '(voice mode)')
 
   // Strip CLAUDECODE env var to allow spawning Claude inside a Claude Code session
   const env = { ...process.env, FORCE_COLOR: '0' }
@@ -187,13 +231,22 @@ export function spawnClaude(options: RunnerOptions): RunnerHandle {
     callbacks.onError(text)
   })
 
+  // Clean up temp image files when process ends
+  const cleanupTempFiles = () => {
+    for (const p of tempImagePaths) {
+      try { unlinkSync(p) } catch { /* already cleaned up */ }
+    }
+  }
+
   const promise = new Promise<number>((resolve) => {
     claude.on('close', (code) => {
+      cleanupTempFiles()
       callbacks.onComplete(code || 0)
       resolve(code || 0)
     })
 
     claude.on('error', (err) => {
+      cleanupTempFiles()
       callbacks.onError(err.message)
       callbacks.onComplete(1)
       resolve(1)

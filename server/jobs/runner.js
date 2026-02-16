@@ -1,17 +1,46 @@
 import { spawn } from "child_process";
+import { writeFileSync, mkdirSync, unlinkSync } from "fs";
+import { join } from "path";
+import { tmpdir } from "os";
 function spawnClaude(options) {
-  const { prompt, history, callbacks } = options;
-  const recentMessages = (history || []).slice(-10);
-  let contextBlock = "";
-  if (recentMessages.length > 0) {
-    contextBlock = "[Recent conversation]\n" + recentMessages.map((m) => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`).join("\n") + "\n[/Recent conversation]\n\n";
+  const { prompt, history, images, rawMode, callbacks } = options;
+  const tempImagePaths = [];
+  if (images && images.length > 0) {
+    const tempDir = join(tmpdir(), "talkboy-images");
+    mkdirSync(tempDir, { recursive: true });
+    for (const img of images) {
+      const base64Data = img.dataUrl.split(",")[1];
+      if (!base64Data) continue;
+      const ext = img.fileName.split(".").pop() || "png";
+      const tempPath = join(tempDir, `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`);
+      writeFileSync(tempPath, Buffer.from(base64Data, "base64"));
+      tempImagePaths.push(tempPath);
+    }
   }
-  const voiceMessage = `${contextBlock}[VOICE MODE - Keep responses to 1-2 sentences, no markdown, speak naturally]
+  let fullPrompt;
+  if (rawMode) {
+    let imageBlock = "";
+    if (tempImagePaths.length > 0) {
+      imageBlock = "Read these image files and then follow the instructions below:\n" + tempImagePaths.map((p) => p).join("\n") + "\n\n";
+    }
+    fullPrompt = `${imageBlock}${prompt}`;
+  } else {
+    const recentMessages = (history || []).slice(-10);
+    let contextBlock = "";
+    if (recentMessages.length > 0) {
+      contextBlock = "[Recent conversation]\n" + recentMessages.map((m) => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`).join("\n") + "\n[/Recent conversation]\n\n";
+    }
+    let imageBlock = "";
+    if (tempImagePaths.length > 0) {
+      imageBlock = "[Attached Images - Use the Read tool to view these image files]\n" + tempImagePaths.map((p) => p).join("\n") + "\n[/Attached Images]\n\n";
+    }
+    fullPrompt = `${contextBlock}${imageBlock}[VOICE MODE - Keep responses to 1-2 sentences, no markdown, speak naturally]
 
 User: ${prompt}`;
+  }
   const args = [
     "-p",
-    voiceMessage,
+    fullPrompt,
     "--output-format",
     "stream-json",
     "--verbose",
@@ -20,7 +49,7 @@ User: ${prompt}`;
     "--no-session-persistence"
   ];
   const claudePath = process.env.CLAUDE_PATH || "claude";
-  console.log("Spawning claude:", claudePath, "prompt length:", voiceMessage.length);
+  console.log("Spawning claude:", claudePath, "prompt length:", fullPrompt.length, rawMode ? "(raw mode)" : "(voice mode)");
   const env = { ...process.env, FORCE_COLOR: "0" };
   delete env.CLAUDECODE;
   const claude = spawn(claudePath, args, {
@@ -145,12 +174,22 @@ User: ${prompt}`;
     console.error("Claude stderr:", text);
     callbacks.onError(text);
   });
+  const cleanupTempFiles = () => {
+    for (const p of tempImagePaths) {
+      try {
+        unlinkSync(p);
+      } catch {
+      }
+    }
+  };
   const promise = new Promise((resolve) => {
     claude.on("close", (code) => {
+      cleanupTempFiles();
       callbacks.onComplete(code || 0);
       resolve(code || 0);
     });
     claude.on("error", (err) => {
+      cleanupTempFiles();
       callbacks.onError(err.message);
       callbacks.onComplete(1);
       resolve(1);

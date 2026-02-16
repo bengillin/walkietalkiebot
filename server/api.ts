@@ -8,6 +8,7 @@ import * as conversations from './db/repositories/conversations.js'
 import * as messages from './db/repositories/messages.js'
 import * as activities from './db/repositories/activities.js'
 import * as search from './db/repositories/search.js'
+import * as plans from './db/repositories/plans.js'
 import { spawnClaude } from './jobs/runner.js'
 import { jobRoutes } from './jobs/api.js'
 
@@ -232,6 +233,113 @@ api.post('/conversations/:id/messages', async (c) => {
     timestamp: msg.timestamp,
     source: msg.source,
   }, 201)
+})
+
+// PATCH /api/images/:id - Update image description
+api.patch('/images/:id', async (c) => {
+  const imageId = c.req.param('id')
+  const { description } = await c.req.json()
+  if (typeof description !== 'string') {
+    return c.json({ error: 'description required' }, 400)
+  }
+
+  const updated = messages.updateImageDescription(imageId, description)
+  if (!updated) {
+    return c.json({ error: 'Image not found' }, 404)
+  }
+
+  return c.json({ success: true })
+})
+
+// ============================================
+// Plans endpoints
+// ============================================
+
+// GET /api/plans - List all plans
+api.get('/plans', (c) => {
+  const limit = parseInt(c.req.query('limit') || '50', 10)
+  const offset = parseInt(c.req.query('offset') || '0', 10)
+  const planList = plans.listPlans(limit, offset)
+
+  return c.json({
+    plans: planList.map(p => ({
+      id: p.id,
+      title: p.title,
+      content: p.content,
+      status: p.status,
+      conversationId: p.conversation_id,
+      createdAt: p.created_at,
+      updatedAt: p.updated_at,
+    })),
+  })
+})
+
+// GET /api/plans/:id - Get single plan
+api.get('/plans/:id', (c) => {
+  const id = c.req.param('id')
+  const plan = plans.getPlan(id)
+
+  if (!plan) {
+    return c.json({ error: 'Plan not found' }, 404)
+  }
+
+  return c.json({
+    id: plan.id,
+    title: plan.title,
+    content: plan.content,
+    status: plan.status,
+    conversationId: plan.conversation_id,
+    createdAt: plan.created_at,
+    updatedAt: plan.updated_at,
+  })
+})
+
+// POST /api/plans - Create a plan
+api.post('/plans', async (c) => {
+  const body = await c.req.json()
+  const plan = plans.createPlan({
+    id: body.id || crypto.randomUUID(),
+    title: body.title || 'Untitled Plan',
+    content: body.content || '',
+    status: body.status,
+    conversationId: body.conversationId,
+  })
+
+  return c.json({
+    id: plan.id,
+    title: plan.title,
+    content: plan.content,
+    status: plan.status,
+    conversationId: plan.conversation_id,
+    createdAt: plan.created_at,
+    updatedAt: plan.updated_at,
+  }, 201)
+})
+
+// PUT /api/plans/:id - Update a plan
+api.put('/plans/:id', async (c) => {
+  const id = c.req.param('id')
+  const body = await c.req.json()
+
+  const existing = plans.getPlan(id)
+  if (!existing) {
+    return c.json({ error: 'Plan not found' }, 404)
+  }
+
+  plans.updatePlan(id, {
+    title: body.title,
+    content: body.content,
+    status: body.status,
+  })
+
+  return c.json({ success: true })
+})
+
+// DELETE /api/plans/:id - Delete a plan
+api.delete('/plans/:id', (c) => {
+  const id = c.req.param('id')
+  plans.deletePlan(id)
+  return c.json({ success: true })
 })
 
 // GET /api/search - Full-text search
@@ -572,6 +680,45 @@ Be thorough but concise. This description will be used as context for building o
   return c.json({ description, fileName })
 })
 
+// POST /api/analyze-image-cc - Analyze image via Claude Code CLI (no API key needed)
+api.post('/analyze-image-cc', async (c) => {
+  const { dataUrl, fileName } = await c.req.json()
+  if (!dataUrl) {
+    return c.json({ error: 'Image data required' }, 400)
+  }
+
+  return new Promise((resolve) => {
+    let description = ''
+    const handle = spawnClaude({
+      prompt: 'Describe this image in detail. If it appears to be a UI design, wireframe, or sketch, focus on the structure and components. Be thorough but concise. Output ONLY the description, no preamble.',
+      images: [{ dataUrl, fileName: fileName || 'image.png' }],
+      rawMode: true,
+      callbacks: {
+        onText: (text) => { description += text },
+        onActivity: () => {},
+        onError: (error) => {
+          console.error('Image analysis via Claude Code failed:', error)
+        },
+        onComplete: () => {
+          resolve(c.json({
+            description: description.trim() || 'Unable to analyze image.',
+            fileName,
+          }))
+        },
+      },
+    })
+
+    // Timeout after 60 seconds
+    setTimeout(() => {
+      handle.kill()
+      resolve(c.json({
+        description: description.trim() || 'Analysis timed out.',
+        fileName,
+      }))
+    }, 60000)
+  })
+})
+
 // POST /api/open-url - Open URL in default browser
 api.post('/open-url', async (c) => {
   const { url } = await c.req.json()
@@ -606,7 +753,7 @@ api.post('/open-url', async (c) => {
 
 // POST /api/claude-code - Execute claude CLI and stream response
 api.post('/claude-code', async (c) => {
-  const { message, history } = await c.req.json()
+  const { message, history, images } = await c.req.json()
   if (!message) {
     return c.json({ error: 'Message required' }, 400)
   }
@@ -615,6 +762,7 @@ api.post('/claude-code', async (c) => {
     const handle = spawnClaude({
       prompt: message,
       history: history || state.messages || [],
+      images,
       callbacks: {
         onText: (text) => {
           stream.writeSSE({ data: JSON.stringify({ text }) })
