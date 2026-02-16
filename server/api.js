@@ -8,8 +8,11 @@ import * as conversations from "./db/repositories/conversations.js";
 import * as messages from "./db/repositories/messages.js";
 import * as activities from "./db/repositories/activities.js";
 import * as search from "./db/repositories/search.js";
+import { spawnClaude } from "./jobs/runner.js";
+import { jobRoutes } from "./jobs/api.js";
 const api = new Hono();
 api.use("*", cors());
+api.route("/jobs", jobRoutes);
 api.get("/status", (c) => {
   return c.json({
     running: true,
@@ -401,168 +404,25 @@ api.post("/claude-code", async (c) => {
     return c.json({ error: "Message required" }, 400);
   }
   return streamSSE(c, async (stream) => {
-    const recentMessages = (history || state.messages || []).slice(-10);
-    let contextBlock = "";
-    if (recentMessages.length > 0) {
-      contextBlock = "[Recent conversation]\n" + recentMessages.map((m) => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`).join("\n") + "\n[/Recent conversation]\n\n";
-    }
-    const voiceMessage = `${contextBlock}[VOICE MODE - Keep responses to 1-2 sentences, no markdown, speak naturally]
-
-User: ${message}`;
-    const args = ["-p", voiceMessage, "--output-format", "stream-json", "--verbose", "--permission-mode", "bypassPermissions", "--no-session-persistence"];
-    const claudePath = process.env.CLAUDE_PATH || "claude";
-    console.log("Spawning claude:", claudePath, args, state.claudeSessionId ? "(resuming session)" : "(new session)");
-    const claude = spawn(claudePath, args, {
-      cwd: process.cwd(),
-      env: { ...process.env, FORCE_COLOR: "0" },
-      stdio: ["ignore", "pipe", "pipe"],
-      detached: false
-    });
-    let buffer = "";
-    const toolInputs = {};
-    const toolNames = {};
-    let currentToolId = null;
-    claude.stdout.on("data", (data) => {
-      buffer += data.toString();
-      const lines = buffer.split("\n");
-      buffer = lines.pop() || "";
-      for (const line of lines) {
-        if (!line.trim()) continue;
-        try {
-          const event = JSON.parse(line);
-          console.log("Claude event:", event.type, event.subtype || "");
-          if (event.type === "assistant") {
-            const textContent = event.message?.content?.find((c2) => c2.type === "text");
-            if (textContent?.text) {
-              let text = textContent.text.replace(/<thinking>[\s\S]*?<\/thinking>\s*/g, "");
-              if (text.trim()) {
-                stream.writeSSE({ data: JSON.stringify({ text }) });
-              }
-            }
-            const toolUseBlocks = event.message?.content?.filter((c2) => c2.type === "tool_use") || [];
-            for (const toolBlock of toolUseBlocks) {
-              if (toolBlock.id && toolBlock.input) {
-                toolInputs[toolBlock.id] = JSON.stringify(toolBlock.input);
-              }
-              let inputDetail = "";
-              if (toolBlock.input) {
-                if (toolBlock.input.file_path) {
-                  inputDetail = toolBlock.input.file_path;
-                } else if (toolBlock.input.command) {
-                  inputDetail = toolBlock.input.command;
-                } else if (toolBlock.input.pattern) {
-                  inputDetail = toolBlock.input.pattern;
-                }
-              }
-              stream.writeSSE({ data: JSON.stringify({
-                activity: {
-                  type: "tool_start",
-                  tool: toolBlock.name,
-                  id: toolBlock.id,
-                  input: inputDetail
-                }
-              }) });
-            }
-          } else if (event.type === "content_block_start") {
-            if (event.content_block?.type === "tool_use") {
-              currentToolId = event.content_block.id;
-              toolInputs[currentToolId] = "";
-              toolNames[currentToolId] = event.content_block.name;
-              stream.writeSSE({ data: JSON.stringify({
-                activity: {
-                  type: "tool_start",
-                  tool: event.content_block.name,
-                  id: event.content_block.id
-                }
-              }) });
-            }
-          } else if (event.type === "content_block_delta") {
-            if (event.delta?.type === "text_delta" && event.delta?.text) {
-              let text = event.delta.text.replace(/<thinking>[\s\S]*?<\/thinking>\s*/g, "");
-              if (text) {
-                stream.writeSSE({ data: JSON.stringify({ text }) });
-              }
-            } else if (event.delta?.type === "input_json_delta" && currentToolId) {
-              toolInputs[currentToolId] = (toolInputs[currentToolId] || "") + event.delta.partial_json;
-            }
-          } else if (event.type === "content_block_stop" && currentToolId) {
-            try {
-              const inputJson = toolInputs[currentToolId];
-              if (inputJson) {
-                const input = JSON.parse(inputJson);
-                let inputDetail = "";
-                if (input.file_path) {
-                  inputDetail = input.file_path;
-                } else if (input.command) {
-                  inputDetail = input.command;
-                } else if (input.pattern) {
-                  inputDetail = input.pattern;
-                }
-                if (inputDetail) {
-                  stream.writeSSE({ data: JSON.stringify({
-                    activity: {
-                      type: "tool_input",
-                      id: currentToolId,
-                      input: inputDetail
-                    }
-                  }) });
-                }
-              }
-            } catch {
-            }
-            currentToolId = null;
-          } else if (event.type === "result") {
-            const subtype = event.subtype || "complete";
-            stream.writeSSE({ data: JSON.stringify({
-              activity: {
-                type: "all_complete",
-                status: subtype === "error" ? "error" : "complete"
-              }
-            }) });
-          } else if (event.type === "user") {
-            const toolResults = event.message?.content?.filter((c2) => c2.type === "tool_result") || [];
-            for (const result of toolResults) {
-              const toolId = result.tool_use_id;
-              const toolName = toolNames[toolId] || "tool";
-              const isError = result.is_error === true;
-              let output = "";
-              if (typeof result.content === "string") {
-                output = result.content.slice(0, 200);
-              } else if (Array.isArray(result.content)) {
-                const textContent = result.content.find((c2) => c2.type === "text");
-                output = textContent?.text?.slice(0, 200) || "";
-              }
-              stream.writeSSE({ data: JSON.stringify({
-                activity: {
-                  type: "tool_end",
-                  tool: toolName,
-                  id: toolId,
-                  status: isError ? "error" : "complete",
-                  output
-                }
-              }) });
-            }
-          }
-        } catch (e) {
-          console.log("Parse error for line:", line.slice(0, 100));
+    const handle = spawnClaude({
+      prompt: message,
+      history: history || state.messages || [],
+      callbacks: {
+        onText: (text) => {
+          stream.writeSSE({ data: JSON.stringify({ text }) });
+        },
+        onActivity: (event) => {
+          stream.writeSSE({ data: JSON.stringify({ activity: event }) });
+        },
+        onError: (error) => {
+          stream.writeSSE({ data: JSON.stringify({ error }) });
+        },
+        onComplete: (code) => {
+          stream.writeSSE({ data: JSON.stringify({ done: true, code }) });
         }
       }
     });
-    claude.stderr.on("data", (data) => {
-      const text = data.toString();
-      console.error("Claude stderr:", text);
-      stream.writeSSE({ data: JSON.stringify({ error: text }) });
-    });
-    await new Promise((resolve) => {
-      claude.on("close", (code) => {
-        stream.writeSSE({ data: JSON.stringify({ done: true, code }) });
-        resolve();
-      });
-      claude.on("error", (err) => {
-        stream.writeSSE({ data: JSON.stringify({ error: err.message }) });
-        resolve();
-      });
-    });
+    await handle.promise;
   });
 });
 export {

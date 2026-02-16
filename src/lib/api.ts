@@ -178,3 +178,79 @@ export async function isDatabaseAvailable(): Promise<boolean> {
     return false
   }
 }
+
+// Jobs
+export interface Job {
+  id: string
+  conversation_id: string
+  prompt: string
+  status: 'queued' | 'running' | 'completed' | 'failed' | 'cancelled'
+  source: string
+  result: string | null
+  error: string | null
+  pid: number | null
+  created_at: number
+  updated_at: number
+  started_at: number | null
+  completed_at: number | null
+}
+
+export async function createJob(params: {
+  conversationId: string
+  prompt: string
+  source?: string
+  history?: Array<{ role: string; content: string }>
+}): Promise<{ id: string; status: string }> {
+  return fetchJson(`${API_BASE}/jobs`, {
+    method: 'POST',
+    body: JSON.stringify(params),
+  })
+}
+
+export async function listJobs(filters?: {
+  status?: string
+  conversationId?: string
+}): Promise<{ jobs: Job[] }> {
+  const params = new URLSearchParams()
+  if (filters?.status) params.set('status', filters.status)
+  if (filters?.conversationId) params.set('conversationId', filters.conversationId)
+  const query = params.toString()
+  return fetchJson(`${API_BASE}/jobs${query ? `?${query}` : ''}`)
+}
+
+export async function getJob(id: string): Promise<Job> {
+  return fetchJson(`${API_BASE}/jobs/${id}`)
+}
+
+export async function cancelJob(id: string): Promise<{ success: boolean }> {
+  return fetchJson(`${API_BASE}/jobs/${id}`, { method: 'DELETE' })
+}
+
+export function subscribeToJobEvents(
+  jobId: string,
+  onEvent: (event: { type: string; data: string }) => void,
+  onDone?: () => void
+): () => void {
+  const eventSource = new EventSource(`${API_BASE}/jobs/${jobId}/events`)
+
+  eventSource.onmessage = (e) => {
+    try {
+      const parsed = JSON.parse(e.data)
+      if (parsed.done) {
+        onDone?.()
+        eventSource.close()
+        return
+      }
+      onEvent(parsed)
+    } catch {
+      // Ignore parse errors
+    }
+  }
+
+  eventSource.onerror = () => {
+    eventSource.close()
+    onDone?.()
+  }
+
+  return () => eventSource.close()
+}

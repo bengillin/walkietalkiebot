@@ -1,0 +1,211 @@
+.job-detail-panel {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(500px, 90vw);
+  max-height: 400px;
+  background: var(--surface-primary, #16162a);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.15));
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  overflow: hidden;
+  animation: panel-slide-up 0.2s ease;
+}
+
+@keyframes panel-slide-up {
+  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.job-detail-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+}
+
+.job-detail-panel__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.job-detail-panel__status {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+.job-detail-panel__status--running {
+  background: rgba(74, 159, 212, 0.2);
+  color: #4a9fd4;
+}
+
+.job-detail-panel__status--queued {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.job-detail-panel__status--completed {
+  background: rgba(74, 222, 128, 0.2);
+  color: #4ade80;
+}
+
+.job-detail-panel__status--failed {
+  background: rgba(248, 113, 113, 0.2);
+  color: #f87171;
+}
+
+.job-detail-panel__status--cancelled {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.job-detail-panel__prompt {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  color: var(--text-primary, rgba(255, 255, 255, 0.9));
+}
+
+.job-detail-panel__close {
+  background: none;
+  border: none;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.5));
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.job-detail-panel__close:hover {
+  color: var(--text-primary, rgba(255, 255, 255, 0.9));
+}
+
+.job-detail-panel__meta {
+  display: flex;
+  gap: 12px;
+  padding: 6px 14px;
+  font-size: 12px;
+  color: var(--text-tertiary, rgba(255, 255, 255, 0.4));
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.05));
+}
+
+.job-detail-panel__cancel {
+  background: rgba(248, 113, 113, 0.15);
+  color: #f87171;
+  border: none;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.job-detail-panel__cancel:hover {
+  background: rgba(248, 113, 113, 0.25);
+}
+
+.job-detail-panel__events {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 200px;
+}
+
+.job-detail-panel__empty {
+  color: var(--text-tertiary, rgba(255, 255, 255, 0.3));
+  font-size: 13px;
+  text-align: center;
+  padding: 16px;
+}
+
+.job-detail-panel__event {
+  font-size: 12px;
+  padding: 3px 0;
+}
+
+.job-detail-panel__event--activity {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+}
+
+.job-detail-panel__event-icon {
+  font-size: 13px;
+  width: 18px;
+  text-align: center;
+}
+
+.job-detail-panel__event-tool {
+  font-weight: 500;
+}
+
+.job-detail-panel__event-input {
+  color: var(--text-tertiary, rgba(255, 255, 255, 0.4));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.job-detail-panel__event-status--complete {
+  color: #4ade80;
+}
+
+.job-detail-panel__event-status--error {
+  color: #f87171;
+}
+
+.job-detail-panel__event--text {
+  color: var(--text-primary, rgba(255, 255, 255, 0.85));
+  line-height: 1.4;
+}
+
+.job-detail-panel__event--error {
+  color: #f87171;
+}
+
+.job-detail-panel__result {
+  padding: 10px 14px;
+  border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+}
+
+.job-detail-panel__result-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-tertiary, rgba(255, 255, 255, 0.4));
+  margin-bottom: 4px;
+}
+
+.job-detail-panel__result-text {
+  font-size: 13px;
+  color: var(--text-primary, rgba(255, 255, 255, 0.9));
+  line-height: 1.4;
+  max-height: 100px;
+  overflow-y: auto;
+}
+
+.job-detail-panel__error {
+  padding: 8px 14px;
+  border-top: 1px solid rgba(248, 113, 113, 0.2);
+  color: #f87171;
+  font-size: 13px;
+}

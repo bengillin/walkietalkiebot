@@ -9,6 +9,9 @@ import { getSSLCerts } from './ssl.js'
 import { api } from './api.js'
 import { initDb, closeDb } from './db/index.js'
 import { startTelegramBot, stopTelegramBot } from './telegram/index.js'
+import { getNotificationDispatcher } from './notifications/dispatcher.js'
+import { MacOSNotificationChannel } from './notifications/macos.js'
+import { getJobManager } from './jobs/manager.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const distPath = join(__dirname, '..', 'dist')
@@ -31,6 +34,14 @@ export function startServer(port: number = 5173): Promise<void> {
       reject(err)
       return
     }
+
+    // Initialize notification system
+    const dispatcher = getNotificationDispatcher()
+    dispatcher.register(new MacOSNotificationChannel())
+
+    // Initialize job manager (cleans up stale jobs from previous runs)
+    const jobManager = getJobManager()
+    jobManager.init()
 
     // Start Telegram bot (non-blocking, will log if token not found)
     startTelegramBot().catch(err => {

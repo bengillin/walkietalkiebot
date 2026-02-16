@@ -141,3 +141,112 @@ Track key decisions and their rationale.
 - Chrome/Edge only (Firefox support limited)
 - May need Deepgram fallback for production quality
 - Need graceful degradation for unsupported browsers
+
+---
+
+### ADR-004: SQLite for Server Persistence
+**Date**: 2026-02-01
+**Status**: Accepted
+**Decision**: Use SQLite via better-sqlite3 with WAL mode for server-side data persistence
+**Rationale**:
+- Synchronous API is simpler than async alternatives
+- WAL mode handles concurrent reads from API and Telegram
+- Single file deployment (no external DB server)
+- localStorage kept as offline cache with auto-migration
+**Consequences**:
+- Requires `better-sqlite3` native module (compiled per platform)
+- DB at `~/.talkboy/talkboy.db`
+- Need schema versioning system for migrations
+
+---
+
+### ADR-005: Hono as Server Framework
+**Date**: 2026-02-01
+**Status**: Accepted
+**Decision**: Use Hono framework for the HTTPS server
+**Rationale**:
+- Lightweight, Web Standards API compatible
+- Built-in SSE streaming support (critical for Claude Code event streaming)
+- Works with Node.js HTTPS server
+- Minimal overhead over raw HTTP
+**Consequences**:
+- All API routes defined in single `server/api.ts` file
+- Custom HTTPS wrapper needed since Hono's `serve()` doesn't support HTTPS directly
+
+---
+
+### ADR-006: Telegram Bot Integration
+**Date**: 2026-02-01
+**Status**: Accepted
+**Decision**: Add a Telegram bot using grammy framework that routes through the existing `/api/claude-code` endpoint
+**Rationale**:
+- Enables mobile access to Claude without building a native app
+- grammy is the most maintained Telegram bot library for Node.js
+- Reusing the same API endpoint ensures consistent behavior between web and Telegram
+**Consequences**:
+- Per-user conversation state tracked in `telegram_state` table
+- Long messages split at 4096 char limit
+- No streaming in Telegram (waits for full response)
+- Bot starts automatically with server if token is configured
+
+---
+
+### ADR-007: MCP Server for Claude Code Integration
+**Date**: 2026-02-01
+**Status**: Accepted
+**Decision**: Expose TalkBoy functionality as MCP tools via stdio transport
+**Rationale**:
+- Allows Claude Code to launch TalkBoy, read transcripts, and respond to user voice input
+- Enables bidirectional IPC where Claude Code can be an active participant in TalkBoy conversations
+**Consequences**:
+- 12 tools exposed
+- All tools proxy to the HTTPS API (self-signed cert bypass required)
+- Duplicate code between `mcp-server/index.js` and `bin/talkboy-mcp.js`
+
+---
+
+### ADR-008: Cassette Tape UI Theme
+**Date**: 2026-02-01
+**Status**: Accepted
+**Decision**: Use a cassette tape / TalkBoy (Home Alone 2) theme for the UI
+**Rationale**:
+- Strong brand identity
+- "Conversations as tapes" is an intuitive metaphor (insert, play, eject, switch)
+- Retro aesthetic is distinctive
+- The original TalkBoy was a voice recorder, fitting perfectly
+**Consequences**:
+- Custom CSS with theme variables
+- McAllister theme (silver TalkBoy) as default
+- Cassette components: CassetteTape (animated reels), TapeDeck (input bar), TapeCollection (conversation switcher), RetroTape, TapeCase
+
+---
+
+### ADR-009: Self-Signed HTTPS
+**Date**: 2026-02-01
+**Status**: Accepted
+**Decision**: Auto-generate self-signed certificates for localhost HTTPS
+**Rationale**:
+- Web Speech API requires a secure context (HTTPS or localhost)
+- Self-signed certs at `~/.talkboy/` allow HTTPS on any port
+- Tailscale certs preferred when available
+**Consequences**:
+- Browser shows certificate warning on first visit
+- `selfsigned` npm dependency
+- `NODE_TLS_REJECT_UNAUTHORIZED=0` needed for internal API calls (MCP, Telegram)
+
+---
+
+### ADR-010: One-Shot Claude Processes
+**Date**: 2026-02-01
+**Status**: Accepted
+**Decision**: Each message spawns a fresh `claude -p` process with `--no-session-persistence --permission-mode bypassPermissions`
+**Rationale**:
+- Avoids session file conflicts when multiple messages arrive
+- No orphaned processes on crash
+- Simple lifecycle (spawn, stream, exit)
+- bypassPermissions avoids blocking on approval prompts
+**Consequences**:
+- No multi-turn tool context within a single Claude session (each message starts fresh)
+- Conversation context passed via prompt text
+- No ability to approve/reject individual tool calls
+- Process cleanup trivial

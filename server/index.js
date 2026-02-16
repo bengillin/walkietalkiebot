@@ -8,6 +8,9 @@ import { getSSLCerts } from "./ssl.js";
 import { api } from "./api.js";
 import { initDb, closeDb } from "./db/index.js";
 import { startTelegramBot, stopTelegramBot } from "./telegram/index.js";
+import { getNotificationDispatcher } from "./notifications/dispatcher.js";
+import { MacOSNotificationChannel } from "./notifications/macos.js";
+import { getJobManager } from "./jobs/manager.js";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const distPath = join(__dirname, "..", "dist");
 let server = null;
@@ -24,6 +27,10 @@ function startServer(port = 5173) {
       reject(err);
       return;
     }
+    const dispatcher = getNotificationDispatcher();
+    dispatcher.register(new MacOSNotificationChannel());
+    const jobManager = getJobManager();
+    jobManager.init();
     startTelegramBot().catch((err) => {
       console.log("Telegram bot not started:", err.message);
     });

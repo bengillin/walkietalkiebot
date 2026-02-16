@@ -17,6 +17,7 @@ import { useStore, enableServerSync } from './lib/store'
 import * as api from './lib/api'
 import { useSoundEffects } from './hooks/useSoundEffects'
 import { useTheme } from './contexts/ThemeContext'
+import { JobStatusBar } from './components/jobs/JobStatusBar'
 import './App.css'
 
 function App() {
@@ -874,6 +875,9 @@ function App() {
           </>
         )}
       </header>
+
+      {/* Background job status */}
+      <JobStatusBar />
 
       {/* Main chat timeline */}
       <main className="app__main">

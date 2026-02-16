@@ -231,6 +231,49 @@ async function openUrl(url) {
   }
 }
 
+// Job management
+async function createJob(conversationId, prompt) {
+  try {
+    const response = await fetch(`${TALKBOY_URL}/api/jobs`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ conversationId, prompt, source: 'mcp' }),
+    });
+    if (response.ok) {
+      return await response.json();
+    }
+    const error = await response.text();
+    return { error: `Failed to create job: ${error}` };
+  } catch {
+    return { error: 'Talkboy not running' };
+  }
+}
+
+async function getJobStatus(jobId) {
+  try {
+    const response = await fetch(`${TALKBOY_URL}/api/jobs/${jobId}`);
+    if (response.ok) {
+      return await response.json();
+    }
+    return { error: 'Job not found' };
+  } catch {
+    return { error: 'Talkboy not running' };
+  }
+}
+
+async function listTalkboyJobs(status) {
+  try {
+    const params = status ? `?status=${status}` : '';
+    const response = await fetch(`${TALKBOY_URL}/api/jobs${params}`);
+    if (response.ok) {
+      return await response.json();
+    }
+    return { jobs: [], error: 'Failed to list jobs' };
+  } catch {
+    return { jobs: [], error: 'Talkboy not running' };
+  }
+}
+
 // Create MCP server
 const server = new Server(
   {
@@ -399,6 +442,54 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['url'],
         },
       },
+      // Job tools
+      {
+        name: 'create_talkboy_job',
+        description: 'Create a background job in Talkboy. The task runs asynchronously and you get a job ID back immediately. Use get_talkboy_job to check on progress.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            conversationId: {
+              type: 'string',
+              description: 'The conversation ID to run the job in',
+            },
+            prompt: {
+              type: 'string',
+              description: 'The task/prompt to execute',
+            },
+          },
+          required: ['conversationId', 'prompt'],
+        },
+      },
+      {
+        name: 'get_talkboy_job',
+        description: 'Get the status and result of a background job.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            jobId: {
+              type: 'string',
+              description: 'The job ID to check',
+            },
+          },
+          required: ['jobId'],
+        },
+      },
+      {
+        name: 'list_talkboy_jobs',
+        description: 'List background jobs, optionally filtered by status.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            status: {
+              type: 'string',
+              enum: ['queued', 'running', 'completed', 'failed', 'cancelled'],
+              description: 'Filter by job status',
+            },
+          },
+          required: [],
+        },
+      },
     ],
   };
 });
@@ -542,6 +633,42 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
     case 'open_url': {
       const result = await openUrl(args.url);
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(result, null, 2),
+          },
+        ],
+      };
+    }
+
+    case 'create_talkboy_job': {
+      const result = await createJob(args.conversationId, args.prompt);
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(result, null, 2),
+          },
+        ],
+      };
+    }
+
+    case 'get_talkboy_job': {
+      const result = await getJobStatus(args.jobId);
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(result, null, 2),
+          },
+        ],
+      };
+    }
+
+    case 'list_talkboy_jobs': {
+      const result = await listTalkboyJobs(args.status);
       return {
         content: [
           {

@@ -1,4 +1,4 @@
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 function initSchema(db) {
   db.exec(`
     CREATE TABLE IF NOT EXISTS schema_version (
@@ -13,7 +13,8 @@ function initSchema(db) {
 }
 function runMigrations(db, fromVersion) {
   const migrations = [
-    migrateV1
+    migrateV1,
+    migrateV2
   ];
   for (let i = fromVersion; i < migrations.length; i++) {
     console.log(`Running migration to version ${i + 1}...`);
@@ -100,6 +101,38 @@ function migrateV1(db) {
     CREATE INDEX idx_conversations_updated ON conversations(updated_at DESC);
     CREATE INDEX idx_messages_conversation ON messages(conversation_id, position);
     CREATE INDEX idx_activities_conversation ON activities(conversation_id, timestamp DESC);
+  `);
+}
+function migrateV2(db) {
+  db.exec(`
+    -- Background jobs
+    CREATE TABLE jobs (
+      id TEXT PRIMARY KEY,
+      conversation_id TEXT NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+      prompt TEXT NOT NULL,
+      status TEXT NOT NULL CHECK (status IN ('queued', 'running', 'completed', 'failed', 'cancelled')),
+      source TEXT NOT NULL DEFAULT 'web',
+      result TEXT,
+      error TEXT,
+      pid INTEGER,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL,
+      started_at INTEGER,
+      completed_at INTEGER
+    );
+
+    -- Job event stream
+    CREATE TABLE job_events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      job_id TEXT NOT NULL REFERENCES jobs(id) ON DELETE CASCADE,
+      event_type TEXT NOT NULL,
+      data TEXT,
+      timestamp INTEGER NOT NULL
+    );
+
+    CREATE INDEX idx_jobs_status ON jobs(status);
+    CREATE INDEX idx_jobs_conversation ON jobs(conversation_id);
+    CREATE INDEX idx_job_events_job ON job_events(job_id, timestamp);
   `);
 }
 export {

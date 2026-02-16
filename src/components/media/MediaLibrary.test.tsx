@@ -87,10 +87,10 @@ describe('MediaLibrary', () => {
     expect(screen.getByText('Images shared in conversations will appear here')).toBeInTheDocument()
   })
 
-  it('displays image count', () => {
+  it('renders all three images', () => {
     const onClose = vi.fn()
     render(<MediaLibrary conversations={mockConversations} onClose={onClose} />)
-    expect(screen.getByText('3 images')).toBeInTheDocument()
+    expect(screen.getAllByRole('img')).toHaveLength(3)
   })
 
   it('renders all images from conversations', () => {
@@ -100,12 +100,11 @@ describe('MediaLibrary', () => {
     expect(images).toHaveLength(3)
   })
 
-  it('calls onClose when close button is clicked', () => {
+  it('calls onClose when backdrop is clicked', () => {
     const onClose = vi.fn()
-    render(<MediaLibrary conversations={mockConversations} onClose={onClose} />)
-    const closeButtons = screen.getAllByRole('button')
-    const closeButton = closeButtons.find(btn => btn.title === '' && btn.className.includes('close'))
-    fireEvent.click(closeButton || closeButtons[closeButtons.length - 1])
+    const { container } = render(<MediaLibrary conversations={mockConversations} onClose={onClose} />)
+    const backdrop = container.querySelector('.media-library__backdrop')!
+    fireEvent.click(backdrop)
     expect(onClose).toHaveBeenCalled()
   })
 

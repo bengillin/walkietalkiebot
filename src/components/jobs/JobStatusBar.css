@@ -1,0 +1,85 @@
+.job-status-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 12px;
+  background: var(--surface-secondary, #1a1a2e);
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  font-size: 13px;
+}
+
+.job-status-bar__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.job-status-bar__item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.job-status-bar__spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top-color: var(--accent-color, #4a9fd4);
+  border-radius: 50%;
+  animation: job-spin 0.8s linear infinite;
+}
+
+@keyframes job-spin {
+  to { transform: rotate(360deg); }
+}
+
+.job-status-bar__prompt {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+}
+
+.job-status-bar__time {
+  color: var(--text-tertiary, rgba(255, 255, 255, 0.4));
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+}
+
+.job-status-bar__badge {
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-tertiary, rgba(255, 255, 255, 0.5));
+}
+
+.job-status-bar__icon {
+  font-size: 14px;
+  width: 16px;
+  text-align: center;
+}
+
+.job-status-bar__icon--completed {
+  color: #4ade80;
+}
+
+.job-status-bar__icon--failed {
+  color: #f87171;
+}
+
+.job-status-bar__item--completed {
+  animation: job-fade-in 0.3s ease;
+}
+
+.job-status-bar__item--failed {
+  animation: job-fade-in 0.3s ease;
+}
+
+@keyframes job-fade-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
