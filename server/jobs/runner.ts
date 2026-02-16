@@ -53,9 +53,13 @@ export function spawnClaude(options: RunnerOptions): RunnerHandle {
   const claudePath = process.env.CLAUDE_PATH || 'claude'
   console.log('Spawning claude:', claudePath, 'prompt length:', voiceMessage.length)
 
+  // Strip CLAUDECODE env var to allow spawning Claude inside a Claude Code session
+  const env = { ...process.env, FORCE_COLOR: '0' }
+  delete env.CLAUDECODE
+
   const claude = spawn(claudePath, args, {
     cwd: process.cwd(),
-    env: { ...process.env, FORCE_COLOR: '0' },
+    env,
     stdio: ['ignore', 'pipe', 'pipe'],
     detached: false,
   })

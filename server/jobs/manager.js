@@ -164,6 +164,8 @@ class JobManager {
           });
         },
         onComplete: (code) => {
+          const currentJob = jobsRepo.getJob(jobId);
+          if (currentJob?.status === "cancelled") return;
           const now = Date.now();
           const status = code === 0 ? "completed" : "failed";
           const error = code !== 0 ? `Process exited with code ${code}` : void 0;

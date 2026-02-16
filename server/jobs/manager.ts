@@ -213,6 +213,10 @@ class JobManager {
           })
         },
         onComplete: (code) => {
+          // If already cancelled, don't overwrite the status
+          const currentJob = jobsRepo.getJob(jobId)
+          if (currentJob?.status === 'cancelled') return
+
           const now = Date.now()
           const status = code === 0 ? 'completed' : 'failed'
           const error = code !== 0 ? `Process exited with code ${code}` : undefined
