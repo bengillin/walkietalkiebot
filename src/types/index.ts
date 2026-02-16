@@ -62,6 +62,7 @@ export interface Message {
   role: 'user' | 'assistant'
   content: string
   timestamp: number
+  source?: string
   images?: MessageImage[]
 }
 
@@ -95,9 +96,6 @@ export interface AppState {
   contextConversationIds: string[]
   toggleContextConversation: (id: string) => void
   clearContext: () => void
-
-  isVoiceEnabled: boolean
-  setVoiceEnabled: (enabled: boolean) => void
 
   // Text-to-speech enabled
   ttsEnabled: boolean
@@ -155,6 +153,14 @@ export interface AppState {
   // TTS voice selection
   ttsVoice: string
   setTtsVoice: (voice: string) => void
+
+  // Claude settings
+  claudeModel: string
+  setClaudeModel: (model: string) => void
+  claudeMaxTokens: number
+  setClaudeMaxTokens: (tokens: number) => void
+  claudeSystemPrompt: string
+  setClaudeSystemPrompt: (prompt: string) => void
 
   // Liner Notes
   linerNotes: string | null

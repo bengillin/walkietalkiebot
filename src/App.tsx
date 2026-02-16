@@ -21,6 +21,7 @@ import { useTheme } from './contexts/ThemeContext'
 import { JobStatusBar } from './components/jobs/JobStatusBar'
 import { LinerNotes } from './components/linernotes/LinerNotes'
 import { KeyboardShortcuts } from './components/shortcuts/KeyboardShortcuts'
+import { SearchOverlay } from './components/search/SearchOverlay'
 import './App.css'
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
   const [showMediaLibrary, setShowMediaLibrary] = useState(false)
   const [showLinerNotes, setShowLinerNotes] = useState(false)
   const [showShortcuts, setShowShortcuts] = useState(false)
+  const [showSearch, setShowSearch] = useState(false)
   const [isTapeEjected, setIsTapeEjected] = useState(false)
   const [responseText, setResponseText] = useState('')
 
@@ -140,6 +142,13 @@ function App() {
     // Trigger word delay
     triggerWordDelay,
     setTriggerWordDelay,
+    // Claude settings
+    claudeModel,
+    setClaudeModel,
+    claudeMaxTokens,
+    setClaudeMaxTokens,
+    claudeSystemPrompt,
+    setClaudeSystemPrompt,
     // Liner Notes
     linerNotes,
     saveLinerNotes,
@@ -490,7 +499,8 @@ function App() {
             if (ttsEnabled) speakStreaming(chunk, false)
           },
           contextMessages,
-          attachedFiles
+          attachedFiles,
+          { model: claudeModel, maxTokens: claudeMaxTokens, systemPrompt: claudeSystemPrompt }
         )
       }
 
@@ -567,6 +577,9 @@ function App() {
         finalTranscriptRef.current = ''
         setAvatarState('idle')
       }
+    },
+    onCmdK: () => {
+      setShowSearch(prev => !prev)
     },
     onCmdE: () => {
       const conv = conversations.find(c => c.id === currentConversationId)
@@ -943,6 +956,12 @@ function App() {
           setCustomTriggerWord={setCustomTriggerWord}
           triggerWordDelay={triggerWordDelay}
           setTriggerWordDelay={setTriggerWordDelay}
+          claudeModel={claudeModel}
+          setClaudeModel={setClaudeModel}
+          claudeMaxTokens={claudeMaxTokens}
+          setClaudeMaxTokens={setClaudeMaxTokens}
+          claudeSystemPrompt={claudeSystemPrompt}
+          setClaudeSystemPrompt={setClaudeSystemPrompt}
           apiKey={apiKey}
           setApiKey={setApiKey}
           onSaveApiKey={handleSaveApiKey}
@@ -980,6 +999,16 @@ function App() {
           }
         }}
         onClose={() => setShowLinerNotes(false)}
+      />
+
+      {/* Search overlay */}
+      <SearchOverlay
+        isOpen={showSearch}
+        onClose={() => setShowSearch(false)}
+        onSelectResult={(conversationId) => {
+          loadConversation(conversationId)
+          setIsTapeEjected(false)
+        }}
       />
 
       {/* Keyboard shortcuts guide */}

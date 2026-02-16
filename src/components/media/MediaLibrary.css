@@ -14,7 +14,7 @@
 
 .media-library__drawer {
   position: fixed;
-  bottom: 110px;
+  bottom: var(--tape-deck-height, 70px);
   left: 0;
   right: 0;
   background: var(--color-bg-secondary, #e8e4d9);
@@ -232,7 +232,7 @@
 
 /* Expanded drawer state */
 .media-library__drawer--expanded {
-  max-height: calc(100vh - 130px);
+  max-height: calc(100vh - var(--tape-deck-height, 70px) - 20px);
   display: flex;
   flex-direction: column;
 }
@@ -339,7 +339,7 @@
   }
 
   .media-library__drawer--expanded {
-    max-height: calc(100vh - 130px);
+    max-height: calc(100vh - var(--tape-deck-height, 70px) - 20px);
   }
 
   .media-library__detail {

@@ -14,7 +14,7 @@
 
 .tape-collection__drawer {
   position: fixed;
-  bottom: 110px;
+  bottom: var(--tape-deck-height, 70px);
   left: 0;
   right: 0;
   background: var(--color-bg-secondary, #e8e4d9);

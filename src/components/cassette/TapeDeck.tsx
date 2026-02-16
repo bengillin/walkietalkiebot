@@ -55,6 +55,7 @@ export function TapeDeck({
   const [manualInput, setManualInput] = useState('')  // What user typed manually
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const deckRef = useRef<HTMLDivElement>(null)
   const justSubmittedRef = useRef(false)
   const wasListeningRef = useRef(false)
   const lastIncorporatedTranscriptRef = useRef('')  // Track what transcript we've already incorporated
@@ -132,6 +133,22 @@ export function TapeDeck({
     adjustTextareaHeight()
   }, [inputValue, transcript])
 
+  // Track deck height so drawers can position relative to it
+  useEffect(() => {
+    const el = deckRef.current
+    if (!el) return
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        document.documentElement.style.setProperty(
+          '--tape-deck-height',
+          `${entry.borderBoxSize[0].blockSize}px`
+        )
+      }
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
   const handleSelectTape = (id: string) => {
     onSelectConversation(id)
   }
@@ -172,7 +189,7 @@ export function TapeDeck({
   }
 
   return (
-    <div className={`tape-deck ${isListening ? 'tape-deck--recording' : ''} ${isEjected ? 'tape-deck--ejected' : ''}`}>
+    <div ref={deckRef} className={`tape-deck ${isListening ? 'tape-deck--recording' : ''} ${isEjected ? 'tape-deck--ejected' : ''}`}>
       {/* Tape collection drawer */}
       <TapeCollection
         conversations={conversations}

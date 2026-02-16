@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, memo } from 'react'
 import { Message, Activity, AvatarState, StoredActivity } from '../../types'
+import { openUrl } from '../../lib/claude'
 import './ChatTimeline.css'
 
 interface ChatTimelineProps {
@@ -170,6 +171,42 @@ function CollapsibleTools({
   )
 }
 
+// Render text with clickable URLs
+const URL_REGEX = /(https?:\/\/[^\s<>"{}|\\^`[\]]*[^\s<>"{}|\\^`[\].,:;!?)])/g
+
+function renderTextWithLinks(text: string): (string | JSX.Element)[] {
+  const parts: (string | JSX.Element)[] = []
+  let lastIndex = 0
+
+  for (const match of text.matchAll(URL_REGEX)) {
+    const url = match[0].replace(/[.,;:!?)\]]+$/, '')
+    const start = match.index!
+    if (start > lastIndex) {
+      parts.push(text.slice(lastIndex, start))
+    }
+    parts.push(
+      <a
+        key={start}
+        className="message-link"
+        href={url}
+        onClick={(e) => {
+          e.preventDefault()
+          openUrl(url)
+        }}
+      >
+        {url}
+      </a>
+    )
+    lastIndex = start + url.length
+  }
+
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex))
+  }
+
+  return parts.length > 0 ? parts : [text]
+}
+
 // Format time for tape display
 function formatTapeTime(timestamp: number): string {
   const date = new Date(timestamp)
@@ -247,7 +284,7 @@ function MessageBubble({
               )}
             </div>
           )}
-          <div className="message-content">{message.content}</div>
+          <div className="message-content">{renderTextWithLinks(message.content)}</div>
         </div>
         {showPinButton && (
           <button
@@ -264,6 +301,9 @@ function MessageBubble({
       </div>
       <div className={`message-meta ${isUser ? 'user' : 'assistant'}`}>
         <span className="message-meta__name">{isUser ? 'You' : 'Talkboy'}</span>
+        {message.source && message.source !== 'web' && (
+          <span className="message-meta__source">via {message.source}</span>
+        )}
         <span className="message-meta__time">{formatTapeTime(message.timestamp)}</span>
         <span className="message-meta__track">#{String(trackNumber).padStart(2, '0')}</span>
       </div>
@@ -292,7 +332,7 @@ function StreamingBubble({
       )}
       <div className="message-bubble assistant streaming">
         <div className="message-bubble-content">
-          <div className="message-content">{text}</div>
+          <div className="message-content">{renderTextWithLinks(text)}</div>
         </div>
       </div>
       <div className="message-meta assistant">

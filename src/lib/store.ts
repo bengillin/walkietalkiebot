@@ -197,6 +197,7 @@ export const useStore = create<AppState>((set, get) => {
               role: m.role,
               content: m.content,
               timestamp: m.timestamp,
+              source: m.source,
               images: m.images,
             }))
             const freshActivities = serverConv.activities.map(a => ({
@@ -310,9 +311,6 @@ export const useStore = create<AppState>((set, get) => {
       set({ contextConversationIds: [] })
     },
 
-    isVoiceEnabled: true,
-    setVoiceEnabled: (isVoiceEnabled) => set({ isVoiceEnabled }),
-
     // Text-to-speech enabled
     ttsEnabled: localStorage.getItem('talkboy_tts_enabled') !== 'false',
     setTtsEnabled: (ttsEnabled) => {
@@ -367,6 +365,23 @@ export const useStore = create<AppState>((set, get) => {
     setTtsVoice: (voice) => {
       localStorage.setItem('talkboy_tts_voice', voice)
       set({ ttsVoice: voice })
+    },
+
+    // Claude settings
+    claudeModel: localStorage.getItem('talkboy_claude_model') || 'claude-sonnet-4-20250514',
+    setClaudeModel: (model) => {
+      localStorage.setItem('talkboy_claude_model', model)
+      set({ claudeModel: model })
+    },
+    claudeMaxTokens: parseInt(localStorage.getItem('talkboy_claude_max_tokens') || '1024', 10),
+    setClaudeMaxTokens: (tokens) => {
+      localStorage.setItem('talkboy_claude_max_tokens', String(tokens))
+      set({ claudeMaxTokens: tokens })
+    },
+    claudeSystemPrompt: localStorage.getItem('talkboy_claude_system_prompt') || 'You are Talkboy. Be direct and brief - responses are spoken aloud. One to two sentences max unless asked for more. No filler phrases, no "Great question!", no "I\'d be happy to help!". Just answer. Kind but not performative.',
+    setClaudeSystemPrompt: (prompt) => {
+      localStorage.setItem('talkboy_claude_system_prompt', prompt)
+      set({ claudeSystemPrompt: prompt })
     },
 
     transcript: '',
@@ -537,6 +552,7 @@ export const useStore = create<AppState>((set, get) => {
               role: m.role,
               content: m.content,
               timestamp: m.timestamp,
+              source: m.source,
               images: m.images,
             })),
             activities: fullConv.activities.map(a => ({
@@ -612,7 +628,3 @@ export function enableServerSync() {
   useStore.getState().setServerSyncEnabled(true)
 }
 
-export function disableServerSync() {
-  serverSyncEnabled = false
-  useStore.getState().setServerSyncEnabled(false)
-}

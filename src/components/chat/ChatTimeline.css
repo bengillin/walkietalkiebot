@@ -183,6 +183,22 @@
   white-space: pre-wrap;
 }
 
+.message-link {
+  color: #5ac8fa;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  word-break: break-all;
+}
+
+.message-link:hover {
+  color: #70d4ff;
+}
+
+.message-bubble.user .message-link {
+  color: rgba(255, 255, 255, 0.9);
+}
+
 .message-time {
   font-size: 0.65rem;
   opacity: 0.6;
@@ -441,6 +457,12 @@
   50% {
     opacity: 0.6;
   }
+}
+
+.message-meta__source {
+  font-size: 0.8rem;
+  opacity: 0.6;
+  font-style: italic;
 }
 
 .message-meta__time {

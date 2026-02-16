@@ -97,7 +97,8 @@ export async function sendMessageStreaming(
   apiKey: string,
   onChunk: (text: string) => void,
   contextMessages?: Message[],
-  attachedFiles?: DroppedFile[]
+  attachedFiles?: DroppedFile[],
+  options?: { model?: string; maxTokens?: number; systemPrompt?: string }
 ): Promise<string> {
   // If we have context from past conversations, prepend it
   let allMessages = messages
@@ -154,10 +155,10 @@ export async function sendMessageStreaming(
       'anthropic-dangerous-direct-browser-access': 'true',
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1024,
+      model: options?.model || 'claude-sonnet-4-20250514',
+      max_tokens: options?.maxTokens || 1024,
       stream: true,
-      system: `You are Talkboy. Be direct and brief - responses are spoken aloud. One to two sentences max unless asked for more. No filler phrases, no "Great question!", no "I'd be happy to help!". Just answer. Kind but not performative.`,
+      system: options?.systemPrompt || `You are Talkboy. Be direct and brief - responses are spoken aloud. One to two sentences max unless asked for more. No filler phrases, no "Great question!", no "I'd be happy to help!". Just answer. Kind but not performative.`,
       messages: claudeMessages,
     }),
   })

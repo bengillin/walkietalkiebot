@@ -180,10 +180,6 @@ export async function isDatabaseAvailable(): Promise<boolean> {
 }
 
 // Liner Notes
-export async function getLinerNotes(conversationId: string): Promise<{ linerNotes: string | null }> {
-  return fetchJson(`${API_BASE}/conversations/${conversationId}/liner-notes`)
-}
-
 export async function saveLinerNotes(conversationId: string, linerNotes: string | null): Promise<{ success: boolean }> {
   return fetchJson(`${API_BASE}/conversations/${conversationId}/liner-notes`, {
     method: 'PUT',

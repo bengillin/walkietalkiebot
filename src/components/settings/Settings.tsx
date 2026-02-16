@@ -31,6 +31,13 @@ interface SettingsProps {
   setCustomTriggerWord: (value: string) => void
   triggerWordDelay: number
   setTriggerWordDelay: (value: number) => void
+  // Claude settings
+  claudeModel: string
+  setClaudeModel: (value: string) => void
+  claudeMaxTokens: number
+  setClaudeMaxTokens: (value: number) => void
+  claudeSystemPrompt: string
+  setClaudeSystemPrompt: (value: string) => void
   // API key
   apiKey: string
   setApiKey: (value: string) => void
@@ -66,6 +73,12 @@ export function Settings({
   setCustomTriggerWord,
   triggerWordDelay,
   setTriggerWordDelay,
+  claudeModel,
+  setClaudeModel,
+  claudeMaxTokens,
+  setClaudeMaxTokens,
+  claudeSystemPrompt,
+  setClaudeSystemPrompt,
   apiKey,
   setApiKey,
   onSaveApiKey,
@@ -187,6 +200,46 @@ export function Settings({
               </button>
             </div>
           )}
+
+          {/* Claude settings (Direct API mode only) */}
+          {!useClaudeCode && (
+            <>
+              <div className="settings__divider" />
+              <label className="settings__input-label">Model</label>
+              <select
+                className="settings__select"
+                value={claudeModel}
+                onChange={(e) => setClaudeModel(e.target.value)}
+              >
+                <option value="claude-sonnet-4-20250514">Claude Sonnet 4</option>
+                <option value="claude-opus-4-20250514">Claude Opus 4</option>
+                <option value="claude-haiku-4-20250514">Claude Haiku 4</option>
+              </select>
+
+              <label className="settings__input-label">Max tokens</label>
+              <div className="settings__range-row">
+                <input
+                  type="range"
+                  min="256"
+                  max="8192"
+                  step="256"
+                  value={claudeMaxTokens}
+                  onChange={(e) => setClaudeMaxTokens(Number(e.target.value))}
+                />
+                <span className="settings__range-value">{claudeMaxTokens}</span>
+              </div>
+
+              <label className="settings__input-label">System prompt</label>
+              <textarea
+                className="settings__textarea"
+                value={claudeSystemPrompt}
+                onChange={(e) => setClaudeSystemPrompt(e.target.value)}
+                rows={3}
+              />
+            </>
+          )}
+
+          <div className="settings__divider" />
 
           <label className="settings__toggle">
             <span className="settings__toggle-label">Speak responses</span>
