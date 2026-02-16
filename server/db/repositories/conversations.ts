@@ -101,6 +101,17 @@ export function touchConversation(id: string): void {
   db.prepare('UPDATE conversations SET updated_at = ? WHERE id = ?').run(Date.now(), id)
 }
 
+export function updateLinerNotes(id: string, linerNotes: string | null): void {
+  const db = getDb()
+  db.prepare('UPDATE conversations SET liner_notes = ?, updated_at = ? WHERE id = ?').run(linerNotes, Date.now(), id)
+}
+
+export function getLinerNotes(id: string): string | null {
+  const db = getDb()
+  const row = db.prepare('SELECT liner_notes FROM conversations WHERE id = ?').get(id) as { liner_notes: string | null } | undefined
+  return row?.liner_notes || null
+}
+
 export function countConversations(): number {
   const db = getDb()
   const row = db.prepare('SELECT COUNT(*) as count FROM conversations').get() as { count: number }

@@ -8,7 +8,8 @@ interface ChatTimelineProps {
   storedActivities: StoredActivity[]  // Historical activities (persisted)
   avatarState: AvatarState
   streamingText: string
-  onImageClick?: (image: { dataUrl: string; description?: string; fileName: string }) => void
+  onImageClick?: (image: { dataUrl: string; description?: string; fileName: string }, allImages?: { dataUrl: string; description?: string; fileName: string }[]) => void
+  onPinToLinerNotes?: (content: string) => void
 }
 
 // Unified activity type for display (works with both live and stored)
@@ -175,20 +176,38 @@ function formatTapeTime(timestamp: number): string {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
 
+// Check if content has meaningful structure (markdown headings, code blocks, lists)
+function hasStructuredContent(content: string): boolean {
+  return /^(#{1,3} |```|\d+\. |- |\* )/m.test(content) && content.length > 100
+}
+
 // Message bubble component with optional activities
 function MessageBubble({
   message,
   onImageClick,
+  onPinToLinerNotes,
   trackNumber,
   activities = [],
 }: {
   message: Message
-  onImageClick?: (image: { dataUrl: string; description?: string; fileName: string }) => void
+  onImageClick?: (image: { dataUrl: string; description?: string; fileName: string }, allImages?: { dataUrl: string; description?: string; fileName: string }[]) => void
+  onPinToLinerNotes?: (content: string) => void
   trackNumber: number
   activities?: DisplayActivity[]
 }) {
   const isUser = message.role === 'user'
   const hasImages = message.images && message.images.length > 0
+  const imageCount = message.images?.length || 0
+  const showPinButton = !isUser && onPinToLinerNotes && hasStructuredContent(message.content)
+
+  // Build gallery array for lightbox navigation
+  const galleryImages = hasImages
+    ? message.images!.map(img => ({
+        dataUrl: img.dataUrl,
+        description: img.description,
+        fileName: img.fileName,
+      }))
+    : undefined
 
   return (
     <div className={`message-wrapper ${isUser ? 'user' : 'assistant'}`}>
@@ -201,24 +220,47 @@ function MessageBubble({
       <div className={`message-bubble ${isUser ? 'user' : 'assistant'}`}>
         <div className="message-bubble-content">
           {hasImages && (
-            <div className="message-images">
+            <div className={`message-images ${imageCount > 2 ? 'message-images--grid' : ''}`}>
               {message.images!.map((img) => (
-                <img
-                  key={img.id}
-                  src={img.dataUrl}
-                  alt={img.fileName}
-                  className="message-image-thumb"
-                  onClick={() => onImageClick?.({
-                    dataUrl: img.dataUrl,
-                    description: img.description,
-                    fileName: img.fileName
-                  })}
-                />
+                <div key={img.id} className="message-image-wrapper">
+                  <img
+                    src={img.dataUrl}
+                    alt={img.fileName}
+                    className="message-image-thumb"
+                    onClick={() => onImageClick?.({
+                      dataUrl: img.dataUrl,
+                      description: img.description,
+                      fileName: img.fileName
+                    }, galleryImages)}
+                  />
+                  {img.description && (
+                    <span className="message-image-analyzed" title="Analyzed">
+                      <svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                      </svg>
+                    </span>
+                  )}
+                </div>
               ))}
+              {imageCount > 1 && (
+                <span className="message-images-count">{imageCount} images</span>
+              )}
             </div>
           )}
           <div className="message-content">{message.content}</div>
         </div>
+        {showPinButton && (
+          <button
+            className="message-bubble__pin-btn"
+            onClick={() => onPinToLinerNotes(message.content)}
+            title="Pin to liner notes"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
+              <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+            </svg>
+            Liner Notes
+          </button>
+        )}
       </div>
       <div className={`message-meta ${isUser ? 'user' : 'assistant'}`}>
         <span className="message-meta__name">{isUser ? 'You' : 'Talkboy'}</span>
@@ -345,6 +387,7 @@ export const ChatTimeline = memo(function ChatTimeline({
   avatarState,
   streamingText,
   onImageClick,
+  onPinToLinerNotes,
 }: ChatTimelineProps) {
   const bottomRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -396,6 +439,7 @@ export const ChatTimeline = memo(function ChatTimeline({
             <MessageBubble
               message={message}
               onImageClick={onImageClick}
+              onPinToLinerNotes={onPinToLinerNotes}
               trackNumber={trackNumber}
               activities={msgActivities}
             />

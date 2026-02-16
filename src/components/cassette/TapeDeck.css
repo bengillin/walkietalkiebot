@@ -4,55 +4,133 @@
   border-top: 3px solid #909090;
 }
 
+/* Option B: Integrated single row layout */
 .tape-deck__main {
-  padding: 16px;
+  padding: 12px 16px;
   display: flex;
   flex-direction: row;
   align-items: flex-end;
-  gap: 12px;
+  gap: 8px;
 }
 
-/* Cassette slot */
-.tape-deck__cassette-slot {
-  width: 120px;
-  height: 75px;
+/* Left side: drawer trigger buttons */
+.tape-deck__left-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  flex-shrink: 0;
+  align-items: flex-end;
+}
+
+/* Right side: input action buttons */
+.tape-deck__right-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  flex-shrink: 0;
+  align-items: flex-end;
+}
+
+/* Shared action button base */
+.tape-deck__action-btn {
+  width: 44px;
+  height: 44px;
   flex-shrink: 0;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  transition: transform 0.1s ease;
-}
-
-.tape-deck__cassette-slot:hover {
-  transform: scale(1.05);
-}
-
-.tape-deck__empty-slot {
-  width: 100%;
-  display: flex;
   align-items: center;
   justify-content: center;
-  color: #606060;
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  text-align: center;
-  background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
-  border: 3px solid #000;
   border-radius: 8px;
+  background: linear-gradient(180deg, #404040 0%, #2a2a2a 100%);
+  border: 2px solid #555;
+  border-bottom-color: #222;
+  border-right-color: #222;
+  color: #ccc;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow:
+    inset 1px 1px 0 rgba(255,255,255,0.1),
+    2px 2px 4px rgba(0,0,0,0.3);
 }
 
-/* Controls row */
-.tape-deck__controls {
-  flex: 1;
-  display: flex;
-  align-items: stretch;
-  gap: 12px;
+.tape-deck__action-btn:hover:not(:disabled) {
+  color: #fff;
+  background: linear-gradient(180deg, #505050 0%, #353535 100%);
+  border-color: #666;
 }
 
-/* Text input */
+.tape-deck__action-btn:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow:
+    inset 1px 1px 0 rgba(255,255,255,0.05),
+    1px 1px 2px rgba(0,0,0,0.3);
+}
+
+.tape-deck__action-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Eject button active state */
+.tape-deck__action-btn--eject.tape-deck__action-btn--active {
+  background: linear-gradient(180deg, #ffa500 0%, #cc8400 100%);
+  border-color: #996300;
+  color: #fff;
+}
+
+/* Send button - green like the original TalkBoy */
+.tape-deck__action-btn--send {
+  background: linear-gradient(180deg, #00a035 0%, #00802b 100%);
+  border: 2px solid #005a1e;
+  color: #fff;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.2),
+    0 3px 0 #003d14;
+}
+
+.tape-deck__action-btn--send:hover:not(:disabled) {
+  background: linear-gradient(180deg, #00b83e 0%, #009933 100%);
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.2),
+    0 4px 0 #003d14;
+}
+
+.tape-deck__action-btn--send:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Mic button recording state */
+.tape-deck__action-btn--mic.tape-deck__action-btn--recording {
+  background: linear-gradient(180deg,
+    rgba(255, 80, 80, 0.9) 0%,
+    rgba(200, 30, 30, 0.95) 100%
+  );
+  border-color: rgba(100, 0, 0, 0.6);
+  color: #fff;
+  box-shadow:
+    inset 0 0 15px rgba(255, 100, 100, 0.5),
+    0 0 15px rgba(255, 0, 0, 0.4),
+    0 0 30px rgba(255, 0, 0, 0.2);
+  animation: mic-pulse 1s ease-in-out infinite;
+}
+
+@keyframes mic-pulse {
+  0%, 100% {
+    box-shadow:
+      inset 0 0 15px rgba(255, 100, 100, 0.5),
+      0 0 15px rgba(255, 0, 0, 0.4),
+      0 0 30px rgba(255, 0, 0, 0.2);
+  }
+  50% {
+    box-shadow:
+      inset 0 0 20px rgba(255, 150, 150, 0.6),
+      0 0 25px rgba(255, 0, 0, 0.6),
+      0 0 50px rgba(255, 0, 0, 0.3);
+  }
+}
+
+/* Text input - center, fills available space */
 .tape-deck__input-wrapper {
   flex: 1;
   min-width: 0;
@@ -62,15 +140,15 @@
 
 .tape-deck__input {
   width: 100%;
-  min-height: 75px;
+  min-height: 44px;
   max-height: 200px;
   height: auto;
-  padding: 14px 18px;
+  padding: 10px 14px;
   background: #2a2a2a;
-  border: 3px solid #1a1a1a;
+  border: 2px solid #1a1a1a;
   border-radius: 8px;
   color: #f0f0f0;
-  font-size: 18px;
+  font-size: 16px;
   line-height: 1.4;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5);
@@ -89,7 +167,7 @@
 
 .tape-deck__input::placeholder {
   color: #707070;
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .tape-deck__input:disabled {
@@ -97,89 +175,66 @@
   cursor: not-allowed;
 }
 
-/* Send button */
-.tape-deck__send-btn {
-  width: 120px;
-  min-height: 75px;
-  align-self: stretch;
-  flex-shrink: 0;
-  border-radius: 8px;
-  background: linear-gradient(180deg, #00a035 0%, #00802b 100%);
-  border: 3px solid #005a1e;
-  color: #fff;
+/* Empty slot (no tape loaded) */
+.tape-deck__empty-slot {
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  box-shadow:
-    inset 0 2px 0 rgba(255, 255, 255, 0.2),
-    0 4px 0 #003d14;
-  transition: all 0.1s ease;
-}
-
-.tape-deck__send-btn:hover:not(:disabled) {
-  background: linear-gradient(180deg, #00b83e 0%, #009933 100%);
-  transform: translateY(-1px);
-  box-shadow:
-    inset 0 2px 0 rgba(255, 255, 255, 0.2),
-    0 5px 0 #003d14;
-}
-
-.tape-deck__send-btn:active:not(:disabled) {
-  transform: translateY(2px);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.tape-deck__send-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  color: #606060;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: center;
+  background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
+  border: 3px solid #000;
+  border-radius: 8px;
 }
 
 /* Mobile styles */
 @media (max-width: 480px) {
   .tape-deck__main {
     padding: 8px;
-    gap: 8px;
+    gap: 6px;
   }
 
-  /* Cassette slot 2/3 size on mobile */
-  .tape-deck__cassette-slot {
-    width: 80px;
-    height: 50px;
+  .tape-deck__action-btn {
+    width: 38px;
+    height: 38px;
+  }
+
+  .tape-deck__action-btn svg {
+    width: 16px;
+    height: 16px;
   }
 
   .tape-deck__input {
-    min-height: 44px;
-    padding: 10px 12px;
+    min-height: 38px;
+    padding: 8px 10px;
     font-size: 16px;
     border-radius: 6px;
   }
 
   .tape-deck__input::placeholder {
-    font-size: 14px;
+    font-size: 13px;
   }
 
-  .tape-deck__send-btn {
-    width: 50px;
-    min-height: 44px;
-    border-radius: 6px;
-  }
-
-  .tape-deck__send-btn svg {
-    width: 18px;
-    height: 18px;
+  /* Hide settings button on mobile - available from menu */
+  .tape-deck__action-btn--settings {
+    display: none;
   }
 }
 
 /* Extra small screens */
 @media (max-width: 360px) {
-  .tape-deck__cassette-slot {
-    width: 60px;
-    height: 40px;
+  .tape-deck__action-btn {
+    width: 34px;
+    height: 34px;
   }
 
-  .tape-deck__send-btn {
-    width: 44px;
+  /* Hide attach button on tiny screens */
+  .tape-deck__action-btn--attach {
+    display: none;
   }
 }
-

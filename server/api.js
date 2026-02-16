@@ -118,6 +118,26 @@ api.delete("/conversations/:id", (c) => {
   }
   return c.json({ success: true });
 });
+api.get("/conversations/:id/liner-notes", (c) => {
+  const id = c.req.param("id");
+  const conv = conversations.getConversation(id);
+  if (!conv) {
+    return c.json({ error: "Conversation not found" }, 404);
+  }
+  return c.json({
+    linerNotes: conv.liner_notes || null
+  });
+});
+api.put("/conversations/:id/liner-notes", async (c) => {
+  const id = c.req.param("id");
+  const body = await c.req.json();
+  const conv = conversations.getConversation(id);
+  if (!conv) {
+    return c.json({ error: "Conversation not found" }, 404);
+  }
+  conversations.updateLinerNotes(id, body.linerNotes || null);
+  return c.json({ success: true });
+});
 api.post("/conversations/:id/messages", async (c) => {
   const conversationId = c.req.param("id");
   const body = await c.req.json();
@@ -230,6 +250,46 @@ api.post("/migrate", async (c) => {
     imported,
     skipped,
     total: localConversations.length
+  });
+});
+api.get("/integrations", (c) => {
+  let telegramConfigured = !!process.env.TELEGRAM_BOT_TOKEN;
+  if (!telegramConfigured) {
+    try {
+      const { existsSync } = require("fs");
+      const { join } = require("path");
+      const { homedir } = require("os");
+      const tokenPath = join(homedir(), ".talkboy", "telegram.token");
+      telegramConfigured = existsSync(tokenPath);
+    } catch {
+    }
+  }
+  return c.json({
+    mcp: {
+      configured: true,
+      toolCount: 15,
+      tools: [
+        "launch_talkboy",
+        "get_talkboy_status",
+        "get_transcript",
+        "get_conversation_history",
+        "get_claude_session",
+        "set_claude_session",
+        "disconnect_claude_session",
+        "get_pending_message",
+        "respond_to_talkboy",
+        "update_talkboy_state",
+        "analyze_image",
+        "open_url",
+        "create_talkboy_job",
+        "get_talkboy_job",
+        "list_talkboy_jobs"
+      ],
+      transport: "stdio"
+    },
+    telegram: {
+      configured: telegramConfigured
+    }
   });
 });
 api.get("/transcript", (c) => {

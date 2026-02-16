@@ -29,6 +29,60 @@
   gap: 16px;
 }
 
+.app__header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Recording indicator in header */
+.app__recording-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: rgba(180, 0, 0, 0.15);
+  border-radius: 12px;
+}
+
+.app__recording-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ff0000;
+  animation: recording-blink 1s ease-in-out infinite;
+}
+
+@keyframes recording-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.app__recording-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #cc0000;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* Liner notes indicator dot */
+.app__header-btn--has-notes {
+  position: relative;
+}
+
+.app__header-btn--has-notes::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  background: #ffa500;
+  border-radius: 50%;
+  border: 2px solid #2a2a2a;
+}
+
 .app__header-actions {
   display: flex;
   align-items: center;

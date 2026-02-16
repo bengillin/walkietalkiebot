@@ -245,6 +245,87 @@
   text-align: right;
 }
 
+/* Tape section: rename current conversation */
+.settings__tape-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings__rename-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings__tape-name {
+  font-size: 14px;
+  color: var(--color-text-primary, #2c2416);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settings__rename-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--color-border, #c4bfb0);
+  border-radius: 4px;
+  color: var(--color-text-secondary, #5a5040);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.settings__rename-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--color-text-primary, #2c2416);
+}
+
+.settings__rename-row .settings__text-input {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.settings__rename-save {
+  padding: 6px 12px;
+  background: linear-gradient(180deg, #fff 0%, #f0f0f0 100%);
+  border: 2px solid var(--color-border, #c4bfb0);
+  border-radius: 6px;
+  color: var(--color-text-primary, #2c2416);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.settings__rename-save:hover {
+  background: linear-gradient(180deg, #fff 0%, #e8e8e8 100%);
+}
+
+/* Select dropdown */
+.settings__select {
+  padding: 8px 12px;
+  background: #fff;
+  border: 2px solid var(--color-border, #c4bfb0);
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--color-text-primary, #2c2416);
+  outline: none;
+  cursor: pointer;
+  max-width: 100%;
+}
+
+.settings__select:focus {
+  border-color: #888;
+}
+
 /* Divider */
 .settings__divider {
   height: 2px;
@@ -302,6 +383,123 @@
 
 .settings__api-link:hover {
   text-decoration: underline;
+}
+
+/* Export buttons */
+.settings__export-row {
+  display: flex;
+  gap: 8px;
+}
+
+.settings__export-btn {
+  flex: 1;
+  padding: 8px 12px;
+  background: linear-gradient(180deg, #fff 0%, #f0f0f0 100%);
+  border: 2px solid var(--color-border, #c4bfb0);
+  border-radius: 6px;
+  color: var(--color-text-primary, #2c2416);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1);
+  transition: all 0.15s ease;
+}
+
+.settings__export-btn:hover {
+  background: linear-gradient(180deg, #fff 0%, #e8e8e8 100%);
+}
+
+.settings__export-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Integrations */
+.settings__integration {
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid var(--color-border, #c4bfb0);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.settings__integration + .settings__integration {
+  margin-top: 8px;
+}
+
+.settings__integration-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings__integration-icon {
+  display: flex;
+  align-items: center;
+  color: var(--color-text-secondary, #5a5040);
+}
+
+.settings__integration-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-primary, #2c2416);
+  flex: 1;
+}
+
+.settings__integration-status {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--color-text-secondary, #5a5040);
+}
+
+.settings__integration-status--active {
+  background: rgba(76, 175, 80, 0.15);
+  color: #2e7d32;
+}
+
+.settings__integration-details {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.settings__integration-meta {
+  font-size: 12px;
+  color: var(--color-text-secondary, #5a5040);
+}
+
+.settings__integration-toggle-btn {
+  padding: 4px 8px;
+  background: transparent;
+  border: 1px solid var(--color-border, #c4bfb0);
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--color-text-secondary, #5a5040);
+  cursor: pointer;
+  width: fit-content;
+}
+
+.settings__integration-toggle-btn:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.settings__mcp-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.settings__mcp-tool {
+  font-size: 11px;
+  font-family: 'Courier New', monospace;
+  padding: 2px 6px;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 4px;
+  color: var(--color-text-primary, #2c2416);
 }
 
 /* Advanced */

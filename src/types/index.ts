@@ -70,6 +70,7 @@ export interface Conversation {
   title: string
   messages: Message[]
   activities?: StoredActivity[]  // Historical tool use, loaded with conversation
+  linerNotes?: string | null     // Pinned artifacts/plans/docs
   createdAt: number
   updatedAt: number
 }
@@ -146,6 +147,19 @@ export interface AppState {
   updateImageAnalysis: (id: string, updates: Partial<ImageAnalysis>) => void
   clearImageAnalyses: () => void
   getImageContext: () => string // Returns formatted string of all analyzed images for context
+
+  // Sound effects
+  soundEffectsEnabled: boolean
+  setSoundEffectsEnabled: (enabled: boolean) => void
+
+  // TTS voice selection
+  ttsVoice: string
+  setTtsVoice: (voice: string) => void
+
+  // Liner Notes
+  linerNotes: string | null
+  setLinerNotes: (notes: string | null) => void
+  saveLinerNotes: (conversationId: string, notes: string | null) => Promise<void>
 
   // Server sync
   serverSyncEnabled: boolean

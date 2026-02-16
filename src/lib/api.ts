@@ -179,6 +179,35 @@ export async function isDatabaseAvailable(): Promise<boolean> {
   }
 }
 
+// Liner Notes
+export async function getLinerNotes(conversationId: string): Promise<{ linerNotes: string | null }> {
+  return fetchJson(`${API_BASE}/conversations/${conversationId}/liner-notes`)
+}
+
+export async function saveLinerNotes(conversationId: string, linerNotes: string | null): Promise<{ success: boolean }> {
+  return fetchJson(`${API_BASE}/conversations/${conversationId}/liner-notes`, {
+    method: 'PUT',
+    body: JSON.stringify({ linerNotes }),
+  })
+}
+
+// Integrations
+export interface IntegrationsStatus {
+  mcp: {
+    configured: boolean
+    toolCount: number
+    tools: string[]
+    transport: string
+  }
+  telegram: {
+    configured: boolean
+  }
+}
+
+export async function getIntegrations(): Promise<IntegrationsStatus> {
+  return fetchJson(`${API_BASE}/integrations`)
+}
+
 // Jobs
 export interface Job {
   id: string

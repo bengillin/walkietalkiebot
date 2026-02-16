@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
-import { AvatarSmall } from './components/avatar/Avatar'
+import { RobotAvatarSmall } from './components/avatar/RobotAvatar'
 import { Logo } from './components/Logo'
 import { ChatTimeline } from './components/chat/ChatTimeline'
 import { TapeDeck } from './components/cassette'
@@ -15,9 +15,12 @@ import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
 import { sendMessageStreaming, sendMessageViaClaudeCode, analyzeImage, analyzeImageViaServer, type ActivityEvent } from './lib/claude'
 import { useStore, enableServerSync } from './lib/store'
 import * as api from './lib/api'
+import { exportConversation } from './lib/export'
 import { useSoundEffects } from './hooks/useSoundEffects'
 import { useTheme } from './contexts/ThemeContext'
 import { JobStatusBar } from './components/jobs/JobStatusBar'
+import { LinerNotes } from './components/linernotes/LinerNotes'
+import { KeyboardShortcuts } from './components/shortcuts/KeyboardShortcuts'
 import './App.css'
 
 function App() {
@@ -29,8 +32,9 @@ function App() {
   )
   const [showSettings, setShowSettings] = useState(false)
   const [showMediaLibrary, setShowMediaLibrary] = useState(false)
+  const [showLinerNotes, setShowLinerNotes] = useState(false)
+  const [showShortcuts, setShowShortcuts] = useState(false)
   const [isTapeEjected, setIsTapeEjected] = useState(false)
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [responseText, setResponseText] = useState('')
 
   // FAB position and size (draggable/resizable)
@@ -53,6 +57,7 @@ function App() {
   )
   const [connectedSessionId, setConnectedSessionId] = useState<string | null>(null)
   const [lightboxImage, setLightboxImage] = useState<{ dataUrl: string; description?: string; fileName: string } | null>(null)
+  const [lightboxGallery, setLightboxGallery] = useState<{ dataUrl: string; description?: string; fileName: string }[] | undefined>(undefined)
 
   // Fetch connected session ID periodically when in Claude Code mode
   useEffect(() => {
@@ -92,6 +97,7 @@ function App() {
     loadConversation,
     deleteConversation,
     contextConversationIds,
+    toggleContextConversation,
     // Activity feed
     activities,
     addActivity,
@@ -115,6 +121,11 @@ function App() {
     // TTS setting
     ttsEnabled,
     setTtsEnabled,
+    ttsVoice,
+    setTtsVoice,
+    // Sound effects
+    soundEffectsEnabled,
+    setSoundEffectsEnabled,
     // Continuous listening setting
     continuousListeningEnabled,
     setContinuousListeningEnabled,
@@ -123,11 +134,15 @@ function App() {
     setWakeWordEnabled,
     // Custom words
     customWakeWord,
+    setCustomWakeWord,
     customTriggerWord,
     setCustomTriggerWord,
     // Trigger word delay
     triggerWordDelay,
     setTriggerWordDelay,
+    // Liner Notes
+    linerNotes,
+    saveLinerNotes,
     // Server sync
     syncFromServer,
     migrateToServer,
@@ -245,7 +260,7 @@ function App() {
   )
 
   // Sound effects
-  const { play: playSound } = useSoundEffects()
+  const { play: playSound } = useSoundEffects(soundEffectsEnabled)
 
   // Ref to capture final transcript for use in onEnd
   const finalTranscriptRef = useRef('')
@@ -308,6 +323,7 @@ function App() {
     isSpeaking,
     isSupported: ttsSupported
   } = useSpeechSynthesis({
+    voice: ttsVoice || undefined,
     onStart: () => setAvatarState('speaking'),
     onEnd: () => {
       setAvatarState('happy')
@@ -540,7 +556,7 @@ function App() {
     },
   })
 
-  // Keyboard shortcuts (Escape to cancel recording)
+  // Keyboard shortcuts (Escape to cancel recording, Cmd+E to export)
   useKeyboardShortcuts({
     isRecording: isListening,
     onEscape: () => {
@@ -552,7 +568,26 @@ function App() {
         setAvatarState('idle')
       }
     },
+    onCmdE: () => {
+      const conv = conversations.find(c => c.id === currentConversationId)
+      if (conv && conv.messages.length > 0) {
+        exportConversation(conv, 'markdown')
+      }
+    },
   })
+
+  // ? key to show keyboard shortcuts guide
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === '?' && !e.metaKey && !e.ctrlKey) {
+        const active = document.activeElement
+        if (active?.tagName === 'INPUT' || active?.tagName === 'TEXTAREA') return
+        setShowShortcuts(prev => !prev)
+      }
+    }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [])
 
   // Spacebar keyboard shortcut for push-to-talk (disabled in continuous mode)
   useEffect(() => {
@@ -756,19 +791,36 @@ function App() {
 
   return (
     <div className="app app--timeline">
-      {/* Header - clean with logo and settings */}
+      {/* Header - simplified: just avatar, logo, and recording indicator */}
       <header className="app__header">
         <div className="app__header-left">
           {/* Avatar status indicator */}
           <div className="app__avatar-status">
-            <AvatarSmall state={avatarState} />
+            <RobotAvatarSmall state={avatarState} />
           </div>
           <div className="app__logo">
             <Logo />
           </div>
         </div>
-        {/* Desktop header actions - hidden on mobile */}
-        <div className="app__header-actions">
+        <div className="app__header-right">
+          {/* Recording indicator */}
+          {isListening && (
+            <div className="app__recording-indicator">
+              <span className="app__recording-dot" />
+              <span className="app__recording-label">REC</span>
+            </div>
+          )}
+          {/* Liner Notes button */}
+          <button
+            className={`app__header-btn ${linerNotes ? 'app__header-btn--has-notes' : ''}`}
+            onClick={() => setShowLinerNotes(true)}
+            title="Liner Notes"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+              <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+            </svg>
+          </button>
+          {/* Media Library button */}
           <button
             className="app__header-btn"
             onClick={() => setShowMediaLibrary(true)}
@@ -778,102 +830,7 @@ function App() {
               <path d="M22 16V4c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2zm-11-4l2.03 2.71L16 11l4 5H8l3-4zM2 6v14c0 1.1.9 2 2 2h14v-2H4V6H2z"/>
             </svg>
           </button>
-          <button
-            className="app__header-btn"
-            onClick={() => setShowSettings(true)}
-            title="Settings"
-          >
-            <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
-              <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="currentColor" strokeWidth="2"/>
-              <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" stroke="currentColor" strokeWidth="2"/>
-            </svg>
-          </button>
-          {/* Eject button */}
-          <button
-            className={`app__header-btn app__header-btn--eject ${isTapeEjected ? 'app__header-btn--active' : ''}`}
-            onClick={() => setIsTapeEjected(!isTapeEjected)}
-            title={isTapeEjected ? 'Close tape collection' : 'Eject tape'}
-          >
-            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-              <path d="M5 17h14v2H5zm7-12L5.33 15h13.34z" />
-            </svg>
-          </button>
-          {/* Record button - red like the original Talkboy */}
-          <button
-            className={`app__header-btn app__header-btn--record ${isListening ? 'app__header-btn--recording' : ''} ${showTapToTalk ? 'app__header-btn--tap-to-talk' : ''}`}
-            onMouseDown={!continuousListeningEnabled ? handleTalkStart : undefined}
-            onMouseUp={!continuousListeningEnabled ? handleTalkEnd : undefined}
-            onMouseLeave={!continuousListeningEnabled && isListening ? handleTalkEnd : undefined}
-            onClick={continuousListeningEnabled ? (isListening ? handleTalkEnd : handleTalkStart) : undefined}
-            onTouchStart={continuousListeningEnabled ? handleTalkStart : undefined}
-            disabled={(!useClaudeCode && !apiKey) || isSpeaking || avatarState === 'thinking' || isTapeEjected}
-            title={showTapToTalk ? 'Tap to talk' : (continuousListeningEnabled ? 'Click to toggle recording' : 'Hold to record')}
-          >
-            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-              <circle cx="12" cy="12" r="8" />
-            </svg>
-          </button>
         </div>
-
-        {/* Mobile menu button - shown only on mobile */}
-        <button
-          className="app__mobile-menu-btn"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          title="Menu"
-        >
-          <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-          </svg>
-        </button>
-
-        {/* Mobile dropdown menu */}
-        {mobileMenuOpen && (
-          <>
-            <div
-              className="app__mobile-menu-backdrop"
-              onClick={() => setMobileMenuOpen(false)}
-            />
-            <div className="app__mobile-menu">
-              <button
-                className="app__mobile-menu-item"
-                onClick={() => {
-                  setShowMediaLibrary(true)
-                  setMobileMenuOpen(false)
-                }}
-              >
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M22 16V4c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2zm-11-4l2.03 2.71L16 11l4 5H8l3-4zM2 6v14c0 1.1.9 2 2 2h14v-2H4V6H2z"/>
-                </svg>
-                Media Library
-              </button>
-              <button
-                className="app__mobile-menu-item"
-                onClick={() => {
-                  setShowSettings(true)
-                  setMobileMenuOpen(false)
-                }}
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/>
-                  <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
-                </svg>
-                Settings
-              </button>
-              <button
-                className="app__mobile-menu-item"
-                onClick={() => {
-                  setIsTapeEjected(!isTapeEjected)
-                  setMobileMenuOpen(false)
-                }}
-              >
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M5 17h14v2H5zm7-12L5.33 15h13.34z" />
-                </svg>
-                {isTapeEjected ? 'Close Tapes' : 'Eject Tape'}
-              </button>
-            </div>
-          </>
-        )}
       </header>
 
       {/* Background job status */}
@@ -887,7 +844,21 @@ function App() {
           storedActivities={storedActivities}
           avatarState={avatarState}
           streamingText={responseText}
-          onImageClick={setLightboxImage}
+          onImageClick={(image, gallery) => {
+            setLightboxImage(image)
+            setLightboxGallery(gallery)
+          }}
+          onPinToLinerNotes={(content) => {
+            if (currentConversationId) {
+              // Append to existing liner notes or set as new
+              const existing = linerNotes || ''
+              const newNotes = existing
+                ? existing + '\n\n---\n\n' + content
+                : content
+              saveLinerNotes(currentConversationId, newNotes)
+              setShowLinerNotes(true)
+            }
+          }}
         />
 
         {error && (
@@ -905,7 +876,7 @@ function App() {
         />
       </main>
 
-      {/* Tape Deck - input area with cassette display */}
+      {/* Tape Deck - unified input bar with drawer triggers */}
       <TapeDeck
         currentConversation={conversations.find(c => c.id === currentConversationId) || null}
         conversations={conversations}
@@ -924,16 +895,28 @@ function App() {
         onDeleteConversation={deleteConversation}
         onCloseCollection={() => setIsTapeEjected(false)}
         onOpenCollection={() => setIsTapeEjected(true)}
+        onOpenSettings={() => setShowSettings(true)}
+        onFilesAdd={handleFilesAdd}
         isDisabled={(!useClaudeCode && !apiKey) || isSpeaking || avatarState === 'thinking'}
         triggerWord={customTriggerWord || 'over'}
         onClearTranscript={() => setTranscript('')}
+        isRecording={isListening}
+        continuousListening={continuousListeningEnabled}
+        onTalkStart={handleTalkStart}
+        onTalkEnd={handleTalkEnd}
+        contextIds={contextConversationIds}
+        onToggleContext={toggleContextConversation}
       />
 
       {/* Image lightbox */}
       {lightboxImage && (
         <ImageLightbox
           image={lightboxImage}
-          onClose={() => setLightboxImage(null)}
+          images={lightboxGallery}
+          onClose={() => {
+            setLightboxImage(null)
+            setLightboxGallery(undefined)
+          }}
         />
       )}
 
@@ -946,8 +929,16 @@ function App() {
           onDisconnectSession={disconnectSession}
           ttsEnabled={ttsEnabled}
           setTtsEnabled={setTtsEnabled}
+          ttsVoice={ttsVoice}
+          setTtsVoice={setTtsVoice}
+          soundEffectsEnabled={soundEffectsEnabled}
+          setSoundEffectsEnabled={setSoundEffectsEnabled}
           continuousListeningEnabled={continuousListeningEnabled}
           setContinuousListeningEnabled={setContinuousListeningEnabled}
+          wakeWordEnabled={wakeWordEnabled}
+          setWakeWordEnabled={setWakeWordEnabled}
+          customWakeWord={customWakeWord}
+          setCustomWakeWord={setCustomWakeWord}
           customTriggerWord={customTriggerWord}
           setCustomTriggerWord={setCustomTriggerWord}
           triggerWordDelay={triggerWordDelay}
@@ -955,6 +946,13 @@ function App() {
           apiKey={apiKey}
           setApiKey={setApiKey}
           onSaveApiKey={handleSaveApiKey}
+          currentConversationTitle={conversations.find(c => c.id === currentConversationId)?.title || 'New conversation'}
+          currentConversation={conversations.find(c => c.id === currentConversationId) || null}
+          onRenameConversation={(title) => {
+            if (currentConversationId) {
+              useStore.getState().renameConversation(currentConversationId, title)
+            }
+          }}
           onResetOnboarding={() => {
             localStorage.removeItem('talkboy_onboarded')
             setHasOnboarded(false)
@@ -970,6 +968,25 @@ function App() {
           onClose={() => setShowMediaLibrary(false)}
         />
       )}
+
+      {/* Liner Notes side panel */}
+      <LinerNotes
+        isOpen={showLinerNotes}
+        linerNotes={linerNotes}
+        conversationTitle={conversations.find(c => c.id === currentConversationId)?.title || 'New conversation'}
+        onSave={(notes) => {
+          if (currentConversationId) {
+            saveLinerNotes(currentConversationId, notes)
+          }
+        }}
+        onClose={() => setShowLinerNotes(false)}
+      />
+
+      {/* Keyboard shortcuts guide */}
+      <KeyboardShortcuts
+        isOpen={showShortcuts}
+        onClose={() => setShowShortcuts(false)}
+      />
 
       {/* Floating Record Button for mobile - draggable and resizable */}
       <button

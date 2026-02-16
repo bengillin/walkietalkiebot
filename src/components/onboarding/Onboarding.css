@@ -544,3 +544,56 @@
 .onboarding__skip:hover {
   color: var(--text-secondary);
 }
+
+/* Robot avatar demo on welcome screen */
+.onboarding__robot-demo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  margin-bottom: 16px;
+  cursor: pointer;
+}
+
+/* Feature grid (2x2 cards) */
+.onboarding__feature-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.onboarding__feature-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  text-align: left;
+}
+
+.onboarding__feature-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: var(--accent-soft);
+  border-radius: var(--radius-sm);
+  color: var(--accent);
+}
+
+.onboarding__feature-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.onboarding__feature-card-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}

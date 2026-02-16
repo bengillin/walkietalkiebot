@@ -183,6 +183,7 @@ export const useStore = create<AppState>((set, get) => {
           currentConversationId: id,
           messages: conversation.messages,
           storedActivities: conversation.activities || [],
+          linerNotes: conversation.linerNotes || null,
           activities: [], // Clear live activities when switching conversations
         })
       }
@@ -354,6 +355,20 @@ export const useStore = create<AppState>((set, get) => {
       set({ triggerWordDelay: delay })
     },
 
+    // Sound effects
+    soundEffectsEnabled: localStorage.getItem('talkboy_sound_effects') !== 'false',
+    setSoundEffectsEnabled: (enabled) => {
+      localStorage.setItem('talkboy_sound_effects', String(enabled))
+      set({ soundEffectsEnabled: enabled })
+    },
+
+    // TTS voice selection
+    ttsVoice: localStorage.getItem('talkboy_tts_voice') || '',
+    setTtsVoice: (voice) => {
+      localStorage.setItem('talkboy_tts_voice', voice)
+      set({ ttsVoice: voice })
+    },
+
     transcript: '',
     setTranscript: (transcript) => set({ transcript }),
 
@@ -467,6 +482,28 @@ export const useStore = create<AppState>((set, get) => {
       return completed
         .map((a) => `[Image: ${a.fileName}]\n${a.description}`)
         .join('\n\n')
+    },
+
+    // Liner Notes
+    linerNotes: null,
+    setLinerNotes: (notes) => set({ linerNotes: notes }),
+    saveLinerNotes: async (conversationId, notes) => {
+      set({ linerNotes: notes })
+
+      // Update local cache
+      set((state) => {
+        const conversations = state.conversations.map((c) =>
+          c.id === conversationId ? { ...c, linerNotes: notes, updatedAt: Date.now() } : c
+        )
+        saveConversationsToStorage(conversations)
+        return { conversations }
+      })
+
+      // Sync to server
+      if (serverSyncEnabled) {
+        api.saveLinerNotes(conversationId, notes)
+          .catch(err => console.warn('Failed to save liner notes to server:', err))
+      }
     },
 
     // Server sync

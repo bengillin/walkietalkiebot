@@ -1,6 +1,6 @@
 import type Database from 'better-sqlite3'
 
-const SCHEMA_VERSION = 2
+const SCHEMA_VERSION = 3
 
 export function initSchema(db: Database.Database): void {
   // Create schema version table
@@ -23,6 +23,7 @@ function runMigrations(db: Database.Database, fromVersion: number): void {
   const migrations: Array<(db: Database.Database) => void> = [
     migrateV1,
     migrateV2,
+    migrateV3,
   ]
 
   for (let i = fromVersion; i < migrations.length; i++) {
@@ -112,6 +113,13 @@ function migrateV1(db: Database.Database): void {
     CREATE INDEX idx_conversations_updated ON conversations(updated_at DESC);
     CREATE INDEX idx_messages_conversation ON messages(conversation_id, position);
     CREATE INDEX idx_activities_conversation ON activities(conversation_id, timestamp DESC);
+  `)
+}
+
+function migrateV3(db: Database.Database): void {
+  db.exec(`
+    -- Liner notes (artifact viewer) for conversations
+    ALTER TABLE conversations ADD COLUMN liner_notes TEXT;
   `)
 }
 

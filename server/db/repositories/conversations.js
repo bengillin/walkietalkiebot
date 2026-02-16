@@ -66,6 +66,15 @@ function touchConversation(id) {
   const db = getDb();
   db.prepare("UPDATE conversations SET updated_at = ? WHERE id = ?").run(Date.now(), id);
 }
+function updateLinerNotes(id, linerNotes) {
+  const db = getDb();
+  db.prepare("UPDATE conversations SET liner_notes = ?, updated_at = ? WHERE id = ?").run(linerNotes, Date.now(), id);
+}
+function getLinerNotes(id) {
+  const db = getDb();
+  const row = db.prepare("SELECT liner_notes FROM conversations WHERE id = ?").get(id);
+  return row?.liner_notes || null;
+}
 function countConversations() {
   const db = getDb();
   const row = db.prepare("SELECT COUNT(*) as count FROM conversations").get();
@@ -76,7 +85,9 @@ export {
   createConversation,
   deleteConversation,
   getConversation,
+  getLinerNotes,
   listConversations,
   touchConversation,
-  updateConversation
+  updateConversation,
+  updateLinerNotes
 };

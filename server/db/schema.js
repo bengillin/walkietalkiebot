@@ -1,4 +1,4 @@
-const SCHEMA_VERSION = 2;
+const SCHEMA_VERSION = 3;
 function initSchema(db) {
   db.exec(`
     CREATE TABLE IF NOT EXISTS schema_version (
@@ -14,7 +14,8 @@ function initSchema(db) {
 function runMigrations(db, fromVersion) {
   const migrations = [
     migrateV1,
-    migrateV2
+    migrateV2,
+    migrateV3
   ];
   for (let i = fromVersion; i < migrations.length; i++) {
     console.log(`Running migration to version ${i + 1}...`);
@@ -101,6 +102,12 @@ function migrateV1(db) {
     CREATE INDEX idx_conversations_updated ON conversations(updated_at DESC);
     CREATE INDEX idx_messages_conversation ON messages(conversation_id, position);
     CREATE INDEX idx_activities_conversation ON activities(conversation_id, timestamp DESC);
+  `);
+}
+function migrateV3(db) {
+  db.exec(`
+    -- Liner notes (artifact viewer) for conversations
+    ALTER TABLE conversations ADD COLUMN liner_notes TEXT;
   `);
 }
 function migrateV2(db) {
