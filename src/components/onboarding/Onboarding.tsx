@@ -68,7 +68,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             </div>
             <h1 className="onboarding__title">Welcome to Talkie</h1>
             <p className="onboarding__subtitle">
-              Talk to Claude instead of typing. Your voice-first AI companion.
+              Your walkie talkie for Claude Code. Talk instead of type.
             </p>
 
             <div className="onboarding__tutorial">
