@@ -1,0 +1,109 @@
+# Talkie App — Walkie Talkie AI Assistant
+
+> A voice-first, cassette tape-themed interface for Claude Code with 6 retro themes, conversation management, Telegram bot, and MCP integration.
+
+## Quick Start
+
+  Install: npx talkiebot
+  Repository: https://github.com/bengillin/walkietalkiebot
+  npm: https://www.npmjs.com/package/talkiebot
+  Website: https://walkietalkie.bot
+  Version: 0.2.0
+  License: MIT
+
+## Documentation
+
+  - Getting Started: https://walkietalkie.bot/docs/getting-started.html
+  - Features: https://walkietalkie.bot/docs/features.html
+  - API Reference: https://walkietalkie.bot/docs/api.html
+  - Integrations (MCP, Telegram, Claude Code): https://walkietalkie.bot/docs/integrations.html
+  - Theme System: https://walkietalkie.bot/docs/themes.html
+
+## Architecture
+
+  Frontend: React 18, TypeScript, Vite, Zustand
+  Server: Node.js, Hono, better-sqlite3 (WAL mode)
+  Telegram: grammy
+  MCP: @modelcontextprotocol/sdk (stdio transport)
+  Voice: Web Speech API (browser-native STT/TTS)
+  Database: SQLite at ~/.talkie/talkie.db
+
+## Features
+
+  - Voice input: Push-to-talk, wake word ("Hey Talkie"), continuous listening, trigger word ("over")
+  - 6 retro themes: TalkBoy, Bubble, Dial-Up, Finder, Guestbook, 1984 (70+ CSS custom properties each)
+  - Cassette tape UI: Conversations stored as illustrated cassette tapes with spinning reels
+  - Claude Code CLI integration: Spawns claude -p with full tool access, real-time activity feed
+  - Direct API mode: Anthropic API with model selection (Sonnet/Opus/Haiku)
+  - Plans system: Auto-detect plans in Claude responses, status workflow (draft/approved/in_progress/completed/archived)
+  - Liner notes: Per-conversation markdown notes
+  - Full-text search: FTS5-powered, Cmd+K global search
+  - Context linking: Use past conversations as context for new messages
+  - Image handling: Drag-drop, Claude vision analysis, media library
+  - Background jobs: Async task execution with SSE streaming
+  - Export: Markdown and JSON
+  - Telegram bot: Text and photo messages to Claude
+  - Keyboard shortcuts: Spacebar push-to-talk, Cmd+K search, Cmd+E export
+
+## MCP Server (15 Tools)
+
+  Setup: Add to Claude Code settings:
+  {
+    "mcpServers": {
+      "talkie": {
+        "command": "npx",
+        "args": ["talkie-mcp"]
+      }
+    }
+  }
+
+  Tools:
+  - launch_talkie: Start server and open browser
+  - get_talkie_status: Check running status and avatar state
+  - get_transcript: Get latest voice transcript
+  - get_conversation_history: Get current conversation messages
+  - get_claude_session: Get connected session ID
+  - set_claude_session: Connect to Claude Code session
+  - disconnect_claude_session: Disconnect session
+  - get_pending_message: Poll for user messages (IPC mode)
+  - respond_to_talkie: Send response to user (IPC mode)
+  - update_talkie_state: Set avatar state, transcript
+  - analyze_image: Claude vision analysis of images
+  - open_url: Open URL in default browser
+  - create_talkie_job: Create background async job
+  - get_talkie_job: Get job status and result
+  - list_talkie_jobs: List jobs, optionally filtered by status
+
+## REST API
+
+  Base URL: https://localhost:5173/api
+  40+ endpoints covering:
+  - Status & Health: GET /api/status, GET /api/integrations
+  - Conversations: CRUD, messages, liner notes, images (9 endpoints)
+  - Plans: CRUD with status workflow (5 endpoints)
+  - Jobs: CRUD + SSE streaming (4 endpoints)
+  - Search: GET /api/search (FTS5 full-text)
+  - IPC: pending, respond, send (3 endpoints)
+  - Sessions: get, set, delete (3 endpoints)
+  - Claude Code: POST /api/claude-code (SSE streaming)
+  - Media: analyze-image, open-url
+
+  Full reference: https://walkietalkie.bot/docs/api.html
+
+## CLI Commands
+
+  talkie-server start [-f]    Start server (background or -f foreground)
+  talkie-server stop          Stop the server
+  talkie-server restart       Restart
+  talkie-server status        Show status (running, port, DB)
+  talkie-server logs [-f]     View logs (-f to follow)
+  talkie-server install       Install as macOS launchd daemon
+  talkie-server uninstall     Remove launchd daemon
+
+## Database Schema (v4)
+
+  Tables: conversations, messages, message_images, activities, plans, jobs, telegram_state, messages_fts, schema_version
+  Location: ~/.talkie/talkie.db (SQLite WAL mode)
+
+---
+Last updated: 2026-02-17

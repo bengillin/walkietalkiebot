@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-mccallister">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Reference — Talkie App</title>
+  <meta name="description" content="Complete REST API reference for Talkie. 40+ endpoints for conversations, plans, jobs, search, IPC, and more." />
+  <meta property="og:title" content="API Reference — Talkie App" />
+  <meta property="og:description" content="Complete REST API reference for Talkie. 40+ endpoints for conversations, plans, jobs, search, IPC, and more." />
+  <meta property="og:image" content="https://walkietalkie.bot/og.png" />
+  <meta property="og:url" content="https://walkietalkie.bot/docs/api.html" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="API Reference — Talkie App" />
+  <meta name="twitter:description" content="Complete REST API reference for Talkie. 40+ endpoints for conversations, plans, jobs, search, IPC, and more." />
+  <meta name="twitter:image" content="https://walkietalkie.bot/og.png" />
+  <link rel="canonical" href="https://walkietalkie.bot/docs/api.html" />
+</head>
+<body>
+  <div class="page">
+
+    <!-- ── Navigation ── -->
+    <nav class="site-nav">
+      <div class="site-nav__inner">
+        <a class="site-nav__brand" href="/">
+          <span class="mini-robot"><span class="mini-robot__face"><span class="mini-robot__eye"></span><span class="mini-robot__eye"></span></span></span>
+          Talkie App
+        </a>
+        <button class="site-nav__toggle" aria-label="Menu">&#9776;</button>
+        <div class="site-nav__links">
+          <a class="site-nav__link site-nav__link--active" href="/docs/">Docs</a>
+          <a class="site-nav__link" href="/docs/integrations.html">Integrations</a>
+          <a class="site-nav__link" href="/docs/api.html">API</a>
+          <a class="site-nav__github" href="https://github.com/bengillin/walkietalkiebot" target="_blank" rel="noopener" title="GitHub">
+            <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ── Docs Layout ── -->
+    <div class="docs-layout">
+
+      <!-- Sidebar -->
+      <aside class="docs-sidebar">
+        <div class="docs-sidebar__title">On this page</div>
+        <ul class="docs-sidebar__list">
+          <li class="docs-sidebar__item"><a href="#status">Status &amp; Health</a></li>
+          <li class="docs-sidebar__item"><a href="#conversations">Conversations</a></li>
+          <li class="docs-sidebar__item"><a href="#plans">Plans</a></li>
+          <li class="docs-sidebar__item"><a href="#jobs">Jobs</a></li>
+          <li class="docs-sidebar__item"><a href="#search">Search</a></li>
+          <li class="docs-sidebar__item"><a href="#ipc">IPC</a></li>
+          <li class="docs-sidebar__item"><a href="#sessions">Sessions</a></li>
+          <li class="docs-sidebar__item"><a href="#claude-code">Claude Code</a></li>
+          <li class="docs-sidebar__item"><a href="#media">Media</a></li>
+          <li class="docs-sidebar__item"><a href="#migration">Migration</a></li>
+          <li class="docs-sidebar__item"><a href="#examples">Examples</a></li>
+        </ul>
+      </aside>
+
+      <!-- Content -->
+      <article class="docs-content">
+
+        <!-- Breadcrumbs -->
+        <div class="docs-breadcrumbs">
+          <a href="/docs/">Docs</a>
+          <span class="docs-breadcrumbs__sep">/</span>
+          <span>API Reference</span>
+        </div>
+
+        <h1>API Reference</h1>
+        <p class="docs-subtitle">Complete REST API for managing conversations, plans, jobs, and integrations.</p>
+
+        <p>Base URL is <code>https://localhost:5173/api</code> (port configurable via the <code>TALKIE_PORT</code> environment variable). All responses are JSON unless otherwise noted. SSE endpoints return <code>text/event-stream</code>.</p>
+
+        <div class="docs-note">
+          <strong>Self-signed certificates</strong>
+          Talkie uses self-signed HTTPS certificates. When making requests with <code>curl</code> or other HTTP clients, you will need to pass the <code>--insecure</code> flag (or equivalent) to skip certificate verification.
+        </div>
+
+        <!-- ── Status & Health ── -->
+        <h2 id="status">Status &amp; Health</h2>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--get">GET</span>
+          <span class="endpoint__path">/api/status</span>
+          <p class="endpoint__desc">Health check. Returns the current avatar state, active conversation ID, and database connection status.</p>
+        </div>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--get">GET</span>
+          <span class="endpoint__path">/api/integrations</span>
+          <p class="endpoint__desc">Returns the status of MCP server and Telegram bot integrations, including whether each is connected and active.</p>
+        </div>
+
+        <!-- ── Conversations ── -->
+        <h2 id="conversations">Conversations</h2>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--get">GET</span>
+          <span class="endpoint__path">/api/conversations</span>
+          <p class="endpoint__desc">List all conversations. Supports <code>limit</code> and <code>offset</code> query parameters for pagination.</p>
+        </div>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--post">POST</span>
+          <span class="endpoint__path">/api/conversations</span>
+          <p class="endpoint__desc">Create a new conversation. Body: <code>{ "title": "string" }</code></p>
+        </div>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--get">GET</span>
+          <span class="endpoint__path">/api/conversations/:id</span>
+          <p class="endpoint__desc">Get a single conversation with all its messages and activities included.</p>
+        </div>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--patch">PATCH</span>
+          <span class="endpoint__path">/api/conversations/:id</span>
+          <p class="endpoint__desc">Update a conversation. Body: <code>{ "title": "string", "parent_id": "string", "project_id": "string" }</code></p>
+        </div>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--delete">DELETE</span>
+          <span class="endpoint__path">/api/conversations/:id</span>
+          <p class="endpoint__desc">Delete a conversation and all its associated messages, activities, and images.</p>
+        </div>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--get">GET</span>
+          <span class="endpoint__path">/api/conversations/:id/liner-notes</span>
+          <p class="endpoint__desc">Get the liner notes text for a conversation.</p>
+        </div>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--put">PUT</span>
+          <span class="endpoint__path">/api/conversations/:id/liner-notes</span>
+          <p class="endpoint__desc">Save liner notes for a conversation. Body: <code>{ "notes": "string" }</code></p>
+        </div>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--post">POST</span>
+          <span class="endpoint__path">/api/conversations/:id/messages</span>
+          <p class="endpoint__desc">Add a message to a conversation. Body: <code>{ "role": "user|assistant", "content": "string", "images": [], "activities": [] }</code></p>
+        </div>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--patch">PATCH</span>
+          <span class="endpoint__path">/api/images/:id</span>
+          <p class="endpoint__desc">Update the description of an attached image. Body: <code>{ "description": "string" }</code></p>
+        </div>
+
+        <!-- ── Plans ── -->
+        <h2 id="plans">Plans</h2>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--get">GET</span>
+          <span class="endpoint__path">/api/plans</span>
+          <p class="endpoint__desc">List all plans. Supports <code>status</code> and <code>conversation_id</code> query parameters for filtering.</p>
+        </div>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--get">GET</span>
+          <span class="endpoint__path">/api/plans/:id</span>
+          <p class="endpoint__desc">Get a single plan by ID.</p>
+        </div>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--post">POST</span>
+          <span class="endpoint__path">/api/plans</span>
+          <p class="endpoint__desc">Create a new plan. Body: <code>{ "title": "string", "content": "string", "status": "draft|approved|in_progress|completed|archived", "conversation_id": "string" }</code></p>
+        </div>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--put">PUT</span>
+          <span class="endpoint__path">/api/plans/:id</span>
+          <p class="endpoint__desc">Update an existing plan. Body: <code>{ "title": "string", "content": "string", "status": "draft|approved|in_progress|completed|archived" }</code></p>
+        </div>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--delete">DELETE</span>
+          <span class="endpoint__path">/api/plans/:id</span>
+          <p class="endpoint__desc">Delete a plan by ID.</p>
+        </div>
+
+        <!-- ── Jobs ── -->
+        <h2 id="jobs">Jobs</h2>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--get">GET</span>
+          <span class="endpoint__path">/api/jobs</span>
+          <p class="endpoint__desc">List all jobs. Supports <code>status</code> query parameter for filtering (queued, running, completed, failed, cancelled).</p>
+        </div>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--post">POST</span>
+          <span class="endpoint__path">/api/jobs</span>
+          <p class="endpoint__desc">Create a new background job. Body: <code>{ "conversation_id": "string", "prompt": "string" }</code></p>
+        </div>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--get">GET</span>
+          <span class="endpoint__path">/api/jobs/:id</span>
+          <p class="endpoint__desc">Get the status and result of a job by ID.</p>
+        </div>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--get">GET</span>
+          <span class="endpoint__path">/api/jobs/:id/stream</span>
+          <p class="endpoint__desc">SSE stream for real-time job events. Returns <code>text/event-stream</code> with JSON-encoded events as the job progresses.</p>
+        </div>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--delete">DELETE</span>
+          <span class="endpoint__path">/api/jobs/:id</span>
+          <p class="endpoint__desc">Cancel a running job by ID.</p>
+        </div>
+
+        <!-- ── Search ── -->
+        <h2 id="search">Search</h2>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--get">GET</span>
+          <span class="endpoint__path">/api/search</span>
+          <p class="endpoint__desc">Full-text search across all conversations. Query parameters: <code>q</code> (search query, required), <code>limit</code> (max results). Returns snippets with highlighted matches.</p>
+        </div>
+
+        <!-- ── IPC ── -->
+        <h2 id="ipc">IPC</h2>
+
+        <p>The IPC (Inter-Process Communication) endpoints enable communication between the Talkie frontend and external tools like the MCP server. The frontend posts messages, and MCP tools poll for pending messages and respond.</p>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--get">GET</span>
+          <span class="endpoint__path">/api/pending</span>
+          <p class="endpoint__desc">Check for a pending message from the frontend. Returns the message content if one is waiting, or an empty response if not.</p>
+        </div>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--post">POST</span>
+          <span class="endpoint__path">/api/respond</span>
+          <p class="endpoint__desc">Send an IPC response back to the frontend. Body: <code>{ "content": "string" }</code></p>
+        </div>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--post">POST</span>
+          <span class="endpoint__path">/api/send</span>
+          <p class="endpoint__desc">Send a message and wait for a response via SSE. Body: <code>{ "content": "string", "conversation_id": "string" }</code>. Returns a <code>text/event-stream</code> with the response.</p>
+        </div>
+
+        <!-- ── Sessions ── -->
+        <h2 id="sessions">Sessions</h2>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--get">GET</span>
+          <span class="endpoint__path">/api/session</span>
+          <p class="endpoint__desc">Get the currently connected Claude Code session ID.</p>
+        </div>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--post">POST</span>
+          <span class="endpoint__path">/api/session</span>
+          <p class="endpoint__desc">Set the Claude Code session ID to connect Talkie to a running session. Body: <code>{ "sessionId": "string" }</code></p>
+        </div>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--delete">DELETE</span>
+          <span class="endpoint__path">/api/session</span>
+          <p class="endpoint__desc">Clear the connected Claude Code session.</p>
+        </div>
+
+        <!-- ── Claude Code ── -->
+        <h2 id="claude-code">Claude Code</h2>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--post">POST</span>
+          <span class="endpoint__path">/api/claude-code</span>
+          <p class="endpoint__desc">Spawn a fresh <code>claude -p</code> CLI process and stream the response as SSE. Body: <code>{ "prompt": "string", "conversation_id": "string", "images": [] }</code>. Returns a stream of JSON events with types: <code>assistant</code> (text chunks), <code>activity</code> (tool usage), <code>result</code> (final response), and <code>error</code>.</p>
+        </div>
+
+        <div class="docs-note">
+          <strong>One-shot processes</strong>
+          Each request to <code>/api/claude-code</code> spawns a fresh CLI process with the flags <code>--no-session-persistence</code> and <code>--permission-mode bypassPermissions</code>. There is no persistent session between requests.
+        </div>
+
+        <!-- ── Media ── -->
+        <h2 id="media">Media</h2>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--post">POST</span>
+          <span class="endpoint__path">/api/analyze-image</span>
+          <p class="endpoint__desc">Analyze an image using Claude vision via the Anthropic API key. Body: image data URL (base64-encoded).</p>
+        </div>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--post">POST</span>
+          <span class="endpoint__path">/api/analyze-image-cc</span>
+          <p class="endpoint__desc">Analyze an image using Claude vision via the Claude Code CLI. Same input format as the API key variant, but routes through the CLI.</p>
+        </div>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--post">POST</span>
+          <span class="endpoint__path">/api/open-url</span>
+          <p class="endpoint__desc">Open a URL in the default system browser. Body: <code>{ "url": "string" }</code></p>
+        </div>
+
+        <!-- ── Migration ── -->
+        <h2 id="migration">Migration</h2>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--post">POST</span>
+          <span class="endpoint__path">/api/migrate</span>
+          <p class="endpoint__desc">Import conversations from localStorage format into the SQLite database. Used for migrating data from older versions of Talkie that stored conversations in the browser.</p>
+        </div>
+
+        <!-- ── Examples ── -->
+        <h2 id="examples">Examples</h2>
+
+        <p>Create a new conversation using <code>curl</code>:</p>
+
+        <pre><code>curl -X POST https://localhost:5173/api/conversations \
+  -H "Content-Type: application/json" \
+  -d '{"title": "My First Tape"}' \
+  --insecure</code></pre>
+
+        <p>The <code>--insecure</code> flag is needed because Talkie uses self-signed certificates. In production HTTP clients, you would configure the CA certificate or disable verification as appropriate for your environment.</p>
+
+        <p>List all conversations with pagination:</p>
+
+        <pre><code>curl https://localhost:5173/api/conversations?limit=10&amp;offset=0 \
+  --insecure</code></pre>
+
+        <p>Search across all messages:</p>
+
+        <pre><code>curl "https://localhost:5173/api/search?q=cassette&amp;limit=5" \
+  --insecure</code></pre>
+
+        <p>Create a background job:</p>
+
+        <pre><code>curl -X POST https://localhost:5173/api/jobs \
+  -H "Content-Type: application/json" \
+  -d '{"conversation_id": "abc-123", "prompt": "Summarize this conversation"}' \
+  --insecure</code></pre>
+
+        <p>Stream Claude Code output with SSE:</p>
+
+        <pre><code>curl -N -X POST https://localhost:5173/api/claude-code \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "Hello, Claude!", "conversation_id": "abc-123"}' \
+  --insecure</code></pre>
+
+        <div class="docs-tip">
+          <strong>Tip</strong>
+          Use the <code>-N</code> flag with <code>curl</code> to disable output buffering when streaming SSE endpoints. This ensures events are printed as they arrive.
+        </div>
+
+        <!-- ── Prev / Next ── -->
+        <div class="docs-page-nav">
+          <a class="docs-page-nav__link" href="/docs/features.html">
+            <span class="docs-page-nav__label">Previous</span>
+            <span class="docs-page-nav__title">Features</span>
+          </a>
+          <a class="docs-page-nav__link docs-page-nav__link--next" href="/docs/integrations.html">
+            <span class="docs-page-nav__label">Next</span>
+            <span class="docs-page-nav__title">Integrations</span>
+          </a>
+        </div>
+
+      </article>
+    </div>
+
+    <!-- ── Footer ── -->
+    <footer class="site-footer">
+      <nav class="site-footer__nav">
+        <a class="site-footer__link" href="/">Home</a>
+        <span class="site-footer__divider">&middot;</span>
+        <a class="site-footer__link" href="/docs/">Docs</a>
+        <span class="site-footer__divider">&middot;</span>
+        <a class="site-footer__link" href="/docs/getting-started.html">Getting Started</a>
+        <span class="site-footer__divider">&middot;</span>
+        <a class="site-footer__link" href="/docs/api.html">API</a>
+        <span class="site-footer__divider">&middot;</span>
+        <a class="site-footer__link" href="/docs/integrations.html">Integrations</a>
+        <span class="site-footer__divider">&middot;</span>
+        <a class="site-footer__link" href="https://www.npmjs.com/package/talkiebot" target="_blank" rel="noopener">npm</a>
+        <span class="site-footer__divider">&middot;</span>
+        <a class="site-footer__link" href="https://github.com/bengillin/walkietalkiebot" target="_blank" rel="noopener">GitHub</a>
+        <span class="site-footer__divider">&middot;</span>
+        <a class="site-footer__link" href="/llms.txt">llms.txt</a>
+      </nav>
+      <p class="site-footer__meta">Built with Claude Code</p>
+    </footer>
+
+  </div>
+
+  <script type="module" src="/src/docs.ts"></script>
+</body>
+</html>

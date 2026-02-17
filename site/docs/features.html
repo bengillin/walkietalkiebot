@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-mccallister">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Features — Talkie App</title>
+  <meta name="description" content="Deep dive into Talkie App features: voice input, cassette tape UI, robot avatar, plans, search, image handling, and more." />
+  <meta property="og:title" content="Features — Talkie App" />
+  <meta property="og:description" content="Deep dive into Talkie App features: voice input, cassette tape UI, robot avatar, plans, search, image handling, and more." />
+  <meta property="og:image" content="https://walkietalkie.bot/og.png" />
+  <meta property="og:url" content="https://walkietalkie.bot/docs/features.html" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Features — Talkie App" />
+  <meta name="twitter:description" content="Deep dive into Talkie App features: voice input, cassette tape UI, robot avatar, plans, search, image handling, and more." />
+  <meta name="twitter:image" content="https://walkietalkie.bot/og.png" />
+  <link rel="canonical" href="https://walkietalkie.bot/docs/features.html" />
+</head>
+<body>
+  <div class="page">
+
+    <!-- ── Navigation ── -->
+    <nav class="site-nav">
+      <div class="site-nav__inner">
+        <a class="site-nav__brand" href="/">
+          <span class="mini-robot"><span class="mini-robot__face"><span class="mini-robot__eye"></span><span class="mini-robot__eye"></span></span></span>
+          Talkie App
+        </a>
+        <button class="site-nav__toggle" aria-label="Menu">&#9776;</button>
+        <div class="site-nav__links">
+          <a class="site-nav__link site-nav__link--active" href="/docs/">Docs</a>
+          <a class="site-nav__link" href="/docs/integrations.html">Integrations</a>
+          <a class="site-nav__link" href="/docs/api.html">API</a>
+          <a class="site-nav__github" href="https://github.com/bengillin/walkietalkiebot" target="_blank" rel="noopener" title="GitHub">
+            <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ── Docs Layout ── -->
+    <div class="docs-layout">
+
+      <!-- Sidebar -->
+      <button class="docs-sidebar-toggle">On this page</button>
+      <aside class="docs-sidebar">
+        <div class="docs-sidebar__title">On this page</div>
+        <ul class="docs-sidebar__list">
+          <li class="docs-sidebar__item"><a href="#voice">Voice Input</a></li>
+          <li class="docs-sidebar__item"><a href="#cassette">Cassette Tape UI</a></li>
+          <li class="docs-sidebar__item"><a href="#robot">Robot Avatar</a></li>
+          <li class="docs-sidebar__item"><a href="#plans">Plans System</a></li>
+          <li class="docs-sidebar__item"><a href="#liner-notes">Liner Notes</a></li>
+          <li class="docs-sidebar__item"><a href="#search">Search</a></li>
+          <li class="docs-sidebar__item"><a href="#context">Context Linking</a></li>
+          <li class="docs-sidebar__item"><a href="#images">Image Handling</a></li>
+          <li class="docs-sidebar__item"><a href="#jobs">Background Jobs</a></li>
+          <li class="docs-sidebar__item"><a href="#export">Export</a></li>
+          <li class="docs-sidebar__item"><a href="#shortcuts">Keyboard Shortcuts</a></li>
+          <li class="docs-sidebar__item"><a href="#mobile">Mobile</a></li>
+        </ul>
+      </aside>
+
+      <!-- Content -->
+      <main class="docs-content">
+
+        <nav class="docs-breadcrumbs">
+          <a href="/docs/">Docs</a>
+          <span class="docs-breadcrumbs__sep">/</span>
+          <span>Features</span>
+        </nav>
+
+        <h1>Features</h1>
+        <p class="docs-subtitle">Everything Talkie can do, explained in detail.</p>
+
+        <!-- ── Voice Input ── -->
+        <h2 id="voice">Voice Input</h2>
+        <p>Talkie is built voice-first. The Web Speech API provides browser-native speech-to-text and text-to-speech with no external services or API keys required.</p>
+
+        <h3>Push-to-talk</h3>
+        <p>Hold the <span class="kbd">Spacebar</span> or tap the microphone button to start recording. Release to send. This is the fastest way to interact with Talkie when you know exactly what you want to say.</p>
+
+        <h3>Wake word</h3>
+        <p>Say <strong>"Hey Talkie"</strong> to activate hands-free recording. The wake word is configurable in settings — change it to any phrase you like. When the wake word is detected, Talkie begins listening and waits for your message.</p>
+
+        <h3>Continuous listening mode</h3>
+        <p>When enabled, Talkie automatically restarts the microphone after each response. This creates a natural back-and-forth conversation where you never need to press a button. The cycle continues until you cancel or disable continuous mode.</p>
+
+        <h3>Trigger word</h3>
+        <p>The default trigger word is <strong>"over"</strong>. When Talkie hears the trigger word, it knows your message is complete and sends it to Claude. The trigger word is configurable in settings.</p>
+
+        <h3>Silence detection</h3>
+        <p>After detecting the trigger word (or in push-to-talk mode), Talkie waits for a brief silence before finalizing the transcription. The silence delay is configurable from <strong>0.5 to 3.0 seconds</strong>, letting you control how much pause time signals the end of your message.</p>
+
+        <h3>Text-to-speech</h3>
+        <p>Claude's responses are spoken aloud using the browser's built-in TTS engine. You can select from any system voice installed on your device via the settings panel. Different voices are available on macOS, Windows, and Linux.</p>
+
+        <h3>Sound effects</h3>
+        <p>Talkie plays synthesized audio tones for key events to provide clear feedback without relying on visual cues:</p>
+        <ul>
+          <li><strong>Start</strong> — a rising tone when recording begins</li>
+          <li><strong>Stop</strong> — a falling tone when recording ends</li>
+          <li><strong>Thinking</strong> — a subtle pulse while waiting for Claude's response</li>
+          <li><strong>Success</strong> — a confirmation chime when the response arrives</li>
+          <li><strong>Error</strong> — a low buzz when something goes wrong</li>
+        </ul>
+
+        <!-- ── Cassette Tape UI ── -->
+        <h2 id="cassette">Cassette Tape UI</h2>
+        <p>Every conversation in Talkie is stored as a cassette tape. The entire interface is built around this metaphor, from the input bar to the collection browser.</p>
+
+        <h3>Tape deck</h3>
+        <p>The bottom input bar is the tape deck. It contains the microphone button, text input field, file attachment button, and send button. This is where you interact with the current tape — recording new messages and viewing playback.</p>
+
+        <h3>Tape collection</h3>
+        <p>Open the drawer to see all your conversations displayed as illustrated cassette cards. Each card shows the conversation title, message count, and a visual cassette illustration. The collection supports scrolling and filtering.</p>
+
+        <h3>Visual details</h3>
+        <p>Cassette tapes have rich visual properties:</p>
+        <ul>
+          <li><strong>8 label colors</strong> — each tape gets a unique label color for easy identification</li>
+          <li><strong>Reel sizes</strong> — reel size scales with message count, so longer conversations have visibly larger reels</li>
+          <li><strong>Eject animations</strong> — tapes animate out when you switch conversations</li>
+          <li><strong>5 sizes</strong> — mini, small, medium, large, and xl cassette renderings</li>
+          <li><strong>4 body colors</strong> — different cassette body colors for variety</li>
+          <li><strong>5 states</strong> — idle, recording, playing, paused, and ejecting, each with distinct visual treatment</li>
+        </ul>
+
+        <!-- ── Robot Avatar ── -->
+        <h2 id="robot">Robot Avatar</h2>
+        <p>The robot avatar in the header is a fully CSS-only animated character. No images or SVGs are used — every part is built with CSS shapes, gradients, and animations.</p>
+
+        <h3>6 states</h3>
+        <p>The robot transitions between states to reflect what Talkie is doing:</p>
+        <ul>
+          <li><strong>Idle</strong> — relaxed, with gentle eye movement and a slow antenna pulse</li>
+          <li><strong>Listening</strong> — alert posture, antenna glowing, eyes wide</li>
+          <li><strong>Thinking</strong> — eyes shift side to side, grille lines pulse, LED blinks</li>
+          <li><strong>Speaking</strong> — mouth animates, grille pulses with speech rhythm</li>
+          <li><strong>Happy</strong> — eyes curve into arcs, antenna tip brightens, LED turns green</li>
+          <li><strong>Confused</strong> — one eye larger than the other, antenna tilts, LED turns amber</li>
+        </ul>
+
+        <h3>Per-state animations</h3>
+        <p>Each state has dedicated CSS animations:</p>
+        <ul>
+          <li><strong>Eye movement</strong> — pupils shift direction based on state</li>
+          <li><strong>Antenna glow</strong> — the antenna tip changes color and brightness</li>
+          <li><strong>Grille pulsing</strong> — the speaker grille lines animate during speech and thinking</li>
+          <li><strong>LED color</strong> — the status LED changes between green, amber, red, and blue</li>
+        </ul>
+
+        <h3>Theme integration</h3>
+        <p>Each theme defines its own robot colors via CSS custom properties (<code>--robot-body</code>, <code>--robot-shadow</code>, <code>--robot-highlight</code>, <code>--screen-idle</code>, etc.). The robot looks completely different in each theme while using the same markup.</p>
+
+        <h3>Interactive</h3>
+        <p>Hover over the robot to trigger the happy state. This provides a small moment of delight and confirms the avatar is responding to the current theme's color scheme.</p>
+
+        <!-- ── Plans System ── -->
+        <h2 id="plans">Plans System</h2>
+        <p>Talkie can detect and manage structured plans from Claude's responses, turning conversational output into actionable workflows.</p>
+
+        <h3>Auto-detection</h3>
+        <p>Plans are automatically extracted from Claude's messages when they contain certain patterns:</p>
+        <ul>
+          <li>Headings followed by numbered steps</li>
+          <li>Numbered lists with action items</li>
+          <li>Checkbox-style lists (<code>- [ ]</code> and <code>- [x]</code>)</li>
+        </ul>
+
+        <h3>Side panel</h3>
+        <p>The plans panel slides open from the right side of the screen. It shows a list of all detected plans and a detail view for the selected plan. Plans can be viewed, edited, and managed without leaving the conversation.</p>
+
+        <h3>Status workflow</h3>
+        <p>Each plan follows a lifecycle:</p>
+        <ol>
+          <li><strong>Draft</strong> — newly detected, not yet reviewed</li>
+          <li><strong>Approved</strong> — reviewed and accepted</li>
+          <li><strong>In Progress</strong> — actively being worked on</li>
+          <li><strong>Completed</strong> — all steps finished</li>
+          <li><strong>Archived</strong> — stored for reference, hidden from active views</li>
+        </ol>
+
+        <h3>Management</h3>
+        <p>Plans can be edited, deleted, or linked to specific conversations. Linking a plan to a conversation creates a cross-reference so you can always trace a plan back to the discussion that created it.</p>
+
+        <!-- ── Liner Notes ── -->
+        <h2 id="liner-notes">Liner Notes</h2>
+        <p>Every cassette tape can have liner notes — a per-conversation notes panel where you can add your own annotations, summaries, or reference material.</p>
+
+        <h3>Markdown support</h3>
+        <p>Liner notes support common Markdown formatting:</p>
+        <ul>
+          <li>Headings (<code>#</code>, <code>##</code>, <code>###</code>)</li>
+          <li><strong>Bold</strong> and <em>italic</em> text</li>
+          <li>Inline <code>code</code> and code blocks</li>
+          <li>Bulleted and numbered lists</li>
+        </ul>
+
+        <h3>Pin from chat</h3>
+        <p>You can pin message content directly from the chat timeline into the liner notes. This lets you quickly save important snippets — a command, a URL, a key decision — without manually copying and pasting.</p>
+
+        <!-- ── Search ── -->
+        <h2 id="search">Search</h2>
+        <p>Talkie provides fast, full-text search across all your conversations using SQLite FTS5.</p>
+
+        <h3>Global search</h3>
+        <p>Press <span class="kbd">Cmd</span> + <span class="kbd">K</span> (or <span class="kbd">Ctrl</span> + <span class="kbd">K</span> on Windows/Linux) to open the search overlay. It appears instantly and focuses the input field so you can start typing immediately.</p>
+
+        <h3>FTS5 full-text search</h3>
+        <p>Search is powered by SQLite's FTS5 extension, which provides fast ranked full-text search across all stored messages. Results are ranked by relevance and returned with highlighted matching snippets.</p>
+
+        <h3>Keyboard navigation</h3>
+        <p>Navigate search results without touching the mouse:</p>
+        <ul>
+          <li><span class="kbd">Arrow Up</span> / <span class="kbd">Arrow Down</span> — move between results</li>
+          <li><span class="kbd">Enter</span> — open the selected result</li>
+          <li><span class="kbd">Escape</span> — close the search overlay</li>
+        </ul>
+
+        <h3>Tape collection filtering</h3>
+        <p>The tape collection drawer also supports inline filtering. Type in the filter field to narrow the displayed tapes by title or content, providing a quick way to find a specific conversation without opening the full search overlay.</p>
+
+        <!-- ── Context Linking ── -->
+        <h2 id="context">Context Linking</h2>
+        <p>Context linking lets you give Claude memory across separate conversations by selecting past tapes as context for the current one.</p>
+
+        <h3>How it works</h3>
+        <p>Toggle past conversations on or off as context sources. When context is enabled, the selected conversations are merged chronologically and included in the prompt sent to Claude. This means Claude can reference information from previous tapes without you needing to repeat it.</p>
+
+        <h3>Use cases</h3>
+        <ul>
+          <li>Continue a thread from a previous conversation</li>
+          <li>Reference decisions made in earlier sessions</li>
+          <li>Build on code or plans from past discussions</li>
+          <li>Provide background context for new questions</li>
+        </ul>
+
+        <!-- ── Image Handling ── -->
+        <h2 id="images">Image Handling</h2>
+        <p>Talkie supports images throughout the conversation, from input to analysis to browsing.</p>
+
+        <h3>Input methods</h3>
+        <ul>
+          <li><strong>Drag and drop</strong> — drag an image file directly onto the chat area</li>
+          <li><strong>File picker</strong> — click the attach button in the tape deck to browse for files</li>
+        </ul>
+
+        <h3>Auto-analysis</h3>
+        <p>When an image is attached, Talkie automatically sends it to Claude for analysis using the vision capability (Sonnet 4). Claude describes what it sees and can answer questions about the image content.</p>
+
+        <h3>Storage</h3>
+        <p>Images are stored as base64 data URLs in the database. Each image has an editable description field that you can modify to add your own notes or correct Claude's auto-generated description.</p>
+
+        <h3>Media library</h3>
+        <p>The media library provides a browsable view of all images across your conversations. You can search, filter, and open any image in a full-screen lightbox for detailed viewing.</p>
+
+        <h3>Lightbox</h3>
+        <p>Click any image in the chat timeline or media library to open it in a full-screen lightbox. The lightbox supports zooming and panning for detailed inspection.</p>
+
+        <!-- ── Background Jobs ── -->
+        <h2 id="jobs">Background Jobs</h2>
+        <p>Background jobs let you run long-running tasks on the server without blocking the UI.</p>
+
+        <h3>How it works</h3>
+        <p>Jobs are created via the REST API or MCP tools. Each job runs asynchronously on the server and streams progress updates via Server-Sent Events (SSE). The frontend polls for updates and displays live progress in the job status bar.</p>
+
+        <h3>Creating jobs</h3>
+        <p>You can create background jobs through:</p>
+        <ul>
+          <li><strong>REST API</strong> — <code>POST /api/jobs</code> with a prompt and optional conversation ID</li>
+          <li><strong>MCP tools</strong> — use the <code>create_talkie_job</code> tool from Claude Code</li>
+        </ul>
+
+        <h3>SSE streaming</h3>
+        <p>Job events are streamed in real-time using Server-Sent Events. The frontend subscribes to the job's SSE endpoint and updates the UI as events arrive — showing progress, partial results, and completion status.</p>
+
+        <h3>Job status bar</h3>
+        <p>Active jobs appear in a status bar at the top of the screen. Each job shows its current state and a summary of progress. Click a job to see its full detail panel.</p>
+
+        <h3>Auto-polling</h3>
+        <p>The frontend polls for job updates every 3 seconds to ensure the UI stays current even if SSE connections are interrupted.</p>
+
+        <h3>Statuses</h3>
+        <p>Jobs move through these states:</p>
+        <ul>
+          <li><strong>Queued</strong> — waiting to start</li>
+          <li><strong>Running</strong> — actively executing</li>
+          <li><strong>Completed</strong> — finished successfully with a result</li>
+          <li><strong>Failed</strong> — encountered an error</li>
+          <li><strong>Cancelled</strong> — stopped by the user</li>
+        </ul>
+
+        <!-- ── Export ── -->
+        <h2 id="export">Export</h2>
+        <p>Export any conversation for backup, sharing, or archival purposes.</p>
+
+        <h3>Markdown export</h3>
+        <p>Press <span class="kbd">Cmd</span> + <span class="kbd">E</span> (or <span class="kbd">Ctrl</span> + <span class="kbd">E</span>) to export the current conversation as a Markdown file. The export includes all messages formatted with proper headings, code blocks, and metadata like timestamps and roles.</p>
+
+        <h3>JSON export</h3>
+        <p>For programmatic use, export conversations as JSON. The JSON format includes the complete conversation data: messages, liner notes, metadata, creation dates, and all associated properties.</p>
+
+        <!-- ── Keyboard Shortcuts ── -->
+        <h2 id="shortcuts">Keyboard Shortcuts</h2>
+        <p>Talkie supports keyboard shortcuts for common actions. Press <span class="kbd">?</span> to toggle the shortcuts guide overlay.</p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Shortcut</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="kbd">Spacebar</span> (hold)</td>
+              <td>Push-to-talk — hold to record, release to send</td>
+            </tr>
+            <tr>
+              <td><span class="kbd">Escape</span></td>
+              <td>Cancel recording</td>
+            </tr>
+            <tr>
+              <td><span class="kbd">Cmd</span> + <span class="kbd">K</span></td>
+              <td>Open global search</td>
+            </tr>
+            <tr>
+              <td><span class="kbd">Cmd</span> + <span class="kbd">E</span></td>
+              <td>Export current conversation</td>
+            </tr>
+            <tr>
+              <td><span class="kbd">?</span></td>
+              <td>Toggle keyboard shortcuts guide</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="docs-note">
+          <strong>Note</strong>
+          On Windows and Linux, use <span class="kbd">Ctrl</span> in place of <span class="kbd">Cmd</span> for all shortcuts.
+        </div>
+
+        <!-- ── Mobile ── -->
+        <h2 id="mobile">Mobile</h2>
+        <p>Talkie works on mobile devices with a touch-optimized interface built around the Floating Action Button (FAB).</p>
+
+        <h3>Floating Action Button</h3>
+        <p>On mobile, the primary recording control is a floating action button that hovers over the interface. It provides quick access to voice recording from anywhere in the app.</p>
+
+        <h3>Draggable and resizable</h3>
+        <p>The FAB can be repositioned by long-pressing and dragging it to any corner of the screen. It can also be resized to suit your preference. This flexibility ensures it never blocks important content.</p>
+
+        <h3>Interaction</h3>
+        <ul>
+          <li><strong>Tap</strong> — start or stop voice recording</li>
+          <li><strong>Long-press</strong> — enter drag mode to reposition the button</li>
+        </ul>
+
+        <h3>Persistence</h3>
+        <p>The FAB's position is persisted in localStorage, so it stays where you put it across page reloads and sessions.</p>
+
+        <!-- ── Prev / Next ── -->
+        <div class="docs-page-nav">
+          <a class="docs-page-nav__link" href="/docs/getting-started.html">
+            <span class="docs-page-nav__label">Previous</span>
+            <span class="docs-page-nav__title">Getting Started</span>
+          </a>
+          <a class="docs-page-nav__link docs-page-nav__link--next" href="/docs/api.html">
+            <span class="docs-page-nav__label">Next</span>
+            <span class="docs-page-nav__title">API Reference</span>
+          </a>
+        </div>
+
+      </main>
+    </div>
+
+    <!-- ── Footer ── -->
+    <footer class="site-footer">
+      <nav class="site-footer__nav">
+        <a class="site-footer__link" href="/">Home</a>
+        <span class="site-footer__divider">&middot;</span>
+        <a class="site-footer__link" href="/docs/">Docs</a>
+        <span class="site-footer__divider">&middot;</span>
+        <a class="site-footer__link" href="/docs/getting-started.html">Getting Started</a>
+        <span class="site-footer__divider">&middot;</span>
+        <a class="site-footer__link" href="/docs/api.html">API</a>
+        <span class="site-footer__divider">&middot;</span>
+        <a class="site-footer__link" href="/docs/integrations.html">Integrations</a>
+        <span class="site-footer__divider">&middot;</span>
+        <a class="site-footer__link" href="https://www.npmjs.com/package/talkiebot" target="_blank" rel="noopener">npm</a>
+        <span class="site-footer__divider">&middot;</span>
+        <a class="site-footer__link" href="https://github.com/bengillin/walkietalkiebot" target="_blank" rel="noopener">GitHub</a>
+        <span class="site-footer__divider">&middot;</span>
+        <a class="site-footer__link" href="/llms.txt">llms.txt</a>
+      </nav>
+      <p class="site-footer__meta">Built with Claude Code</p>
+    </footer>
+
+  </div>
+
+  <script type="module" src="/src/docs.ts"></script>
+</body>
+</html>

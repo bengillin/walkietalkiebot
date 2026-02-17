@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Sitemap: https://walkietalkie.bot/sitemap.xml
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /

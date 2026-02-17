@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-mccallister">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Themes — Talkie App</title>
+  <meta name="description" content="Talkie App theme system: 6 retro themes with 70+ CSS custom properties each. Learn how theming works and how to use it in your components." />
+  <meta property="og:title" content="Themes — Talkie App" />
+  <meta property="og:description" content="Talkie App theme system: 6 retro themes with 70+ CSS custom properties each. Learn how theming works and how to use it in your components." />
+  <meta property="og:image" content="https://walkietalkie.bot/og.png" />
+  <meta property="og:url" content="https://walkietalkie.bot/docs/themes.html" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Themes — Talkie App" />
+  <meta name="twitter:description" content="Talkie App theme system: 6 retro themes with 70+ CSS custom properties each. Learn how theming works and how to use it in your components." />
+  <meta name="twitter:image" content="https://walkietalkie.bot/og.png" />
+  <link rel="canonical" href="https://walkietalkie.bot/docs/themes.html" />
+</head>
+<body>
+  <div class="page">
+
+    <!-- ── Navigation ── -->
+    <nav class="site-nav">
+      <div class="site-nav__inner">
+        <a class="site-nav__brand" href="/">
+          <span class="mini-robot"><span class="mini-robot__face"><span class="mini-robot__eye"></span><span class="mini-robot__eye"></span></span></span>
+          Talkie App
+        </a>
+        <button class="site-nav__toggle" aria-label="Menu">&#9776;</button>
+        <div class="site-nav__links">
+          <a class="site-nav__link site-nav__link--active" href="/docs/">Docs</a>
+          <a class="site-nav__link" href="/docs/integrations.html">Integrations</a>
+          <a class="site-nav__link" href="/docs/api.html">API</a>
+          <a class="site-nav__github" href="https://github.com/bengillin/walkietalkiebot" target="_blank" rel="noopener" title="GitHub">
+            <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ── Docs Layout ── -->
+    <div class="docs-layout">
+
+      <!-- Sidebar -->
+      <button class="docs-sidebar-toggle">On this page</button>
+      <aside class="docs-sidebar">
+        <div class="docs-sidebar__title">On this page</div>
+        <ul class="docs-sidebar__list">
+          <li class="docs-sidebar__item"><a href="#overview">Overview</a></li>
+          <li class="docs-sidebar__item"><a href="#theme-list">Theme List</a></li>
+          <li class="docs-sidebar__item"><a href="#properties">CSS Custom Properties</a></li>
+          <li class="docs-sidebar__item"><a href="#borders">Viewport Borders</a></li>
+          <li class="docs-sidebar__item"><a href="#switching">How Theme Switching Works</a></li>
+          <li class="docs-sidebar__item"><a href="#components">Using Themes in Components</a></li>
+        </ul>
+      </aside>
+
+      <!-- Content -->
+      <main class="docs-content">
+
+        <nav class="docs-breadcrumbs">
+          <a href="/docs/">Docs</a>
+          <span class="docs-breadcrumbs__sep">/</span>
+          <span>Themes</span>
+        </nav>
+
+        <h1>Themes</h1>
+        <p class="docs-subtitle">6 retro themes with 70+ CSS custom properties each. Every pixel reskins.</p>
+
+        <!-- ── Overview ── -->
+        <h2 id="overview">Overview</h2>
+        <p>Talkie ships with 6 complete themes. Each theme defines over 70 CSS custom properties that control every visual element in the interface — backgrounds, text colors, accent colors, borders, shadows, typography, robot avatar colors, screen states, buttons, inputs, and modals.</p>
+        <p>Themes are applied via the <code>data-theme</code> attribute on the root element. When the theme changes, every component in the UI transitions smoothly to the new color scheme. No JavaScript re-rendering is needed — CSS custom properties handle the entire transition.</p>
+
+        <div class="docs-note">
+          <strong>Try it now</strong>
+          If you are viewing this site in the Talkie app, open the theme picker in settings to switch themes live and see every element update instantly.
+        </div>
+
+        <!-- ── Theme List ── -->
+        <h2 id="theme-list">Theme List</h2>
+
+        <h3>TalkBoy (mccallister)</h3>
+        <p>Inspired by the silver cassette recorder from the 90s. Chunky button aesthetics, a dark metallic background, and bold red accents. Typography uses Impact and Arial Black for that toy-packaging feel. This is the default theme.</p>
+
+        <h3>Bubble (imessage)</h3>
+        <p>Clean, white, and minimal. Modeled after modern Apple messaging interfaces. Uses SF Pro (or system sans-serif) with a blue accent color. Shadows are soft and subtle, borders are nearly invisible, and the overall feel is polished and contemporary.</p>
+
+        <h3>Dial-Up (aol)</h3>
+        <p>Windows 95-era nostalgia. Gray panels with beveled borders, navy blue accents, and MS Sans Serif typography. Buttons look raised and clickable. The entire interface feels like an instant messenger from 1997.</p>
+
+        <h3>Finder (classic-mac)</h3>
+        <p>The elegant simplicity of classic Mac OS. Light gray backgrounds with crisp 1px black borders. Geneva and Chicago typography. No gradients, no shadows — just clean, precise lines and a monochrome palette with occasional blue highlights.</p>
+
+        <h3>Guestbook (geocities)</h3>
+        <p>A love letter to the 90s web. Dark backgrounds with neon green, magenta, and cyan text. Comic Sans typography (yes, really). Glowing borders, high contrast, and the unmistakable energy of a GeoCities homepage under construction.</p>
+
+        <h3>1984 (apple-1984)</h3>
+        <p>Warm beige and cream tones from the original Macintosh era. Futura typography gives it a retro-futurist feel. The signature rainbow stripe — red, orange, yellow, green, blue, purple — appears as an accent throughout the interface, referencing the classic Apple logo.</p>
+
+        <!-- ── CSS Custom Properties ── -->
+        <h2 id="properties">CSS Custom Properties</h2>
+        <p>Each theme defines the following CSS custom properties. Use these in your own styles to ensure components stay consistent with the active theme.</p>
+
+        <h3>Background colors</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Property</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>--bg-primary</code></td>
+              <td>Main background color for the page and large surfaces</td>
+            </tr>
+            <tr>
+              <td><code>--bg-secondary</code></td>
+              <td>Secondary background for cards, panels, and elevated surfaces</td>
+            </tr>
+            <tr>
+              <td><code>--bg-tertiary</code></td>
+              <td>Tertiary background for nested elements and subtle depth</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Text colors</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Property</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>--text-primary</code></td>
+              <td>Primary text color for headings and important content</td>
+            </tr>
+            <tr>
+              <td><code>--text-secondary</code></td>
+              <td>Secondary text for body copy and descriptions</td>
+            </tr>
+            <tr>
+              <td><code>--text-muted</code></td>
+              <td>Muted text for labels, captions, and de-emphasized content</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Accent colors</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Property</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>--accent</code></td>
+              <td>Primary accent color for links, active states, and highlights</td>
+            </tr>
+            <tr>
+              <td><code>--accent-hover</code></td>
+              <td>Accent color on hover/focus states</td>
+            </tr>
+            <tr>
+              <td><code>--accent-glow</code></td>
+              <td>Glow or shadow color for accent-colored elements</td>
+            </tr>
+            <tr>
+              <td><code>--accent-soft</code></td>
+              <td>Soft, low-opacity accent for backgrounds and subtle highlights</td>
+            </tr>
+            <tr>
+              <td><code>--accent-secondary</code></td>
+              <td>Secondary accent for complementary highlights</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Robot avatar</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Property</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>--robot-body</code></td>
+              <td>Main body color of the robot avatar</td>
+            </tr>
+            <tr>
+              <td><code>--robot-shadow</code></td>
+              <td>Shadow/darker tone for robot depth</td>
+            </tr>
+            <tr>
+              <td><code>--robot-highlight</code></td>
+              <td>Highlight/lighter tone for robot edges</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Screen states</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Property</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>--screen-idle</code></td>
+              <td>Robot screen color in idle state</td>
+            </tr>
+            <tr>
+              <td><code>--screen-happy</code></td>
+              <td>Robot screen color in happy state</td>
+            </tr>
+            <tr>
+              <td><code>--screen-error</code></td>
+              <td>Robot screen color in error state</td>
+            </tr>
+            <tr>
+              <td><code>--screen-listening</code></td>
+              <td>Robot screen color in listening state</td>
+            </tr>
+            <tr>
+              <td><code>--screen-thinking</code></td>
+              <td>Robot screen color in thinking state</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Borders</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Property</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>--border-subtle</code></td>
+              <td>Very subtle border for dividers and separators</td>
+            </tr>
+            <tr>
+              <td><code>--border-light</code></td>
+              <td>Standard border for cards, inputs, and panels</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Shadows</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Property</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>--shadow-soft</code></td>
+              <td>Soft shadow for subtle elevation (cards, dropdowns)</td>
+            </tr>
+            <tr>
+              <td><code>--shadow-raised</code></td>
+              <td>Stronger shadow for raised elements (modals, popovers)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Header</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Property</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>--header-bg</code></td>
+              <td>Background color for the top header bar</td>
+            </tr>
+            <tr>
+              <td><code>--header-border</code></td>
+              <td>Border color at the bottom of the header</td>
+            </tr>
+            <tr>
+              <td><code>--header-text</code></td>
+              <td>Text color within the header</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Buttons</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Property</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>--btn-bg</code></td>
+              <td>Default button background color</td>
+            </tr>
+            <tr>
+              <td><code>--btn-hover</code></td>
+              <td>Button background on hover</td>
+            </tr>
+            <tr>
+              <td><code>--btn-border</code></td>
+              <td>Button border color</td>
+            </tr>
+            <tr>
+              <td><code>--btn-shadow</code></td>
+              <td>Button box-shadow for pressed/raised effects</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Input</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Property</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>--input-bg</code></td>
+              <td>Background for text inputs, textareas, and code blocks</td>
+            </tr>
+            <tr>
+              <td><code>--input-border</code></td>
+              <td>Border color for input elements</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Modal</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Property</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>--modal-bg</code></td>
+              <td>Background color for modal dialogs and overlays</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Typography</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Property</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>--font-family</code></td>
+              <td>Primary font stack for body text</td>
+            </tr>
+            <tr>
+              <td><code>--font-weight-normal</code></td>
+              <td>Normal font weight (typically 400)</td>
+            </tr>
+            <tr>
+              <td><code>--font-weight-bold</code></td>
+              <td>Bold font weight (typically 600 or 700)</td>
+            </tr>
+            <tr>
+              <td><code>--title-font</code></td>
+              <td>Font family for headings and display text</td>
+            </tr>
+            <tr>
+              <td><code>--title-style</code></td>
+              <td>Font style for titles (normal or italic)</td>
+            </tr>
+            <tr>
+              <td><code>--title-transform</code></td>
+              <td>Text transform for titles (none, uppercase, etc.)</td>
+            </tr>
+            <tr>
+              <td><code>--letter-spacing</code></td>
+              <td>Letter spacing for body text</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- ── Viewport Borders ── -->
+        <h2 id="borders">Viewport Borders</h2>
+        <p>Each theme decorates the viewport edges with a unique border treatment, adding personality before you even read the content.</p>
+
+        <h3>TalkBoy</h3>
+        <p>A bold red 4px strip across the top of the viewport. Evokes the red record button on a cassette recorder.</p>
+
+        <h3>Bubble</h3>
+        <p>A thin blue 2px hairline at the top. Minimal and precise, matching the clean aesthetic of the theme.</p>
+
+        <h3>Dial-Up</h3>
+        <p>A navy-to-blue gradient strip at the top. Reminiscent of the Windows 95 title bar gradient.</p>
+
+        <h3>Finder</h3>
+        <p>A 1px black border on all four sides with a white inner highlight. Replicates the classic Mac OS window chrome — a precise frame around the entire viewport.</p>
+
+        <h3>Guestbook</h3>
+        <p>Neon magenta rail on the left edge and a cyan rail on the right edge. The viewport becomes a glowing portal, framed in the signature GeoCities palette.</p>
+
+        <h3>1984</h3>
+        <p>A rainbow stripe across the top — red, orange, yellow, green, blue, and purple bands. The iconic Apple rainbow, rendered as a horizontal gradient strip.</p>
+
+        <!-- ── How Theme Switching Works ── -->
+        <h2 id="switching">How Theme Switching Works</h2>
+        <p>Talkie uses two mechanisms for applying themes, depending on context.</p>
+
+        <h3>Global page theming</h3>
+        <p>For the full-page theme, a class like <code>.theme-mccallister</code> is added to the <code>&lt;html&gt;</code> element. Each theme class defines all the CSS custom properties that child elements consume. Only one theme class is active at a time.</p>
+
+        <h3>Scoped theme islands</h3>
+        <p>For isolated theme previews (like the theme showcase on the homepage), the <code>data-theme</code> attribute is applied to a local wrapper element. This lets you render a component in a specific theme without affecting the rest of the page.</p>
+
+        <pre><code>&lt;div data-theme="geocities"&gt;
+  &lt;!-- This component renders in the Guestbook theme --&gt;
+  &lt;div class="robot robot--idle"&gt;...&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+        <h3>localStorage persistence</h3>
+        <p>The selected theme is stored under the <code>talkie_theme</code> key in localStorage. On page load, the saved theme is read and applied before the first paint to avoid a flash of the wrong theme.</p>
+
+        <h3>setTheme function</h3>
+        <p>The theme switching logic removes all theme classes, adds the new one, and persists the choice:</p>
+
+        <pre><code>type ThemeName = 'mccallister' | 'imessage' | 'aol'
+  | 'classic-mac' | 'geocities' | 'apple-1984'
+
+const themes: ThemeName[] = [
+  'mccallister', 'imessage', 'aol',
+  'classic-mac', 'geocities', 'apple-1984'
+]
+
+function setTheme(name: ThemeName) {
+  themes.forEach(t =&gt;
+    document.documentElement.classList.remove(`theme-${t}`)
+  )
+  document.documentElement.classList.add(`theme-${name}`)
+  localStorage.setItem('talkie_theme', name)
+}</code></pre>
+
+        <!-- ── Using Themes in Components ── -->
+        <h2 id="components">Using Themes in Components</h2>
+        <p>To build components that respect the active theme, reference CSS custom properties instead of hardcoded colors.</p>
+
+        <h3>Basic usage</h3>
+        <p>Use <code>var()</code> to reference theme properties in your CSS:</p>
+
+        <pre><code>.my-card {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  box-shadow: var(--shadow-soft);
+  font-family: var(--font-family);
+}
+
+.my-card__title {
+  font-family: var(--title-font);
+  font-style: var(--title-style);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+}
+
+.my-card__body {
+  color: var(--text-secondary);
+}
+
+.my-card__link {
+  color: var(--accent);
+}
+
+.my-card__link:hover {
+  color: var(--accent-hover);
+}</code></pre>
+
+        <h3>Smooth transitions</h3>
+        <p>All CSS custom properties transition smoothly when the theme changes. Add a transition to your elements to participate in theme switching animations:</p>
+
+        <pre><code>.my-element {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}</code></pre>
+
+        <h3>Theme-specific overrides</h3>
+        <p>If you need different behavior in a specific theme, use the theme class selector:</p>
+
+        <pre><code>/* Default styling */
+.my-button {
+  border-radius: 8px;
+}
+
+/* Sharper corners in the Dial-Up theme */
+.theme-aol .my-button {
+  border-radius: 0;
+  border: 2px outset var(--btn-border);
+}
+
+/* Neon glow in the Guestbook theme */
+.theme-geocities .my-button {
+  box-shadow: 0 0 8px var(--accent-glow);
+}</code></pre>
+
+        <h3>Robot state colors</h3>
+        <p>If you are building components that reflect the robot's state (or any state-based UI), use the screen state variables:</p>
+
+        <pre><code>.status-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--screen-idle);
+}
+
+.status-indicator--listening {
+  background: var(--screen-listening);
+}
+
+.status-indicator--error {
+  background: var(--screen-error);
+}</code></pre>
+
+        <div class="docs-tip">
+          <strong>Tip</strong>
+          Always test your components in all 6 themes. Some themes have light backgrounds with dark text, while others have dark backgrounds with light text. Using CSS custom properties consistently ensures your component works everywhere.
+        </div>
+
+        <!-- ── Prev / Next ── -->
+        <div class="docs-page-nav">
+          <a class="docs-page-nav__link" href="/docs/api.html">
+            <span class="docs-page-nav__label">Previous</span>
+            <span class="docs-page-nav__title">API Reference</span>
+          </a>
+        </div>
+
+      </main>
+    </div>
+
+    <!-- ── Footer ── -->
+    <footer class="site-footer">
+      <nav class="site-footer__nav">
+        <a class="site-footer__link" href="/">Home</a>
+        <span class="site-footer__divider">&middot;</span>
+        <a class="site-footer__link" href="/docs/">Docs</a>
+        <span class="site-footer__divider">&middot;</span>
+        <a class="site-footer__link" href="/docs/getting-started.html">Getting Started</a>
+        <span class="site-footer__divider">&middot;</span>
+        <a class="site-footer__link" href="/docs/api.html">API</a>
+        <span class="site-footer__divider">&middot;</span>
+        <a class="site-footer__link" href="/docs/integrations.html">Integrations</a>
+        <span class="site-footer__divider">&middot;</span>
+        <a class="site-footer__link" href="https://www.npmjs.com/package/talkiebot" target="_blank" rel="noopener">npm</a>
+        <span class="site-footer__divider">&middot;</span>
+        <a class="site-footer__link" href="https://github.com/bengillin/walkietalkiebot" target="_blank" rel="noopener">GitHub</a>
+        <span class="site-footer__divider">&middot;</span>
+        <a class="site-footer__link" href="/llms.txt">llms.txt</a>
+      </nav>
+      <p class="site-footer__meta">Built with Claude Code</p>
+    </footer>
+
+  </div>
+
+  <script type="module" src="/src/docs.ts"></script>
+</body>
+</html>

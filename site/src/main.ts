@@ -1,4 +1,5 @@
 import './style.css'
+import './nav.css'
 
 type ThemeName = 'mccallister' | 'imessage' | 'aol' | 'classic-mac' | 'geocities' | 'apple-1984'
 
@@ -95,8 +96,19 @@ function initThemeCards() {
   })
 }
 
+// ── Mobile nav toggle ──
+function initNavToggle() {
+  const toggle = document.querySelector('.site-nav__toggle')
+  const links = document.querySelector('.site-nav__links')
+  if (!toggle || !links) return
+  toggle.addEventListener('click', () => {
+    links.classList.toggle('site-nav__links--open')
+  })
+}
+
 // ── Init ──
 initTheme()
+initNavToggle()
 initRobotCycling()
 initReelSpin()
 initCopy()

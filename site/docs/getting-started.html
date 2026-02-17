@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-mccallister">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Getting Started — Talkie App</title>
+  <meta name="description" content="Install Talkie, configure your environment, and start talking to Claude in minutes." />
+  <meta property="og:title" content="Getting Started — Talkie App" />
+  <meta property="og:description" content="Install Talkie, configure your environment, and start talking to Claude in minutes." />
+  <meta property="og:image" content="https://walkietalkie.bot/og.png" />
+  <meta property="og:url" content="https://walkietalkie.bot/docs/getting-started.html" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Getting Started — Talkie App" />
+  <meta name="twitter:description" content="Install Talkie, configure your environment, and start talking to Claude in minutes." />
+  <meta name="twitter:image" content="https://walkietalkie.bot/og.png" />
+  <link rel="canonical" href="https://walkietalkie.bot/docs/getting-started.html" />
+</head>
+<body>
+  <div class="page">
+
+    <!-- ── Navigation ── -->
+    <nav class="site-nav">
+      <div class="site-nav__inner">
+        <a class="site-nav__brand" href="/">
+          <span class="mini-robot"><span class="mini-robot__face"><span class="mini-robot__eye"></span><span class="mini-robot__eye"></span></span></span>
+          Talkie App
+        </a>
+        <button class="site-nav__toggle" aria-label="Menu">&#9776;</button>
+        <div class="site-nav__links">
+          <a class="site-nav__link site-nav__link--active" href="/docs/">Docs</a>
+          <a class="site-nav__link" href="/docs/integrations.html">Integrations</a>
+          <a class="site-nav__link" href="/docs/api.html">API</a>
+          <a class="site-nav__github" href="https://github.com/bengillin/walkietalkiebot" target="_blank" rel="noopener" title="GitHub">
+            <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ── Docs Layout ── -->
+    <div class="docs-layout">
+
+      <!-- Sidebar -->
+      <aside class="docs-sidebar">
+        <div class="docs-sidebar__title">On this page</div>
+        <ul class="docs-sidebar__list">
+          <li class="docs-sidebar__item"><a href="#installation">Installation</a></li>
+          <li class="docs-sidebar__item"><a href="#requirements">System Requirements</a></li>
+          <li class="docs-sidebar__item"><a href="#first-launch">First Launch</a></li>
+          <li class="docs-sidebar__item"><a href="#onboarding">Onboarding</a></li>
+          <li class="docs-sidebar__item"><a href="#basic-usage">Basic Usage</a></li>
+          <li class="docs-sidebar__item"><a href="#troubleshooting">Troubleshooting</a></li>
+        </ul>
+      </aside>
+
+      <!-- Content -->
+      <article class="docs-content">
+
+        <!-- Breadcrumbs -->
+        <div class="docs-breadcrumbs">
+          <a href="/docs/">Docs</a>
+          <span class="docs-breadcrumbs__sep">/</span>
+          <span>Getting Started</span>
+        </div>
+
+        <h1>Getting Started</h1>
+        <p class="docs-subtitle">Install, configure, and start talking to Claude in minutes.</p>
+
+        <!-- ── Installation ── -->
+        <h2 id="installation">Installation</h2>
+
+        <p>Talkie is distributed as an npm package. A single command downloads the package, starts an HTTPS server, generates self-signed certificates, and opens your browser:</p>
+
+        <pre><code>npx talkiebot</code></pre>
+
+        <p>That is all you need. The <code>npx talkiebot</code> command handles everything:</p>
+
+        <ul>
+          <li>Downloads and installs the <code>talkiebot</code> package from npm</li>
+          <li>Generates self-signed TLS certificates at <code>~/.talkie/</code></li>
+          <li>Starts an HTTPS server on port 3443 (configurable)</li>
+          <li>Opens your default browser to the Talkie interface</li>
+        </ul>
+
+        <div class="docs-note">
+          <strong>Node.js 18+ required</strong>
+          Talkie requires Node.js version 18 or later. Check your version with <code>node --version</code>. Download the latest LTS release from <a href="https://nodejs.org" target="_blank" rel="noopener">nodejs.org</a> if needed.
+        </div>
+
+        <p>If you prefer a global install:</p>
+
+        <pre><code>npm install -g talkiebot
+talkiebot</code></pre>
+
+        <!-- ── System Requirements ── -->
+        <h2 id="requirements">System Requirements</h2>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Requirement</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Browser</strong></td>
+              <td>Chrome or Edge (required for Web Speech API support)</td>
+            </tr>
+            <tr>
+              <td><strong>HTTPS</strong></td>
+              <td>Auto-handled. Self-signed certs generated on first launch.</td>
+            </tr>
+            <tr>
+              <td><strong>Node.js</strong></td>
+              <td>Version 18 or later</td>
+            </tr>
+            <tr>
+              <td><strong>OS</strong></td>
+              <td>macOS, Linux, or Windows</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>The Web Speech API is used for both speech-to-text and text-to-speech. It requires a secure context (HTTPS), which Talkie provides automatically with self-signed certificates. Firefox and Safari have limited or no support for the Web Speech API recognition interface.</p>
+
+        <!-- ── First Launch ── -->
+        <h2 id="first-launch">First Launch</h2>
+
+        <p>When you run <code>npx talkiebot</code> for the first time, several things happen in sequence:</p>
+
+        <ol>
+          <li><strong>Certificate generation</strong> &mdash; A self-signed TLS certificate and private key are created at <code>~/.talkie/cert.pem</code> and <code>~/.talkie/key.pem</code>. These are reused on subsequent launches.</li>
+          <li><strong>Database creation</strong> &mdash; An SQLite database is initialized at <code>~/.talkie/talkie.db</code> with WAL mode enabled for concurrent reads.</li>
+          <li><strong>Server start</strong> &mdash; The HTTPS server starts on port 3443 (or the port set by <code>TALKIE_PORT</code>).</li>
+          <li><strong>Browser opens</strong> &mdash; Your default browser navigates to <code>https://localhost:3443</code>.</li>
+          <li><strong>Certificate warning</strong> &mdash; Your browser will show a security warning because the certificate is self-signed. Accept it to continue (see <a href="#troubleshooting">Troubleshooting</a> below).</li>
+          <li><strong>Onboarding wizard</strong> &mdash; On your first visit, a 6-step setup wizard walks you through configuration.</li>
+        </ol>
+
+        <!-- ── Onboarding ── -->
+        <h2 id="onboarding">Onboarding</h2>
+
+        <p>The onboarding wizard runs automatically on your first visit. It consists of six steps that configure your Talkie experience:</p>
+
+        <ol>
+          <li>
+            <strong>Theme selection</strong> &mdash; Choose from 6 retro themes: TalkBoy, Bubble, Dial-Up, Finder, Guestbook, or 1984. Each theme completely reskins the entire interface. You can change this later from the settings drawer.
+          </li>
+          <li>
+            <strong>Text-to-speech</strong> &mdash; Toggle TTS on or off and pick a voice from the voices available in your browser. Claude's responses will be read aloud when TTS is enabled.
+          </li>
+          <li>
+            <strong>Sound effects</strong> &mdash; Enable or disable UI sound effects for actions like sending messages, receiving responses, and navigation.
+          </li>
+          <li>
+            <strong>Wake word</strong> &mdash; Configure a wake word that activates voice input hands-free. When enabled, Talkie continuously listens for the trigger phrase in the background.
+          </li>
+          <li>
+            <strong>Continuous listening</strong> &mdash; Set up continuous listening mode and a trigger word. In this mode, Talkie keeps the microphone open and sends transcriptions when the trigger word is detected.
+          </li>
+          <li>
+            <strong>Done</strong> &mdash; Review your settings and start using Talkie. All settings can be changed later from the settings drawer.
+          </li>
+        </ol>
+
+        <div class="docs-tip">
+          <strong>Tip</strong>
+          You do not need to configure everything during onboarding. The defaults work well for most users. You can always adjust settings later by opening the settings drawer.
+        </div>
+
+        <!-- ── Basic Usage ── -->
+        <h2 id="basic-usage">Basic Usage</h2>
+
+        <h3>Voice input</h3>
+
+        <p>There are two ways to use voice input:</p>
+
+        <ul>
+          <li><strong>Push-to-talk</strong> &mdash; Hold the <span class="kbd">Space</span> key or tap the microphone button. Release to send your message.</li>
+          <li><strong>Continuous listening</strong> &mdash; When enabled in settings, Talkie keeps the microphone open and listens for your trigger word.</li>
+        </ul>
+
+        <h3>Text input</h3>
+
+        <p>Type your message in the input bar at the bottom of the screen and press <span class="kbd">Enter</span> to send. Use <span class="kbd">Shift</span> + <span class="kbd">Enter</span> for a new line.</p>
+
+        <h3>Theme switching</h3>
+
+        <p>Open the settings drawer from the floating action button (bottom-right corner) to switch between the 6 available themes. Your selection is saved and persists across sessions.</p>
+
+        <h3>Keyboard shortcuts</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Shortcut</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="kbd">Space</span> (hold)</td>
+              <td>Push-to-talk</td>
+            </tr>
+            <tr>
+              <td><span class="kbd">Cmd</span> + <span class="kbd">K</span></td>
+              <td>Open search</td>
+            </tr>
+            <tr>
+              <td><span class="kbd">Enter</span></td>
+              <td>Send message</td>
+            </tr>
+            <tr>
+              <td><span class="kbd">Shift</span> + <span class="kbd">Enter</span></td>
+              <td>New line in input</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- ── Troubleshooting ── -->
+        <h2 id="troubleshooting">Troubleshooting</h2>
+
+        <h3>Certificate warnings</h3>
+
+        <p>Because Talkie uses a self-signed certificate, your browser will show a security warning on first visit. This is expected and safe for local development:</p>
+
+        <ul>
+          <li><strong>Chrome</strong> &mdash; Click "Advanced" then "Proceed to localhost (unsafe)".</li>
+          <li><strong>Edge</strong> &mdash; Click "Advanced" then "Continue to localhost (unsafe)".</li>
+        </ul>
+
+        <p>The certificate is stored at <code>~/.talkie/cert.pem</code>. If you need to regenerate it, delete the file and restart Talkie.</p>
+
+        <h3>Microphone permissions</h3>
+
+        <p>Voice input requires microphone access over HTTPS. If the browser does not prompt for permission:</p>
+
+        <ul>
+          <li>Verify you are accessing Talkie over <code>https://</code> (not <code>http://</code>).</li>
+          <li>Check your browser's site settings and ensure microphone access is allowed for <code>https://localhost:3443</code>.</li>
+          <li>On macOS, ensure your browser has microphone permission in System Settings &gt; Privacy &amp; Security &gt; Microphone.</li>
+        </ul>
+
+        <h3>Port conflicts</h3>
+
+        <p>If port 3443 is already in use, set a different port with the <code>TALKIE_PORT</code> environment variable:</p>
+
+        <pre><code>TALKIE_PORT=4443 npx talkiebot</code></pre>
+
+        <p>You can also export it in your shell profile to make it permanent:</p>
+
+        <pre><code>export TALKIE_PORT=4443</code></pre>
+
+        <div class="docs-warning">
+          <strong>Still stuck?</strong>
+          Open an issue on <a href="https://github.com/bengillin/walkietalkiebot/issues" target="_blank" rel="noopener">GitHub</a> with your Node.js version, browser, and OS details.
+        </div>
+
+        <!-- ── Prev / Next ── -->
+        <div class="docs-page-nav">
+          <a class="docs-page-nav__link" href="/docs/">
+            <span class="docs-page-nav__label">Previous</span>
+            <span class="docs-page-nav__title">Documentation</span>
+          </a>
+          <a class="docs-page-nav__link docs-page-nav__link--next" href="/docs/features.html">
+            <span class="docs-page-nav__label">Next</span>
+            <span class="docs-page-nav__title">Features</span>
+          </a>
+        </div>
+
+      </article>
+    </div>
+
+    <!-- ── Footer ── -->
+    <footer class="site-footer">
+      <nav class="site-footer__nav">
+        <a class="site-footer__link" href="/">Home</a>
+        <span class="site-footer__divider">&middot;</span>
+        <a class="site-footer__link" href="/docs/">Docs</a>
+        <span class="site-footer__divider">&middot;</span>
+        <a class="site-footer__link" href="/docs/getting-started.html">Getting Started</a>
+        <span class="site-footer__divider">&middot;</span>
+        <a class="site-footer__link" href="/docs/api.html">API</a>
+        <span class="site-footer__divider">&middot;</span>
+        <a class="site-footer__link" href="/docs/integrations.html">Integrations</a>
+        <span class="site-footer__divider">&middot;</span>
+        <a class="site-footer__link" href="https://www.npmjs.com/package/talkiebot" target="_blank" rel="noopener">npm</a>
+        <span class="site-footer__divider">&middot;</span>
+        <a class="site-footer__link" href="https://github.com/bengillin/walkietalkiebot" target="_blank" rel="noopener">GitHub</a>
+        <span class="site-footer__divider">&middot;</span>
+        <a class="site-footer__link" href="/llms.txt">llms.txt</a>
+      </nav>
+      <p class="site-footer__meta">Built with Claude Code</p>
+    </footer>
+
+  </div>
+
+  <script type="module" src="/src/docs.ts"></script>
+</body>
+</html>
