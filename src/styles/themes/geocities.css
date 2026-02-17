@@ -1,0 +1,2816 @@
+/* Geocities Theme - Mid-90s personal homepage chaos */
+[data-theme="geocities"] {
+  /* Background Colors - garish teal/purple */
+  --bg-primary: #000033;
+  --bg-secondary: #000066;
+  --bg-tertiary: #330066;
+  --color-bg-secondary: #000066;
+
+  /* Text Colors - neon on dark */
+  --text-primary: #00ff00;
+  --text-secondary: #ffff00;
+  --text-muted: #999999;
+  --text-tertiary: #ff00ff;
+
+  /* Accent Colors - hot pink / electric blue */
+  --accent: #ff00ff;
+  --accent-hover: #ff66ff;
+  --accent-glow: rgba(255, 0, 255, 0.4);
+  --accent-soft: rgba(255, 0, 255, 0.15);
+
+  /* Secondary accent - electric yellow */
+  --accent-secondary: #ffff00;
+
+  /* Message Colors */
+  --message-user-bg: #000066;
+  --message-user-text: #00ff00;
+  --message-assistant-bg: #330033;
+  --message-assistant-text: #ff00ff;
+
+  /* Robot Avatar Colors */
+  --robot-body: #333366;
+  --robot-shadow: #000033;
+  --robot-highlight: #6666ff;
+
+  /* Screen States */
+  --screen-idle: #000099;
+  --screen-happy: #ffff00;
+  --screen-error: #ff0000;
+  --screen-listening: #00ff00;
+  --screen-thinking: #ff00ff;
+
+  /* Borders & Shadows */
+  --border-subtle: #6600cc;
+  --border-light: #9933ff;
+  --border-color: #6600cc;
+  --color-border: #6600cc;
+  --shadow-soft: 0 0 8px rgba(255, 0, 255, 0.3);
+  --shadow-glow: 0 0 12px rgba(0, 255, 255, 0.4);
+
+  /* Header specific */
+  --header-bg: linear-gradient(90deg, #ff0000, #ff6600, #ffff00, #00ff00, #0066ff, #9900ff);
+  --header-border: #ff00ff;
+  --header-text: #ffffff;
+
+  /* Button styling */
+  --btn-bg: #333399;
+  --btn-hover: #4444aa;
+  --btn-border: #ff00ff;
+  --btn-shadow: 0 0 6px rgba(255, 0, 255, 0.5);
+
+  /* Input styling */
+  --input-bg: #000033;
+  --input-border: #00ffff;
+
+  /* Modal */
+  --modal-bg: #000033;
+  --modal-overlay: rgba(0, 0, 51, 0.85);
+
+  /* Typography - Comic Sans is king */
+  --font-family: 'Comic Sans MS', 'Comic Sans', cursive, sans-serif;
+  --font-weight-normal: 400;
+  --font-weight-medium: 400;
+  --font-weight-bold: 700;
+  --title-font: 'Comic Sans MS', 'Comic Sans', cursive, sans-serif;
+  --title-style: normal;
+  --title-transform: none;
+  --letter-spacing: 0;
+
+  /* Radius - rounded everything like old web */
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-full: 0px;
+}
+
+/* ============================================
+   Body & Root - starfield / tiled bg
+   ============================================ */
+[data-theme="geocities"] html,
+[data-theme="geocities"] body {
+  background: #000033;
+  background-image:
+    radial-gradient(1px 1px at 20px 30px, #ffffff, transparent),
+    radial-gradient(1px 1px at 40px 70px, rgba(255,255,255,0.8), transparent),
+    radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 130px 80px, #ffffff, transparent),
+    radial-gradient(1px 1px at 160px 20px, rgba(255,255,255,0.7), transparent),
+    radial-gradient(1px 1px at 200px 60px, rgba(255,255,255,0.5), transparent);
+  background-size: 200px 100px;
+  font-family: 'Comic Sans MS', 'Comic Sans', cursive, sans-serif;
+  -webkit-font-smoothing: auto;
+  font-size: 14px;
+  color: #00ff00;
+}
+
+/* ============================================
+   Header - rainbow gradient title bar
+   ============================================ */
+[data-theme="geocities"] .app__header {
+  background: linear-gradient(90deg, #ff0000, #ff6600, #ffff00, #00ff00, #0066ff, #9900ff);
+  border-bottom: 3px solid #ff00ff;
+  box-shadow: 0 2px 10px rgba(255, 0, 255, 0.5);
+  min-height: 36px;
+  padding: 4px 8px;
+}
+
+[data-theme="geocities"] .app__title {
+  font-family: 'Comic Sans MS', 'Comic Sans', cursive;
+  font-weight: 700;
+  font-size: 16px;
+  font-style: normal;
+  letter-spacing: 1px;
+  text-transform: none;
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: #ffffff;
+  background-clip: unset;
+  text-shadow: 2px 2px 0 #000000, 0 0 10px #ff00ff;
+  filter: none;
+}
+
+/* Header buttons - neon glow buttons */
+[data-theme="geocities"] .app__header-btn {
+  background: #333399;
+  border: 2px solid #00ffff;
+  border-radius: 0;
+  color: #00ffff;
+  box-shadow: 0 0 6px rgba(0, 255, 255, 0.4);
+  padding: 2px;
+  width: 28px;
+  height: 26px;
+  min-width: 28px;
+}
+
+[data-theme="geocities"] .app__header-btn:hover {
+  background: #4444aa;
+  color: #ffff00;
+  border-color: #ffff00;
+  box-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
+}
+
+[data-theme="geocities"] .app__header-btn:active {
+  background: #222266;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+  transform: none;
+}
+
+[data-theme="geocities"] .app__header-btn:disabled {
+  color: #666699;
+  border-color: #666699;
+  box-shadow: none;
+}
+
+/* Eject button active */
+[data-theme="geocities"] .app__header-btn--eject.app__header-btn--active {
+  background: #660066;
+  border-color: #ff00ff;
+  color: #ff00ff;
+  box-shadow: 0 0 10px rgba(255, 0, 255, 0.6);
+}
+
+/* Record button - pulsing red */
+[data-theme="geocities"] .app__header-btn--record {
+  background: #cc0000;
+  border: 2px solid #ff3333;
+  color: #ffffff;
+  width: 28px;
+  height: 26px;
+  border-radius: 0;
+  box-shadow: 0 0 8px rgba(255, 0, 0, 0.6);
+}
+
+[data-theme="geocities"] .app__header-btn--record::before {
+  display: none;
+}
+
+[data-theme="geocities"] .app__header-btn--record:hover:not(:disabled) {
+  background: #ff0000;
+  box-shadow: 0 0 12px rgba(255, 0, 0, 0.8);
+}
+
+[data-theme="geocities"] .app__header-btn--record:active:not(:disabled) {
+  background: #990000;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+  transform: none;
+}
+
+[data-theme="geocities"] .app__header-btn--record.app__header-btn--recording {
+  background: #ff0000;
+  box-shadow: 0 0 15px rgba(255, 0, 0, 1);
+  animation: geocities-record-pulse 0.6s ease-in-out infinite;
+}
+
+[data-theme="geocities"] .app__header-btn--record.app__header-btn--recording::before {
+  display: none;
+}
+
+@keyframes geocities-record-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(255, 0, 0, 0.6); }
+  50% { box-shadow: 0 0 20px rgba(255, 0, 0, 1); }
+}
+
+/* Tap to talk pulse */
+[data-theme="geocities"] .app__header-btn--record.app__header-btn--tap-to-talk {
+  animation: geocities-tap-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes geocities-tap-pulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(255, 0, 0, 0.4); }
+  50% { box-shadow: 0 0 15px rgba(255, 0, 0, 0.8); }
+}
+
+/* Recording indicator */
+[data-theme="geocities"] .app__recording-indicator {
+  background: #330000;
+  border-radius: 0;
+}
+
+[data-theme="geocities"] .app__recording-dot {
+  background: #ff0000;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #ff0000;
+}
+
+[data-theme="geocities"] .app__recording-label {
+  color: #ff3333;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-size: 12px;
+  font-family: 'Comic Sans MS', cursive;
+  text-shadow: 0 0 6px rgba(255, 0, 0, 0.5);
+}
+
+/* Liner notes indicator */
+[data-theme="geocities"] .app__header-btn--has-notes::after {
+  background: #ffff00;
+  border-color: #000000;
+  border-radius: 50%;
+  box-shadow: 0 0 6px #ffff00;
+}
+
+/* Conversation dropdown */
+[data-theme="geocities"] .app__conversation-dropdown {
+  background: #000066;
+  border-radius: 0;
+  padding: 2px 8px;
+  border: 2px solid #00ffff;
+  box-shadow: 0 0 6px rgba(0, 255, 255, 0.3);
+}
+
+[data-theme="geocities"] .app__conversation-dropdown:hover {
+  background: #000099;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+[data-theme="geocities"] .app__conversation-title {
+  color: #00ffff;
+  font-weight: 700;
+  font-size: 13px;
+  font-family: 'Comic Sans MS', cursive;
+}
+
+/* Logo */
+[data-theme="geocities"] .app__logo {
+  height: 28px;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  filter: hue-rotate(90deg) saturate(2);
+}
+
+/* Avatar */
+[data-theme="geocities"] .app__avatar-mini {
+  width: 32px;
+  height: 32px;
+}
+
+[data-theme="geocities"] .app__avatar-status {
+  width: 32px;
+  height: 32px;
+}
+
+/* Mobile menu */
+[data-theme="geocities"] .app__mobile-menu-btn {
+  background: #333399;
+  border: 2px solid #00ffff;
+  color: #00ffff;
+  box-shadow: 0 0 6px rgba(0, 255, 255, 0.3);
+}
+
+[data-theme="geocities"] .app__mobile-menu {
+  background: #000033;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 2px solid #ff00ff;
+  border-radius: 0;
+  box-shadow: 0 0 15px rgba(255, 0, 255, 0.5);
+}
+
+[data-theme="geocities"] .app__mobile-menu-item {
+  color: #00ff00;
+  font-size: 14px;
+  padding: 6px 16px;
+  font-family: 'Comic Sans MS', cursive;
+}
+
+[data-theme="geocities"] .app__mobile-menu-item:hover {
+  background: #ff00ff;
+  color: #ffffff;
+}
+
+[data-theme="geocities"] .app__mobile-menu-item:active {
+  background: #cc00cc;
+  color: #ffffff;
+}
+
+[data-theme="geocities"] .app__mobile-menu-item--danger {
+  color: #ff3333;
+}
+
+[data-theme="geocities"] .app__mobile-menu-item--danger:hover {
+  background: #ff0000;
+  color: #ffffff;
+}
+
+/* ============================================
+   Main Content Area
+   ============================================ */
+[data-theme="geocities"] .app__main {
+  background: #000033;
+}
+
+[data-theme="geocities"] .app__avatar-section {
+  background: #000033;
+  border-bottom: 3px solid #ff00ff;
+}
+
+[data-theme="geocities"] .app__error {
+  color: #ff3333;
+  background: #330000;
+  border: 2px solid #ff0000;
+  border-radius: 0;
+  text-shadow: 0 0 6px rgba(255, 0, 0, 0.4);
+}
+
+/* Plan notification */
+[data-theme="geocities"] .app__plan-notification {
+  background: #330033;
+  border: 2px solid #ff00ff;
+  border-radius: 0;
+  color: #ff00ff;
+  font-weight: 700;
+  font-family: 'Comic Sans MS', cursive;
+  box-shadow: 0 0 8px rgba(255, 0, 255, 0.3);
+}
+
+[data-theme="geocities"] .app__plan-notification:hover {
+  background: #440044;
+  box-shadow: 0 0 12px rgba(255, 0, 255, 0.5);
+}
+
+/* Input bar */
+[data-theme="geocities"] .app__input-bar {
+  background: #000033;
+  border-top: 3px solid #00ffff;
+}
+
+/* ============================================
+   Chat Timeline - the main homepage area
+   ============================================ */
+[data-theme="geocities"] .chat-timeline {
+  background: #000033;
+  background-image:
+    radial-gradient(1px 1px at 50px 40px, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1px 1px at 120px 80px, rgba(255,255,255,0.2), transparent),
+    radial-gradient(1px 1px at 180px 30px, rgba(255,255,255,0.25), transparent);
+  background-size: 200px 100px;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Message bubbles - neon colored text on dark backgrounds */
+[data-theme="geocities"] .message-bubble {
+  border-radius: 0;
+  font-family: 'Comic Sans MS', 'Comic Sans', cursive;
+  font-weight: 400;
+  border: 2px solid;
+  font-size: 14px;
+}
+
+[data-theme="geocities"] .message-bubble.user {
+  background: #000066;
+  color: #00ff00;
+  border-color: #00ff00;
+  box-shadow: 0 0 8px rgba(0, 255, 0, 0.3);
+}
+
+[data-theme="geocities"] .message-bubble.assistant {
+  background: #330033;
+  color: #ff00ff;
+  border-color: #ff00ff;
+  box-shadow: 0 0 8px rgba(255, 0, 255, 0.3);
+}
+
+/* Hide the default tail */
+[data-theme="geocities"] .message-bubble.assistant::after {
+  display: none;
+}
+
+[data-theme="geocities"] .message-bubble.listening {
+  background: #003300;
+  border: 2px dashed #00ff00;
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.4);
+}
+
+[data-theme="geocities"] .message-bubble.thinking {
+  background: #220033;
+  color: #9966ff;
+  border: 2px dashed #9966ff;
+  box-shadow: 0 0 8px rgba(153, 102, 255, 0.3);
+}
+
+[data-theme="geocities"] .message-bubble.streaming {
+  background: #330033;
+  color: #ff00ff;
+  border-color: #ff00ff;
+  box-shadow: 0 0 10px rgba(255, 0, 255, 0.4);
+}
+
+/* Links in messages */
+[data-theme="geocities"] .message-link {
+  color: #00ffff;
+  text-decoration: underline;
+  text-shadow: 0 0 6px rgba(0, 255, 255, 0.4);
+}
+
+[data-theme="geocities"] .message-bubble.user .message-link {
+  color: #ffff00;
+  text-decoration: underline;
+}
+
+/* Message status */
+[data-theme="geocities"] .message-status {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 400;
+  text-transform: none;
+  font-size: 11px;
+  color: #999999;
+}
+
+/* Message meta */
+[data-theme="geocities"] .message-meta {
+  color: #999999;
+  font-family: 'Comic Sans MS', cursive;
+}
+
+[data-theme="geocities"] .message-meta__name--recording {
+  color: #ff3333;
+  text-shadow: 0 0 6px rgba(255, 0, 0, 0.4);
+}
+
+/* Message images */
+[data-theme="geocities"] .message-image-thumb {
+  border-radius: 0;
+  border: 2px solid #00ffff;
+  box-shadow: 0 0 6px rgba(0, 255, 255, 0.3);
+}
+
+[data-theme="geocities"] .message-image-thumb:hover {
+  transform: none;
+  box-shadow: 0 0 12px rgba(0, 255, 255, 0.6);
+  border-color: #ffff00;
+}
+
+[data-theme="geocities"] .message-image-analyzed {
+  background: #00ff00;
+  border-radius: 0;
+  box-shadow: 0 0 6px #00ff00;
+}
+
+/* Typing indicator - neon dots */
+[data-theme="geocities"] .typing-indicator span {
+  width: 6px;
+  height: 6px;
+  background: #ff00ff;
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 0 6px #ff00ff;
+}
+
+/* Code blocks in messages */
+[data-theme="geocities"] .msg-code-block {
+  background: #000000;
+  color: #00ff00;
+  border: 2px solid #00ff00;
+  border-radius: 0;
+  font-family: 'Courier New', monospace;
+  box-shadow: 0 0 8px rgba(0, 255, 0, 0.3);
+}
+
+[data-theme="geocities"] .message-bubble.user .msg-code-block {
+  background: #000000;
+  color: #00ff00;
+  border-color: #00ff00;
+}
+
+[data-theme="geocities"] .msg-inline-code {
+  background: #000000;
+  color: #00ff00;
+  border-radius: 0;
+  font-family: 'Courier New', monospace;
+  padding: 1px 4px;
+  border: 1px solid #00ff00;
+}
+
+[data-theme="geocities"] .message-bubble.user .msg-inline-code {
+  background: #000000;
+  color: #00ff00;
+}
+
+/* Headings in messages */
+[data-theme="geocities"] .msg-heading--1 {
+  color: #ffff00;
+  font-family: 'Comic Sans MS', cursive;
+  text-shadow: 0 0 8px rgba(255, 255, 0, 0.5);
+}
+
+/* Scrollbar - neon style */
+[data-theme="geocities"] .chat-timeline::-webkit-scrollbar {
+  width: 14px;
+}
+
+[data-theme="geocities"] .chat-timeline::-webkit-scrollbar-track {
+  background: #000033;
+  border-left: 1px solid #6600cc;
+}
+
+[data-theme="geocities"] .chat-timeline::-webkit-scrollbar-thumb {
+  background: #333399;
+  border: 1px solid #6666ff;
+  border-radius: 0;
+  box-shadow: 0 0 4px rgba(102, 102, 255, 0.3);
+}
+
+[data-theme="geocities"] .chat-timeline::-webkit-scrollbar-thumb:hover {
+  background: #4444aa;
+  box-shadow: 0 0 8px rgba(102, 102, 255, 0.5);
+}
+
+/* ============================================
+   Tool Badges - visitor counter style
+   ============================================ */
+[data-theme="geocities"] .tool-badge {
+  background: #000066;
+  border: 2px solid #00ffff;
+  border-radius: 0;
+  box-shadow: 0 0 4px rgba(0, 255, 255, 0.3);
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 400;
+  text-transform: none;
+  font-size: 11px;
+  letter-spacing: 0;
+  padding: 2px 6px;
+  color: #00ffff;
+}
+
+[data-theme="geocities"] .tool-badge .tool-name {
+  color: #ffff00;
+  font-weight: 700;
+}
+
+[data-theme="geocities"] .tool-badge .tool-input {
+  color: #00ffff;
+}
+
+[data-theme="geocities"] .tool-badge.running {
+  border-color: #ff00ff;
+  background: #220033;
+  color: #ff00ff;
+  box-shadow: 0 0 8px rgba(255, 0, 255, 0.4);
+}
+
+[data-theme="geocities"] .tool-badge.running .tool-name,
+[data-theme="geocities"] .tool-badge.running .tool-input {
+  color: #ff00ff;
+}
+
+[data-theme="geocities"] .tool-badge.error {
+  border-color: #ff0000;
+  background: #330000;
+  color: #ff3333;
+  box-shadow: 0 0 8px rgba(255, 0, 0, 0.4);
+}
+
+[data-theme="geocities"] .tool-badge.error .tool-name,
+[data-theme="geocities"] .tool-badge.error .tool-input {
+  color: #ff3333;
+}
+
+[data-theme="geocities"] .tool-spinner {
+  border-top-color: #ff00ff;
+}
+
+[data-theme="geocities"] .tool-complete {
+  color: #00ff00;
+  font-weight: 700;
+}
+
+[data-theme="geocities"] .tool-error {
+  color: #ff0000;
+  font-weight: 700;
+}
+
+/* Collapsible tools indicator */
+[data-theme="geocities"] .collapsible-tools__indicator {
+  background: #000066;
+  border: 2px solid #00ffff;
+  border-radius: 0;
+  box-shadow: 0 0 4px rgba(0, 255, 255, 0.3);
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 400;
+  text-transform: none;
+  font-size: 11px;
+  letter-spacing: 0;
+  color: #00ffff;
+  padding: 3px 8px;
+}
+
+[data-theme="geocities"] .collapsible-tools__indicator:hover {
+  background: #000099;
+  border-color: #ffff00;
+  color: #ffff00;
+  transform: none;
+  box-shadow: 0 0 8px rgba(255, 255, 0, 0.4);
+}
+
+[data-theme="geocities"] .collapsible-tools__indicator.running {
+  border-color: #ff00ff;
+  background: #220033;
+  color: #ff00ff;
+  box-shadow: 0 0 8px rgba(255, 0, 255, 0.4);
+  animation: geocities-tool-glow 1s ease-in-out infinite;
+}
+
+@keyframes geocities-tool-glow {
+  0%, 100% { box-shadow: 0 0 4px rgba(255, 0, 255, 0.3); }
+  50% { box-shadow: 0 0 12px rgba(255, 0, 255, 0.8); }
+}
+
+[data-theme="geocities"] .collapsible-tools__indicator.error {
+  border-color: #ff0000;
+  background: #330000;
+  color: #ff3333;
+  box-shadow: 0 0 6px rgba(255, 0, 0, 0.4);
+}
+
+[data-theme="geocities"] .collapsible-tools__count {
+  color: inherit;
+  font-weight: 700;
+}
+
+/* Avatar container */
+[data-theme="geocities"] .chat-timeline__avatar-container {
+  background: #000066;
+  border: 2px solid #6666ff;
+  border-radius: 0;
+  box-shadow: 0 0 8px rgba(102, 102, 255, 0.3);
+  padding: 8px;
+}
+
+/* ============================================
+   Unified Input Bar - guestbook entry
+   ============================================ */
+[data-theme="geocities"] .unified-input-bar {
+  background: #000044;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-top: 3px solid #00ffff;
+  box-shadow: 0 -2px 10px rgba(0, 255, 255, 0.2);
+  padding: 6px 8px;
+}
+
+[data-theme="geocities"] .unified-input-bar.listening {
+  background: #001100;
+  border-top-color: #00ff00;
+  box-shadow: 0 -2px 10px rgba(0, 255, 0, 0.3);
+}
+
+[data-theme="geocities"] .unified-input-bar__field {
+  background: #000033;
+  border: 2px solid #00ffff;
+  border-radius: 0;
+  color: #00ff00;
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 400;
+  box-shadow: 0 0 6px rgba(0, 255, 255, 0.2);
+  height: auto;
+  padding: 6px 10px;
+  font-size: 14px;
+}
+
+[data-theme="geocities"] .unified-input-bar__field:focus {
+  border-color: #ffff00;
+  box-shadow: 0 0 10px rgba(255, 255, 0, 0.4);
+}
+
+[data-theme="geocities"] .unified-input-bar__field::placeholder {
+  color: #666699;
+  font-family: 'Comic Sans MS', cursive;
+}
+
+[data-theme="geocities"] .unified-input-bar__icon-btn {
+  background: #333399;
+  border: 2px solid #6666ff;
+  border-radius: 0;
+  color: #00ffff;
+  box-shadow: 0 0 4px rgba(102, 102, 255, 0.3);
+}
+
+[data-theme="geocities"] .unified-input-bar__icon-btn:hover:not(:disabled) {
+  background: #4444aa;
+  transform: none;
+  color: #ffff00;
+  border-color: #ffff00;
+}
+
+[data-theme="geocities"] .unified-input-bar__icon-btn.mic-active {
+  background: #cc0000;
+  border-color: #ff3333;
+  box-shadow: 0 0 12px rgba(255, 0, 0, 0.6);
+  color: white;
+  animation: geocities-record-pulse 0.6s ease-in-out infinite;
+}
+
+/* Send button - neon CTA */
+[data-theme="geocities"] .unified-input-bar__send {
+  background: #ff00ff;
+  border: 2px solid #ff66ff;
+  border-radius: 0;
+  box-shadow: 0 0 8px rgba(255, 0, 255, 0.5);
+  color: #ffffff;
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 700;
+  text-shadow: 1px 1px 0 #990099;
+}
+
+[data-theme="geocities"] .unified-input-bar__send:hover:not(:disabled) {
+  background: #ff33ff;
+  transform: none;
+  box-shadow: 0 0 15px rgba(255, 0, 255, 0.8);
+}
+
+[data-theme="geocities"] .unified-input-bar__send:active:not(:disabled) {
+  background: #cc00cc;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.3);
+  transform: none;
+}
+
+/* ============================================
+   Conversation Dropdown Sidebar
+   ============================================ */
+[data-theme="geocities"] .conversation-dropdown-panel {
+  background: #000033;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 2px solid #ff00ff;
+  border-radius: 0;
+  box-shadow: 0 0 15px rgba(255, 0, 255, 0.4);
+}
+
+[data-theme="geocities"] .dropdown-new-btn {
+  background: #333399;
+  border: 2px solid #00ffff;
+  border-radius: 0;
+  color: #00ffff;
+  box-shadow: 0 0 6px rgba(0, 255, 255, 0.3);
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+[data-theme="geocities"] .dropdown-new-btn:hover {
+  background: #4444aa;
+  border-color: #ffff00;
+  color: #ffff00;
+  transform: none;
+  box-shadow: 0 0 10px rgba(255, 255, 0, 0.4);
+}
+
+[data-theme="geocities"] .dropdown-new-btn:active {
+  background: #222266;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.4);
+  transform: none;
+}
+
+[data-theme="geocities"] .dropdown-item {
+  border-radius: 0;
+  border: none;
+  margin-bottom: 0;
+  font-family: 'Comic Sans MS', cursive;
+}
+
+[data-theme="geocities"] .dropdown-item:hover {
+  background: #ff00ff;
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 0 8px rgba(255, 0, 255, 0.4);
+}
+
+[data-theme="geocities"] .dropdown-item.active {
+  background: #660066;
+  border: none;
+  box-shadow: 0 0 6px rgba(255, 0, 255, 0.3);
+  color: #ff00ff;
+}
+
+[data-theme="geocities"] .dropdown-item.active .dropdown-item-title,
+[data-theme="geocities"] .dropdown-item.active .dropdown-item-meta {
+  color: #ff66ff;
+}
+
+[data-theme="geocities"] .dropdown-item:hover .dropdown-item-title,
+[data-theme="geocities"] .dropdown-item:hover .dropdown-item-meta {
+  color: #ffffff;
+}
+
+[data-theme="geocities"] .dropdown-item-title {
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 700;
+  color: #00ffff;
+}
+
+[data-theme="geocities"] .dropdown-item-meta {
+  font-family: 'Comic Sans MS', cursive;
+  text-transform: none;
+  font-size: 11px;
+  letter-spacing: 0;
+  color: #999999;
+}
+
+[data-theme="geocities"] .dropdown-item-context,
+[data-theme="geocities"] .dropdown-item-delete {
+  background: #333399;
+  border: 1px solid #6666ff;
+  border-radius: 0;
+  box-shadow: none;
+  color: #00ffff;
+}
+
+[data-theme="geocities"] .dropdown-item-context:hover {
+  background: #4444aa;
+  border-color: #ffff00;
+  color: #ffff00;
+}
+
+[data-theme="geocities"] .dropdown-item-delete:hover {
+  background: #cc0000;
+  border-color: #ff3333;
+  color: #ffffff;
+}
+
+[data-theme="geocities"] .dropdown-context-info {
+  background: #000066;
+  border-top: 2px solid #00ffff;
+  font-family: 'Comic Sans MS', cursive;
+  text-transform: none;
+  color: #00ff00;
+}
+
+/* ============================================
+   Speaker Avatar
+   ============================================ */
+[data-theme="geocities"] .speaker-avatar__grille {
+  background: #333366;
+  border: 2px solid #6666ff;
+  box-shadow: 0 0 8px rgba(102, 102, 255, 0.3);
+  border-radius: 0;
+}
+
+[data-theme="geocities"] .speaker-avatar--listening .speaker-avatar__grille {
+  box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+  border-color: #00ff00;
+}
+
+[data-theme="geocities"] .speaker-avatar--listening .speaker-avatar__hole {
+  background: #00ff00;
+  box-shadow: 0 0 4px #00ff00;
+}
+
+[data-theme="geocities"] .speaker-avatar--speaking .speaker-avatar__grille {
+  border-color: #00ffff;
+  box-shadow: 0 0 12px rgba(0, 255, 255, 0.5);
+}
+
+[data-theme="geocities"] .speaker-avatar--speaking .speaker-avatar__hole {
+  background: #00ffff;
+  box-shadow: 0 0 4px #00ffff;
+}
+
+[data-theme="geocities"] .speaker-avatar--happy .speaker-avatar__grille {
+  border-color: #ffff00;
+  box-shadow: 0 0 12px rgba(255, 255, 0, 0.5);
+}
+
+/* ============================================
+   Robot Avatar - alien/UFO vibes
+   ============================================ */
+[data-theme="geocities"] .robot__body {
+  background: #333366;
+  border-color: #6666ff;
+  border-radius: 0;
+}
+
+[data-theme="geocities"] .robot__screen {
+  background: #000099;
+  border-radius: 0;
+  box-shadow: 0 0 8px rgba(0, 0, 255, 0.4);
+}
+
+[data-theme="geocities"] .robot__antenna-tip {
+  background: #00ff00;
+  box-shadow: 0 0 8px #00ff00;
+  border-radius: 50%;
+}
+
+[data-theme="geocities"] .robot__led {
+  background: #ff00ff;
+  box-shadow: 0 0 6px #ff00ff;
+  border-radius: 50%;
+}
+
+[data-theme="geocities"] .robot__base {
+  background: #222255;
+  border-radius: 0;
+}
+
+[data-theme="geocities"] .robot--listening .robot__screen {
+  background: #006600;
+  box-shadow: 0 0 12px rgba(0, 255, 0, 0.5);
+}
+
+[data-theme="geocities"] .robot--listening .robot__antenna-tip {
+  background: #00ff00;
+  box-shadow: 0 0 12px #00ff00;
+}
+
+[data-theme="geocities"] .robot--thinking .robot__screen {
+  background: #660066;
+  animation: geocities-think-glow 1s ease-in-out infinite;
+}
+
+@keyframes geocities-think-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(255, 0, 255, 0.3); background: #660066; }
+  50% { box-shadow: 0 0 20px rgba(255, 0, 255, 0.8); background: #990099; }
+}
+
+[data-theme="geocities"] .robot--thinking .robot__antenna-tip {
+  background: #ff00ff;
+  box-shadow: 0 0 10px #ff00ff;
+}
+
+[data-theme="geocities"] .robot--happy .robot__screen {
+  background: #999900;
+  box-shadow: 0 0 12px rgba(255, 255, 0, 0.5);
+}
+
+[data-theme="geocities"] .robot--confused .robot__screen {
+  background: #990000;
+  box-shadow: 0 0 12px rgba(255, 0, 0, 0.5);
+}
+
+/* ============================================
+   Settings Drawer - Webmaster Tools
+   ============================================ */
+[data-theme="geocities"] .settings__drawer {
+  background: #000033;
+  border-top: 3px solid #ff00ff;
+  border-radius: 0;
+  box-shadow: -2px 0 10px rgba(255, 0, 255, 0.3);
+}
+
+[data-theme="geocities"] .settings__header {
+  background: linear-gradient(90deg, #ff0000, #ff6600, #ffff00, #00ff00, #0066ff, #9900ff);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom: 3px solid #ff00ff;
+  padding: 4px 8px;
+}
+
+[data-theme="geocities"] .settings__title {
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 700;
+  font-style: normal;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #ffffff;
+  font-size: 14px;
+  text-shadow: 2px 2px 0 #000000;
+}
+
+[data-theme="geocities"] .settings__close {
+  background: #333399;
+  border: 2px solid #00ffff;
+  border-radius: 0;
+  color: #00ffff;
+  box-shadow: 0 0 6px rgba(0, 255, 255, 0.3);
+  width: 24px;
+  height: 24px;
+}
+
+[data-theme="geocities"] .settings__close:hover {
+  background: #4444aa;
+  border-color: #ffff00;
+  color: #ffff00;
+}
+
+/* Settings section titles */
+[data-theme="geocities"] .settings__section-title {
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #ffff00;
+  font-size: 13px;
+  margin-top: 12px;
+  margin-bottom: 4px;
+  padding-left: 4px;
+  text-shadow: 0 0 6px rgba(255, 255, 0, 0.4);
+}
+
+[data-theme="geocities"] .settings__section-desc {
+  font-family: 'Comic Sans MS', cursive;
+  color: #999999;
+  font-size: 11px;
+  padding-left: 4px;
+}
+
+/* Toggle rows */
+[data-theme="geocities"] .settings__toggle {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 4px 8px;
+  box-shadow: none;
+}
+
+[data-theme="geocities"] .settings__toggle:hover {
+  background: rgba(255, 0, 255, 0.1);
+  border: none;
+}
+
+[data-theme="geocities"] .settings__toggle-label {
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 400;
+  color: #00ff00;
+  font-size: 13px;
+}
+
+/* Toggle switch - neon style */
+[data-theme="geocities"] .settings__slider {
+  width: 40px;
+  height: 20px;
+  background: #000066;
+  border: 2px solid #6666ff;
+  border-radius: 0;
+  box-shadow: 0 0 4px rgba(102, 102, 255, 0.3);
+}
+
+[data-theme="geocities"] .settings__slider::before {
+  width: 12px;
+  height: 12px;
+  top: 2px;
+  left: 2px;
+  background: #6666ff;
+  border: none;
+  border-radius: 0;
+  box-shadow: 0 0 4px rgba(102, 102, 255, 0.3);
+}
+
+[data-theme="geocities"] .settings__slider::after {
+  display: none;
+}
+
+[data-theme="geocities"] .settings__toggle input:checked + .settings__slider {
+  background: #660066;
+  border-color: #ff00ff;
+  box-shadow: 0 0 8px rgba(255, 0, 255, 0.4);
+}
+
+[data-theme="geocities"] .settings__toggle input:checked + .settings__slider::before {
+  transform: translateX(20px);
+  background: #ff00ff;
+  border: none;
+  box-shadow: 0 0 6px #ff00ff;
+}
+
+/* Text inputs */
+[data-theme="geocities"] .settings__text-input {
+  background: #000033;
+  border: 2px solid #00ffff;
+  border-radius: 0;
+  color: #00ff00;
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 400;
+  box-shadow: 0 0 4px rgba(0, 255, 255, 0.2);
+}
+
+[data-theme="geocities"] .settings__text-input:focus {
+  border-color: #ffff00;
+  box-shadow: 0 0 8px rgba(255, 255, 0, 0.4);
+}
+
+[data-theme="geocities"] .settings__text-input::placeholder {
+  color: #666699;
+}
+
+[data-theme="geocities"] .settings__input-label {
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 400;
+  color: #00ffff;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 11px;
+}
+
+[data-theme="geocities"] .settings__optional {
+  color: #999999;
+}
+
+[data-theme="geocities"] .settings__hint {
+  font-family: 'Comic Sans MS', cursive;
+  color: #999999;
+  font-size: 11px;
+}
+
+/* Range slider */
+[data-theme="geocities"] .settings__range-row input[type="range"] {
+  height: 6px;
+  background: #000066;
+  border: 2px solid #6666ff;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+[data-theme="geocities"] .settings__range-row input[type="range"]::-webkit-slider-thumb {
+  width: 14px;
+  height: 20px;
+  background: #ff00ff;
+  border: none;
+  border-radius: 0;
+  box-shadow: 0 0 6px #ff00ff;
+}
+
+[data-theme="geocities"] .settings__range-value {
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 400;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  color: #ffff00;
+  text-shadow: 0 0 4px rgba(255, 255, 0, 0.3);
+}
+
+/* Session status */
+[data-theme="geocities"] .settings__session {
+  background: #000066;
+  border: 2px solid #6666ff;
+  border-radius: 0;
+  box-shadow: 0 0 4px rgba(102, 102, 255, 0.2);
+}
+
+[data-theme="geocities"] .settings__session-status {
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #999999;
+}
+
+[data-theme="geocities"] .settings__session-status--connected {
+  color: #00ff00;
+  text-shadow: 0 0 6px rgba(0, 255, 0, 0.4);
+}
+
+[data-theme="geocities"] .settings__session-disconnect {
+  background: #333399;
+  border: 2px solid #6666ff;
+  border-radius: 0;
+  color: #00ffff;
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  box-shadow: 0 0 4px rgba(102, 102, 255, 0.3);
+}
+
+[data-theme="geocities"] .settings__session-disconnect:hover {
+  background: #4444aa;
+  border-color: #ffff00;
+  color: #ffff00;
+}
+
+/* Divider */
+[data-theme="geocities"] .settings__divider {
+  height: 2px;
+  background: linear-gradient(90deg, #ff00ff, #00ffff, #ffff00);
+  border: none;
+  margin: 8px 0;
+  box-shadow: 0 0 6px rgba(255, 0, 255, 0.3);
+}
+
+/* Subsection */
+[data-theme="geocities"] .settings__subsection {
+  background: rgba(0, 0, 102, 0.5);
+  border: 2px solid #6666ff;
+  border-radius: 0;
+  padding: 8px;
+  margin-left: 0;
+}
+
+/* API form */
+[data-theme="geocities"] .settings__api-form input {
+  background: #000033;
+  border: 2px solid #00ffff;
+  border-radius: 0;
+  color: #00ff00;
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 400;
+  box-shadow: 0 0 4px rgba(0, 255, 255, 0.2);
+}
+
+[data-theme="geocities"] .settings__api-form input:focus {
+  border-color: #ffff00;
+  box-shadow: 0 0 8px rgba(255, 255, 0, 0.4);
+}
+
+[data-theme="geocities"] .settings__api-form input::placeholder {
+  color: #666699;
+}
+
+[data-theme="geocities"] .settings__api-form button {
+  background: #ff00ff;
+  border: 2px solid #ff66ff;
+  border-radius: 0;
+  color: #ffffff;
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+  box-shadow: 0 0 8px rgba(255, 0, 255, 0.4);
+}
+
+[data-theme="geocities"] .settings__api-form button:hover:not(:disabled) {
+  background: #ff33ff;
+  transform: none;
+  box-shadow: 0 0 12px rgba(255, 0, 255, 0.6);
+}
+
+[data-theme="geocities"] .settings__api-form button:active:not(:disabled) {
+  background: #cc00cc;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  transform: none;
+}
+
+[data-theme="geocities"] .settings__api-link {
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 400;
+  color: #00ffff;
+  text-decoration: underline;
+}
+
+[data-theme="geocities"] .settings__api-link:hover {
+  color: #ffff00;
+  text-shadow: 0 0 6px rgba(255, 255, 0, 0.4);
+}
+
+/* Advanced section */
+[data-theme="geocities"] .settings__advanced-toggle {
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #00ffff;
+  text-decoration: underline;
+  font-size: 13px;
+}
+
+[data-theme="geocities"] .settings__advanced-toggle:hover {
+  color: #ffff00;
+  text-shadow: 0 0 6px rgba(255, 255, 0, 0.4);
+}
+
+/* Reset button */
+[data-theme="geocities"] .settings__reset-btn {
+  background: #333399;
+  border: 2px solid #6666ff;
+  border-radius: 0;
+  color: #00ffff;
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  box-shadow: 0 0 4px rgba(102, 102, 255, 0.3);
+  font-size: 13px;
+}
+
+[data-theme="geocities"] .settings__reset-btn:hover {
+  background: #4444aa;
+  border-color: #ffff00;
+  color: #ffff00;
+}
+
+/* Export button */
+[data-theme="geocities"] .settings__export-btn {
+  background: #333399;
+  border: 2px solid #6666ff;
+  border-radius: 0;
+  color: #00ffff;
+  box-shadow: 0 0 4px rgba(102, 102, 255, 0.3);
+}
+
+[data-theme="geocities"] .settings__export-btn:hover {
+  background: #4444aa;
+  border-color: #ffff00;
+  color: #ffff00;
+}
+
+/* Integration status */
+[data-theme="geocities"] .settings__integration-status--active {
+  background: #003300;
+  color: #00ff00;
+  border: 1px solid #00ff00;
+  box-shadow: 0 0 6px rgba(0, 255, 0, 0.3);
+}
+
+/* Scrollbar */
+[data-theme="geocities"] .settings__drawer::-webkit-scrollbar {
+  width: 14px;
+}
+
+[data-theme="geocities"] .settings__drawer::-webkit-scrollbar-track {
+  background: #000033;
+}
+
+[data-theme="geocities"] .settings__drawer::-webkit-scrollbar-thumb {
+  background: #333399;
+  border-radius: 0;
+  border: 1px solid #6666ff;
+}
+
+[data-theme="geocities"] .settings__drawer::-webkit-scrollbar-thumb:hover {
+  background: #4444aa;
+}
+
+/* ============================================
+   Theme Selector
+   ============================================ */
+[data-theme="geocities"] .settings__theme-option {
+  background: #000066;
+  border: 2px solid #6666ff;
+  border-radius: 0;
+}
+
+[data-theme="geocities"] .settings__theme-option:hover {
+  border-color: #ff00ff;
+  box-shadow: 0 0 8px rgba(255, 0, 255, 0.4);
+}
+
+[data-theme="geocities"] .settings__theme-option--active {
+  border-color: #00ffff;
+  background: #000099;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+}
+
+[data-theme="geocities"] .settings__theme-name {
+  color: #ffff00;
+  font-weight: 700;
+  font-family: 'Comic Sans MS', cursive;
+}
+
+[data-theme="geocities"] .settings__theme-desc {
+  color: #999999;
+  font-family: 'Comic Sans MS', cursive;
+}
+
+[data-theme="geocities"] .settings__theme-check {
+  background: #ff00ff;
+  color: #ffffff;
+  border-radius: 0;
+  box-shadow: 0 0 6px #ff00ff;
+}
+
+/* ============================================
+   Modal - popup window
+   ============================================ */
+[data-theme="geocities"] .modal-overlay {
+  background: rgba(0, 0, 51, 0.85);
+  backdrop-filter: none;
+}
+
+[data-theme="geocities"] .modal {
+  background: #000033;
+  border: 3px solid #ff00ff;
+  border-radius: 0;
+  box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+  padding: 12px;
+}
+
+[data-theme="geocities"] .modal h2 {
+  font-weight: 700;
+  color: #ffff00;
+  font-family: 'Comic Sans MS', cursive;
+  text-shadow: 0 0 8px rgba(255, 255, 0, 0.4);
+}
+
+[data-theme="geocities"] .modal p {
+  color: #00ff00;
+  font-family: 'Comic Sans MS', cursive;
+}
+
+[data-theme="geocities"] .modal input {
+  background: #000033;
+  border: 2px solid #00ffff;
+  border-radius: 0;
+  color: #00ff00;
+  font-family: 'Comic Sans MS', cursive;
+  box-shadow: 0 0 4px rgba(0, 255, 255, 0.2);
+}
+
+[data-theme="geocities"] .modal input:focus {
+  border-color: #ffff00;
+  box-shadow: 0 0 8px rgba(255, 255, 0, 0.4);
+}
+
+[data-theme="geocities"] .modal input::placeholder {
+  color: #666699;
+}
+
+[data-theme="geocities"] .modal button {
+  background: #333399;
+  border-radius: 0;
+  color: #00ffff;
+  font-weight: 700;
+  border: 2px solid #6666ff;
+  box-shadow: 0 0 6px rgba(102, 102, 255, 0.3);
+}
+
+[data-theme="geocities"] .modal button:hover:not(:disabled) {
+  background: #4444aa;
+  transform: none;
+  box-shadow: 0 0 10px rgba(102, 102, 255, 0.5);
+}
+
+[data-theme="geocities"] .modal a {
+  color: #00ffff;
+  text-decoration: underline;
+}
+
+[data-theme="geocities"] .modal a:hover {
+  color: #ffff00;
+  text-shadow: 0 0 6px rgba(255, 255, 0, 0.4);
+}
+
+[data-theme="geocities"] .modal__close {
+  background: #333399;
+  border: 2px solid #00ffff;
+  border-radius: 0;
+  color: #00ffff;
+  box-shadow: 0 0 4px rgba(0, 255, 255, 0.3);
+}
+
+[data-theme="geocities"] .modal__close:hover {
+  background: #4444aa;
+  color: #ffff00;
+  border-color: #ffff00;
+}
+
+/* ============================================
+   Search Overlay
+   ============================================ */
+[data-theme="geocities"] .search-overlay {
+  background: rgba(0, 0, 51, 0.8);
+}
+
+[data-theme="geocities"] .search-overlay__panel {
+  background: #000033;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 3px solid #ff00ff;
+  border-radius: 0;
+  box-shadow: 0 0 20px rgba(255, 0, 255, 0.4);
+}
+
+[data-theme="geocities"] .search-overlay__input-row {
+  border-bottom: 2px solid #6600cc;
+}
+
+[data-theme="geocities"] .search-overlay__input {
+  color: #00ff00;
+  font-family: 'Comic Sans MS', cursive;
+  background: #000033;
+  border: 2px solid #00ffff;
+}
+
+[data-theme="geocities"] .search-overlay__input::placeholder {
+  color: #666699;
+}
+
+[data-theme="geocities"] .search-overlay__spinner {
+  border-color: #333399;
+  border-top-color: #ff00ff;
+}
+
+[data-theme="geocities"] .search-overlay__result:hover {
+  background: #ff00ff;
+  color: #ffffff;
+}
+
+[data-theme="geocities"] .search-overlay__result-snippet mark {
+  background: #ffff00;
+  border-radius: 0;
+  color: #000000;
+}
+
+[data-theme="geocities"] .search-overlay__results::-webkit-scrollbar-thumb {
+  background: #333399;
+  border: 1px solid #6666ff;
+}
+
+/* ============================================
+   Plans Panel
+   ============================================ */
+[data-theme="geocities"] .plans__panel {
+  background: #000033;
+  border: 2px solid #ff00ff;
+  box-shadow: -2px 0 10px rgba(255, 0, 255, 0.3);
+}
+
+[data-theme="geocities"] .plans__header {
+  border-bottom: 3px solid #ff00ff;
+  background: linear-gradient(90deg, #ff0000, #ff6600, #ffff00, #00ff00, #0066ff, #9900ff);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+[data-theme="geocities"] .plans__icon {
+  color: #ffff00;
+  text-shadow: 0 0 6px rgba(255, 255, 0, 0.5);
+}
+
+[data-theme="geocities"] .plans__title {
+  color: #ffffff;
+  font-weight: 700;
+  text-shadow: 2px 2px 0 #000000;
+  font-family: 'Comic Sans MS', cursive;
+}
+
+[data-theme="geocities"] .plans__close {
+  background: #333399;
+  border: 2px solid #00ffff;
+  border-radius: 0;
+  color: #00ffff;
+  box-shadow: 0 0 4px rgba(0, 255, 255, 0.3);
+}
+
+[data-theme="geocities"] .plans__close:hover {
+  background: #4444aa;
+  color: #ffff00;
+}
+
+[data-theme="geocities"] .plans__new-btn {
+  background: #333399;
+  color: #00ffff;
+  border-radius: 0;
+  border: 2px solid #6666ff;
+  box-shadow: 0 0 6px rgba(102, 102, 255, 0.3);
+}
+
+[data-theme="geocities"] .plans__new-btn:hover {
+  background: #4444aa;
+  border-color: #ffff00;
+  color: #ffff00;
+}
+
+[data-theme="geocities"] .plans__item {
+  background: #000066;
+  border: 2px solid #6666ff;
+  border-radius: 0;
+}
+
+[data-theme="geocities"] .plans__item:hover {
+  background: #000099;
+  border-color: #ff00ff;
+}
+
+[data-theme="geocities"] .plans__status-dot--approved {
+  background: #00ffff;
+  border-radius: 50%;
+  box-shadow: 0 0 6px #00ffff;
+}
+
+[data-theme="geocities"] .plans__status-dot--in_progress {
+  background: #ffff00;
+  border-radius: 50%;
+  box-shadow: 0 0 6px #ffff00;
+}
+
+[data-theme="geocities"] .plans__status-dot--completed {
+  background: #00ff00;
+  border-radius: 50%;
+  box-shadow: 0 0 6px #00ff00;
+}
+
+[data-theme="geocities"] .plans__edit-btn {
+  background: transparent;
+  border: none;
+  color: #00ffff;
+  text-decoration: underline;
+}
+
+[data-theme="geocities"] .plans__delete-btn {
+  background: transparent;
+  border: none;
+  color: #ff3333;
+  text-decoration: underline;
+}
+
+[data-theme="geocities"] .plans__delete-btn:hover {
+  background: transparent;
+  color: #ff6666;
+  text-shadow: 0 0 6px rgba(255, 0, 0, 0.4);
+}
+
+[data-theme="geocities"] .plans__editor-title,
+[data-theme="geocities"] .plans__editor-content {
+  background: #000033;
+  border: 2px solid #00ffff;
+  border-radius: 0;
+  color: #00ff00;
+  font-family: 'Comic Sans MS', cursive;
+  box-shadow: 0 0 4px rgba(0, 255, 255, 0.2);
+}
+
+[data-theme="geocities"] .plans__editor-title:focus,
+[data-theme="geocities"] .plans__editor-content:focus {
+  border-color: #ffff00;
+  box-shadow: 0 0 8px rgba(255, 255, 0, 0.4);
+}
+
+[data-theme="geocities"] .plans__error {
+  color: #ff3333;
+  text-shadow: 0 0 6px rgba(255, 0, 0, 0.4);
+}
+
+[data-theme="geocities"] .plans__content::-webkit-scrollbar-thumb {
+  background: #333399;
+  border: 1px solid #6666ff;
+}
+
+/* ============================================
+   Tape Deck
+   ============================================ */
+[data-theme="geocities"] .tape-deck {
+  background: #000044;
+  border: 2px solid #6666ff;
+  border-radius: 0;
+  box-shadow: 0 0 8px rgba(102, 102, 255, 0.3);
+}
+
+[data-theme="geocities"] .tape-deck__action-btn {
+  background: #333399;
+  border: 2px solid #6666ff;
+  color: #00ffff;
+  border-radius: 0;
+  box-shadow: 0 0 4px rgba(102, 102, 255, 0.3);
+}
+
+[data-theme="geocities"] .tape-deck__action-btn:hover {
+  background: #4444aa;
+  color: #ffff00;
+  border-color: #ffff00;
+}
+
+[data-theme="geocities"] .tape-deck__action-btn:active {
+  background: #222266;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.4);
+  transform: none;
+}
+
+[data-theme="geocities"] .tape-deck__action-btn--eject.active {
+  background: #660066;
+  color: #ff00ff;
+  border-color: #ff00ff;
+  box-shadow: 0 0 8px rgba(255, 0, 255, 0.4);
+}
+
+[data-theme="geocities"] .tape-deck__action-btn--send {
+  background: #ff00ff;
+  border: 2px solid #ff66ff;
+  color: #ffffff;
+  box-shadow: 0 0 8px rgba(255, 0, 255, 0.5);
+  font-weight: 700;
+}
+
+[data-theme="geocities"] .tape-deck__action-btn--send:hover {
+  background: #ff33ff;
+  box-shadow: 0 0 12px rgba(255, 0, 255, 0.7);
+}
+
+[data-theme="geocities"] .tape-deck__action-btn--mic.recording {
+  background: #cc0000;
+  color: #ffffff;
+  border-color: #ff3333;
+  box-shadow: 0 0 12px rgba(255, 0, 0, 0.6);
+}
+
+[data-theme="geocities"] .tape-deck__input {
+  background: #000033;
+  border: 2px solid #00ffff;
+  border-radius: 0;
+  color: #00ff00;
+  box-shadow: 0 0 4px rgba(0, 255, 255, 0.2);
+}
+
+[data-theme="geocities"] .tape-deck__input:focus {
+  border-color: #ffff00;
+  box-shadow: 0 0 8px rgba(255, 255, 0, 0.4);
+}
+
+[data-theme="geocities"] .tape-deck__input::placeholder {
+  color: #666699;
+}
+
+[data-theme="geocities"] .tape-deck__empty-slot {
+  color: #999999;
+  background: #000044;
+  border-radius: 0;
+  border: 2px dashed #6666ff;
+}
+
+/* ============================================
+   Tape Collection
+   ============================================ */
+[data-theme="geocities"] .tape-collection__drawer {
+  background: #000033;
+  border: 2px solid #ff00ff;
+}
+
+[data-theme="geocities"] .tape-collection__new-btn {
+  background: #333399;
+  border: 2px solid #6666ff;
+  border-radius: 0;
+  color: #00ffff;
+  box-shadow: 0 0 6px rgba(102, 102, 255, 0.3);
+}
+
+[data-theme="geocities"] .tape-collection__new-btn:hover {
+  background: #4444aa;
+  border-color: #ffff00;
+  color: #ffff00;
+}
+
+[data-theme="geocities"] .tape-collection__search-input {
+  background: #000033;
+  border: 2px solid #00ffff;
+  border-radius: 0;
+  color: #00ff00;
+  box-shadow: 0 0 4px rgba(0, 255, 255, 0.2);
+}
+
+[data-theme="geocities"] .tape-collection__item--match {
+  outline: 2px dotted #ff00ff;
+}
+
+[data-theme="geocities"] .tape-collection__delete-btn {
+  background: #333399;
+  border: 1px solid #6666ff;
+  border-radius: 0;
+  color: #00ffff;
+}
+
+[data-theme="geocities"] .tape-collection__delete-btn:hover {
+  background: #cc0000;
+  border-color: #ff3333;
+  color: #ffffff;
+}
+
+[data-theme="geocities"] .tape-collection__context-btn {
+  background: #333399;
+  border: 1px solid #6666ff;
+  border-radius: 0;
+  color: #00ffff;
+}
+
+[data-theme="geocities"] .tape-collection__context-btn--active {
+  background: #660066;
+  border-color: #ff00ff;
+  color: #ff00ff;
+  box-shadow: 0 0 6px rgba(255, 0, 255, 0.3);
+}
+
+[data-theme="geocities"] .tape-collection__confirm-content {
+  background: #000033;
+  border: 2px solid #ff00ff;
+  border-radius: 0;
+  color: #ff00ff;
+}
+
+[data-theme="geocities"] .tape-collection__confirm-ok {
+  background: #333399;
+  border: 2px solid #6666ff;
+  color: #00ffff;
+  box-shadow: 0 0 6px rgba(102, 102, 255, 0.3);
+}
+
+[data-theme="geocities"] .tape-collection__confirm-cancel {
+  background: #333399;
+  border: 2px solid #6666ff;
+  color: #00ffff;
+  box-shadow: 0 0 6px rgba(102, 102, 255, 0.3);
+}
+
+/* ============================================
+   Media Library
+   ============================================ */
+[data-theme="geocities"] .media-library__drawer {
+  background: #000033;
+  border: 2px solid #ff00ff;
+}
+
+[data-theme="geocities"] .modal--media-library {
+  background: #000033;
+  border: 3px solid #ff00ff;
+  border-radius: 0;
+  box-shadow: 0 0 20px rgba(255, 0, 255, 0.4);
+}
+
+[data-theme="geocities"] .modal--media-library .modal__header h2 {
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 700;
+  font-style: normal;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #ffff00;
+  text-shadow: 0 0 8px rgba(255, 255, 0, 0.4);
+}
+
+[data-theme="geocities"] .modal--media-library .modal__close {
+  background: #333399;
+  border: 2px solid #00ffff;
+  border-radius: 0;
+  color: #00ffff;
+}
+
+[data-theme="geocities"] .modal--media-library .modal__close:hover {
+  background: #4444aa;
+  color: #ffff00;
+  border-color: #ffff00;
+}
+
+[data-theme="geocities"] .media-library__sort {
+  background: #333399;
+  border: 2px solid #6666ff;
+  border-radius: 0;
+  color: #00ffff;
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+[data-theme="geocities"] .media-library__count {
+  background: transparent;
+  border: none;
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 400;
+  text-transform: none;
+  color: #999999;
+  box-shadow: none;
+}
+
+[data-theme="geocities"] .media-library__grid {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+[data-theme="geocities"] .media-library__item {
+  background: #000066;
+  border: 2px solid #6666ff;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+[data-theme="geocities"] .media-library__item:hover {
+  background: #000099;
+  border-color: #ff00ff;
+  transform: none;
+  box-shadow: 0 0 10px rgba(255, 0, 255, 0.4);
+}
+
+[data-theme="geocities"] .media-library__thumbnail {
+  border-radius: 0;
+  border: 1px solid #6666ff;
+}
+
+[data-theme="geocities"] .media-library__item-overlay {
+  background: linear-gradient(transparent 40%, rgba(0, 0, 51, 0.95));
+}
+
+[data-theme="geocities"] .media-library__item-name {
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 400;
+  font-size: 11px;
+  color: #00ffff;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+[data-theme="geocities"] .media-library__item-date {
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 11px;
+  text-transform: none;
+  color: #999999;
+}
+
+[data-theme="geocities"] .media-library__empty p {
+  color: #999999;
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 400;
+}
+
+/* Lightbox */
+[data-theme="geocities"] .media-library__lightbox {
+  background: rgba(0, 0, 51, 0.9);
+  backdrop-filter: none;
+}
+
+[data-theme="geocities"] .media-library__lightbox-content {
+  background: #000033;
+  border: 3px solid #ff00ff;
+  border-radius: 0;
+  box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+}
+
+[data-theme="geocities"] .media-library__lightbox-close {
+  background: #333399;
+  border: 2px solid #00ffff;
+  border-radius: 0;
+  color: #00ffff;
+}
+
+[data-theme="geocities"] .media-library__lightbox-close:hover {
+  background: #4444aa;
+  color: #ffff00;
+  border-color: #ffff00;
+}
+
+[data-theme="geocities"] .media-library__lightbox-main {
+  background: #000000;
+  border-right: 3px solid #6600cc;
+}
+
+[data-theme="geocities"] .media-library__lightbox-sidebar {
+  background: #000033;
+  border-left: 3px solid #6600cc;
+}
+
+[data-theme="geocities"] .media-library__lightbox-filename {
+  background: #000066;
+  border: 2px solid #6666ff;
+  border-radius: 0;
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 700;
+  color: #ffff00;
+  text-transform: none;
+  letter-spacing: 0;
+  box-shadow: none;
+}
+
+[data-theme="geocities"] .media-library__lightbox-meta {
+  background: #000066;
+  border: 2px solid #6666ff;
+  border-radius: 0;
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 400;
+  color: #00ff00;
+  box-shadow: none;
+}
+
+[data-theme="geocities"] .media-library__lightbox-heading {
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 700;
+  font-style: normal;
+  color: #ffff00;
+  text-transform: none;
+  letter-spacing: 0;
+  border-bottom: 2px solid #6600cc;
+}
+
+[data-theme="geocities"] .media-library__lightbox-description {
+  background: #000033;
+  border: 2px solid #00ffff;
+  border-radius: 0;
+  font-family: 'Comic Sans MS', cursive;
+  color: #00ff00;
+  box-shadow: 0 0 4px rgba(0, 255, 255, 0.2);
+}
+
+[data-theme="geocities"] .media-library__lightbox-no-analysis {
+  background: #330033;
+  border: 2px solid #6600cc;
+  border-radius: 0;
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 400;
+  color: #999999;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* ============================================
+   Image Lightbox (standalone)
+   ============================================ */
+[data-theme="geocities"] .lightbox-overlay {
+  background: rgba(0, 0, 51, 0.9);
+  backdrop-filter: none;
+}
+
+[data-theme="geocities"] .lightbox-content {
+  background: #000033;
+  border: 3px solid #ff00ff;
+  border-radius: 0;
+  box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+}
+
+[data-theme="geocities"] .lightbox-close {
+  background: #333399;
+  border: 2px solid #00ffff;
+  border-radius: 0;
+  color: #00ffff;
+}
+
+[data-theme="geocities"] .lightbox-close:hover {
+  background: #4444aa;
+  color: #ffff00;
+  border-color: #ffff00;
+}
+
+[data-theme="geocities"] .lightbox-image-container {
+  background: #000000;
+}
+
+[data-theme="geocities"] .lightbox-image {
+  border-radius: 0;
+  border: 2px solid #6666ff;
+}
+
+[data-theme="geocities"] .lightbox-sidebar {
+  background: #000033;
+  border-left: 3px solid #6600cc;
+}
+
+[data-theme="geocities"] .lightbox-sidebar h3 {
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 700;
+  color: #ffff00;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+[data-theme="geocities"] .lightbox-sidebar p {
+  font-family: 'Comic Sans MS', cursive;
+  color: #00ff00;
+}
+
+[data-theme="geocities"] .lightbox-nav {
+  background: #333399;
+  border-radius: 0;
+  color: #00ffff;
+  border: 2px solid #6666ff;
+  box-shadow: 0 0 4px rgba(102, 102, 255, 0.3);
+}
+
+[data-theme="geocities"] .lightbox-nav:hover {
+  background: #4444aa;
+  color: #ffff00;
+}
+
+[data-theme="geocities"] .lightbox-info-bar {
+  background: #000044;
+  border-top: 2px solid #6600cc;
+}
+
+[data-theme="geocities"] .lightbox-filename {
+  color: #00ffff;
+}
+
+[data-theme="geocities"] .lightbox-counter {
+  color: #999999;
+}
+
+/* ============================================
+   Liner Notes
+   ============================================ */
+[data-theme="geocities"] .liner-notes__panel {
+  background: #000033;
+  border: 2px solid #ff00ff;
+  box-shadow: -2px 0 10px rgba(255, 0, 255, 0.3);
+}
+
+[data-theme="geocities"] .liner-notes__close {
+  background: #333399;
+  border: 2px solid #00ffff;
+  border-radius: 0;
+  color: #00ffff;
+}
+
+[data-theme="geocities"] .liner-notes__close:hover {
+  background: #4444aa;
+  color: #ffff00;
+  border-color: #ffff00;
+}
+
+[data-theme="geocities"] .liner-notes__tape-label {
+  background: #000066;
+  border-radius: 0;
+  border: 2px solid #6666ff;
+}
+
+[data-theme="geocities"] .liner-notes__rendered {
+  color: #00ff00;
+  font-family: 'Comic Sans MS', cursive;
+}
+
+[data-theme="geocities"] .liner-notes__h1 {
+  border-bottom: 2px solid #ff00ff;
+  color: #ffff00;
+  text-shadow: 0 0 6px rgba(255, 255, 0, 0.4);
+}
+
+[data-theme="geocities"] .liner-notes__code-block {
+  background: #000000;
+  color: #00ff00;
+  border: 2px solid #00ff00;
+  border-radius: 0;
+  font-family: 'Courier New', monospace;
+  box-shadow: 0 0 6px rgba(0, 255, 0, 0.3);
+}
+
+[data-theme="geocities"] .liner-notes__textarea {
+  background: #000033;
+  border: 2px solid #00ffff;
+  border-radius: 0;
+  color: #00ff00;
+  font-family: 'Comic Sans MS', cursive;
+  box-shadow: 0 0 4px rgba(0, 255, 255, 0.2);
+}
+
+[data-theme="geocities"] .liner-notes__textarea:focus {
+  border-color: #ffff00;
+  box-shadow: 0 0 8px rgba(255, 255, 0, 0.4);
+}
+
+[data-theme="geocities"] .liner-notes__btn--edit {
+  background: transparent;
+  border: none;
+  color: #00ffff;
+  text-decoration: underline;
+}
+
+[data-theme="geocities"] .liner-notes__btn--save {
+  background: #ff00ff;
+  border: 2px solid #ff66ff;
+  border-radius: 0;
+  color: #ffffff;
+  box-shadow: 0 0 8px rgba(255, 0, 255, 0.4);
+}
+
+[data-theme="geocities"] .liner-notes__btn--cancel {
+  background: #333399;
+  border: 2px solid #6666ff;
+  border-radius: 0;
+  color: #00ffff;
+}
+
+[data-theme="geocities"] .liner-notes__btn--clear {
+  background: transparent;
+  border: none;
+  color: #ff3333;
+  text-decoration: underline;
+}
+
+[data-theme="geocities"] .liner-notes__content::-webkit-scrollbar-thumb {
+  background: #333399;
+  border: 1px solid #6666ff;
+}
+
+/* ============================================
+   Activity Feed
+   ============================================ */
+[data-theme="geocities"] .activity-feed {
+  background: #000033;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 2px solid #6666ff;
+  border-radius: 0;
+}
+
+[data-theme="geocities"] .activity-feed__header {
+  border-bottom: 2px solid #6600cc;
+}
+
+[data-theme="geocities"] .activity-feed__title {
+  color: #ffff00;
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 700;
+}
+
+[data-theme="geocities"] .activity-feed__toggle {
+  color: #00ffff;
+  text-decoration: underline;
+}
+
+[data-theme="geocities"] .activity-feed__toggle:hover {
+  background: transparent;
+  color: #ffff00;
+}
+
+[data-theme="geocities"] .activity-feed__item--running {
+  background: rgba(255, 0, 255, 0.1);
+}
+
+[data-theme="geocities"] .activity-feed__item--error {
+  background: rgba(255, 0, 0, 0.15);
+}
+
+[data-theme="geocities"] .activity-feed__spinner {
+  border-color: #333399;
+  border-top-color: #ff00ff;
+}
+
+[data-theme="geocities"] .activity-feed__check {
+  color: #00ff00;
+}
+
+[data-theme="geocities"] .activity-feed__error {
+  color: #ff3333;
+}
+
+/* ============================================
+   Job Status Bar
+   ============================================ */
+[data-theme="geocities"] .job-status-bar {
+  background: #000044;
+  border: 2px solid #6666ff;
+}
+
+[data-theme="geocities"] .job-status-bar__item:hover {
+  background: #ff00ff;
+  color: #ffffff;
+}
+
+[data-theme="geocities"] .job-status-bar__spinner {
+  border-color: #333399;
+  border-top-color: #ff00ff;
+}
+
+[data-theme="geocities"] .job-status-bar__prompt {
+  color: #00ff00;
+  font-family: 'Comic Sans MS', cursive;
+}
+
+[data-theme="geocities"] .job-status-bar__time {
+  color: #999999;
+}
+
+[data-theme="geocities"] .job-status-bar__badge {
+  background: #ff00ff;
+  color: #ffffff;
+  border-radius: 0;
+  box-shadow: 0 0 6px rgba(255, 0, 255, 0.4);
+}
+
+[data-theme="geocities"] .job-status-bar__icon--completed {
+  color: #00ff00;
+}
+
+[data-theme="geocities"] .job-status-bar__icon--failed {
+  color: #ff3333;
+}
+
+/* ============================================
+   Onboarding - Welcome to my homepage!
+   ============================================ */
+[data-theme="geocities"] .onboarding {
+  background: #000033;
+  background-image:
+    radial-gradient(1px 1px at 20px 30px, #ffffff, transparent),
+    radial-gradient(1px 1px at 40px 70px, rgba(255,255,255,0.8), transparent),
+    radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 130px 80px, #ffffff, transparent);
+  background-size: 200px 100px;
+}
+
+[data-theme="geocities"] .onboarding__container {
+  background: #000044;
+  border: 3px solid #ff00ff;
+  border-radius: 0;
+  box-shadow: 0 0 20px rgba(255, 0, 255, 0.4);
+  padding: 16px;
+}
+
+[data-theme="geocities"] .onboarding__progress {
+  background: #000066;
+  border: 2px solid #6666ff;
+  border-radius: 0;
+  height: 16px;
+}
+
+[data-theme="geocities"] .onboarding__progress-bar {
+  background: linear-gradient(90deg, #ff00ff, #00ffff, #ffff00);
+  border-radius: 0;
+  box-shadow: 0 0 6px rgba(255, 0, 255, 0.4);
+}
+
+[data-theme="geocities"] .onboarding__title {
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 700;
+  font-style: normal;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #ffff00;
+  text-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
+}
+
+[data-theme="geocities"] .onboarding__subtitle {
+  font-family: 'Comic Sans MS', cursive;
+  color: #00ff00;
+}
+
+[data-theme="geocities"] .onboarding__subtitle a {
+  color: #00ffff;
+  font-weight: 400;
+  text-decoration: underline;
+}
+
+[data-theme="geocities"] .onboarding__back {
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #00ffff;
+  text-decoration: underline;
+}
+
+[data-theme="geocities"] .onboarding__back:hover {
+  color: #ffff00;
+}
+
+[data-theme="geocities"] .onboarding__option {
+  background: #000066;
+  border: 2px solid #6666ff;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+[data-theme="geocities"] .onboarding__option:hover {
+  background: #000099;
+  border-color: #ff00ff;
+  transform: none;
+  box-shadow: 0 0 10px rgba(255, 0, 255, 0.4);
+}
+
+[data-theme="geocities"] .onboarding__option--primary {
+  background: #660066;
+  border-color: #ff00ff;
+  box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+  color: #ffffff;
+}
+
+[data-theme="geocities"] .onboarding__option--primary:hover {
+  background: #880088;
+  box-shadow: 0 0 15px rgba(255, 0, 255, 0.5);
+}
+
+[data-theme="geocities"] .onboarding__option-icon {
+  background: #333366;
+  border: 2px solid #6666ff;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+[data-theme="geocities"] .onboarding__option--primary .onboarding__option-icon {
+  background: #440044;
+  border-color: #ff00ff;
+}
+
+[data-theme="geocities"] .onboarding__option-title {
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 700;
+  color: #00ffff;
+}
+
+[data-theme="geocities"] .onboarding__option--primary .onboarding__option-title {
+  color: #ffffff;
+}
+
+[data-theme="geocities"] .onboarding__option-desc {
+  font-family: 'Comic Sans MS', cursive;
+  color: #999999;
+}
+
+[data-theme="geocities"] .onboarding__option--primary .onboarding__option-desc {
+  color: #ff99ff;
+}
+
+[data-theme="geocities"] .onboarding__input {
+  background: #000033;
+  border: 2px solid #00ffff;
+  border-radius: 0;
+  color: #00ff00;
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 400;
+  box-shadow: 0 0 4px rgba(0, 255, 255, 0.2);
+}
+
+[data-theme="geocities"] .onboarding__input:focus {
+  border-color: #ffff00;
+  box-shadow: 0 0 8px rgba(255, 255, 0, 0.4);
+}
+
+[data-theme="geocities"] .onboarding__button {
+  background: #ff00ff;
+  border: 2px solid #ff66ff;
+  border-radius: 0;
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
+  text-shadow: 1px 1px 0 #990099;
+}
+
+[data-theme="geocities"] .onboarding__button:hover:not(:disabled) {
+  background: #ff33ff;
+  transform: none;
+  box-shadow: 0 0 15px rgba(255, 0, 255, 0.7);
+  filter: none;
+}
+
+[data-theme="geocities"] .onboarding__button:active:not(:disabled) {
+  background: #cc00cc;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  transform: none;
+}
+
+[data-theme="geocities"] .onboarding__tutorial-icon kbd {
+  background: #333399;
+  border: 2px solid #6666ff;
+  border-radius: 0;
+  color: #00ffff;
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 700;
+  box-shadow: 0 0 4px rgba(102, 102, 255, 0.3);
+}
+
+[data-theme="geocities"] .onboarding__wake-word,
+[data-theme="geocities"] .onboarding__tutorial-word {
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 700;
+  font-style: normal;
+  color: #ff00ff;
+  text-shadow: 0 0 6px rgba(255, 0, 255, 0.5);
+}
+
+[data-theme="geocities"] .onboarding__step-label {
+  background: #ff00ff;
+  border: none;
+  border-radius: 0;
+  color: #ffffff;
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 700;
+  box-shadow: 0 0 6px rgba(255, 0, 255, 0.4);
+}
+
+[data-theme="geocities"] .onboarding__feature-title {
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 700;
+  color: #ffff00;
+}
+
+[data-theme="geocities"] .onboarding__feature-demo,
+[data-theme="geocities"] .onboarding__feature-list {
+  background: #000066;
+  border: 2px solid #6666ff;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+[data-theme="geocities"] .onboarding__drop-zone-demo {
+  background: #000033;
+  border: 2px dashed #00ffff;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+[data-theme="geocities"] .onboarding__drop-zone-demo svg {
+  color: #00ffff;
+}
+
+[data-theme="geocities"] .onboarding__drop-zone-demo span {
+  font-family: 'Comic Sans MS', cursive;
+  color: #999999;
+}
+
+[data-theme="geocities"] .onboarding__toggle {
+  background: #000066;
+  border: 2px solid #6666ff;
+  border-radius: 0;
+}
+
+[data-theme="geocities"] .onboarding__toggle:hover {
+  background: #000099;
+  border-color: #ff00ff;
+}
+
+[data-theme="geocities"] .onboarding__toggle-slider {
+  background: #000066;
+  border: 2px solid #6666ff;
+  box-shadow: none;
+}
+
+[data-theme="geocities"] .onboarding__toggle-slider::before {
+  background: #6666ff;
+  border: none;
+  box-shadow: 0 0 4px rgba(102, 102, 255, 0.3);
+  border-radius: 0;
+}
+
+[data-theme="geocities"] .onboarding__toggle input:checked + .onboarding__toggle-slider {
+  background: #660066;
+  border-color: #ff00ff;
+}
+
+[data-theme="geocities"] .onboarding__toggle-label {
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 400;
+  color: #00ff00;
+}
+
+[data-theme="geocities"] .onboarding__toggle-desc {
+  font-family: 'Comic Sans MS', cursive;
+  color: #999999;
+}
+
+[data-theme="geocities"] .onboarding__nav-back {
+  background: #333399;
+  border: 2px solid #6666ff;
+  border-radius: 0;
+  color: #00ffff;
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  box-shadow: 0 0 4px rgba(102, 102, 255, 0.3);
+}
+
+[data-theme="geocities"] .onboarding__nav-back:hover {
+  background: #4444aa;
+  transform: none;
+  color: #ffff00;
+}
+
+[data-theme="geocities"] .onboarding__skip {
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #00ffff;
+  text-decoration: underline;
+}
+
+[data-theme="geocities"] .onboarding__skip:hover {
+  color: #ffff00;
+}
+
+/* ============================================
+   Talk Button
+   ============================================ */
+[data-theme="geocities"] .talk-button {
+  background: #333399;
+  border: 2px solid #00ffff;
+  border-radius: 0;
+  color: #00ffff;
+  font-family: 'Comic Sans MS', cursive;
+  box-shadow: 0 0 8px rgba(0, 255, 255, 0.4);
+}
+
+[data-theme="geocities"] .talk-button::before {
+  display: none;
+}
+
+[data-theme="geocities"] .talk-button:hover:not(:disabled) {
+  background: #4444aa;
+  border-color: #ffff00;
+  color: #ffff00;
+  transform: none;
+  box-shadow: 0 0 12px rgba(255, 255, 0, 0.5);
+}
+
+[data-theme="geocities"] .talk-button:active:not(:disabled),
+[data-theme="geocities"] .talk-button--active {
+  background: #660066;
+  border-color: #ff00ff;
+  color: #ff00ff;
+  transform: none;
+  box-shadow: 0 0 15px rgba(255, 0, 255, 0.6);
+}
+
+[data-theme="geocities"] .talk-button--active::before,
+[data-theme="geocities"] .talk-button--active::after {
+  display: none;
+}
+
+[data-theme="geocities"] .talk-button__label {
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ============================================
+   File Drop Zone
+   ============================================ */
+[data-theme="geocities"] .dropzone-overlay {
+  background: rgba(255, 0, 255, 0.2);
+  border: 3px dashed #ff00ff;
+  backdrop-filter: none;
+}
+
+[data-theme="geocities"] .dropzone-overlay__content {
+  color: #ffffff;
+  text-shadow: 2px 2px 0 #000000, 0 0 10px #ff00ff;
+  font-family: 'Comic Sans MS', cursive;
+}
+
+[data-theme="geocities"] .dropzone-files {
+  background: #000044;
+  border: 2px solid #6666ff;
+  border-radius: 0;
+}
+
+[data-theme="geocities"] .dropzone-file__thumb-wrap {
+  border: 2px solid #6666ff;
+  border-radius: 0;
+}
+
+[data-theme="geocities"] .dropzone-file__remove {
+  background: #333399;
+  border-radius: 0;
+  border: 1px solid #6666ff;
+}
+
+[data-theme="geocities"] .dropzone-file__remove:hover {
+  background: #cc0000;
+  border-color: #ff3333;
+  color: #ffffff;
+}
+
+[data-theme="geocities"] .dropzone-file__analyzing-badge {
+  background: #ff00ff;
+  border-radius: 0;
+  color: #ffffff;
+  box-shadow: 0 0 6px rgba(255, 0, 255, 0.4);
+}
+
+[data-theme="geocities"] .dropzone-file--analyzing .dropzone-file__thumb-wrap {
+  border-color: #ff00ff;
+  box-shadow: 0 0 8px rgba(255, 0, 255, 0.4);
+}
+
+[data-theme="geocities"] .dropzone-files__add:hover {
+  border-color: #ff00ff;
+  color: #ff00ff;
+  background: rgba(255, 0, 255, 0.1);
+}
+
+/* ============================================
+   Floating Record Button (FAB) - mobile
+   ============================================ */
+@media (max-width: 480px) {
+  [data-theme="geocities"] .app__record-fab {
+    background: #333399;
+    border: 2px solid #00ffff;
+    box-shadow: 0 0 12px rgba(0, 255, 255, 0.5);
+    border-radius: 0;
+  }
+
+  [data-theme="geocities"] .app__record-fab svg {
+    fill: #00ffff;
+  }
+
+  [data-theme="geocities"] .app__record-fab-resize {
+    background: #6666ff;
+    border: none;
+    border-radius: 0;
+  }
+
+  [data-theme="geocities"] .app__record-fab--recording {
+    background: #cc0000;
+    border-color: #ff3333;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
+    animation: geocities-record-pulse 0.6s ease-in-out infinite;
+  }
+
+  [data-theme="geocities"] .app__record-fab--recording svg {
+    fill: #ffffff;
+  }
+
+  [data-theme="geocities"] .app__record-fab--tap-to-talk {
+    animation: geocities-tap-pulse 1.5s ease-in-out infinite;
+  }
+}
+
+/* ============================================
+   Global Scrollbar
+   ============================================ */
+[data-theme="geocities"] ::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+
+[data-theme="geocities"] ::-webkit-scrollbar-track {
+  background: #000033;
+}
+
+[data-theme="geocities"] ::-webkit-scrollbar-thumb {
+  background: #333399;
+  border-radius: 0;
+  border: 1px solid #6666ff;
+}
+
+[data-theme="geocities"] ::-webkit-scrollbar-thumb:hover {
+  background: #4444aa;
+  box-shadow: 0 0 6px rgba(102, 102, 255, 0.4);
+}
+
+/* ============================================
+   Selection & Focus
+   ============================================ */
+[data-theme="geocities"] ::selection {
+  background: #ff00ff;
+  color: #ffffff;
+}
+
+[data-theme="geocities"] :focus-visible {
+  outline: 2px solid #00ffff;
+  outline-offset: 1px;
+}
+
+/* ============================================
+   Keyboard Shortcuts
+   ============================================ */
+[data-theme="geocities"] .keyboard-shortcuts kbd {
+  background: #333399;
+  border: 2px solid #6666ff;
+  border-radius: 0;
+  color: #00ffff;
+  font-family: 'Comic Sans MS', cursive;
+  box-shadow: 0 0 4px rgba(102, 102, 255, 0.3);
+}
+
+/* ============================================
+   Scroll to Bottom Button
+   ============================================ */
+[data-theme="geocities"] .scroll-to-bottom {
+  width: 36px;
+  height: 36px;
+  border-radius: 0;
+  background: #ff00ff;
+  border: 2px solid #ff66ff;
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+[data-theme="geocities"] .scroll-to-bottom:hover {
+  background: #ff33ff;
+  border-color: #ff99ff;
+  color: #ffffff;
+  transform: none;
+  box-shadow: 0 0 15px rgba(255, 0, 255, 0.8);
+}
+
+[data-theme="geocities"] .scroll-to-bottom:active {
+  background: #cc00cc;
+  transform: none;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+}
