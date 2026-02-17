@@ -1,0 +1,107 @@
+.buddy-entry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: #c0c0c0;
+  border: 2px solid;
+  border-color: #ffffff #808080 #808080 #ffffff;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Arial, sans-serif;
+}
+
+.buddy-entry:hover {
+  background: #d4d0c8;
+}
+
+.buddy-entry--selected {
+  background: #000080;
+  color: #ffffff;
+}
+
+.buddy-entry--selected:hover {
+  background: #0000a0;
+}
+
+/* Eject animation */
+.buddy-entry--ejecting {
+  animation: buddy-blink-out 0.4s steps(3) forwards;
+}
+
+@keyframes buddy-blink-out {
+  0% { opacity: 1; }
+  33% { opacity: 0; }
+  66% { opacity: 1; }
+  100% { opacity: 0; transform: scaleY(0); }
+}
+
+/* Status indicator */
+.buddy-entry__status {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+}
+
+.buddy-entry__status--active {
+  background: #00c000;
+  box-shadow: 0 0 4px rgba(0, 192, 0, 0.5);
+}
+
+.buddy-entry__status--away {
+  background: #ffcc00;
+}
+
+.buddy-entry__status--offline {
+  background: #808080;
+}
+
+/* Info area */
+.buddy-entry__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.buddy-entry__name {
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: inherit;
+}
+
+.buddy-entry--selected .buddy-entry__name {
+  color: #ffffff;
+}
+
+.buddy-entry__detail {
+  font-size: 10px;
+  color: #555;
+  margin-top: 1px;
+}
+
+.buddy-entry--selected .buddy-entry__detail {
+  color: #aaaaff;
+}
+
+/* Now playing label */
+.buddy-entry--selected::after {
+  content: "ACTIVE";
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #000080;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 2px;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  z-index: 10;
+  font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Arial, sans-serif;
+}

@@ -82,10 +82,12 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               <p className="onboarding__subtitle">
                 Your walkie talkie for Claude Code.
               </p>
+              <p className="onboarding__subtitle">
+                Choose a theme below, you can always change it later.
+              </p>
             </div>
 
             <div className="onboarding__theme-section">
-              <p className="onboarding__theme-heading">Choose a theme</p>
               <div className="onboarding__theme-row">
                 {themes.map((t) => (
                   <button
@@ -100,9 +102,6 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                   </button>
                 ))}
               </div>
-              <p className="onboarding__theme-blurb">
-                {themes.find(t => t.name === settings.theme)?.description}
-              </p>
             </div>
 
             <button className="onboarding__button" onClick={nextStep}>

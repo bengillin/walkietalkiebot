@@ -129,13 +129,13 @@
   filter: none;
 }
 
-/* Header buttons - neon glow buttons */
+/* Header buttons - white for legibility on rainbow gradient */
 [data-theme="geocities"] .app__header-btn {
-  background: #333399;
-  border: 2px solid #00ffff;
+  background: rgba(0, 0, 0, 0.35);
+  border: 2px solid rgba(255, 255, 255, 0.7);
   border-radius: 0;
-  color: #00ffff;
-  box-shadow: 0 0 6px rgba(0, 255, 255, 0.4);
+  color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
   padding: 2px;
   width: 28px;
   height: 26px;
@@ -143,21 +143,21 @@
 }
 
 [data-theme="geocities"] .app__header-btn:hover {
-  background: #4444aa;
-  color: #ffff00;
-  border-color: #ffff00;
-  box-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
+  background: rgba(0, 0, 0, 0.5);
+  color: #ffffff;
+  border-color: #ffffff;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
 }
 
 [data-theme="geocities"] .app__header-btn:active {
-  background: #222266;
+  background: rgba(0, 0, 0, 0.6);
   box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
   transform: none;
 }
 
 [data-theme="geocities"] .app__header-btn:disabled {
-  color: #666699;
-  border-color: #666699;
+  color: rgba(255, 255, 255, 0.4);
+  border-color: rgba(255, 255, 255, 0.3);
   box-shadow: none;
 }
 
@@ -222,7 +222,7 @@
 
 /* Recording indicator */
 [data-theme="geocities"] .app__recording-indicator {
-  background: #330000;
+  background: rgba(0, 0, 0, 0.4);
   border-radius: 0;
 }
 
@@ -233,13 +233,13 @@
 }
 
 [data-theme="geocities"] .app__recording-label {
-  color: #ff3333;
+  color: #ffffff;
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
   font-size: 12px;
   font-family: 'Comic Sans MS', cursive;
-  text-shadow: 0 0 6px rgba(255, 0, 0, 0.5);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 /* Liner notes indicator */
@@ -252,23 +252,24 @@
 
 /* Conversation dropdown */
 [data-theme="geocities"] .app__conversation-dropdown {
-  background: #000066;
+  background: rgba(0, 0, 0, 0.35);
   border-radius: 0;
   padding: 2px 8px;
-  border: 2px solid #00ffff;
-  box-shadow: 0 0 6px rgba(0, 255, 255, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 [data-theme="geocities"] .app__conversation-dropdown:hover {
-  background: #000099;
-  box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+  background: rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
 }
 
 [data-theme="geocities"] .app__conversation-title {
-  color: #00ffff;
+  color: #ffffff;
   font-weight: 700;
   font-size: 13px;
   font-family: 'Comic Sans MS', cursive;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 /* Logo */

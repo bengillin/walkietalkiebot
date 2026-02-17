@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { RetroTape, getTapeColor } from './RetroTape'
+import { ConversationItem } from './ConversationItem'
+import { useTheme, type ThemeName } from '../../contexts/ThemeContext'
 import type { Conversation } from '../../types'
 import * as api from '../../lib/api'
 import './TapeCollection.css'
@@ -9,6 +10,15 @@ function summarizeTitle(title: string): string {
   const words = title.split(/\s+/).filter(Boolean)
   if (words.length <= 5) return title
   return words.slice(0, 5).join(' ')
+}
+
+const THEME_LABELS: Record<ThemeName, { title: string; newBtn: string; search: string; switchPrompt: string; empty: string; emptyBtn: string }> = {
+  mccallister: { title: 'Recorded Conversations', newBtn: 'New Recording', search: 'Search tapes...', switchPrompt: 'Switch tapes?', empty: 'No tapes yet', emptyBtn: 'Create your first tape' },
+  imessage: { title: 'Conversations', newBtn: 'New Chat', search: 'Search conversations...', switchPrompt: 'Switch conversations?', empty: 'No conversations yet', emptyBtn: 'Start a conversation' },
+  aol: { title: 'Buddy List', newBtn: 'New Buddy', search: 'Search buddies...', switchPrompt: 'Switch buddies?', empty: 'No buddies online', emptyBtn: 'Add a buddy' },
+  'classic-mac': { title: 'Saved Disks', newBtn: 'New Disk', search: 'Search disks...', switchPrompt: 'Switch disks?', empty: 'No disks yet', emptyBtn: 'Initialize a disk' },
+  geocities: { title: 'Guest Book', newBtn: 'New Page', search: 'Search pages...', switchPrompt: 'Switch pages?', empty: 'No pages yet', emptyBtn: 'Create your first page' },
+  'apple-1984': { title: 'Saved Disks', newBtn: 'New Disk', search: 'Search disks...', switchPrompt: 'Switch disks?', empty: 'No disks yet', emptyBtn: 'Initialize a disk' },
 }
 
 interface TapeCollectionProps {
@@ -34,6 +44,8 @@ export function TapeCollection({
   contextIds = [],
   onToggleContext,
 }: TapeCollectionProps) {
+  const { theme } = useTheme()
+  const labels = THEME_LABELS[theme]
   const [pendingSwitch, setPendingSwitch] = useState<string | null>(null)
   const [isEjecting, setIsEjecting] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -118,12 +130,12 @@ export function TapeCollection({
 
       <div className="tape-collection__drawer">
         <div className="tape-collection__header">
-          <h3 className="tape-collection__title">Recorded Conversations</h3>
+          <h3 className="tape-collection__title">{labels.title}</h3>
           <button className="tape-collection__new-btn" onClick={onNew}>
             <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
               <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
             </svg>
-            New Recording
+            {labels.newBtn}
           </button>
         </div>
 
@@ -138,7 +150,7 @@ export function TapeCollection({
             className="tape-collection__search-input"
             value={searchQuery}
             onChange={(e) => handleSearchChange(e.target.value)}
-            placeholder="Search tapes..."
+            placeholder={labels.search}
           />
           {searchQuery && (
             <button
@@ -165,15 +177,15 @@ export function TapeCollection({
                 key={conv.id}
                 className={`tape-collection__item ${conv.id === currentId ? 'tape-collection__item--current' : ''} ${searchResults && searchResults.has(conv.id) ? 'tape-collection__item--match' : ''} ${contextIds.includes(conv.id) ? 'tape-collection__item--context' : ''}`}
               >
-                <RetroTape
+                <ConversationItem
                   title={summarizeTitle(conv.title)}
-                  color={getTapeColor(originalIndex >= 0 ? originalIndex : index)}
-                  tapeUsage={Math.min(conv.messages.length / 50, 1)}
+                  messageCount={conv.messages.length}
+                  colorIndex={originalIndex >= 0 ? originalIndex : index}
                   isSelected={conv.id === currentId}
                   isEjecting={isEjecting && conv.id === currentId}
                   onClick={() => handleTapeClick(conv.id)}
                 />
-                {/* Context toggle button - not shown on current tape */}
+                {/* Context toggle button - not shown on current item */}
                 {conv.id !== currentId && onToggleContext && (
                   <button
                     className={`tape-collection__context-btn ${contextIds.includes(conv.id) ? 'tape-collection__context-btn--active' : ''}`}
@@ -195,7 +207,7 @@ export function TapeCollection({
                       e.stopPropagation()
                       onDelete(conv.id)
                     }}
-                    title="Delete tape"
+                    title="Delete"
                   >
                     <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
                       <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
@@ -209,16 +221,16 @@ export function TapeCollection({
 
         {displayConversations.length === 0 && !searchQuery && (
           <div className="tape-collection__empty">
-            <p>No tapes yet</p>
+            <p>{labels.empty}</p>
             <button className="tape-collection__empty-btn" onClick={onNew}>
-              Create your first tape
+              {labels.emptyBtn}
             </button>
           </div>
         )}
 
         {displayConversations.length === 0 && searchQuery && (
           <div className="tape-collection__empty">
-            <p>No matching tapes</p>
+            <p>No results found</p>
           </div>
         )}
 
@@ -226,7 +238,7 @@ export function TapeCollection({
         {pendingSwitch && (
           <div className="tape-collection__confirm">
             <div className="tape-collection__confirm-content">
-              <p>Switch tapes?</p>
+              <p>{labels.switchPrompt}</p>
               <span>Your current conversation will be saved.</span>
               <div className="tape-collection__confirm-buttons">
                 <button className="tape-collection__confirm-cancel" onClick={cancelSwitch}>

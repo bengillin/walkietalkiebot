@@ -86,7 +86,7 @@
   margin-top: auto;
 }
 
-/* Speech bubble — mirrors assistant chat bubble per theme */
+/* Speech bubble — tail points UP toward the robot avatar above */
 .onboarding__speech-bubble {
   padding: 20px 32px 16px;
   border-radius: 27px;
@@ -95,6 +95,21 @@
   width: fit-content;
   margin-bottom: 28px;
   text-align: center;
+  position: relative;
+}
+
+/* Default upward tail */
+.onboarding__speech-bubble::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 10px solid var(--bg-secondary, #2a2a2a);
 }
 
 .onboarding__speech-bubble .onboarding__title {
@@ -105,7 +120,7 @@
   margin-bottom: 0;
 }
 
-/* McCallister bubble — industrial gray gradient, hard shadow */
+/* ── McCallister / TalkBoy ── */
 [data-theme="mccallister"] .onboarding__speech-bubble {
   background: linear-gradient(180deg, #d8d8d8 0%, #c8c8c8 100%);
   border: 3px solid #909090;
@@ -114,28 +129,57 @@
     inset 0 1px 0 rgba(255,255,255,0.5),
     3px 3px 0 rgba(0,0,0,0.2);
 }
+[data-theme="mccallister"] .onboarding__speech-bubble::before {
+  top: -12px;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-bottom: 12px solid #d8d8d8;
+  filter: drop-shadow(0 -1px 0 #909090);
+}
 [data-theme="mccallister"] .onboarding__speech-bubble .onboarding__title {
+  font-family: 'Arial Black', 'Helvetica Neue', Impact, sans-serif;
+  font-size: 28px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
   color: #1a1a1a;
 }
 [data-theme="mccallister"] .onboarding__speech-bubble .onboarding__subtitle {
+  font-family: 'Arial', 'Helvetica Neue', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
   color: #4a4a4a;
 }
 
-/* iMessage bubble — light gray, rounded, clean */
+/* ── Bubble / iMessage ── */
 [data-theme="imessage"] .onboarding__speech-bubble {
   background: #e5e5ea;
   border: none;
-  border-radius: 18px 18px 18px 4px;
+  border-radius: 20px;
   box-shadow: none;
 }
+[data-theme="imessage"] .onboarding__speech-bubble::before {
+  top: -9px;
+  border-left: 9px solid transparent;
+  border-right: 9px solid transparent;
+  border-bottom: 9px solid #e5e5ea;
+}
 [data-theme="imessage"] .onboarding__speech-bubble .onboarding__title {
+  font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
   color: #000000;
 }
 [data-theme="imessage"] .onboarding__speech-bubble .onboarding__subtitle {
+  font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: -0.2px;
   color: #3c3c43;
 }
 
-/* AOL bubble — Win95 beveled panel */
+/* ── Dial-Up / AOL ── */
 [data-theme="aol"] .onboarding__speech-bubble {
   background: #c0c0c0;
   border: 2px solid;
@@ -143,49 +187,101 @@
   border-radius: 0;
   box-shadow: 1px 1px 0 #000000;
 }
+[data-theme="aol"] .onboarding__speech-bubble::before {
+  /* Win95 tooltip pointer — small beveled triangle */
+  top: -8px;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 8px solid #c0c0c0;
+  filter: drop-shadow(0 -1px 0 #ffffff);
+}
 [data-theme="aol"] .onboarding__speech-bubble .onboarding__title {
+  font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Arial, sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0;
   color: #000000;
 }
 [data-theme="aol"] .onboarding__speech-bubble .onboarding__subtitle {
+  font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
   color: #000080;
 }
 
-/* Classic Mac bubble — white, 1px black border, Platinum */
+/* ── Finder / Classic Mac ── */
 [data-theme="classic-mac"] .onboarding__speech-bubble {
   background: #ffffff;
   border: 1px solid #000000;
   border-radius: 5px;
   box-shadow: 1px 1px 0 #999999;
 }
+[data-theme="classic-mac"] .onboarding__speech-bubble::before {
+  top: -8px;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 8px solid #ffffff;
+  filter: drop-shadow(0 -1px 0 #000000);
+}
 [data-theme="classic-mac"] .onboarding__speech-bubble .onboarding__title {
+  font-family: 'Chicago', 'Geneva', 'Charcoal', 'Lucida Grande', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0;
   color: #000000;
 }
 [data-theme="classic-mac"] .onboarding__speech-bubble .onboarding__subtitle {
+  font-family: 'Geneva', 'Lucida Grande', 'Helvetica Neue', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
   color: #333333;
 }
 
-/* GeoCities bubble — dark purple, neon magenta border, glow */
+/* ── Guestbook / GeoCities ── */
 [data-theme="geocities"] .onboarding__speech-bubble {
   background: #330033;
   border: 2px solid #ff00ff;
   border-radius: 0;
   box-shadow: 0 0 8px rgba(255, 0, 255, 0.3);
 }
+[data-theme="geocities"] .onboarding__speech-bubble::before {
+  top: -10px;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 10px solid #ff00ff;
+  /* Neon outline triangle — sits just outside the border */
+  filter: drop-shadow(0 -2px 4px rgba(255, 0, 255, 0.5));
+}
 [data-theme="geocities"] .onboarding__speech-bubble .onboarding__title {
+  font-family: 'Comic Sans MS', 'Comic Sans', cursive, sans-serif;
+  font-size: 28px;
+  font-weight: 700;
   color: #ffffff;
+  text-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
 }
 [data-theme="geocities"] .onboarding__speech-bubble .onboarding__subtitle {
+  font-family: 'Comic Sans MS', 'Comic Sans', cursive, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
   color: #ff00ff;
+  text-shadow: 0 0 6px rgba(255, 0, 255, 0.4);
 }
 
-/* 1984 bubble — warm beige, brown border, rainbow stripe top */
+/* ── 1984 / Apple ── */
 [data-theme="apple-1984"] .onboarding__speech-bubble {
   background: #e8d5b0;
   border: 1px solid #c4a882;
   border-radius: 10px;
   box-shadow: 0 2px 6px rgba(44, 24, 16, 0.08);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
+}
+[data-theme="apple-1984"] .onboarding__speech-bubble::before {
+  top: -9px;
+  border-left: 9px solid transparent;
+  border-right: 9px solid transparent;
+  border-bottom: 9px solid #e8d5b0;
+  filter: drop-shadow(0 -1px 0 #c4a882);
 }
 [data-theme="apple-1984"] .onboarding__speech-bubble::after {
   content: '';
@@ -194,6 +290,7 @@
   left: 0;
   right: 0;
   height: 3px;
+  border-radius: 10px 10px 0 0;
   background: linear-gradient(to right,
     #61BB46 0%, #61BB46 16.66%,
     #FDB827 16.66%, #FDB827 33.33%,
@@ -203,9 +300,17 @@
     #009DDC 83.33%, #009DDC 100%);
 }
 [data-theme="apple-1984"] .onboarding__speech-bubble .onboarding__title {
+  font-family: 'Futura', 'Century Gothic', 'Gill Sans', sans-serif;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   color: #2c1810;
 }
 [data-theme="apple-1984"] .onboarding__speech-bubble .onboarding__subtitle {
+  font-family: 'Futura', 'Century Gothic', 'Gill Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
   color: #5a3a28;
 }
 
@@ -222,24 +327,20 @@
   margin-bottom: 12px;
 }
 
-.onboarding__theme-section .onboarding__theme-blurb {
-  margin-bottom: 0;
-}
-
 /* Titles */
 .onboarding__title {
-  font-size: 34px;
-  font-weight: 600;
+  font-size: 48px;
+  font-weight: 700;
   letter-spacing: -0.5px;
   color: var(--onb-heading);
-  margin: 0 0 8px;
+  margin: 0 0 14px;
 }
 
 .onboarding__subtitle {
-  font-size: 18px;
+  font-size: 36px;
+  font-weight: 500;
   color: var(--onb-text);
-  margin: 0 0 28px;
-  white-space: nowrap;
+  margin: 0;
 }
 
 /* Buttons */
@@ -564,16 +665,6 @@
   color: var(--onb-text);
 }
 
-/* Theme section heading */
-.onboarding__theme-heading {
-  font-size: 14px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--onb-text);
-  margin: 0 0 12px;
-}
-
 /* Theme swatch row — 3 columns, 2 rows for 6 themes */
 .onboarding__theme-row {
   display: grid;
@@ -588,7 +679,9 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 22px 6px 10px;
+  padding: 12px 6px;
+  height: 80px;
+  box-sizing: border-box;
   cursor: pointer;
   transition: all 0.15s ease;
   position: relative;
@@ -614,20 +707,6 @@
   font-weight: 500;
   white-space: nowrap;
 }
-
-/* Selected theme description */
-.onboarding__theme-blurb {
-  font-size: 15px;
-  color: var(--onb-text);
-  margin: 0 0 28px;
-  min-height: 20px;
-  transition: opacity 0.15s ease;
-}
-
-[data-theme="mccallister"] .onboarding__theme-blurb { white-space: nowrap; }
-[data-theme="classic-mac"] .onboarding__theme-blurb { white-space: nowrap; }
-[data-theme="geocities"] .onboarding__theme-blurb { white-space: nowrap; }
-[data-theme="apple-1984"] .onboarding__theme-blurb { white-space: nowrap; }
 
 /* TalkBoy (McCallister) swatch — red record dot */
 .onboarding__theme-swatch--mccallister {
@@ -889,6 +968,6 @@
   align-items: center;
   justify-content: center;
   padding: 16px 24px;
-  margin-bottom: 16px;
+  margin-bottom: 4px;
   cursor: pointer;
 }
