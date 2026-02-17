@@ -1,0 +1,74 @@
+/* Viewport border overlays — uses .theme-X classes for global scope */
+
+.page::before {
+  content: '';
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  display: none;
+}
+
+/* TalkBoy — red recording strip across top */
+.theme-mccallister .page::before {
+  display: block;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: #cc0000;
+}
+
+/* Bubble — hairline blue accent at top */
+.theme-imessage .page::before {
+  display: block;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: #007aff;
+}
+
+/* Dial-Up — Win95 title bar gradient across top */
+.theme-aol .page::before {
+  display: block;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #000080, #1084d0);
+}
+
+/* Finder — 1px black border all sides, inner white highlight */
+.theme-classic-mac .page::before {
+  display: block;
+  inset: 0;
+  border: 1px solid #000000;
+  box-shadow: inset 0 0 0 1px #ffffff;
+}
+
+/* Guestbook — neon magenta left + cyan right rails */
+.theme-geocities .page::before {
+  display: block;
+  top: 0; bottom: 0; left: 0;
+  width: 3px;
+  background: #ff00ff;
+  box-shadow: 0 0 8px rgba(255, 0, 255, 0.5);
+}
+.theme-geocities .page::after {
+  content: '';
+  position: fixed;
+  top: 0; bottom: 0; right: 0;
+  width: 3px;
+  background: #00ffff;
+  box-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* 1984 — rainbow stripe across top */
+.theme-apple-1984 .page::before {
+  display: block;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(to right,
+    #61BB46 0%, #61BB46 16.66%,
+    #FDB827 16.66%, #FDB827 33.33%,
+    #F5821F 33.33%, #F5821F 50%,
+    #E03A3E 50%, #E03A3E 66.66%,
+    #963D97 66.66%, #963D97 83.33%,
+    #009DDC 83.33%, #009DDC 100%);
+}

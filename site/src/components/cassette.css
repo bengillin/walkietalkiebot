@@ -1,0 +1,231 @@
+/* Cassette Tape — ported from src/components/cassette/CassetteTape.css */
+
+.cassette {
+  cursor: default;
+  user-select: none;
+}
+
+.cassette--large .cassette__body {
+  width: 280px;
+  height: 175px;
+}
+
+.cassette--large .cassette__title {
+  font-size: 16px;
+}
+
+.cassette--large .cassette__subtitle {
+  font-size: 11px;
+}
+
+/* Main body */
+.cassette__body {
+  position: relative;
+  border-radius: 6px;
+  padding: 4px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow:
+    0 4px 0 rgba(0, 0, 0, 0.4),
+    0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Color variant — black */
+.cassette--black .cassette__body {
+  background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 50%, #1a1a1a 100%);
+  border: 2px solid #0a0a0a;
+}
+
+/* Top edge with screws */
+.cassette__top-edge {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 8px;
+}
+
+.cassette__screw {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #606060 0%, #404040 100%);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Label */
+.cassette__label {
+  margin: 2px 6px;
+  padding: 6px 10px;
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+  min-height: 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.cassette__label-lines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 5px,
+    rgba(0, 0, 0, 0.05) 5px,
+    rgba(0, 0, 0, 0.05) 6px
+  );
+  pointer-events: none;
+}
+
+.cassette__title {
+  font-family: 'Comic Sans MS', 'Marker Felt', cursive;
+  font-size: 11px;
+  font-weight: bold;
+  color: #1a1a1a;
+  text-align: center;
+  line-height: 1.2;
+  position: relative;
+  z-index: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cassette__subtitle {
+  font-family: 'Comic Sans MS', 'Marker Felt', cursive;
+  font-size: 8px;
+  color: #4a4a4a;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+/* Tape window */
+.cassette__window {
+  margin: 4px 10px;
+  height: 40px;
+  background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
+  border-radius: 4px;
+  border: 2px solid #000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 14px;
+  position: relative;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* Reels */
+.cassette__reel {
+  width: 20px;
+  height: 20px;
+  background: #f5f5f5;
+  border-radius: 50%;
+  position: relative;
+  box-shadow: 0 0 0 2px #e0e0e0;
+  flex-shrink: 0;
+}
+
+.cassette__reel::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40%;
+  height: 40%;
+  background: #2a2a2a;
+  border-radius: 50%;
+}
+
+.cassette__reel-spokes {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+}
+
+.cassette__reel-spokes::before,
+.cassette__reel-spokes::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  background: #2a2a2a;
+}
+
+.cassette__reel-spokes::before {
+  width: 100%;
+  height: 2px;
+  transform: translate(-50%, -50%);
+}
+
+.cassette__reel-spokes::after {
+  width: 2px;
+  height: 100%;
+  transform: translate(-50%, -50%);
+}
+
+/* Tape path between reels */
+.cassette__tape-path {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.cassette__tape-line {
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    #4a3a2a 10%,
+    #3a2a1a 50%,
+    #4a3a2a 90%,
+    transparent 100%
+  );
+  opacity: 0.8;
+}
+
+/* Bottom teeth */
+.cassette__bottom {
+  padding: 4px 0;
+}
+
+.cassette__teeth {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.cassette__tooth {
+  width: 8px;
+  height: 6px;
+  background: linear-gradient(180deg, #404040 0%, #303030 100%);
+  border-radius: 0 0 2px 2px;
+}
+
+/* Recording indicator */
+.cassette__record-light {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  background: #ff0000;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #ff0000, 0 0 16px #ff0000;
+  animation: record-pulse 1s ease-in-out infinite;
+}
+
+@keyframes record-pulse {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 8px #ff0000, 0 0 16px #ff0000;
+  }
+  50% {
+    opacity: 0.6;
+    box-shadow: 0 0 4px #ff0000, 0 0 8px #ff0000;
+  }
+}
