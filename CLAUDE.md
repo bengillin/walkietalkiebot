@@ -56,7 +56,7 @@ server/                 Hono HTTPS server
   db/repositories/      CRUD: conversations, messages, activities, search, plans, jobs, telegram
   jobs/                 Async job execution
   telegram/             grammy bot (commands, handlers)
-mcp-server/index.js     MCP server with 15 tools (stdio transport)
+mcp-server/index.js     MCP server with 30 tools (stdio transport)
 bin/                    CLI entry points
   talkie.js            Start server + open browser
   talkie-server.js     Server lifecycle (start/stop/restart/status/logs/install)

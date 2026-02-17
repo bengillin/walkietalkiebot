@@ -1,7 +1,7 @@
 {
   "name": "talkiebot-mcp",
   "version": "0.2.0",
-  "description": "MCP server for Talkie — 15 tools for voice, conversations, sessions, jobs, and image analysis in Claude Code",
+  "description": "MCP server for Talkie — 30 tools for voice, conversations, sessions, jobs, and image analysis in Claude Code",
   "type": "module",
   "main": "index.js",
   "bin": {

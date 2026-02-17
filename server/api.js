@@ -350,7 +350,7 @@ api.get("/integrations", (c) => {
   return c.json({
     mcp: {
       configured: true,
-      toolCount: 15,
+      toolCount: 30,
       tools: [
         "launch_talkie",
         "get_talkie_status",
@@ -366,7 +366,22 @@ api.get("/integrations", (c) => {
         "open_url",
         "create_talkie_job",
         "get_talkie_job",
-        "list_talkie_jobs"
+        "list_talkie_jobs",
+        "list_conversations",
+        "get_conversation",
+        "create_conversation",
+        "rename_conversation",
+        "delete_conversation",
+        "search_conversations",
+        "add_message",
+        "list_plans",
+        "get_plan",
+        "create_plan",
+        "update_plan",
+        "delete_plan",
+        "get_liner_notes",
+        "set_liner_notes",
+        "export_conversation"
       ],
       transport: "stdio"
     },

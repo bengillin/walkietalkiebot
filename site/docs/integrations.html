@@ -128,7 +128,7 @@
         <!-- ── MCP Server ── -->
         <h2 id="mcp">MCP Server</h2>
 
-        <p>Talkie includes an MCP (Model Context Protocol) server with 15 tools that allow Claude Code to interact with the Talkie interface. The MCP server uses stdio transport and is launched via the <code>talkie-mcp</code> command.</p>
+        <p>Talkie includes an MCP (Model Context Protocol) server with 30 tools that allow Claude Code to interact with the Talkie interface. The MCP server uses stdio transport and is launched via the <code>talkie-mcp</code> command.</p>
 
         <h3>Setup</h3>
 
@@ -143,7 +143,7 @@
   }
 }</code></pre>
 
-        <p>Once configured, Claude Code will have access to all 15 Talkie tools.</p>
+        <p>Once configured, Claude Code will have access to all 30 Talkie tools.</p>
 
         <h3>Available tools</h3>
 
@@ -235,6 +235,108 @@
           <div class="tool-card__name">list_talkie_jobs</div>
           <div class="tool-card__desc">List all background jobs, optionally filtered by status.</div>
           <div class="tool-card__params">Params: <code>status</code> (enum: queued, running, completed, failed, cancelled)</div>
+        </div>
+
+        <!-- Conversations -->
+
+        <div class="tool-card">
+          <div class="tool-card__name">list_conversations</div>
+          <div class="tool-card__desc">List all saved conversations with pagination.</div>
+          <div class="tool-card__params">Params: <code>limit</code> (number), <code>offset</code> (number)</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card__name">get_conversation</div>
+          <div class="tool-card__desc">Get full conversation by ID with messages, images, and tool activities.</div>
+          <div class="tool-card__params">Params: <code>conversationId</code> (string, required)</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card__name">create_conversation</div>
+          <div class="tool-card__desc">Create a new conversation (cassette tape).</div>
+          <div class="tool-card__params">Params: <code>title</code> (string), <code>id</code> (string)</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card__name">rename_conversation</div>
+          <div class="tool-card__desc">Rename an existing conversation.</div>
+          <div class="tool-card__params">Params: <code>conversationId</code> (string, required), <code>title</code> (string, required)</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card__name">delete_conversation</div>
+          <div class="tool-card__desc">Delete a conversation and all its messages permanently.</div>
+          <div class="tool-card__params">Params: <code>conversationId</code> (string, required)</div>
+        </div>
+
+        <!-- Search -->
+
+        <div class="tool-card">
+          <div class="tool-card__name">search_conversations</div>
+          <div class="tool-card__desc">Full-text search across all conversations using FTS5. Returns ranked results with highlighted snippets.</div>
+          <div class="tool-card__params">Params: <code>query</code> (string, required), <code>limit</code> (number)</div>
+        </div>
+
+        <!-- Messages -->
+
+        <div class="tool-card">
+          <div class="tool-card__name">add_message</div>
+          <div class="tool-card__desc">Add a message to an existing conversation programmatically.</div>
+          <div class="tool-card__params">Params: <code>conversationId</code> (string, required), <code>role</code> (string: user/assistant, required), <code>content</code> (string, required), <code>source</code> (string)</div>
+        </div>
+
+        <!-- Plans -->
+
+        <div class="tool-card">
+          <div class="tool-card__name">list_plans</div>
+          <div class="tool-card__desc">List all plans with status workflow tracking.</div>
+          <div class="tool-card__params">Params: <code>limit</code> (number), <code>offset</code> (number)</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card__name">get_plan</div>
+          <div class="tool-card__desc">Get a plan by ID with full content and status.</div>
+          <div class="tool-card__params">Params: <code>planId</code> (string, required)</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card__name">create_plan</div>
+          <div class="tool-card__desc">Create a new plan linked to a conversation.</div>
+          <div class="tool-card__params">Params: <code>title</code> (string, required), <code>content</code> (string, required), <code>status</code> (string: draft/approved/in_progress/completed/archived), <code>conversationId</code> (string)</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card__name">update_plan</div>
+          <div class="tool-card__desc">Update a plan's title, content, or advance its status.</div>
+          <div class="tool-card__params">Params: <code>planId</code> (string, required), <code>title</code> (string), <code>content</code> (string), <code>status</code> (string)</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card__name">delete_plan</div>
+          <div class="tool-card__desc">Delete a plan permanently.</div>
+          <div class="tool-card__params">Params: <code>planId</code> (string, required)</div>
+        </div>
+
+        <!-- Liner Notes -->
+
+        <div class="tool-card">
+          <div class="tool-card__name">get_liner_notes</div>
+          <div class="tool-card__desc">Get the markdown liner notes for a conversation.</div>
+          <div class="tool-card__params">Params: <code>conversationId</code> (string, required)</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card__name">set_liner_notes</div>
+          <div class="tool-card__desc">Set or clear liner notes for a conversation.</div>
+          <div class="tool-card__params">Params: <code>conversationId</code> (string, required), <code>linerNotes</code> (string)</div>
+        </div>
+
+        <!-- Export -->
+
+        <div class="tool-card">
+          <div class="tool-card__name">export_conversation</div>
+          <div class="tool-card__desc">Export a conversation as formatted markdown or JSON.</div>
+          <div class="tool-card__params">Params: <code>conversationId</code> (string, required), <code>format</code> (string: markdown/json)</div>
         </div>
 
         <h3>IPC workflow</h3>

@@ -325,7 +325,7 @@ server/
 ├── jobs/                      Async job execution
 └── telegram/                  Bot commands and handlers
 
-mcp-server/index.js            MCP server (15 tools, stdio)
+mcp-server/index.js            MCP server (30 tools, stdio)
 bin/
 ├── talkie.js                  Start server + open browser
 ├── talkie-server.js           Server lifecycle CLI

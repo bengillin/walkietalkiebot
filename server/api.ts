@@ -477,13 +477,18 @@ api.get('/integrations', (c) => {
   return c.json({
     mcp: {
       configured: true,
-      toolCount: 15,
+      toolCount: 30,
       tools: [
         'launch_talkie', 'get_talkie_status', 'get_transcript',
         'get_conversation_history', 'get_claude_session', 'set_claude_session',
         'disconnect_claude_session', 'get_pending_message', 'respond_to_talkie',
         'update_talkie_state', 'analyze_image', 'open_url',
         'create_talkie_job', 'get_talkie_job', 'list_talkie_jobs',
+        'list_conversations', 'get_conversation', 'create_conversation',
+        'rename_conversation', 'delete_conversation', 'search_conversations',
+        'add_message', 'list_plans', 'get_plan',
+        'create_plan', 'update_plan', 'delete_plan',
+        'get_liner_notes', 'set_liner_notes', 'export_conversation',
       ],
       transport: 'stdio',
     },

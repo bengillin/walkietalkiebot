@@ -45,7 +45,7 @@
   - Telegram bot: Text and photo messages to Claude
   - Keyboard shortcuts: Spacebar push-to-talk, Cmd+K search, Cmd+E export
 
-## MCP Server (15 Tools)
+## MCP Server (30 Tools)
 
   Setup: Add to Claude Code settings:
   {
@@ -58,21 +58,60 @@
   }
 
   Tools:
+
+  Core:
   - launch_talkie: Start server and open browser
   - get_talkie_status: Check running status and avatar state
-  - get_transcript: Get latest voice transcript
-  - get_conversation_history: Get current conversation messages
+
+  Session:
   - get_claude_session: Get connected session ID
   - set_claude_session: Connect to Claude Code session
   - disconnect_claude_session: Disconnect session
+
+  IPC:
   - get_pending_message: Poll for user messages (IPC mode)
   - respond_to_talkie: Send response to user (IPC mode)
+  - get_transcript: Get latest voice transcript
+  - get_conversation_history: Get current conversation messages
+
+  State:
   - update_talkie_state: Set avatar state, transcript
+
+  Media:
   - analyze_image: Claude vision analysis of images
   - open_url: Open URL in default browser
+
+  Jobs:
   - create_talkie_job: Create background async job
   - get_talkie_job: Get job status and result
   - list_talkie_jobs: List jobs, optionally filtered by status
+
+  Conversations:
+  - list_conversations: List all saved conversations with pagination
+  - get_conversation: Get full conversation with messages, images, and activities
+  - create_conversation: Create a new conversation (cassette tape)
+  - rename_conversation: Rename an existing conversation
+  - delete_conversation: Delete a conversation permanently
+
+  Search:
+  - search_conversations: Full-text search across all conversations (FTS5)
+
+  Messages:
+  - add_message: Add a message to an existing conversation
+
+  Plans:
+  - list_plans: List all plans with status workflow
+  - get_plan: Get a plan by ID with full content
+  - create_plan: Create a new plan (draft/approved/in_progress/completed/archived)
+  - update_plan: Update plan title, content, or status
+  - delete_plan: Delete a plan permanently
+
+  Liner Notes:
+  - get_liner_notes: Get per-conversation markdown notes
+  - set_liner_notes: Set or clear liner notes for a conversation
+
+  Export:
+  - export_conversation: Export conversation as markdown or JSON
 
 ## REST API
 
