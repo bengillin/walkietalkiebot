@@ -1,6 +1,6 @@
 {
   "name": "talkiebot",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A voice-first, cassette tape-themed interface for Claude Code with 6 retro themes, conversation management, Telegram bot, and MCP integration",
   "type": "module",
   "bin": {
