@@ -102,8 +102,8 @@
   background: linear-gradient(180deg, #000080, #1084d0);
   border-bottom: 2px solid #808080;
   box-shadow: none;
-  min-height: 32px;
-  padding: 2px 4px;
+  min-height: 80px;
+  padding: 12px 20px;
 }
 
 [data-theme="aol"] .app__title {
@@ -268,8 +268,8 @@
 }
 
 [data-theme="aol"] .app__avatar-status {
-  width: 32px;
-  height: 32px;
+  width: 60px;
+  height: 60px;
 }
 
 /* Mobile menu */

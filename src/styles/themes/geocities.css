@@ -110,8 +110,8 @@
   background: linear-gradient(90deg, #ff0000, #ff6600, #ffff00, #00ff00, #0066ff, #9900ff);
   border-bottom: 3px solid #ff00ff;
   box-shadow: 0 2px 10px rgba(255, 0, 255, 0.5);
-  min-height: 36px;
-  padding: 4px 8px;
+  min-height: 80px;
+  padding: 12px 20px;
 }
 
 [data-theme="geocities"] .app__title {
@@ -286,8 +286,8 @@
 }
 
 [data-theme="geocities"] .app__avatar-status {
-  width: 32px;
-  height: 32px;
+  width: 60px;
+  height: 60px;
 }
 
 /* Mobile menu */

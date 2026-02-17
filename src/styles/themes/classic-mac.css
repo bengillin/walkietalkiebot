@@ -116,8 +116,8 @@
   );
   border-bottom: 1px solid #000000;
   box-shadow: 0 1px 0 #ffffff;
-  min-height: 36px;
-  padding: 4px 8px;
+  min-height: 80px;
+  padding: 12px 20px;
 }
 
 [data-theme="classic-mac"] .app__title {
@@ -289,8 +289,8 @@
 }
 
 [data-theme="classic-mac"] .app__avatar-status {
-  width: 32px;
-  height: 32px;
+  width: 60px;
+  height: 60px;
 }
 
 /* Mobile menu */
