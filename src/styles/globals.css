@@ -1,6 +1,7 @@
 @import './themes/mccallister.css';
 @import './themes/imessage.css';
 @import './themes/aol.css';
+@import './themes/classic-mac.css';
 
 * {
   margin: 0;

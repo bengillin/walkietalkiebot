@@ -1,0 +1,2834 @@
+/* Classic Mac OS Theme - System 7/8/9 Platinum aesthetic */
+[data-theme="classic-mac"] {
+  /* Background Colors - Platinum gray */
+  --bg-primary: #dddddd;
+  --bg-secondary: #eeeeee;
+  --bg-tertiary: #cccccc;
+  --color-bg-secondary: #eeeeee;
+
+  /* Text Colors - Classic black */
+  --text-primary: #000000;
+  --text-secondary: #333333;
+  --text-muted: #666666;
+  --text-tertiary: #999999;
+
+  /* Accent Colors - Mac OS highlight blue */
+  --accent: #3366cc;
+  --accent-hover: #2255bb;
+  --accent-glow: rgba(51, 102, 204, 0.3);
+  --accent-soft: rgba(51, 102, 204, 0.1);
+
+  /* Secondary accent - Apple rainbow */
+  --accent-secondary: #36c;
+
+  /* Message Colors */
+  --message-user-bg: #dddddd;
+  --message-user-text: #000000;
+  --message-assistant-bg: #ffffff;
+  --message-assistant-text: #000000;
+
+  /* Robot Avatar Colors */
+  --robot-body: #dddddd;
+  --robot-shadow: #999999;
+  --robot-highlight: #ffffff;
+
+  /* Screen States */
+  --screen-idle: #3366cc;
+  --screen-happy: #ff6600;
+  --screen-error: #cc0000;
+  --screen-listening: #009933;
+  --screen-thinking: #6633cc;
+
+  /* Borders & Shadows - Classic Mac 1px black borders */
+  --border-subtle: #999999;
+  --border-light: #bbbbbb;
+  --border-color: #000000;
+  --color-border: #000000;
+  --shadow-soft: 1px 1px 0 #000000;
+  --shadow-glow: none;
+
+  /* Header specific */
+  --header-bg: #dddddd;
+  --header-border: #000000;
+  --header-text: #000000;
+
+  /* Button styling - Mac OS rounded rect with 1px border */
+  --btn-bg: #dddddd;
+  --btn-hover: #eeeeee;
+  --btn-border: #000000;
+  --btn-shadow: 1px 1px 0 #000000;
+
+  /* Input styling */
+  --input-bg: #ffffff;
+  --input-border: #000000;
+
+  /* Modal */
+  --modal-bg: #dddddd;
+  --modal-overlay: rgba(0, 0, 0, 0.4);
+
+  /* Typography - Chicago / Charcoal system fonts */
+  --font-family: 'Geneva', 'Lucida Grande', 'Helvetica Neue', Helvetica, sans-serif;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+  --title-font: 'Chicago', 'Charcoal', 'Geneva', 'Lucida Grande', 'Helvetica Neue', sans-serif;
+  --title-style: normal;
+  --title-transform: none;
+  --letter-spacing: 0;
+
+  /* Radius - Classic Mac subtle rounding */
+  --radius-sm: 3px;
+  --radius-md: 5px;
+  --radius-lg: 8px;
+  --radius-full: 9999px;
+}
+
+/* ============================================
+   Body & Root
+   ============================================ */
+[data-theme="classic-mac"] html,
+[data-theme="classic-mac"] body {
+  background: #dddddd;
+  /* Platinum horizontal pinstripes */
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 1px,
+    rgba(255, 255, 255, 0.3) 1px,
+    rgba(255, 255, 255, 0.3) 2px
+  );
+  font-family: 'Geneva', 'Lucida Grande', 'Helvetica Neue', Helvetica, sans-serif;
+  -webkit-font-smoothing: auto;
+  font-size: 12px;
+}
+
+/* ============================================
+   Header - Classic Mac menu bar
+   ============================================ */
+[data-theme="classic-mac"] .app__header {
+  background: #dddddd;
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 1px,
+    rgba(255, 255, 255, 0.4) 1px,
+    rgba(255, 255, 255, 0.4) 2px
+  );
+  border-bottom: 1px solid #000000;
+  box-shadow: 0 1px 0 #ffffff;
+  min-height: 36px;
+  padding: 4px 8px;
+}
+
+[data-theme="classic-mac"] .app__title {
+  font-family: 'Chicago', 'Charcoal', 'Geneva', 'Lucida Grande', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  font-style: normal;
+  letter-spacing: 0;
+  text-transform: none;
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: #000000;
+  background-clip: unset;
+  text-shadow: none;
+  filter: none;
+}
+
+/* Header buttons - Classic Mac rounded buttons */
+[data-theme="classic-mac"] .app__header-btn {
+  background: #dddddd;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  color: #000000;
+  box-shadow: none;
+  padding: 2px 6px;
+  width: 28px;
+  height: 24px;
+  min-width: 28px;
+}
+
+[data-theme="classic-mac"] .app__header-btn:hover {
+  background: #eeeeee;
+  color: #000000;
+  border-color: #000000;
+}
+
+[data-theme="classic-mac"] .app__header-btn:active {
+  background: #000000;
+  color: #ffffff;
+  box-shadow: none;
+  transform: none;
+}
+
+[data-theme="classic-mac"] .app__header-btn:disabled {
+  color: #999999;
+  border-color: #999999;
+}
+
+/* Eject button active */
+[data-theme="classic-mac"] .app__header-btn--eject.app__header-btn--active {
+  background: #000000;
+  border-color: #000000;
+  color: #ffffff;
+  box-shadow: none;
+}
+
+/* Record button - Classic Mac style */
+[data-theme="classic-mac"] .app__header-btn--record {
+  background: #dddddd;
+  border: 1px solid #000000;
+  color: #cc0000;
+  width: 28px;
+  height: 24px;
+  border-radius: 3px;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .app__header-btn--record::before {
+  display: none;
+}
+
+[data-theme="classic-mac"] .app__header-btn--record:hover:not(:disabled) {
+  background: #eeeeee;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .app__header-btn--record:active:not(:disabled) {
+  background: #cc0000;
+  color: #ffffff;
+  box-shadow: none;
+  transform: none;
+}
+
+[data-theme="classic-mac"] .app__header-btn--record.app__header-btn--recording {
+  background: #cc0000;
+  color: #ffffff;
+  border-color: #000000;
+  box-shadow: none;
+  animation: classic-mac-record-blink 1s ease-in-out infinite;
+}
+
+[data-theme="classic-mac"] .app__header-btn--record.app__header-btn--recording::before {
+  display: none;
+}
+
+@keyframes classic-mac-record-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Tap to talk pulse */
+[data-theme="classic-mac"] .app__header-btn--record.app__header-btn--tap-to-talk {
+  animation: classic-mac-tap-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes classic-mac-tap-pulse {
+  0%, 100% { background: #dddddd; }
+  50% { background: #ffcccc; }
+}
+
+/* Recording indicator */
+[data-theme="classic-mac"] .app__recording-indicator {
+  background: #dddddd;
+  border-radius: 3px;
+}
+
+[data-theme="classic-mac"] .app__recording-dot {
+  background: #cc0000;
+  border-radius: 50%;
+}
+
+[data-theme="classic-mac"] .app__recording-label {
+  color: #cc0000;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  font-size: 10px;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+}
+
+/* Liner notes indicator */
+[data-theme="classic-mac"] .app__header-btn--has-notes::after {
+  background: #ff6600;
+  border-color: #000000;
+  border-radius: 50%;
+}
+
+/* Conversation dropdown - Classic Mac popup menu */
+[data-theme="classic-mac"] .app__conversation-dropdown {
+  background: #ffffff;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  padding: 2px 8px;
+  box-shadow: 1px 1px 0 #000000;
+}
+
+[data-theme="classic-mac"] .app__conversation-dropdown:hover {
+  background: #eeeeee;
+}
+
+[data-theme="classic-mac"] .app__conversation-title {
+  color: #000000;
+  font-weight: 400;
+  font-size: 12px;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+}
+
+/* Logo */
+[data-theme="classic-mac"] .app__logo {
+  height: 28px;
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+/* Avatar */
+[data-theme="classic-mac"] .app__avatar-mini {
+  width: 32px;
+  height: 32px;
+}
+
+[data-theme="classic-mac"] .app__avatar-status {
+  width: 32px;
+  height: 32px;
+}
+
+/* Mobile menu */
+[data-theme="classic-mac"] .app__mobile-menu-btn {
+  background: #dddddd;
+  border: 1px solid #000000;
+  color: #000000;
+  border-radius: 3px;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .app__mobile-menu {
+  background: #ffffff;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="classic-mac"] .app__mobile-menu-item {
+  color: #000000;
+  font-size: 12px;
+  padding: 4px 16px;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+}
+
+[data-theme="classic-mac"] .app__mobile-menu-item:hover {
+  background: #3366cc;
+  color: #ffffff;
+}
+
+[data-theme="classic-mac"] .app__mobile-menu-item:active {
+  background: #3366cc;
+  color: #ffffff;
+}
+
+[data-theme="classic-mac"] .app__mobile-menu-item--danger {
+  color: #cc0000;
+}
+
+[data-theme="classic-mac"] .app__mobile-menu-item--danger:hover {
+  background: #cc0000;
+  color: #ffffff;
+}
+
+/* ============================================
+   Main Content Area
+   ============================================ */
+[data-theme="classic-mac"] .app__main {
+  background: #dddddd;
+}
+
+[data-theme="classic-mac"] .app__avatar-section {
+  background: #dddddd;
+  border-bottom: 1px solid #000000;
+}
+
+[data-theme="classic-mac"] .app__error {
+  color: #cc0000;
+  background: #ffffff;
+  border: 1px solid #000000;
+  border-radius: 3px;
+}
+
+/* Plan notification */
+[data-theme="classic-mac"] .app__plan-notification {
+  background: #ffffff;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  color: #000000;
+  font-weight: 700;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+}
+
+[data-theme="classic-mac"] .app__plan-notification:hover {
+  background: #eeeeee;
+}
+
+/* Input bar */
+[data-theme="classic-mac"] .app__input-bar {
+  background: #dddddd;
+  border-top: 1px solid #000000;
+}
+
+/* ============================================
+   Chat Timeline - Classic Mac window content
+   ============================================ */
+[data-theme="classic-mac"] .chat-timeline {
+  background: #ffffff;
+  border: 1px solid #000000;
+  box-shadow: inset 1px 1px 0 #999999;
+}
+
+/* Message bubbles - Classic Mac dialog style */
+[data-theme="classic-mac"] .message-bubble {
+  border-radius: 5px;
+  font-family: 'Geneva', 'Lucida Grande', 'Helvetica Neue', sans-serif;
+  font-weight: 400;
+  border: 1px solid #000000;
+  box-shadow: 1px 1px 0 #999999;
+  font-size: 12px;
+}
+
+[data-theme="classic-mac"] .message-bubble.user {
+  background: #dddddd;
+  color: #000000;
+  border: 1px solid #000000;
+  border-radius: 5px;
+  box-shadow: 1px 1px 0 #999999;
+}
+
+[data-theme="classic-mac"] .message-bubble.assistant {
+  background: #ffffff;
+  color: #000000;
+  border: 1px solid #000000;
+  border-radius: 5px;
+  box-shadow: 1px 1px 0 #999999;
+}
+
+/* Hide the default tail */
+[data-theme="classic-mac"] .message-bubble.assistant::after {
+  display: none;
+}
+
+[data-theme="classic-mac"] .message-bubble.user::after {
+  display: none;
+}
+
+[data-theme="classic-mac"] .message-bubble.listening {
+  background: #ffffcc;
+  border: 1px dashed #000000;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .message-bubble.thinking {
+  background: #eeeeee;
+  color: #666666;
+  border: 1px solid #999999;
+  border-radius: 5px;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .message-bubble.streaming {
+  background: #ffffff;
+  color: #000000;
+  border: 1px solid #000000;
+  border-radius: 5px;
+  box-shadow: 1px 1px 0 #999999;
+}
+
+/* Links in messages */
+[data-theme="classic-mac"] .message-link {
+  color: #3366cc;
+  text-decoration: underline;
+}
+
+[data-theme="classic-mac"] .message-bubble.user .message-link {
+  color: #3366cc;
+  text-decoration: underline;
+}
+
+/* Message status */
+[data-theme="classic-mac"] .message-status {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  font-weight: 400;
+  text-transform: none;
+  font-size: 10px;
+  color: #666666;
+}
+
+/* Message meta */
+[data-theme="classic-mac"] .message-meta {
+  color: #666666;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+}
+
+[data-theme="classic-mac"] .message-meta__name--recording {
+  color: #cc0000;
+}
+
+/* Message images */
+[data-theme="classic-mac"] .message-image-thumb {
+  border-radius: 3px;
+  border: 1px solid #000000;
+  box-shadow: 1px 1px 0 #999999;
+}
+
+[data-theme="classic-mac"] .message-image-thumb:hover {
+  transform: none;
+  box-shadow: 2px 2px 0 #999999;
+  border-color: #3366cc;
+}
+
+[data-theme="classic-mac"] .message-image-analyzed {
+  background: #009933;
+  border-radius: 50%;
+}
+
+/* Typing indicator */
+[data-theme="classic-mac"] .typing-indicator span {
+  width: 5px;
+  height: 5px;
+  background: #000000;
+  border: none;
+  border-radius: 50%;
+  box-shadow: none;
+}
+
+/* Code blocks in messages */
+[data-theme="classic-mac"] .msg-code-block {
+  background: #ffffff;
+  color: #000000;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  font-family: 'Monaco', 'Courier New', monospace;
+  box-shadow: inset 1px 1px 0 #cccccc;
+}
+
+[data-theme="classic-mac"] .message-bubble.user .msg-code-block {
+  background: #ffffff;
+  color: #000000;
+  border: 1px solid #000000;
+}
+
+[data-theme="classic-mac"] .msg-inline-code {
+  background: #eeeeee;
+  color: #000000;
+  border-radius: 2px;
+  font-family: 'Monaco', 'Courier New', monospace;
+  padding: 1px 4px;
+  border: 1px solid #cccccc;
+}
+
+[data-theme="classic-mac"] .message-bubble.user .msg-inline-code {
+  background: #eeeeee;
+  color: #000000;
+}
+
+/* Headings in messages */
+[data-theme="classic-mac"] .msg-heading--1 {
+  color: #000000;
+  font-family: 'Chicago', 'Charcoal', 'Geneva', sans-serif;
+}
+
+/* Scrollbar - Classic Mac style */
+[data-theme="classic-mac"] .chat-timeline::-webkit-scrollbar {
+  width: 16px;
+}
+
+[data-theme="classic-mac"] .chat-timeline::-webkit-scrollbar-track {
+  background: #dddddd;
+  border-left: 1px solid #000000;
+}
+
+[data-theme="classic-mac"] .chat-timeline::-webkit-scrollbar-thumb {
+  background: #bbbbbb;
+  border: 1px solid #000000;
+  border-radius: 0;
+  box-shadow: inset 1px 1px 0 #eeeeee, inset -1px -1px 0 #999999;
+}
+
+[data-theme="classic-mac"] .chat-timeline::-webkit-scrollbar-thumb:hover {
+  background: #cccccc;
+}
+
+[data-theme="classic-mac"] .chat-timeline::-webkit-scrollbar-button:vertical:start:decrement,
+[data-theme="classic-mac"] .chat-timeline::-webkit-scrollbar-button:vertical:end:increment {
+  display: block;
+  height: 16px;
+  background: #dddddd;
+  border: 1px solid #000000;
+  box-shadow: inset 1px 1px 0 #ffffff, inset -1px -1px 0 #999999;
+}
+
+/* ============================================
+   Tool Badges - Classic Mac labels
+   ============================================ */
+[data-theme="classic-mac"] .tool-badge {
+  background: #eeeeee;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  box-shadow: none;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  font-weight: 400;
+  text-transform: none;
+  font-size: 10px;
+  letter-spacing: 0;
+  padding: 2px 6px;
+  color: #000000;
+}
+
+[data-theme="classic-mac"] .tool-badge .tool-name {
+  color: #000000;
+  font-weight: 700;
+}
+
+[data-theme="classic-mac"] .tool-badge .tool-input {
+  color: #666666;
+}
+
+[data-theme="classic-mac"] .tool-badge.running {
+  border-color: #000000;
+  background: #eeeeee;
+  color: #3366cc;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .tool-badge.running .tool-name,
+[data-theme="classic-mac"] .tool-badge.running .tool-input {
+  color: #3366cc;
+}
+
+[data-theme="classic-mac"] .tool-badge.error {
+  border-color: #000000;
+  background: #eeeeee;
+  color: #cc0000;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .tool-badge.error .tool-name,
+[data-theme="classic-mac"] .tool-badge.error .tool-input {
+  color: #cc0000;
+}
+
+[data-theme="classic-mac"] .tool-spinner {
+  border-top-color: #3366cc;
+}
+
+[data-theme="classic-mac"] .tool-complete {
+  color: #009933;
+  font-weight: 700;
+}
+
+[data-theme="classic-mac"] .tool-error {
+  color: #cc0000;
+  font-weight: 700;
+}
+
+/* Collapsible tools indicator */
+[data-theme="classic-mac"] .collapsible-tools__indicator {
+  background: #eeeeee;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  box-shadow: none;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  font-weight: 400;
+  text-transform: none;
+  font-size: 10px;
+  letter-spacing: 0;
+  color: #000000;
+  padding: 2px 8px;
+}
+
+[data-theme="classic-mac"] .collapsible-tools__indicator:hover {
+  background: #ffffff;
+  border-color: #000000;
+  transform: none;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .collapsible-tools__indicator.running {
+  border-color: #000000;
+  background: #eeeeee;
+  color: #3366cc;
+  box-shadow: none;
+  animation: classic-mac-tool-blink 1.5s ease-in-out infinite;
+}
+
+@keyframes classic-mac-tool-blink {
+  0%, 100% { color: #3366cc; }
+  50% { color: #eeeeee; }
+}
+
+[data-theme="classic-mac"] .collapsible-tools__indicator.error {
+  border-color: #000000;
+  background: #eeeeee;
+  color: #cc0000;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .collapsible-tools__count {
+  color: inherit;
+  font-weight: 700;
+}
+
+/* Avatar container */
+[data-theme="classic-mac"] .chat-timeline__avatar-container {
+  background: #dddddd;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  box-shadow: none;
+  padding: 8px;
+}
+
+/* ============================================
+   Unified Input Bar - Classic Mac text input
+   ============================================ */
+[data-theme="classic-mac"] .unified-input-bar {
+  background: #dddddd;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-top: 1px solid #000000;
+  box-shadow: 0 -1px 0 #ffffff;
+  padding: 6px 8px;
+}
+
+[data-theme="classic-mac"] .unified-input-bar.listening {
+  background: #dddddd;
+  border-top-color: #cc0000;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .unified-input-bar__field {
+  background: #ffffff;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  color: #000000;
+  font-family: 'Geneva', 'Lucida Grande', 'Helvetica Neue', sans-serif;
+  font-weight: 400;
+  box-shadow: inset 1px 1px 0 #999999;
+  height: auto;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+[data-theme="classic-mac"] .unified-input-bar__field:focus {
+  border-color: #000000;
+  box-shadow: inset 1px 1px 0 #999999;
+  outline: 2px solid #3366cc;
+  outline-offset: 0;
+}
+
+[data-theme="classic-mac"] .unified-input-bar__field::placeholder {
+  color: #999999;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+}
+
+[data-theme="classic-mac"] .unified-input-bar__icon-btn {
+  background: #dddddd;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  color: #000000;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .unified-input-bar__icon-btn:hover:not(:disabled) {
+  background: #eeeeee;
+  transform: none;
+  color: #000000;
+  border-color: #000000;
+}
+
+[data-theme="classic-mac"] .unified-input-bar__icon-btn.mic-active {
+  background: #cc0000;
+  border-color: #000000;
+  box-shadow: none;
+  color: white;
+  animation: classic-mac-record-blink 1s ease-in-out infinite;
+}
+
+/* Send button */
+[data-theme="classic-mac"] .unified-input-bar__send {
+  background: #dddddd;
+  border: 2px solid #000000;
+  border-radius: 5px;
+  box-shadow: none;
+  color: #000000;
+  font-family: 'Chicago', 'Charcoal', 'Geneva', sans-serif;
+  font-weight: 700;
+}
+
+[data-theme="classic-mac"] .unified-input-bar__send:hover:not(:disabled) {
+  background: #eeeeee;
+  transform: none;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .unified-input-bar__send:active:not(:disabled) {
+  background: #000000;
+  color: #ffffff;
+  transform: none;
+}
+
+/* ============================================
+   Conversation Dropdown Sidebar
+   ============================================ */
+[data-theme="classic-mac"] .conversation-dropdown-panel {
+  background: #dddddd;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="classic-mac"] .dropdown-new-btn {
+  background: #dddddd;
+  border: 2px solid #000000;
+  border-radius: 5px;
+  color: #000000;
+  box-shadow: none;
+  font-family: 'Chicago', 'Charcoal', 'Geneva', sans-serif;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+[data-theme="classic-mac"] .dropdown-new-btn:hover {
+  background: #eeeeee;
+  border-color: #000000;
+  color: #000000;
+  transform: none;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .dropdown-new-btn:active {
+  background: #000000;
+  color: #ffffff;
+  transform: none;
+}
+
+[data-theme="classic-mac"] .dropdown-item {
+  border-radius: 3px;
+  border: none;
+  margin-bottom: 1px;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+}
+
+[data-theme="classic-mac"] .dropdown-item:hover {
+  background: #3366cc;
+  color: #ffffff;
+  border: none;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .dropdown-item.active {
+  background: #3366cc;
+  border: none;
+  box-shadow: none;
+  color: #ffffff;
+}
+
+[data-theme="classic-mac"] .dropdown-item.active .dropdown-item-title,
+[data-theme="classic-mac"] .dropdown-item.active .dropdown-item-meta {
+  color: #ffffff;
+}
+
+[data-theme="classic-mac"] .dropdown-item:hover .dropdown-item-title,
+[data-theme="classic-mac"] .dropdown-item:hover .dropdown-item-meta {
+  color: #ffffff;
+}
+
+[data-theme="classic-mac"] .dropdown-item-title {
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  font-weight: 700;
+  color: #000000;
+}
+
+[data-theme="classic-mac"] .dropdown-item-meta {
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  text-transform: none;
+  font-size: 10px;
+  letter-spacing: 0;
+  color: #666666;
+}
+
+[data-theme="classic-mac"] .dropdown-item-context,
+[data-theme="classic-mac"] .dropdown-item-delete {
+  background: #dddddd;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  box-shadow: none;
+  color: #000000;
+}
+
+[data-theme="classic-mac"] .dropdown-item-context:hover {
+  background: #eeeeee;
+  border-color: #000000;
+  color: #000000;
+}
+
+[data-theme="classic-mac"] .dropdown-item-delete:hover {
+  background: #cc0000;
+  border-color: #000000;
+  color: #ffffff;
+}
+
+[data-theme="classic-mac"] .dropdown-context-info {
+  background: #ffffcc;
+  border-top: 1px solid #000000;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  text-transform: none;
+  color: #009933;
+}
+
+/* ============================================
+   Speaker Avatar
+   ============================================ */
+[data-theme="classic-mac"] .speaker-avatar__grille {
+  background: #dddddd;
+  border: 1px solid #000000;
+  box-shadow: none;
+  border-radius: 3px;
+}
+
+[data-theme="classic-mac"] .speaker-avatar--listening .speaker-avatar__grille {
+  box-shadow: 0 0 4px #009933;
+  border-color: #009933;
+}
+
+[data-theme="classic-mac"] .speaker-avatar--listening .speaker-avatar__hole {
+  background: #009933;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .speaker-avatar--speaking .speaker-avatar__grille {
+  border-color: #3366cc;
+}
+
+[data-theme="classic-mac"] .speaker-avatar--speaking .speaker-avatar__hole {
+  background: #3366cc;
+}
+
+[data-theme="classic-mac"] .speaker-avatar--happy .speaker-avatar__grille {
+  border-color: #ff6600;
+}
+
+/* ============================================
+   Robot Avatar
+   ============================================ */
+[data-theme="classic-mac"] .robot__body {
+  background: #dddddd;
+  border-color: #000000;
+  border-radius: 3px;
+}
+
+[data-theme="classic-mac"] .robot__screen {
+  background: #3366cc;
+  border-radius: 2px;
+}
+
+[data-theme="classic-mac"] .robot__antenna-tip {
+  background: #ff6600;
+  box-shadow: none;
+  border-radius: 50%;
+}
+
+[data-theme="classic-mac"] .robot__led {
+  background: #009933;
+  box-shadow: 0 0 3px #009933;
+  border-radius: 50%;
+}
+
+[data-theme="classic-mac"] .robot__base {
+  background: #999999;
+  border-radius: 2px;
+}
+
+[data-theme="classic-mac"] .robot--listening .robot__screen {
+  background: #009933;
+}
+
+[data-theme="classic-mac"] .robot--listening .robot__antenna-tip {
+  background: #009933;
+  box-shadow: 0 0 3px #009933;
+}
+
+[data-theme="classic-mac"] .robot--thinking .robot__screen {
+  background: #6633cc;
+  animation: classic-mac-think-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes classic-mac-think-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+[data-theme="classic-mac"] .robot--thinking .robot__antenna-tip {
+  background: #6633cc;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .robot--happy .robot__screen {
+  background: #ff6600;
+}
+
+[data-theme="classic-mac"] .robot--confused .robot__screen {
+  background: #cc0000;
+}
+
+/* ============================================
+   Settings Drawer - Classic Mac control panel
+   ============================================ */
+[data-theme="classic-mac"] .settings__drawer {
+  background: #dddddd;
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 1px,
+    rgba(255, 255, 255, 0.3) 1px,
+    rgba(255, 255, 255, 0.3) 2px
+  );
+  border-top: 1px solid #000000;
+  border-radius: 0;
+  box-shadow: -1px 0 0 #000000;
+}
+
+[data-theme="classic-mac"] .settings__header {
+  background: #dddddd;
+  /* Classic Mac horizontal stripes title bar */
+  background-image: repeating-linear-gradient(
+    0deg,
+    #dddddd,
+    #dddddd 1px,
+    #000000 1px,
+    #000000 2px,
+    #dddddd 2px,
+    #dddddd 3px,
+    #ffffff 3px,
+    #ffffff 4px
+  );
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom: 1px solid #000000;
+  padding: 4px 8px;
+}
+
+[data-theme="classic-mac"] .settings__title {
+  font-family: 'Chicago', 'Charcoal', 'Geneva', sans-serif;
+  font-weight: 700;
+  font-style: normal;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #000000;
+  font-size: 12px;
+  text-shadow: none;
+  background: #dddddd;
+  padding: 0 6px;
+}
+
+[data-theme="classic-mac"] .settings__close {
+  background: #dddddd;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  color: #000000;
+  box-shadow: none;
+  width: 16px;
+  height: 16px;
+}
+
+[data-theme="classic-mac"] .settings__close:hover {
+  background: #000000;
+  border-color: #000000;
+  color: #ffffff;
+}
+
+/* Settings section titles */
+[data-theme="classic-mac"] .settings__section-title {
+  font-family: 'Chicago', 'Charcoal', 'Geneva', sans-serif;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #000000;
+  font-size: 11px;
+  margin-top: 12px;
+  margin-bottom: 4px;
+  padding-left: 4px;
+}
+
+[data-theme="classic-mac"] .settings__section-desc {
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  color: #666666;
+  font-size: 10px;
+  padding-left: 4px;
+}
+
+/* Toggle rows */
+[data-theme="classic-mac"] .settings__toggle {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 4px 8px;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .settings__toggle:hover {
+  background: transparent;
+  border: none;
+}
+
+[data-theme="classic-mac"] .settings__toggle-label {
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  font-weight: 400;
+  color: #000000;
+  font-size: 12px;
+}
+
+/* Toggle switch - Classic Mac checkbox */
+[data-theme="classic-mac"] .settings__slider {
+  width: 40px;
+  height: 20px;
+  background: #ffffff;
+  border: 1px solid #000000;
+  border-radius: 10px;
+  box-shadow: inset 1px 1px 0 #999999;
+}
+
+[data-theme="classic-mac"] .settings__slider::before {
+  width: 14px;
+  height: 14px;
+  top: 2px;
+  left: 2px;
+  background: #dddddd;
+  border: 1px solid #000000;
+  border-radius: 50%;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .settings__slider::after {
+  display: none;
+}
+
+[data-theme="classic-mac"] .settings__toggle input:checked + .settings__slider {
+  background: #3366cc;
+  border-color: #000000;
+}
+
+[data-theme="classic-mac"] .settings__toggle input:checked + .settings__slider::before {
+  transform: translateX(20px);
+  background: #ffffff;
+  border-color: #000000;
+}
+
+/* Text inputs - Classic Mac edit field */
+[data-theme="classic-mac"] .settings__text-input {
+  background: #ffffff;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  color: #000000;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  font-weight: 400;
+  box-shadow: inset 1px 1px 0 #999999;
+}
+
+[data-theme="classic-mac"] .settings__text-input:focus {
+  border-color: #000000;
+  box-shadow: inset 1px 1px 0 #999999;
+  outline: 2px solid #3366cc;
+}
+
+[data-theme="classic-mac"] .settings__text-input::placeholder {
+  color: #999999;
+}
+
+[data-theme="classic-mac"] .settings__input-label {
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  font-weight: 400;
+  color: #000000;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 10px;
+}
+
+[data-theme="classic-mac"] .settings__optional {
+  color: #999999;
+}
+
+[data-theme="classic-mac"] .settings__hint {
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  color: #666666;
+  font-size: 10px;
+}
+
+/* Range slider */
+[data-theme="classic-mac"] .settings__range-row input[type="range"] {
+  height: 6px;
+  background: #ffffff;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  box-shadow: inset 1px 1px 0 #999999;
+}
+
+[data-theme="classic-mac"] .settings__range-row input[type="range"]::-webkit-slider-thumb {
+  width: 14px;
+  height: 18px;
+  background: #dddddd;
+  border: 1px solid #000000;
+  border-radius: 2px;
+  box-shadow: inset 1px 1px 0 #ffffff, inset -1px -1px 0 #999999;
+}
+
+[data-theme="classic-mac"] .settings__range-value {
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  font-weight: 400;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  color: #000000;
+  text-shadow: none;
+}
+
+/* Session status */
+[data-theme="classic-mac"] .settings__session {
+  background: #eeeeee;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .settings__session-status {
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #666666;
+}
+
+[data-theme="classic-mac"] .settings__session-status--connected {
+  color: #009933;
+  text-shadow: none;
+}
+
+[data-theme="classic-mac"] .settings__session-disconnect {
+  background: #dddddd;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  color: #000000;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .settings__session-disconnect:hover {
+  background: #000000;
+  border-color: #000000;
+  color: #ffffff;
+}
+
+/* Divider - Classic Mac etched line */
+[data-theme="classic-mac"] .settings__divider {
+  height: 2px;
+  background: none;
+  border-top: 1px solid #999999;
+  border-bottom: 1px solid #ffffff;
+  margin: 6px 0;
+}
+
+/* Subsection */
+[data-theme="classic-mac"] .settings__subsection {
+  background: #eeeeee;
+  border: 1px solid #999999;
+  border-radius: 3px;
+  padding: 8px;
+  margin-left: 0;
+}
+
+/* API form */
+[data-theme="classic-mac"] .settings__api-form input {
+  background: #ffffff;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  color: #000000;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  font-weight: 400;
+  box-shadow: inset 1px 1px 0 #999999;
+}
+
+[data-theme="classic-mac"] .settings__api-form input:focus {
+  border-color: #000000;
+  box-shadow: inset 1px 1px 0 #999999;
+  outline: 2px solid #3366cc;
+}
+
+[data-theme="classic-mac"] .settings__api-form input::placeholder {
+  color: #999999;
+}
+
+[data-theme="classic-mac"] .settings__api-form button {
+  background: #dddddd;
+  border: 2px solid #000000;
+  border-radius: 5px;
+  color: #000000;
+  font-family: 'Chicago', 'Charcoal', 'Geneva', sans-serif;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .settings__api-form button:hover:not(:disabled) {
+  background: #eeeeee;
+  transform: none;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .settings__api-form button:active:not(:disabled) {
+  background: #000000;
+  color: #ffffff;
+  transform: none;
+}
+
+[data-theme="classic-mac"] .settings__api-link {
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  font-weight: 400;
+  color: #3366cc;
+  text-decoration: underline;
+}
+
+[data-theme="classic-mac"] .settings__api-link:hover {
+  color: #6633cc;
+}
+
+/* Advanced section */
+[data-theme="classic-mac"] .settings__advanced-toggle {
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #3366cc;
+  text-decoration: underline;
+  font-size: 12px;
+}
+
+[data-theme="classic-mac"] .settings__advanced-toggle:hover {
+  color: #6633cc;
+}
+
+/* Reset button */
+[data-theme="classic-mac"] .settings__reset-btn {
+  background: #dddddd;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  color: #000000;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  box-shadow: none;
+  font-size: 12px;
+}
+
+[data-theme="classic-mac"] .settings__reset-btn:hover {
+  background: #eeeeee;
+  border-color: #000000;
+  color: #000000;
+}
+
+/* Export button */
+[data-theme="classic-mac"] .settings__export-btn {
+  background: #dddddd;
+  border: 2px solid #000000;
+  border-radius: 5px;
+  color: #000000;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .settings__export-btn:hover {
+  background: #eeeeee;
+}
+
+/* Integration status */
+[data-theme="classic-mac"] .settings__integration-status--active {
+  background: #eeeeee;
+  color: #009933;
+  border: 1px solid #000000;
+}
+
+/* Scrollbar */
+[data-theme="classic-mac"] .settings__drawer::-webkit-scrollbar {
+  width: 16px;
+}
+
+[data-theme="classic-mac"] .settings__drawer::-webkit-scrollbar-track {
+  background: #dddddd;
+  border-left: 1px solid #000000;
+}
+
+[data-theme="classic-mac"] .settings__drawer::-webkit-scrollbar-thumb {
+  background: #bbbbbb;
+  border-radius: 0;
+  border: 1px solid #000000;
+  box-shadow: inset 1px 1px 0 #eeeeee, inset -1px -1px 0 #999999;
+}
+
+[data-theme="classic-mac"] .settings__drawer::-webkit-scrollbar-thumb:hover {
+  background: #cccccc;
+}
+
+/* ============================================
+   Theme Selector
+   ============================================ */
+[data-theme="classic-mac"] .settings__theme-option {
+  background: #eeeeee;
+  border: 1px solid #000000;
+  border-radius: 3px;
+}
+
+[data-theme="classic-mac"] .settings__theme-option:hover {
+  border-color: #3366cc;
+  background: #ffffff;
+}
+
+[data-theme="classic-mac"] .settings__theme-option--active {
+  border-color: #3366cc;
+  border-width: 2px;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .settings__theme-name {
+  color: #000000;
+  font-weight: 700;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+}
+
+[data-theme="classic-mac"] .settings__theme-desc {
+  color: #666666;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+}
+
+[data-theme="classic-mac"] .settings__theme-check {
+  background: #3366cc;
+  color: #ffffff;
+  border-radius: 50%;
+}
+
+/* ============================================
+   Modal - Classic Mac dialog box
+   ============================================ */
+[data-theme="classic-mac"] .modal-overlay {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: none;
+}
+
+[data-theme="classic-mac"] .modal {
+  background: #dddddd;
+  border: 1px solid #000000;
+  border-radius: 5px;
+  box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.4);
+  padding: 12px;
+}
+
+[data-theme="classic-mac"] .modal h2 {
+  font-weight: 700;
+  color: #000000;
+  font-family: 'Chicago', 'Charcoal', 'Geneva', sans-serif;
+}
+
+[data-theme="classic-mac"] .modal p {
+  color: #000000;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+}
+
+[data-theme="classic-mac"] .modal input {
+  background: #ffffff;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  color: #000000;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  box-shadow: inset 1px 1px 0 #999999;
+}
+
+[data-theme="classic-mac"] .modal input:focus {
+  border-color: #000000;
+  box-shadow: inset 1px 1px 0 #999999;
+  outline: 2px solid #3366cc;
+}
+
+[data-theme="classic-mac"] .modal input::placeholder {
+  color: #999999;
+}
+
+[data-theme="classic-mac"] .modal button {
+  background: #dddddd;
+  border: 2px solid #000000;
+  border-radius: 5px;
+  color: #000000;
+  font-weight: 700;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .modal button:hover:not(:disabled) {
+  background: #eeeeee;
+  transform: none;
+}
+
+[data-theme="classic-mac"] .modal a {
+  color: #3366cc;
+  text-decoration: underline;
+}
+
+[data-theme="classic-mac"] .modal a:hover {
+  color: #6633cc;
+}
+
+[data-theme="classic-mac"] .modal__close {
+  background: #dddddd;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  color: #000000;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .modal__close:hover {
+  background: #000000;
+  color: #ffffff;
+}
+
+/* ============================================
+   Search Overlay - Classic Mac Find dialog
+   ============================================ */
+[data-theme="classic-mac"] .search-overlay {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="classic-mac"] .search-overlay__panel {
+  background: #dddddd;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid #000000;
+  border-radius: 5px;
+  box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="classic-mac"] .search-overlay__input-row {
+  border-bottom: 1px solid #999999;
+}
+
+[data-theme="classic-mac"] .search-overlay__input {
+  color: #000000;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  background: #ffffff;
+  border: 1px solid #000000;
+}
+
+[data-theme="classic-mac"] .search-overlay__input::placeholder {
+  color: #999999;
+}
+
+[data-theme="classic-mac"] .search-overlay__spinner {
+  border-color: #dddddd;
+  border-top-color: #3366cc;
+}
+
+[data-theme="classic-mac"] .search-overlay__result:hover {
+  background: #3366cc;
+  color: #ffffff;
+}
+
+[data-theme="classic-mac"] .search-overlay__result-snippet mark {
+  background: #ffff00;
+  border-radius: 0;
+  color: #000000;
+}
+
+[data-theme="classic-mac"] .search-overlay__results::-webkit-scrollbar-thumb {
+  background: #bbbbbb;
+  border: 1px solid #000000;
+  box-shadow: inset 1px 1px 0 #eeeeee, inset -1px -1px 0 #999999;
+}
+
+/* ============================================
+   Plans Panel
+   ============================================ */
+[data-theme="classic-mac"] .plans__panel {
+  background: #dddddd;
+  border: 1px solid #000000;
+  box-shadow: -1px 0 0 #000000;
+}
+
+[data-theme="classic-mac"] .plans__header {
+  border-bottom: 1px solid #000000;
+  background: #dddddd;
+  background-image: repeating-linear-gradient(
+    0deg,
+    #dddddd,
+    #dddddd 1px,
+    #000000 1px,
+    #000000 2px,
+    #dddddd 2px,
+    #dddddd 3px,
+    #ffffff 3px,
+    #ffffff 4px
+  );
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+[data-theme="classic-mac"] .plans__icon {
+  color: #ff6600;
+}
+
+[data-theme="classic-mac"] .plans__title {
+  color: #000000;
+  font-weight: 700;
+  text-shadow: none;
+  font-family: 'Chicago', 'Charcoal', 'Geneva', sans-serif;
+  background: #dddddd;
+  padding: 0 6px;
+}
+
+[data-theme="classic-mac"] .plans__close {
+  background: #dddddd;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  color: #000000;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .plans__close:hover {
+  background: #000000;
+  color: #ffffff;
+}
+
+[data-theme="classic-mac"] .plans__new-btn {
+  background: #dddddd;
+  color: #000000;
+  border: 2px solid #000000;
+  border-radius: 5px;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .plans__new-btn:hover {
+  background: #eeeeee;
+}
+
+[data-theme="classic-mac"] .plans__item {
+  background: #eeeeee;
+  border: 1px solid #000000;
+  border-radius: 3px;
+}
+
+[data-theme="classic-mac"] .plans__item:hover {
+  background: #ffffff;
+}
+
+[data-theme="classic-mac"] .plans__status-dot--approved {
+  background: #3366cc;
+  border-radius: 50%;
+}
+
+[data-theme="classic-mac"] .plans__status-dot--in_progress {
+  background: #ff6600;
+  border-radius: 50%;
+}
+
+[data-theme="classic-mac"] .plans__status-dot--completed {
+  background: #009933;
+  border-radius: 50%;
+}
+
+[data-theme="classic-mac"] .plans__edit-btn {
+  background: transparent;
+  border: none;
+  color: #3366cc;
+  text-decoration: underline;
+}
+
+[data-theme="classic-mac"] .plans__delete-btn {
+  background: transparent;
+  border: none;
+  color: #cc0000;
+  text-decoration: underline;
+}
+
+[data-theme="classic-mac"] .plans__delete-btn:hover {
+  background: transparent;
+}
+
+[data-theme="classic-mac"] .plans__editor-title,
+[data-theme="classic-mac"] .plans__editor-content {
+  background: #ffffff;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  color: #000000;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  box-shadow: inset 1px 1px 0 #999999;
+}
+
+[data-theme="classic-mac"] .plans__editor-title:focus,
+[data-theme="classic-mac"] .plans__editor-content:focus {
+  border-color: #000000;
+  box-shadow: inset 1px 1px 0 #999999;
+  outline: 2px solid #3366cc;
+}
+
+[data-theme="classic-mac"] .plans__error {
+  color: #cc0000;
+}
+
+[data-theme="classic-mac"] .plans__content::-webkit-scrollbar-thumb {
+  background: #bbbbbb;
+  border: 1px solid #000000;
+  box-shadow: inset 1px 1px 0 #eeeeee, inset -1px -1px 0 #999999;
+}
+
+/* ============================================
+   Tape Deck
+   ============================================ */
+[data-theme="classic-mac"] .tape-deck {
+  background: #dddddd;
+  border: 1px solid #000000;
+  border-radius: 5px;
+}
+
+[data-theme="classic-mac"] .tape-deck__action-btn {
+  background: #dddddd;
+  border: 1px solid #000000;
+  color: #000000;
+  border-radius: 3px;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .tape-deck__action-btn:hover {
+  background: #eeeeee;
+  color: #000000;
+}
+
+[data-theme="classic-mac"] .tape-deck__action-btn:active {
+  background: #000000;
+  color: #ffffff;
+  box-shadow: none;
+  transform: none;
+}
+
+[data-theme="classic-mac"] .tape-deck__action-btn--eject.active {
+  background: #000000;
+  color: #ffffff;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .tape-deck__action-btn--send {
+  background: #dddddd;
+  border: 2px solid #000000;
+  color: #000000;
+  box-shadow: none;
+  font-weight: 700;
+  border-radius: 5px;
+}
+
+[data-theme="classic-mac"] .tape-deck__action-btn--send:hover {
+  background: #eeeeee;
+}
+
+[data-theme="classic-mac"] .tape-deck__action-btn--mic.recording {
+  background: #cc0000;
+  color: #ffffff;
+  border-color: #000000;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .tape-deck__input {
+  background: #ffffff;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  color: #000000;
+  box-shadow: inset 1px 1px 0 #999999;
+}
+
+[data-theme="classic-mac"] .tape-deck__input:focus {
+  border-color: #000000;
+  box-shadow: inset 1px 1px 0 #999999;
+  outline: 2px solid #3366cc;
+}
+
+[data-theme="classic-mac"] .tape-deck__input::placeholder {
+  color: #999999;
+}
+
+[data-theme="classic-mac"] .tape-deck__empty-slot {
+  color: #999999;
+  background: #eeeeee;
+  border-radius: 3px;
+  border: 1px solid #000000;
+}
+
+/* ============================================
+   Tape Collection
+   ============================================ */
+[data-theme="classic-mac"] .tape-collection__drawer {
+  background: #dddddd;
+  border: 1px solid #000000;
+}
+
+[data-theme="classic-mac"] .tape-collection__new-btn {
+  background: #dddddd;
+  border: 2px solid #000000;
+  border-radius: 5px;
+  color: #000000;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .tape-collection__new-btn:hover {
+  background: #eeeeee;
+}
+
+[data-theme="classic-mac"] .tape-collection__search-input {
+  background: #ffffff;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  color: #000000;
+  box-shadow: inset 1px 1px 0 #999999;
+}
+
+[data-theme="classic-mac"] .tape-collection__item--match {
+  outline: 2px solid #3366cc;
+}
+
+[data-theme="classic-mac"] .tape-collection__delete-btn {
+  background: #dddddd;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  color: #000000;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .tape-collection__delete-btn:hover {
+  background: #cc0000;
+  color: #ffffff;
+}
+
+[data-theme="classic-mac"] .tape-collection__context-btn {
+  background: #dddddd;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  color: #000000;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .tape-collection__context-btn--active {
+  background: #000000;
+  border-color: #000000;
+  color: #ffffff;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .tape-collection__confirm-content {
+  background: #dddddd;
+  border: 1px solid #000000;
+  border-radius: 5px;
+  color: #000000;
+}
+
+[data-theme="classic-mac"] .tape-collection__confirm-ok {
+  background: #dddddd;
+  border: 2px solid #000000;
+  color: #000000;
+  border-radius: 5px;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .tape-collection__confirm-cancel {
+  background: #dddddd;
+  border: 2px solid #000000;
+  color: #000000;
+  border-radius: 5px;
+  box-shadow: none;
+}
+
+/* ============================================
+   Media Library
+   ============================================ */
+[data-theme="classic-mac"] .media-library__drawer {
+  background: #dddddd;
+  border: 1px solid #000000;
+}
+
+[data-theme="classic-mac"] .modal--media-library {
+  background: #dddddd;
+  border: 1px solid #000000;
+  border-radius: 5px;
+  box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="classic-mac"] .modal--media-library .modal__header h2 {
+  font-family: 'Chicago', 'Charcoal', 'Geneva', sans-serif;
+  font-weight: 700;
+  font-style: normal;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #000000;
+}
+
+[data-theme="classic-mac"] .modal--media-library .modal__close {
+  background: #dddddd;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  color: #000000;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .modal--media-library .modal__close:hover {
+  background: #000000;
+  border-color: #000000;
+  color: #ffffff;
+}
+
+[data-theme="classic-mac"] .media-library__sort {
+  background: #dddddd;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  color: #000000;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .media-library__count {
+  background: transparent;
+  border: none;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  font-weight: 400;
+  text-transform: none;
+  color: #666666;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .media-library__grid {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .media-library__item {
+  background: #eeeeee;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .media-library__item:hover {
+  background: #ffffff;
+  border-color: #3366cc;
+  transform: none;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .media-library__thumbnail {
+  border-radius: 2px;
+  border: 1px solid #999999;
+}
+
+[data-theme="classic-mac"] .media-library__item-overlay {
+  background: linear-gradient(transparent 40%, rgba(221, 221, 221, 0.95));
+}
+
+[data-theme="classic-mac"] .media-library__item-name {
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  font-weight: 400;
+  font-size: 10px;
+  color: #000000;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+[data-theme="classic-mac"] .media-library__item-date {
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  font-size: 10px;
+  text-transform: none;
+  color: #666666;
+}
+
+[data-theme="classic-mac"] .media-library__empty p {
+  color: #666666;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  font-weight: 400;
+}
+
+/* Lightbox */
+[data-theme="classic-mac"] .media-library__lightbox {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: none;
+}
+
+[data-theme="classic-mac"] .media-library__lightbox-content {
+  background: #dddddd;
+  border: 1px solid #000000;
+  border-radius: 5px;
+  box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="classic-mac"] .media-library__lightbox-close {
+  background: #dddddd;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  color: #000000;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .media-library__lightbox-close:hover {
+  background: #000000;
+  border-color: #000000;
+  color: #ffffff;
+}
+
+[data-theme="classic-mac"] .media-library__lightbox-main {
+  background: #000000;
+  border-right: 1px solid #000000;
+}
+
+[data-theme="classic-mac"] .media-library__lightbox-sidebar {
+  background: #dddddd;
+  border-left: 1px solid #ffffff;
+}
+
+[data-theme="classic-mac"] .media-library__lightbox-filename {
+  background: #eeeeee;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  font-weight: 700;
+  color: #000000;
+  text-transform: none;
+  letter-spacing: 0;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .media-library__lightbox-meta {
+  background: #eeeeee;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  font-weight: 400;
+  color: #000000;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .media-library__lightbox-heading {
+  font-family: 'Chicago', 'Charcoal', 'Geneva', sans-serif;
+  font-weight: 700;
+  font-style: normal;
+  color: #000000;
+  text-transform: none;
+  letter-spacing: 0;
+  border-bottom: 1px solid #999999;
+}
+
+[data-theme="classic-mac"] .media-library__lightbox-description {
+  background: #ffffff;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  color: #000000;
+  box-shadow: inset 1px 1px 0 #999999;
+}
+
+[data-theme="classic-mac"] .media-library__lightbox-no-analysis {
+  background: #eeeeee;
+  border: 1px solid #999999;
+  border-radius: 3px;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  font-weight: 400;
+  color: #666666;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* ============================================
+   Image Lightbox (standalone)
+   ============================================ */
+[data-theme="classic-mac"] .lightbox-overlay {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: none;
+}
+
+[data-theme="classic-mac"] .lightbox-content {
+  background: #dddddd;
+  border: 1px solid #000000;
+  border-radius: 5px;
+  box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="classic-mac"] .lightbox-close {
+  background: #dddddd;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  color: #000000;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .lightbox-close:hover {
+  background: #000000;
+  border-color: #000000;
+  color: #ffffff;
+}
+
+[data-theme="classic-mac"] .lightbox-image-container {
+  background: #000000;
+}
+
+[data-theme="classic-mac"] .lightbox-image {
+  border-radius: 0;
+  border: 1px solid #000000;
+}
+
+[data-theme="classic-mac"] .lightbox-sidebar {
+  background: #dddddd;
+  border-left: 1px solid #000000;
+}
+
+[data-theme="classic-mac"] .lightbox-sidebar h3 {
+  font-family: 'Chicago', 'Charcoal', 'Geneva', sans-serif;
+  font-weight: 700;
+  color: #000000;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+[data-theme="classic-mac"] .lightbox-sidebar p {
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  color: #000000;
+}
+
+[data-theme="classic-mac"] .lightbox-nav {
+  background: #dddddd;
+  border-radius: 3px;
+  color: #000000;
+  border: 1px solid #000000;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .lightbox-nav:hover {
+  background: #eeeeee;
+}
+
+[data-theme="classic-mac"] .lightbox-info-bar {
+  background: #dddddd;
+  border-top: 1px solid #000000;
+}
+
+[data-theme="classic-mac"] .lightbox-filename {
+  color: #000000;
+}
+
+[data-theme="classic-mac"] .lightbox-counter {
+  color: #666666;
+}
+
+/* ============================================
+   Liner Notes
+   ============================================ */
+[data-theme="classic-mac"] .liner-notes__panel {
+  background: #dddddd;
+  border: 1px solid #000000;
+  box-shadow: -1px 0 0 #000000;
+}
+
+[data-theme="classic-mac"] .liner-notes__close {
+  background: #dddddd;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  color: #000000;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .liner-notes__close:hover {
+  background: #000000;
+  color: #ffffff;
+}
+
+[data-theme="classic-mac"] .liner-notes__tape-label {
+  background: #ffffff;
+  border-radius: 3px;
+  border: 1px solid #000000;
+}
+
+[data-theme="classic-mac"] .liner-notes__rendered {
+  color: #000000;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+}
+
+[data-theme="classic-mac"] .liner-notes__h1 {
+  border-bottom: 1px solid #000000;
+}
+
+[data-theme="classic-mac"] .liner-notes__code-block {
+  background: #ffffff;
+  color: #000000;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  font-family: 'Monaco', 'Courier New', monospace;
+}
+
+[data-theme="classic-mac"] .liner-notes__textarea {
+  background: #ffffff;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  color: #000000;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  box-shadow: inset 1px 1px 0 #999999;
+}
+
+[data-theme="classic-mac"] .liner-notes__textarea:focus {
+  border-color: #000000;
+  box-shadow: inset 1px 1px 0 #999999;
+  outline: 2px solid #3366cc;
+}
+
+[data-theme="classic-mac"] .liner-notes__btn--edit {
+  background: transparent;
+  border: none;
+  color: #3366cc;
+  text-decoration: underline;
+}
+
+[data-theme="classic-mac"] .liner-notes__btn--save {
+  background: #dddddd;
+  border: 2px solid #000000;
+  border-radius: 5px;
+  color: #000000;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .liner-notes__btn--cancel {
+  background: #dddddd;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  color: #000000;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .liner-notes__btn--clear {
+  background: transparent;
+  border: none;
+  color: #cc0000;
+  text-decoration: underline;
+}
+
+[data-theme="classic-mac"] .liner-notes__content::-webkit-scrollbar-thumb {
+  background: #bbbbbb;
+  border: 1px solid #000000;
+  box-shadow: inset 1px 1px 0 #eeeeee, inset -1px -1px 0 #999999;
+}
+
+/* ============================================
+   Activity Feed
+   ============================================ */
+[data-theme="classic-mac"] .activity-feed {
+  background: #eeeeee;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid #000000;
+  border-radius: 3px;
+}
+
+[data-theme="classic-mac"] .activity-feed__header {
+  border-bottom: 1px solid #999999;
+}
+
+[data-theme="classic-mac"] .activity-feed__title {
+  color: #000000;
+  font-family: 'Chicago', 'Charcoal', 'Geneva', sans-serif;
+  font-weight: 700;
+}
+
+[data-theme="classic-mac"] .activity-feed__toggle {
+  color: #3366cc;
+  text-decoration: underline;
+}
+
+[data-theme="classic-mac"] .activity-feed__toggle:hover {
+  background: transparent;
+  color: #6633cc;
+}
+
+[data-theme="classic-mac"] .activity-feed__item--running {
+  background: #ffffcc;
+}
+
+[data-theme="classic-mac"] .activity-feed__item--error {
+  background: #ffcccc;
+}
+
+[data-theme="classic-mac"] .activity-feed__spinner {
+  border-color: #dddddd;
+  border-top-color: #3366cc;
+}
+
+[data-theme="classic-mac"] .activity-feed__check {
+  color: #009933;
+}
+
+[data-theme="classic-mac"] .activity-feed__error {
+  color: #cc0000;
+}
+
+/* ============================================
+   Job Status Bar
+   ============================================ */
+[data-theme="classic-mac"] .job-status-bar {
+  background: #eeeeee;
+  border: 1px solid #000000;
+}
+
+[data-theme="classic-mac"] .job-status-bar__item:hover {
+  background: #3366cc;
+  color: #ffffff;
+}
+
+[data-theme="classic-mac"] .job-status-bar__spinner {
+  border-color: #dddddd;
+  border-top-color: #3366cc;
+}
+
+[data-theme="classic-mac"] .job-status-bar__prompt {
+  color: #000000;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+}
+
+[data-theme="classic-mac"] .job-status-bar__time {
+  color: #666666;
+}
+
+[data-theme="classic-mac"] .job-status-bar__badge {
+  background: #3366cc;
+  color: #ffffff;
+  border-radius: 3px;
+}
+
+[data-theme="classic-mac"] .job-status-bar__icon--completed {
+  color: #009933;
+}
+
+[data-theme="classic-mac"] .job-status-bar__icon--failed {
+  color: #cc0000;
+}
+
+/* ============================================
+   Onboarding
+   ============================================ */
+[data-theme="classic-mac"] .onboarding {
+  background: #dddddd;
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 1px,
+    rgba(255, 255, 255, 0.3) 1px,
+    rgba(255, 255, 255, 0.3) 2px
+  );
+}
+
+[data-theme="classic-mac"] .onboarding__container {
+  background: #dddddd;
+  border: 1px solid #000000;
+  border-radius: 5px;
+  box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.3);
+  padding: 16px;
+}
+
+[data-theme="classic-mac"] .onboarding__progress {
+  background: #ffffff;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  height: 12px;
+  box-shadow: inset 1px 1px 0 #999999;
+}
+
+[data-theme="classic-mac"] .onboarding__progress-bar {
+  background: #3366cc;
+  border-radius: 2px;
+}
+
+[data-theme="classic-mac"] .onboarding__title {
+  font-family: 'Chicago', 'Charcoal', 'Geneva', 'Lucida Grande', sans-serif;
+  font-weight: 700;
+  font-style: normal;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #000000;
+}
+
+[data-theme="classic-mac"] .onboarding__subtitle {
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  color: #000000;
+}
+
+[data-theme="classic-mac"] .onboarding__subtitle a {
+  color: #3366cc;
+  font-weight: 400;
+  text-decoration: underline;
+}
+
+[data-theme="classic-mac"] .onboarding__back {
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #3366cc;
+  text-decoration: underline;
+}
+
+[data-theme="classic-mac"] .onboarding__back:hover {
+  color: #6633cc;
+}
+
+[data-theme="classic-mac"] .onboarding__option {
+  background: #eeeeee;
+  border: 1px solid #000000;
+  border-radius: 5px;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .onboarding__option:hover {
+  background: #ffffff;
+  border-color: #3366cc;
+  transform: none;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .onboarding__option--primary {
+  background: #3366cc;
+  border-color: #000000;
+  box-shadow: none;
+  color: #ffffff;
+}
+
+[data-theme="classic-mac"] .onboarding__option--primary:hover {
+  background: #4477dd;
+}
+
+[data-theme="classic-mac"] .onboarding__option-icon {
+  background: #dddddd;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .onboarding__option--primary .onboarding__option-icon {
+  background: #2255aa;
+  border-color: #000000;
+}
+
+[data-theme="classic-mac"] .onboarding__option-title {
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  font-weight: 700;
+  color: #000000;
+}
+
+[data-theme="classic-mac"] .onboarding__option--primary .onboarding__option-title {
+  color: #ffffff;
+}
+
+[data-theme="classic-mac"] .onboarding__option-desc {
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  color: #666666;
+}
+
+[data-theme="classic-mac"] .onboarding__option--primary .onboarding__option-desc {
+  color: #ccddff;
+}
+
+[data-theme="classic-mac"] .onboarding__input {
+  background: #ffffff;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  color: #000000;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  font-weight: 400;
+  box-shadow: inset 1px 1px 0 #999999;
+}
+
+[data-theme="classic-mac"] .onboarding__input:focus {
+  border-color: #000000;
+  box-shadow: inset 1px 1px 0 #999999;
+  outline: 2px solid #3366cc;
+}
+
+[data-theme="classic-mac"] .onboarding__button {
+  background: #dddddd;
+  border: 2px solid #000000;
+  border-radius: 5px;
+  font-family: 'Chicago', 'Charcoal', 'Geneva', sans-serif;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #000000;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .onboarding__button:hover:not(:disabled) {
+  background: #eeeeee;
+  transform: none;
+  box-shadow: none;
+  filter: none;
+}
+
+[data-theme="classic-mac"] .onboarding__button:active:not(:disabled) {
+  background: #000000;
+  color: #ffffff;
+  transform: none;
+}
+
+[data-theme="classic-mac"] .onboarding__tutorial-icon kbd {
+  background: #dddddd;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  color: #000000;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  font-weight: 700;
+  box-shadow: 1px 1px 0 #999999;
+}
+
+[data-theme="classic-mac"] .onboarding__wake-word,
+[data-theme="classic-mac"] .onboarding__tutorial-word {
+  font-family: 'Chicago', 'Charcoal', 'Geneva', sans-serif;
+  font-weight: 700;
+  font-style: normal;
+  color: #3366cc;
+}
+
+[data-theme="classic-mac"] .onboarding__step-label {
+  background: #3366cc;
+  border: none;
+  border-radius: 3px;
+  color: #ffffff;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  font-weight: 700;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .onboarding__feature-title {
+  font-family: 'Chicago', 'Charcoal', 'Geneva', sans-serif;
+  font-weight: 700;
+  color: #000000;
+}
+
+[data-theme="classic-mac"] .onboarding__feature-demo,
+[data-theme="classic-mac"] .onboarding__feature-list {
+  background: #eeeeee;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .onboarding__drop-zone-demo {
+  background: #ffffff;
+  border: 1px dashed #000000;
+  border-radius: 3px;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .onboarding__drop-zone-demo svg {
+  color: #999999;
+}
+
+[data-theme="classic-mac"] .onboarding__drop-zone-demo span {
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  color: #666666;
+}
+
+[data-theme="classic-mac"] .onboarding__toggle {
+  background: #eeeeee;
+  border: 1px solid #000000;
+  border-radius: 3px;
+}
+
+[data-theme="classic-mac"] .onboarding__toggle:hover {
+  background: #ffffff;
+}
+
+[data-theme="classic-mac"] .onboarding__toggle-slider {
+  background: #ffffff;
+  border: 1px solid #000000;
+  box-shadow: inset 1px 1px 0 #999999;
+}
+
+[data-theme="classic-mac"] .onboarding__toggle-slider::before {
+  background: #dddddd;
+  border: 1px solid #000000;
+  box-shadow: none;
+  border-radius: 50%;
+}
+
+[data-theme="classic-mac"] .onboarding__toggle input:checked + .onboarding__toggle-slider {
+  background: #3366cc;
+}
+
+[data-theme="classic-mac"] .onboarding__toggle-label {
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  font-weight: 400;
+  color: #000000;
+}
+
+[data-theme="classic-mac"] .onboarding__toggle-desc {
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  color: #666666;
+}
+
+[data-theme="classic-mac"] .onboarding__nav-back {
+  background: #dddddd;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  color: #000000;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .onboarding__nav-back:hover {
+  background: #eeeeee;
+  transform: none;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .onboarding__skip {
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #3366cc;
+  text-decoration: underline;
+}
+
+[data-theme="classic-mac"] .onboarding__skip:hover {
+  color: #6633cc;
+}
+
+/* ============================================
+   Talk Button
+   ============================================ */
+[data-theme="classic-mac"] .talk-button {
+  background: #dddddd;
+  border: 2px solid #000000;
+  border-radius: 5px;
+  color: #000000;
+  font-family: 'Chicago', 'Charcoal', 'Geneva', sans-serif;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .talk-button::before {
+  display: none;
+}
+
+[data-theme="classic-mac"] .talk-button:hover:not(:disabled) {
+  background: #eeeeee;
+  border-color: #000000;
+  transform: none;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .talk-button:active:not(:disabled),
+[data-theme="classic-mac"] .talk-button--active {
+  background: #000000;
+  border-color: #000000;
+  color: #ffffff;
+  transform: none;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .talk-button--active::before,
+[data-theme="classic-mac"] .talk-button--active::after {
+  display: none;
+}
+
+[data-theme="classic-mac"] .talk-button__label {
+  font-family: 'Chicago', 'Charcoal', 'Geneva', sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+
+/* ============================================
+   File Drop Zone
+   ============================================ */
+[data-theme="classic-mac"] .dropzone-overlay {
+  background: rgba(51, 102, 204, 0.15);
+  border: 2px dashed #000000;
+  backdrop-filter: none;
+}
+
+[data-theme="classic-mac"] .dropzone-overlay__content {
+  color: #000000;
+  text-shadow: none;
+  font-family: 'Chicago', 'Charcoal', 'Geneva', sans-serif;
+}
+
+[data-theme="classic-mac"] .dropzone-files {
+  background: #eeeeee;
+  border: 1px solid #000000;
+  border-radius: 3px;
+}
+
+[data-theme="classic-mac"] .dropzone-file__thumb-wrap {
+  border: 1px solid #000000;
+  border-radius: 2px;
+}
+
+[data-theme="classic-mac"] .dropzone-file__remove {
+  background: #dddddd;
+  border-radius: 3px;
+  border: 1px solid #000000;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .dropzone-file__remove:hover {
+  background: #cc0000;
+  color: #ffffff;
+}
+
+[data-theme="classic-mac"] .dropzone-file__analyzing-badge {
+  background: #3366cc;
+  border-radius: 3px;
+  color: #ffffff;
+}
+
+[data-theme="classic-mac"] .dropzone-file--analyzing .dropzone-file__thumb-wrap {
+  border-color: #3366cc;
+  box-shadow: none;
+}
+
+[data-theme="classic-mac"] .dropzone-files__add:hover {
+  border-color: #3366cc;
+  color: #3366cc;
+  background: #ffffff;
+}
+
+/* ============================================
+   Floating Record Button (FAB) - mobile
+   ============================================ */
+@media (max-width: 480px) {
+  [data-theme="classic-mac"] .app__record-fab {
+    background: #dddddd;
+    border: 2px solid #000000;
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    border-radius: 5px;
+  }
+
+  [data-theme="classic-mac"] .app__record-fab svg {
+    fill: #000000;
+  }
+
+  [data-theme="classic-mac"] .app__record-fab-resize {
+    background: #999999;
+    border: none;
+    border-radius: 0;
+  }
+
+  [data-theme="classic-mac"] .app__record-fab--recording {
+    background: #cc0000;
+    border-color: #000000;
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    animation: classic-mac-record-blink 1s ease-in-out infinite;
+  }
+
+  [data-theme="classic-mac"] .app__record-fab--recording svg {
+    fill: #ffffff;
+  }
+
+  [data-theme="classic-mac"] .app__record-fab--tap-to-talk {
+    animation: classic-mac-tap-pulse 1.5s ease-in-out infinite;
+  }
+}
+
+/* ============================================
+   Global Scrollbar - Classic Mac style
+   ============================================ */
+[data-theme="classic-mac"] ::-webkit-scrollbar {
+  width: 16px;
+  height: 16px;
+}
+
+[data-theme="classic-mac"] ::-webkit-scrollbar-track {
+  background: #dddddd;
+  border-left: 1px solid #000000;
+}
+
+[data-theme="classic-mac"] ::-webkit-scrollbar-thumb {
+  background: #bbbbbb;
+  border-radius: 0;
+  border: 1px solid #000000;
+  box-shadow: inset 1px 1px 0 #eeeeee, inset -1px -1px 0 #999999;
+}
+
+[data-theme="classic-mac"] ::-webkit-scrollbar-thumb:hover {
+  background: #cccccc;
+}
+
+/* ============================================
+   Selection & Focus
+   ============================================ */
+[data-theme="classic-mac"] ::selection {
+  background: #3366cc;
+  color: #ffffff;
+}
+
+[data-theme="classic-mac"] :focus-visible {
+  outline: 2px solid #3366cc;
+  outline-offset: 1px;
+}
+
+/* ============================================
+   Keyboard Shortcuts
+   ============================================ */
+[data-theme="classic-mac"] .keyboard-shortcuts kbd {
+  background: #dddddd;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  color: #000000;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  box-shadow: 1px 1px 0 #999999;
+}
+
+/* ============================================
+   Scroll to Bottom Button
+   ============================================ */
+[data-theme="classic-mac"] .scroll-to-bottom {
+  width: 32px;
+  height: 32px;
+  border-radius: 3px;
+  background: #dddddd;
+  border: 1px solid #000000;
+  color: #000000;
+  box-shadow: 1px 1px 0 #999999;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+[data-theme="classic-mac"] .scroll-to-bottom:hover {
+  background: #eeeeee;
+  border-color: #000000;
+  color: #000000;
+  transform: none;
+}
+
+[data-theme="classic-mac"] .scroll-to-bottom:active {
+  background: #000000;
+  color: #ffffff;
+  transform: none;
+}
