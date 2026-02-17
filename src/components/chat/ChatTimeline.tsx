@@ -587,6 +587,21 @@ export const ChatTimeline = memo(function ChatTimeline({
       )}
 
       <div ref={bottomRef} />
+
+      {!shouldAutoScroll && (
+        <button
+          className="scroll-to-bottom"
+          onClick={() => {
+            bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+            setShouldAutoScroll(true)
+          }}
+          aria-label="Scroll to bottom"
+        >
+          <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+            <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/>
+          </svg>
+        </button>
+      )}
     </div>
   )
 })

@@ -12,9 +12,15 @@ export interface ActivityEvent {
   output?: string
 }
 
+export interface PlanEvent {
+  title: string
+  content: string
+}
+
 export interface RunnerCallbacks {
   onText: (text: string) => void
   onActivity: (event: ActivityEvent) => void
+  onPlan?: (plan: PlanEvent) => void
   onError: (error: string) => void
   onComplete: (code: number) => void
 }
@@ -36,6 +42,42 @@ export interface RunnerHandle {
   pid: number
   kill: () => void
   promise: Promise<number>
+}
+
+// Detect if a Write/Edit tool call is writing a plan
+function detectPlanFromTool(toolName: string, input: { file_path?: string; content?: string; new_string?: string }): PlanEvent | null {
+  if (toolName !== 'Write' && toolName !== 'Edit') return null
+
+  const filePath = input.file_path || ''
+  const content = input.content || input.new_string || ''
+  if (!content || content.length < 100) return null
+
+  // Check if file path suggests a plan
+  const isPlanFile = /plan/i.test(filePath)
+
+  // Check if content has plan-like structure
+  const headingCount = (content.match(/^#{1,3}\s+.+/gm) || []).length
+  const listItemCount = (content.match(/^(?:\d+\.|[-*])\s+/gm) || []).length
+  const hasPlanHeading = /^#{1,3}\s+.*(?:plan|implementation|approach|strategy|roadmap|phases?|proposal)/im.test(content)
+  const hasStructure = headingCount >= 2 && listItemCount >= 4
+
+  if (!isPlanFile && !hasPlanHeading && !hasStructure) return null
+
+  // Extract title
+  let title = 'Untitled Plan'
+  const titleMatch = content.match(/^#{1,3}\s+(.*(?:plan|implementation|approach|strategy|roadmap|phases?|proposal).*)/im)
+  if (titleMatch) {
+    title = titleMatch[1].replace(/\*\*/g, '').replace(/`/g, '').trim()
+  } else {
+    const firstHeading = content.match(/^#{1,3}\s+(.+)/m)
+    if (firstHeading) {
+      title = firstHeading[1].replace(/\*\*/g, '').replace(/`/g, '').trim()
+    }
+  }
+
+  if (title.length > 100) title = title.slice(0, 97) + '...'
+
+  return { title, content }
 }
 
 export function spawnClaude(options: RunnerOptions): RunnerHandle {
@@ -83,7 +125,13 @@ export function spawnClaude(options: RunnerOptions): RunnerHandle {
         '\n[/Attached Images]\n\n'
     }
 
-    fullPrompt = `${contextBlock}${imageBlock}[VOICE MODE - Keep responses to 1-2 sentences, no markdown, speak naturally]\n\nUser: ${prompt}`
+    // Detect if user is asking for a plan
+    const isPlanRequest = /\b(?:plan|design|architect|propose|strategy|roadmap|outline)\b/i.test(prompt)
+    const planInstruction = isPlanRequest
+      ? '\n[PLAN MODE - The user is asking you to make a plan. Write the full detailed plan (with markdown headings, numbered steps, etc.) to a file using the Write tool at /tmp/talkboy-plan.md. Then give a brief voice summary of what you planned.]'
+      : ''
+
+    fullPrompt = `${contextBlock}${imageBlock}[VOICE MODE - Keep responses to 1-2 sentences, no markdown, speak naturally]${planInstruction}\n\nUser: ${prompt}`
   }
 
   const args = [
@@ -149,6 +197,11 @@ export function spawnClaude(options: RunnerOptions): RunnerHandle {
               id: toolBlock.id,
               input: inputDetail,
             })
+            // Check if this tool use is writing a plan
+            if (callbacks.onPlan && toolBlock.input) {
+              const plan = detectPlanFromTool(toolBlock.name, toolBlock.input)
+              if (plan) callbacks.onPlan(plan)
+            }
           }
         } else if (event.type === 'content_block_start') {
           if (event.content_block?.type === 'tool_use') {
@@ -185,6 +238,12 @@ export function spawnClaude(options: RunnerOptions): RunnerHandle {
                   id: currentToolId,
                   input: inputDetail,
                 })
+              }
+              // Check if this tool use is writing a plan
+              if (callbacks.onPlan) {
+                const toolName = toolNames[currentToolId] || ''
+                const plan = detectPlanFromTool(toolName, input)
+                if (plan) callbacks.onPlan(plan)
               }
             }
           } catch {

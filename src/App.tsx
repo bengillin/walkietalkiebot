@@ -12,10 +12,11 @@ import { useSpeechRecognition } from './components/voice/useSpeechRecognition'
 import { useWakeWord } from './components/voice/useWakeWord'
 import { useSpeechSynthesis } from './components/voice/useSpeechSynthesis'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
-import { sendMessageStreaming, sendMessageViaClaudeCode, analyzeImage, analyzeImageViaClaudeCode, type ActivityEvent } from './lib/claude'
+import { sendMessageStreaming, sendMessageViaClaudeCode, analyzeImage, analyzeImageViaClaudeCode, type ActivityEvent, type PlanEvent } from './lib/claude'
 import { useStore, enableServerSync } from './lib/store'
 import * as api from './lib/api'
 import { exportConversation } from './lib/export'
+import { detectAndSavePlan } from './lib/planDetection'
 import { useSoundEffects } from './hooks/useSoundEffects'
 import { useTheme } from './contexts/ThemeContext'
 import { JobStatusBar } from './components/jobs/JobStatusBar'
@@ -38,6 +39,7 @@ function App() {
   const [showShortcuts, setShowShortcuts] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
   const [showPlans, setShowPlans] = useState(false)
+  const [planNotification, setPlanNotification] = useState<string | null>(null)
   const [isTapeEjected, setIsTapeEjected] = useState(false)
   const [responseText, setResponseText] = useState('')
 
@@ -459,6 +461,7 @@ function App() {
     }]
 
     let fullResponse = ''
+    const planRef: { current: PlanEvent | null } = { current: null }
 
     try {
       if (useClaudeCode) {
@@ -482,7 +485,8 @@ function App() {
           },
           messages.map(m => ({ role: m.role, content: m.content })),
           handleActivity,
-          imageAttachments
+          imageAttachments,
+          (plan) => { planRef.current = plan }
         )
         // Speak the full response at once (if TTS enabled)
         if (fullResponse.trim() && ttsEnabled) {
@@ -529,6 +533,28 @@ function App() {
       addMessage({ role: 'assistant', content: fullResponse })
       // Persist activities with this conversation
       finalizeActivities()
+
+      // Save plan if one was detected from tool use (Write/Edit to plan file)
+      if (planRef.current) {
+        api.createPlan({
+          title: planRef.current.title,
+          content: planRef.current.content,
+          status: 'draft',
+          conversationId: currentConversationId,
+        }).then(plan => {
+          console.log('[PlanDetection] Saved plan from tool use:', plan.id, plan.title)
+          setPlanNotification(plan.title)
+          setTimeout(() => setPlanNotification(null), 5000)
+        }).catch(err => console.warn('[PlanDetection] Failed to save plan:', err))
+      } else if (fullResponse.trim()) {
+        // Fallback: detect plan from response text (works for non-voice mode)
+        detectAndSavePlan(fullResponse, currentConversationId).then(plan => {
+          if (plan) {
+            setPlanNotification(plan.title)
+            setTimeout(() => setPlanNotification(null), 5000)
+          }
+        })
+      }
     } catch (err) {
       console.error('API error:', err)
       playSound('error')
@@ -543,7 +569,7 @@ function App() {
     }
 
     setTranscript('')
-  }, [apiKey, messages, addMessage, setAvatarState, setTranscript, clearSpeechTranscript, speak, speakStreaming, playSound, contextMessages, useClaudeCode, clearActivities, handleActivity, attachedFiles, clearFiles, clearImageAnalyses, getImageContext, ttsEnabled, finalizeActivities])
+  }, [apiKey, messages, addMessage, setAvatarState, setTranscript, clearSpeechTranscript, speak, speakStreaming, playSound, contextMessages, useClaudeCode, clearActivities, handleActivity, attachedFiles, clearFiles, clearImageAnalyses, getImageContext, ttsEnabled, finalizeActivities, currentConversationId])
 
   // Handle talk button
   const handleTalkStart = useCallback(() => {
@@ -890,6 +916,18 @@ function App() {
 
         {error && (
           <div className="app__error">{error}</div>
+        )}
+
+        {planNotification && (
+          <button
+            className="app__plan-notification"
+            onClick={() => {
+              setShowPlans(true)
+              setPlanNotification(null)
+            }}
+          >
+            Plan saved: {planNotification}
+          </button>
         )}
 
       </main>

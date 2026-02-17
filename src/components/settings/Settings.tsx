@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { exportConversation } from '../../lib/export'
 import { getIntegrations, type IntegrationsStatus } from '../../lib/api'
+import { useTheme } from '../../contexts/ThemeContext'
 import type { Conversation } from '../../types'
 import './Settings.css'
 
@@ -88,6 +89,7 @@ export function Settings({
   onResetOnboarding,
   onClose,
 }: SettingsProps) {
+  const { theme, setTheme, themes } = useTheme()
   const canClose = useClaudeCode || apiKey
   const [editingTitle, setEditingTitle] = useState(false)
   const [titleDraft, setTitleDraft] = useState(currentConversationTitle)
@@ -170,6 +172,22 @@ export function Settings({
                 </button>
               </div>
             )}
+          </div>
+
+          <div className="settings__divider" />
+
+          <label className="settings__input-label">Theme</label>
+          <div className="settings__theme-picker">
+            {themes.map((t) => (
+              <button
+                key={t.name}
+                className={`settings__theme-option ${theme === t.name ? 'settings__theme-option--active' : ''}`}
+                onClick={() => setTheme(t.name)}
+              >
+                <span className="settings__theme-name">{t.displayName}</span>
+                <span className="settings__theme-desc">{t.description}</span>
+              </button>
+            ))}
           </div>
 
           <div className="settings__divider" />

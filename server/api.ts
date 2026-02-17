@@ -770,6 +770,9 @@ api.post('/claude-code', async (c) => {
         onActivity: (event) => {
           stream.writeSSE({ data: JSON.stringify({ activity: event }) })
         },
+        onPlan: (plan) => {
+          stream.writeSSE({ data: JSON.stringify({ plan }) })
+        },
         onError: (error) => {
           stream.writeSSE({ data: JSON.stringify({ error }) })
         },

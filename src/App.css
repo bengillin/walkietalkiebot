@@ -480,6 +480,36 @@
   text-align: center;
 }
 
+.app__plan-notification {
+  display: block;
+  margin: 8px 16px;
+  padding: 10px 16px;
+  background: rgba(100, 200, 100, 0.12);
+  border: 1px solid rgba(100, 200, 100, 0.3);
+  border-radius: var(--radius-md);
+  color: var(--screen-text, #c8e6c8);
+  font-size: 13px;
+  text-align: center;
+  cursor: pointer;
+  font-family: inherit;
+  animation: plan-notification-in 0.3s ease-out;
+}
+
+.app__plan-notification:hover {
+  background: rgba(100, 200, 100, 0.2);
+}
+
+@keyframes plan-notification-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Legacy controls (non-timeline mode) */
 .app__controls {
   display: flex;

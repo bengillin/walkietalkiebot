@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 
-export type ThemeName = 'mccallister'
+export type ThemeName = 'mccallister' | 'imessage' | 'aol'
 
 export interface Theme {
   name: ThemeName
@@ -13,6 +13,16 @@ export const themes: Theme[] = [
     name: 'mccallister',
     displayName: 'Talkboy',
     description: 'Silver 90s cassette recorder aesthetic'
+  },
+  {
+    name: 'imessage',
+    displayName: 'iMessage',
+    description: 'Clean Apple-style light theme'
+  },
+  {
+    name: 'aol',
+    displayName: 'AOL 90s',
+    description: 'Windows 95 / AOL Instant Messenger nostalgia'
   }
 ]
 

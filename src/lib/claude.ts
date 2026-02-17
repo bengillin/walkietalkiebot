@@ -237,13 +237,20 @@ export interface ActivityEvent {
   partial_json?: string
 }
 
+// Plan event from Claude Code (detected when writing plan files)
+export interface PlanEvent {
+  title: string
+  content: string
+}
+
 // Send message through Claude Code CLI (has full agent capabilities)
 export async function sendMessageViaClaudeCode(
   message: string,
   onChunk: (text: string) => void,
   history?: Array<{ role: string; content: string }>,
   onActivity?: (activity: ActivityEvent) => void,
-  images?: Array<{ dataUrl: string; fileName: string }>
+  images?: Array<{ dataUrl: string; fileName: string }>,
+  onPlan?: (plan: PlanEvent) => void
 ): Promise<string> {
   const response = await fetch('/api/claude-code', {
     method: 'POST',
@@ -280,6 +287,9 @@ export async function sendMessageViaClaudeCode(
           }
           if (parsed.activity && onActivity) {
             onActivity(parsed.activity)
+          }
+          if (parsed.plan && onPlan) {
+            onPlan(parsed.plan)
           }
           if (parsed.error) {
             throw new Error(parsed.error)

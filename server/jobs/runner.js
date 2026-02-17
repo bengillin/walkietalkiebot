@@ -2,6 +2,30 @@ import { spawn } from "child_process";
 import { writeFileSync, mkdirSync, unlinkSync } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
+function detectPlanFromTool(toolName, input) {
+  if (toolName !== "Write" && toolName !== "Edit") return null;
+  const filePath = input.file_path || "";
+  const content = input.content || input.new_string || "";
+  if (!content || content.length < 100) return null;
+  const isPlanFile = /plan/i.test(filePath);
+  const headingCount = (content.match(/^#{1,3}\s+.+/gm) || []).length;
+  const listItemCount = (content.match(/^(?:\d+\.|[-*])\s+/gm) || []).length;
+  const hasPlanHeading = /^#{1,3}\s+.*(?:plan|implementation|approach|strategy|roadmap|phases?|proposal)/im.test(content);
+  const hasStructure = headingCount >= 2 && listItemCount >= 4;
+  if (!isPlanFile && !hasPlanHeading && !hasStructure) return null;
+  let title = "Untitled Plan";
+  const titleMatch = content.match(/^#{1,3}\s+(.*(?:plan|implementation|approach|strategy|roadmap|phases?|proposal).*)/im);
+  if (titleMatch) {
+    title = titleMatch[1].replace(/\*\*/g, "").replace(/`/g, "").trim();
+  } else {
+    const firstHeading = content.match(/^#{1,3}\s+(.+)/m);
+    if (firstHeading) {
+      title = firstHeading[1].replace(/\*\*/g, "").replace(/`/g, "").trim();
+    }
+  }
+  if (title.length > 100) title = title.slice(0, 97) + "...";
+  return { title, content };
+}
 function spawnClaude(options) {
   const { prompt, history, images, rawMode, callbacks } = options;
   const tempImagePaths = [];
@@ -34,7 +58,9 @@ function spawnClaude(options) {
     if (tempImagePaths.length > 0) {
       imageBlock = "[Attached Images - Use the Read tool to view these image files]\n" + tempImagePaths.map((p) => p).join("\n") + "\n[/Attached Images]\n\n";
     }
-    fullPrompt = `${contextBlock}${imageBlock}[VOICE MODE - Keep responses to 1-2 sentences, no markdown, speak naturally]
+    const isPlanRequest = /\b(?:plan|design|architect|propose|strategy|roadmap|outline)\b/i.test(prompt);
+    const planInstruction = isPlanRequest ? "\n[PLAN MODE - The user is asking you to make a plan. Write the full detailed plan (with markdown headings, numbered steps, etc.) to a file using the Write tool at /tmp/talkboy-plan.md. Then give a brief voice summary of what you planned.]" : "";
+    fullPrompt = `${contextBlock}${imageBlock}[VOICE MODE - Keep responses to 1-2 sentences, no markdown, speak naturally]${planInstruction}
 
 User: ${prompt}`;
   }
@@ -95,6 +121,10 @@ User: ${prompt}`;
               id: toolBlock.id,
               input: inputDetail
             });
+            if (callbacks.onPlan && toolBlock.input) {
+              const plan = detectPlanFromTool(toolBlock.name, toolBlock.input);
+              if (plan) callbacks.onPlan(plan);
+            }
           }
         } else if (event.type === "content_block_start") {
           if (event.content_block?.type === "tool_use") {
@@ -131,6 +161,11 @@ User: ${prompt}`;
                   id: currentToolId,
                   input: inputDetail
                 });
+              }
+              if (callbacks.onPlan) {
+                const toolName = toolNames[currentToolId] || "";
+                const plan = detectPlanFromTool(toolName, input);
+                if (plan) callbacks.onPlan(plan);
               }
             }
           } catch {
