@@ -52,31 +52,6 @@
   transition: width 0.3s ease;
 }
 
-/* Back button */
-.onboarding__back {
-  align-self: flex-start;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 0;
-  margin-bottom: 16px;
-  background: none;
-  border: none;
-  color: var(--text-secondary);
-  font-size: 14px;
-  cursor: pointer;
-  transition: color 0.15s ease;
-}
-
-.onboarding__back:hover {
-  color: var(--text-primary);
-}
-
-.onboarding__back svg {
-  width: 18px;
-  height: 18px;
-}
-
 /* Titles */
 .onboarding__title {
   font-size: 28px;
@@ -90,117 +65,6 @@
   font-size: 16px;
   color: var(--text-secondary);
   margin: 0 0 32px;
-}
-
-.onboarding__subtitle a {
-  color: var(--accent);
-  text-decoration: none;
-}
-
-.onboarding__subtitle a:hover {
-  text-decoration: underline;
-}
-
-/* Options (welcome screen) */
-.onboarding__options {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-}
-
-.onboarding__option {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  width: 100%;
-  padding: 20px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-lg);
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.15s ease;
-}
-
-.onboarding__option:hover {
-  border-color: var(--accent);
-  background: var(--bg-tertiary);
-}
-
-.onboarding__option--primary {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-}
-
-.onboarding__option--primary:hover {
-  background: var(--accent-soft);
-}
-
-.onboarding__option-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  background: var(--bg-tertiary);
-  border-radius: var(--radius-md);
-  flex-shrink: 0;
-}
-
-.onboarding__option--primary .onboarding__option-icon {
-  background: var(--accent);
-  color: white;
-}
-
-.onboarding__option-icon svg {
-  width: 22px;
-  height: 22px;
-}
-
-.onboarding__option-content {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.onboarding__option-title {
-  font-size: 16px;
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-.onboarding__option-desc {
-  font-size: 13px;
-  color: var(--text-secondary);
-}
-
-/* Form */
-.onboarding__form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  width: 100%;
-}
-
-.onboarding__input {
-  width: 100%;
-  padding: 14px 16px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-md);
-  font-size: 15px;
-  color: var(--text-primary);
-  outline: none;
-  transition: border-color 0.15s ease;
-}
-
-.onboarding__input:focus {
-  border-color: var(--accent);
-}
-
-.onboarding__input::placeholder {
-  color: var(--text-tertiary);
 }
 
 /* Buttons */
@@ -225,23 +89,17 @@
   cursor: not-allowed;
 }
 
-.onboarding__button--large {
-  padding: 16px 32px;
-  font-size: 16px;
-  margin-top: 24px;
-}
-
 .onboarding__button--primary {
   background: var(--accent);
 }
 
-/* Tutorial step (basic interaction) */
+/* Tutorial (spacebar instruction) */
 .onboarding__tutorial {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 24px;
-  margin-bottom: 16px;
+  margin-bottom: 32px;
 }
 
 .onboarding__tutorial-item {
@@ -270,12 +128,6 @@
   font-weight: 500;
   color: var(--text-primary);
   box-shadow: 0 2px 0 var(--border-light);
-}
-
-.onboarding__tutorial-word {
-  font-size: 24px;
-  font-weight: 600;
-  color: var(--accent);
 }
 
 .onboarding__tutorial-item p {
@@ -324,97 +176,6 @@
 .onboarding__feature-content {
   width: 100%;
   margin-bottom: 24px;
-}
-
-.onboarding__feature-demo {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 32px;
-  background: var(--bg-secondary);
-  border-radius: var(--radius-lg);
-  margin-bottom: 20px;
-}
-
-.onboarding__wake-word {
-  font-size: 28px;
-  font-weight: 600;
-  color: var(--accent);
-}
-
-.onboarding__mic-icon {
-  width: 48px;
-  height: 48px;
-  color: var(--accent);
-}
-
-.onboarding__always-on {
-  font-size: 16px;
-  font-weight: 500;
-  color: var(--text-secondary);
-}
-
-.onboarding__feature-desc {
-  font-size: 15px;
-  line-height: 1.5;
-  color: var(--text-secondary);
-  margin: 0 0 24px;
-}
-
-/* Feature list (claude code info) */
-.onboarding__feature-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 24px;
-  background: var(--bg-secondary);
-  border-radius: var(--radius-lg);
-  margin-bottom: 20px;
-}
-
-.onboarding__feature-item {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  text-align: left;
-}
-
-.onboarding__feature-item svg {
-  width: 24px;
-  height: 24px;
-  color: var(--accent);
-  flex-shrink: 0;
-}
-
-.onboarding__feature-item span {
-  font-size: 15px;
-  color: var(--text-primary);
-}
-
-/* Drop zone demo (image analysis) */
-.onboarding__drop-zone-demo {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 40px;
-  background: var(--bg-secondary);
-  border: 2px dashed var(--border-light);
-  border-radius: var(--radius-lg);
-  margin-bottom: 20px;
-}
-
-.onboarding__drop-zone-demo svg {
-  width: 48px;
-  height: 48px;
-  color: var(--text-tertiary);
-}
-
-.onboarding__drop-zone-demo span {
-  font-size: 15px;
-  color: var(--text-secondary);
 }
 
 /* Toggle switches */
@@ -485,7 +246,7 @@
   color: var(--text-secondary);
 }
 
-/* Options list (final options) */
+/* Options list */
 .onboarding__options-list {
   display: flex;
   flex-direction: column;
@@ -553,47 +314,4 @@
   padding: 24px;
   margin-bottom: 16px;
   cursor: pointer;
-}
-
-/* Feature grid (2x2 cards) */
-.onboarding__feature-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  width: 100%;
-  margin-bottom: 16px;
-}
-
-.onboarding__feature-card {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 16px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-md);
-  text-align: left;
-}
-
-.onboarding__feature-card-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  background: var(--accent-soft);
-  border-radius: var(--radius-sm);
-  color: var(--accent);
-}
-
-.onboarding__feature-card-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.onboarding__feature-card-desc {
-  font-size: 12px;
-  color: var(--text-secondary);
-  line-height: 1.4;
 }

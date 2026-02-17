@@ -198,13 +198,11 @@ function App() {
     localStorage.setItem('talkie_use_claude_code', 'true')
 
     // Apply onboarding settings
-    setWakeWordEnabled(settings.wakeWordEnabled)
-    setContinuousListeningEnabled(settings.continuousListening)
     setTtsEnabled(settings.ttsEnabled)
 
     setHasOnboarded(true)
     localStorage.setItem('talkie_onboarded', 'true')
-  }, [setWakeWordEnabled, setContinuousListeningEnabled, setTtsEnabled])
+  }, [setTtsEnabled])
 
   // Get messages from context conversations to include in API calls
   const contextMessages = useMemo(() => {
