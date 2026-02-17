@@ -1,20 +1,20 @@
 {
-  "name": "@walkietalkie/mcp-server",
+  "name": "talkiebot-mcp",
   "version": "0.2.0",
-  "description": "MCP server for Talkie voice interface - includes tools for session management, IPC messaging, image analysis, and more",
+  "description": "MCP server for Talkie — 15 tools for voice, conversations, sessions, jobs, and image analysis in Claude Code",
   "type": "module",
   "main": "index.js",
   "bin": {
     "talkie-mcp": "./index.js"
   },
-  "scripts": {
-    "start": "node index.js"
-  },
   "keywords": [
     "mcp",
     "claude",
+    "claude-code",
     "voice",
-    "talkie"
+    "talkie",
+    "model-context-protocol",
+    "ai-tools"
   ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0"

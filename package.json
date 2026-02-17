@@ -1,23 +1,18 @@
 {
-  "name": "@walkietalkie/talkie",
+  "name": "talkiebot",
   "version": "0.1.0",
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/bengillin/walkietalkiebot.git"
-  },
-  "description": "A voice-first, cassette tape-themed interface for Claude Code with conversation management and MCP integration",
+  "description": "A voice-first, cassette tape-themed interface for Claude Code with 6 retro themes, conversation management, Telegram bot, and MCP integration",
   "type": "module",
   "bin": {
     "talkie": "bin/talkie.js",
     "talkie-server": "bin/talkie-server.js",
-    "talkie-mcp": "bin/talkie-mcp.js"
+    "talkie-mcp": "mcp-server/index.js"
   },
   "files": [
-    "bin/",
-    "server/",
+    "bin/talkie.js",
+    "bin/talkie-server.js",
+    "mcp-server/index.js",
+    "server/**/*.js",
     "dist/"
   ],
   "scripts": {
@@ -32,15 +27,19 @@
   },
   "keywords": [
     "claude",
+    "claude-code",
     "voice",
     "ai",
     "assistant",
     "mcp",
-    "claude-code",
     "speech-recognition",
     "text-to-speech",
     "cassette",
-    "retro"
+    "retro",
+    "themes",
+    "telegram",
+    "tts",
+    "wake-word"
   ],
   "author": "",
   "license": "MIT",
