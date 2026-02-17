@@ -1,5 +1,5 @@
 // In-memory state store for API
-export interface TalkboyState {
+export interface TalkieState {
   avatarState: string
   transcript: string
   lastUserMessage: string
@@ -10,7 +10,7 @@ export interface TalkboyState {
   responseCallbacks: Array<(response: string) => void>
 }
 
-export let state: TalkboyState = {
+export let state: TalkieState = {
   avatarState: 'idle',
   transcript: '',
   lastUserMessage: '',
@@ -21,7 +21,7 @@ export let state: TalkboyState = {
   responseCallbacks: [],
 }
 
-export function updateState(update: Partial<TalkboyState>) {
+export function updateState(update: Partial<TalkieState>) {
   state = { ...state, ...update }
 }
 

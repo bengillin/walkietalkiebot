@@ -1,4 +1,4 @@
-# Talkboy Planning Document
+# Talkie Planning Document
 
 ## The Problem
 
@@ -32,7 +32,7 @@ Voice interfaces + AI + friendly avatars = accessible coding for everyone
 
 ### Voice Ideas
 - [ ] Push-to-talk (spacebar/button)
-- [ ] Wake word ("Hey Talkboy")
+- [ ] Wake word ("Hey Talkie")
 - [ ] Continuous listening mode
 - [ ] Multiple voice options per avatar
 - [ ] Voice cloning for custom avatars

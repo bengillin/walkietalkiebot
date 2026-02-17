@@ -77,7 +77,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             >
               <RobotAvatar state={robotState} size="large" />
             </div>
-            <h1 className="onboarding__title">Welcome to Talkboy</h1>
+            <h1 className="onboarding__title">Welcome to Talkie</h1>
             <p className="onboarding__subtitle">
               Talk to Claude instead of typing. Your voice-first AI companion.
             </p>
@@ -91,7 +91,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           <div className="onboarding__step onboarding__step--feature">
             <div className="onboarding__feature-header">
               <span className="onboarding__step-label">Voice Controls</span>
-              <h2 className="onboarding__feature-title">How to talk to Talkboy</h2>
+              <h2 className="onboarding__feature-title">How to talk to Talkie</h2>
             </div>
 
             <div className="onboarding__feature-content">
@@ -116,7 +116,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                   <span className="onboarding__toggle-slider"></span>
                   <div className="onboarding__toggle-content">
                     <span className="onboarding__toggle-label">Wake word</span>
-                    <span className="onboarding__toggle-desc">Say "Hey Talkboy" to start listening</span>
+                    <span className="onboarding__toggle-desc">Say "Hey Talkie" to start listening</span>
                   </div>
                 </label>
 
@@ -248,7 +248,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             <div className="onboarding__nav">
               <button className="onboarding__nav-back" onClick={prevStep}>Back</button>
               <button className="onboarding__button onboarding__button--primary" onClick={handleComplete}>
-                Start using Talkboy
+                Start using Talkie
               </button>
             </div>
           </div>

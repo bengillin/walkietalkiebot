@@ -4,7 +4,7 @@ import basicSsl from '@vitejs/plugin-basic-ssl'
 import { spawn } from 'child_process'
 
 // In-memory state store for API
-interface TalkboyState {
+interface TalkieState {
   avatarState: string
   transcript: string
   lastUserMessage: string
@@ -15,7 +15,7 @@ interface TalkboyState {
   responseCallbacks: Array<(response: string) => void>
 }
 
-let state: TalkboyState = {
+let state: TalkieState = {
   avatarState: 'idle',
   transcript: '',
   lastUserMessage: '',
@@ -27,9 +27,9 @@ let state: TalkboyState = {
 }
 
 // Vite plugin to add API routes
-function talkboyApi(): Plugin {
+function talkieApi(): Plugin {
   return {
-    name: 'talkboy-api',
+    name: 'talkie-api',
     configureServer(server) {
       // GET /api/status - Check if running and get current state
       server.middlewares.use('/api/status', (req, res, next) => {
@@ -638,7 +638,7 @@ User: ${message}`
 }
 
 export default defineConfig({
-  plugins: [react(), basicSsl(), talkboyApi()],
+  plugins: [react(), basicSsl(), talkieApi()],
   server: {
     https: true,
   },

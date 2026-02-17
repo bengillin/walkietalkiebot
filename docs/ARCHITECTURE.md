@@ -1,8 +1,8 @@
-# TalkBoy Architecture
+# Talkie Architecture
 
 ## System Overview
 
-TalkBoy is a voice-first interface for Claude Code. It runs as an HTTPS server (Hono framework) that serves a React SPA and provides API endpoints. The system has three deployment targets: web UI (React), Telegram bot (grammy), and MCP server (stdio).
+Talkie is a voice-first interface for Claude Code. It runs as an HTTPS server (Hono framework) that serves a React SPA and provides API endpoints. The system has three deployment targets: web UI (React), Telegram bot (grammy), and MCP server (stdio).
 
 ## Data Flows
 
@@ -16,13 +16,13 @@ TalkBoy is a voice-first interface for Claude Code. It runs as an HTTPS server (
 6. Frontend renders streaming text and activity feed
 7. On completion, message + activities saved to SQLite via `POST /api/conversations/:id/messages`
 
-### IPC Mode (MCP <-> TalkBoy)
+### IPC Mode (MCP <-> Talkie)
 
-1. User speaks in TalkBoy web UI
+1. User speaks in Talkie web UI
 2. Frontend calls `POST /api/send` with message, opens SSE stream
 3. Server stores message in `state.pendingMessage`
 4. Claude Code (via MCP tool `get_pending_message`) polls `GET /api/pending`
-5. Claude Code processes message, calls MCP tool `respond_to_talkboy`
+5. Claude Code processes message, calls MCP tool `respond_to_talkie`
 6. Server receives `POST /api/respond`, fires callback
 7. Response streams back to frontend via the open SSE connection
 
@@ -38,7 +38,7 @@ TalkBoy is a voice-first interface for Claude Code. It runs as an HTTPS server (
 
 The server (`server/index.ts`) initializes:
 
-1. SQLite database (`~/.talkboy/talkboy.db`) with WAL mode
+1. SQLite database (`~/.talkie/talkie.db`) with WAL mode
 2. Telegram bot (if token available, non-blocking)
 3. Hono app with API routes mounted at `/api`
 4. Static file serving from `dist/`
@@ -49,7 +49,7 @@ The server (`server/index.ts`) initializes:
 Transient state for IPC and real-time data:
 
 ```
-TalkboyState {
+TalkieState {
   avatarState: string           # idle, listening, thinking, speaking
   transcript: string            # Current voice transcript
   lastUserMessage: string
@@ -63,7 +63,7 @@ TalkboyState {
 
 ## Database
 
-SQLite at `~/.talkboy/talkboy.db`, WAL mode, foreign keys enabled.
+SQLite at `~/.talkie/talkie.db`, WAL mode, foreign keys enabled.
 
 ### Schema (Version 1)
 
@@ -110,7 +110,7 @@ localStorage serves as a cache. SQLite is the source of truth when the server is
 
 1. `useSpeechRecognition` -- Web Speech API wrapper with interim results, trigger word detection, auto-restart
 2. `useSpeechSynthesis` -- TTS with streaming mode (accumulates chunks) and single-utterance mode
-3. `useWakeWord` -- Passive listener for wake phrases ("hey talkboy")
+3. `useWakeWord` -- Passive listener for wake phrases ("hey talkie")
 
 ### Component Tree
 
@@ -131,13 +131,13 @@ App
 
 12 tools exposed via stdio transport (`mcp-server/index.js`):
 
-**Core**: launch_talkboy, get_talkboy_status, get_transcript, get_conversation_history
+**Core**: launch_talkie, get_talkie_status, get_transcript, get_conversation_history
 
 **Session**: get_claude_session, set_claude_session, disconnect_claude_session
 
-**IPC**: get_pending_message, respond_to_talkboy
+**IPC**: get_pending_message, respond_to_talkie
 
-**State**: update_talkboy_state
+**State**: update_talkie_state
 
 **Media**: analyze_image, open_url
 
@@ -147,16 +147,16 @@ All tools make HTTPS requests to the local server API (with self-signed cert byp
 
 Three entry points in `bin/`:
 
-- `talkboy` -- Start server + open Chrome
-- `talkboy-server` -- Lifecycle management (start/stop/restart/status/logs/install/uninstall as launchd daemon)
-- `talkboy-mcp` -- MCP server (stdio)
+- `talkie` -- Start server + open Chrome
+- `talkie-server` -- Lifecycle management (start/stop/restart/status/logs/install/uninstall as launchd daemon)
+- `talkie-mcp` -- MCP server (stdio)
 
 ## HTTPS
 
 Required for Web Speech API. Certificates are auto-generated:
 
 1. Check for Tailscale certs at standard macOS path
-2. Fall back to self-signed certs stored at `~/.talkboy/`
+2. Fall back to self-signed certs stored at `~/.talkie/`
 3. Generated via `selfsigned` npm package
 
 ## Key Design Decisions

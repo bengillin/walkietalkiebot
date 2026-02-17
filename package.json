@@ -1,19 +1,19 @@
 {
-  "name": "@bengillin/talkboy",
+  "name": "@walkietalkie/talkie",
   "version": "0.1.0",
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/bengillin/talkboy.git"
+    "url": "https://github.com/bengillin/walkietalkiebot.git"
   },
   "description": "A voice-first, cassette tape-themed interface for Claude Code with conversation management and MCP integration",
   "type": "module",
   "bin": {
-    "talkboy": "bin/talkboy.js",
-    "talkboy-server": "bin/talkboy-server.js",
-    "talkboy-mcp": "bin/talkboy-mcp.js"
+    "talkie": "bin/talkie.js",
+    "talkie-server": "bin/talkie-server.js",
+    "talkie-mcp": "bin/talkie-mcp.js"
   },
   "files": [
     "bin/",

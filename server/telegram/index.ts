@@ -14,7 +14,7 @@ function getToken(): string | null {
   }
 
   // Check token file
-  const tokenPath = join(homedir(), '.talkboy', 'telegram.token')
+  const tokenPath = join(homedir(), '.talkie', 'telegram.token')
   if (existsSync(tokenPath)) {
     return readFileSync(tokenPath, 'utf-8').trim()
   }
@@ -26,7 +26,7 @@ export async function startTelegramBot(): Promise<void> {
   const token = getToken()
 
   if (!token) {
-    throw new Error('Telegram bot token not found. Set TELEGRAM_BOT_TOKEN env or create ~/.talkboy/telegram.token')
+    throw new Error('Telegram bot token not found. Set TELEGRAM_BOT_TOKEN env or create ~/.talkie/telegram.token')
   }
 
   bot = new Bot(token)

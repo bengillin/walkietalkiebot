@@ -1,8 +1,8 @@
-# Talkboy Roadmap
+# Talkie Roadmap
 
 ## Current State Summary
 
-Talkboy is a voice-first interface for Claude with approximately 6,400 lines of code across 41 files. The core vision of making AI assistance feel natural and immediate through voice interaction has been realized.
+Talkie is a voice-first interface for Claude with approximately 6,400 lines of code across 41 files. The core vision of making AI assistance feel natural and immediate through voice interaction has been realized.
 
 ---
 
@@ -11,7 +11,7 @@ Talkboy is a voice-first interface for Claude with approximately 6,400 lines of 
 ### Core Voice Interface
 - [x] Push-to-talk recording (spacebar or click)
 - [x] "Over" trigger word for hands-free sending
-- [x] Wake word detection ("hey talkboy" with mishearing variants)
+- [x] Wake word detection ("hey talkie" with mishearing variants)
 - [x] Continuous listening mode
 - [x] Streaming TTS responses
 - [x] Sound effects (listening start/stop, thinking, success, errors)
@@ -93,7 +93,7 @@ Custom triggers mapped to actions:
 ### Tier 3: Medium Term
 
 #### Project Context Auto-Loading
-- Detect project by directory structure or `.talkboy` config
+- Detect project by directory structure or `.talkie` config
 - Auto-load relevant docs and past conversations
 - "Last time in this project, you were working on X"
 
@@ -145,7 +145,7 @@ Merge via PR with squash commits to keep main history clean.
 ## Consolidated File Structure
 
 ```
-talkboy/
+talkie/
 ├── README.md                 # Project overview
 ├── ROADMAP.md                # This file - feature planning
 ├── PLAN.md                   # Current sprint tracking

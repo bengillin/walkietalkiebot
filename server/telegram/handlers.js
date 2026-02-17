@@ -3,7 +3,7 @@ import * as conversations from "../db/repositories/conversations.js";
 import * as messages from "../db/repositories/messages.js";
 import * as telegramState from "../db/repositories/telegram.js";
 import * as activities from "../db/repositories/activities.js";
-const WEB_UI_URL = process.env.TALKBOY_URL || "https://localhost:5173";
+const WEB_UI_URL = process.env.TALKIE_URL || "https://localhost:5173";
 function setupHandlers(bot) {
   bot.on("message:text", async (ctx) => {
     const userId = ctx.from?.id;
@@ -135,7 +135,7 @@ function setupHandlers(bot) {
       console.error("Error processing Telegram message:", err);
       const keyboard = new InlineKeyboard().text("Try again", "retry_message");
       await ctx.reply(
-        "Sorry, I encountered an error processing your message. Make sure the Talkboy server is running and Claude Code is available.",
+        "Sorry, I encountered an error processing your message. Make sure the Talkie server is running and Claude Code is available.",
         { reply_markup: keyboard }
       );
     }
@@ -281,7 +281,7 @@ Describe what you see and ask if I have any questions about it.`;
     } catch (err) {
       console.error("Error processing Telegram photo:", err);
       await ctx.reply(
-        "Sorry, I had trouble processing that image. Make sure the Talkboy server is running and an API key is configured."
+        "Sorry, I had trouble processing that image. Make sure the Talkie server is running and an API key is configured."
       );
     }
   });

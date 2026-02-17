@@ -1,11 +1,11 @@
 {
-  "name": "@talkboy/mcp-server",
+  "name": "@walkietalkie/mcp-server",
   "version": "0.2.0",
-  "description": "MCP server for Talkboy voice interface - includes tools for session management, IPC messaging, image analysis, and more",
+  "description": "MCP server for Talkie voice interface - includes tools for session management, IPC messaging, image analysis, and more",
   "type": "module",
   "main": "index.js",
   "bin": {
-    "talkboy-mcp": "./index.js"
+    "talkie-mcp": "./index.js"
   },
   "scripts": {
     "start": "node index.js"
@@ -14,7 +14,7 @@
     "mcp",
     "claude",
     "voice",
-    "talkboy"
+    "talkie"
   ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0"

@@ -1,4 +1,4 @@
-# Talkboy Development Plan
+# Talkie Development Plan
 
 ## Completed Features
 
@@ -8,7 +8,7 @@
 - [x] Conversation history with persistence
 
 ### Voice Interaction Modes
-- [x] Wake word detection - "hey talkboy" activation
+- [x] Wake word detection - "hey talkie" activation
 - [x] Continuous listening with "over" trigger word
 - [x] Silence detection for natural conversation flow
 
@@ -38,7 +38,7 @@ Create a comprehensive onboarding flow that introduces users to all available fe
    - "Over" trigger word for hands-free
 
 3. **Wake Word Detection** (new step)
-   - "Hey Talkboy" activation
+   - "Hey Talkie" activation
    - When to use it vs push-to-talk
 
 4. **Continuous Listening Mode** (new step)

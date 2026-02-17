@@ -3,11 +3,11 @@
 import { startServer } from '../server/index.js'
 import open from 'open'
 
-const PORT = parseInt(process.env.TALKBOY_PORT || '5173', 10)
+const PORT = parseInt(process.env.TALKIE_PORT || '5173', 10)
 const URL = `https://localhost:${PORT}`
 
 async function main() {
-  console.log('Starting Talkboy...')
+  console.log('Starting Talkie...')
 
   try {
     await startServer(PORT)
@@ -23,10 +23,10 @@ async function main() {
       await open(URL)
     }
 
-    console.log('\nTalkboy is running. Press Ctrl+C to stop.')
+    console.log('\nTalkie is running. Press Ctrl+C to stop.')
   } catch (err) {
     if (err instanceof Error && err.message.includes('already in use')) {
-      console.log(`Talkboy appears to already be running on port ${PORT}`)
+      console.log(`Talkie appears to already be running on port ${PORT}`)
       console.log(`Opening ${URL}...`)
       try {
         await open(URL, { app: { name: 'google chrome' } })
@@ -34,7 +34,7 @@ async function main() {
         await open(URL)
       }
     } else {
-      console.error('Failed to start Talkboy:', err)
+      console.error('Failed to start Talkie:', err)
       process.exit(1)
     }
   }

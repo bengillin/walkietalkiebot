@@ -130,7 +130,7 @@ export function startServer(port: number = 5173): Promise<void> {
     })
 
     server.listen(port, () => {
-      console.log(`Talkboy server running at https://localhost:${port}`)
+      console.log(`Talkie server running at https://localhost:${port}`)
       resolve()
     })
 

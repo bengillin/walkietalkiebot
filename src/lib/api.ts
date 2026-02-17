@@ -1,4 +1,4 @@
-// API client for Talkboy server
+// API client for Talkie server
 
 export interface Conversation {
   id: string
@@ -169,12 +169,12 @@ export async function migrateFromLocalStorage(conversations: Array<{
 
 // Check if migration is needed
 export function needsMigration(): boolean {
-  return localStorage.getItem('talkboy_migrated') !== 'true'
+  return localStorage.getItem('talkie_migrated') !== 'true'
 }
 
 // Mark migration as complete
 export function markMigrationComplete(): void {
-  localStorage.setItem('talkboy_migrated', 'true')
+  localStorage.setItem('talkie_migrated', 'true')
 }
 
 // Check if database is available

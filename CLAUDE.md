@@ -1,4 +1,4 @@
-# TalkBoy
+# Talkie
 
 A voice-first, cassette tape-themed interface for Claude Code with conversation management, Telegram bot, and MCP integration.
 
@@ -15,8 +15,8 @@ A voice-first, cassette tape-themed interface for Claude Code with conversation 
 - `npm run dev` — Start Vite dev server (frontend only, no API)
 - `npm run build` — TypeScript check + Vite build + esbuild server bundle
 - `npm run test` — Run vitest
-- `talkboy-server start -f` — Start HTTPS server in foreground (serves API + built frontend)
-- `talkboy-server start` — Start as background process or via launchd
+- `talkie-server start -f` — Start HTTPS server in foreground (serves API + built frontend)
+- `talkie-server start` — Start as background process or via launchd
 
 ## Directory Structure
 
@@ -41,23 +41,23 @@ server/                 Hono HTTPS server
   telegram/             grammy bot (commands, handlers)
 mcp-server/index.js     MCP server with 12 tools (stdio transport)
 bin/                    CLI entry points
-  talkboy.js            Start server + open browser
-  talkboy-server.js     Server lifecycle (start/stop/restart/status/logs/install)
-  talkboy-mcp.js        MCP server entry point
+  talkie.js            Start server + open browser
+  talkie-server.js     Server lifecycle (start/stop/restart/status/logs/install)
+  talkie-mcp.js        MCP server entry point
 ```
 
 ## Key Patterns
 
-- **HTTPS required**: Web Speech API needs secure context. Self-signed certs auto-generated at `~/.talkboy/`
+- **HTTPS required**: Web Speech API needs secure context. Self-signed certs auto-generated at `~/.talkie/`
 - **Two Claude modes**: Direct API (with API key, streaming TTS) or Claude Code CLI (spawns `claude -p`, shows tool activity)
-- **Persistence**: localStorage as cache, SQLite (`~/.talkboy/talkboy.db`) as source of truth. Auto-migration on first server connect.
+- **Persistence**: localStorage as cache, SQLite (`~/.talkie/talkie.db`) as source of truth. Auto-migration on first server connect.
 - **IPC**: Frontend posts to `/api/send`, MCP tools poll `/api/pending`, respond via `/api/respond`
 - **One-shot processes**: Each `/api/claude-code` call spawns a fresh `claude -p` with `--no-session-persistence --permission-mode bypassPermissions`
 - **SSE streaming**: Claude Code events and job events use Server-Sent Events
 
 ## Database
 
-SQLite at `~/.talkboy/talkboy.db`. Schema version tracked in `schema_version` table. Current tables:
+SQLite at `~/.talkie/talkie.db`. Schema version tracked in `schema_version` table. Current tables:
 - `conversations` — id, title, timestamps, project_id
 - `messages` — role, content, position, source
 - `message_images` — base64 data URLs with descriptions

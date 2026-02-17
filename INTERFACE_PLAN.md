@@ -1,8 +1,8 @@
-# TalkBoy Interface Improvement Plan
+# Talkie Interface Improvement Plan
 
 ## The Problem We Just Had
 
-While planning this very improvement, the plan was built in conversation context but never saved to a file. When you asked to see it, there was nothing to show. This highlights a fundamental UX gap: **TalkBoy has no way to surface artifacts, documents, or plans that Claude produces during a conversation.** Everything lives in the chat stream and gets lost.
+While planning this very improvement, the plan was built in conversation context but never saved to a file. When you asked to see it, there was nothing to show. This highlights a fundamental UX gap: **Talkie has no way to surface artifacts, documents, or plans that Claude produces during a conversation.** Everything lives in the chat stream and gets lost.
 
 This plan addresses that problem alongside all the other interface improvements.
 
@@ -128,7 +128,7 @@ I'd lean toward **A (side panel)** for Phase 1 since it's the most immediately u
 
 With buttons moving to the input bar, the header becomes:
 ```
-[Avatar/Status]  TalkBoy  [🔴 Recording indicator]  [📋 Liner Notes]
+[Avatar/Status]  Talkie  [🔴 Recording indicator]  [📋 Liner Notes]
 ```
 
 - Avatar shows current state (idle/listening/thinking/speaking)
@@ -140,7 +140,7 @@ With buttons moving to the input bar, the header becomes:
 
 ## Aesthetic Guidelines
 
-All new components should maintain the cassette tape / TalkBoy aesthetic:
+All new components should maintain the cassette tape / Talkie aesthetic:
 - **Colors**: Metallic grays, blacks, warm accent colors from tape labels
 - **Textures**: Brushed metal, speaker grille patterns, plastic screws
 - **Shadows**: 3D beveled buttons, inset shadows for pressed states

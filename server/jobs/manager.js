@@ -198,12 +198,12 @@ class JobManager {
           const notification = status === "completed" ? {
             type: "job_completed",
             jobId,
-            title: "TalkBoy: Task complete",
+            title: "Talkie: Task complete",
             body: fullResponse.slice(0, 80) || "Done."
           } : {
             type: "job_failed",
             jobId,
-            title: "TalkBoy: Task failed",
+            title: "Talkie: Task failed",
             body: error || "Unknown error"
           };
           dispatcher.dispatch(notification).catch((e) => {

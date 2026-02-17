@@ -19,7 +19,7 @@ interface UseWakeWordResult {
  * When the wake word is detected, it calls onWakeWord callback.
  */
 export function useWakeWord({
-  wakeWord = 'hey talkboy',
+  wakeWord = 'hey talkie',
   onWakeWord,
   enabled = false,
   language = 'en-US',
@@ -66,9 +66,9 @@ export function useWakeWord({
       normalWake,
       normalWake.replace('hey', 'hay'),
       normalWake.replace('hey', 'a'),
-      normalWake.replace('talkboy', 'talk boy'),
-      normalWake.replace('talkboy', 'talk voice'),
-      normalWake.replace('talkboy', 'doc boy'),
+      normalWake.replace('talkie', 'talk boy'),
+      normalWake.replace('talkie', 'talk voice'),
+      normalWake.replace('talkie', 'doc boy'),
     ]
 
     return variants.some(v => normalText.includes(v))

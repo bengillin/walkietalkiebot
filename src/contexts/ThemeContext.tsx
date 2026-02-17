@@ -11,7 +11,7 @@ export interface Theme {
 export const themes: Theme[] = [
   {
     name: 'mccallister',
-    displayName: 'Talkboy',
+    displayName: 'Talkie',
     description: 'Silver 90s cassette recorder aesthetic'
   },
   {
@@ -46,10 +46,10 @@ const ThemeContext = createContext<ThemeContextValue | null>(null)
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<ThemeName>(() => {
-    const saved = localStorage.getItem('talkboy_theme')
+    const saved = localStorage.getItem('talkie_theme')
     // Migrate old spelling to new spelling
     if (saved === 'mcallister') {
-      localStorage.setItem('talkboy_theme', 'mccallister')
+      localStorage.setItem('talkie_theme', 'mccallister')
       return 'mccallister'
     }
     return (saved as ThemeName) || 'mccallister'
@@ -57,7 +57,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const setTheme = (newTheme: ThemeName) => {
     setThemeState(newTheme)
-    localStorage.setItem('talkboy_theme', newTheme)
+    localStorage.setItem('talkie_theme', newTheme)
   }
 
   // Apply theme to document

@@ -94,7 +94,7 @@ function startServer(port = 5173) {
       res.end();
     });
     server.listen(port, () => {
-      console.log(`Talkboy server running at https://localhost:${port}`);
+      console.log(`Talkie server running at https://localhost:${port}`);
       resolve();
     });
     server.on("error", (err) => {

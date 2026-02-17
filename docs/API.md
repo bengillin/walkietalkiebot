@@ -1,6 +1,6 @@
-# TalkBoy API Reference
+# Talkie API Reference
 
-TalkBoy runs a Hono-based HTTPS server at `https://localhost:5173` by default. All endpoints are prefixed with `/api`.
+Talkie runs a Hono-based HTTPS server at `https://localhost:5173` by default. All endpoints are prefixed with `/api`.
 
 CORS is enabled on all routes.
 
@@ -402,7 +402,7 @@ All fields are optional; only provided fields are updated.
 
 ## IPC (Inter-Process Communication)
 
-These endpoints enable bidirectional communication between the TalkBoy web UI and an external Claude Code session.
+These endpoints enable bidirectional communication between the Talkie web UI and an external Claude Code session.
 
 ### `GET /api/pending`
 

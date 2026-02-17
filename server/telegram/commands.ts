@@ -2,7 +2,7 @@ import { Bot, InlineKeyboard } from 'grammy'
 import * as conversations from '../db/repositories/conversations.js'
 import * as telegramState from '../db/repositories/telegram.js'
 
-const WEB_UI_URL = process.env.TALKBOY_URL || 'https://localhost:5173'
+const WEB_UI_URL = process.env.TALKIE_URL || 'https://localhost:5173'
 
 export function setupCommands(bot: Bot): void {
   // /start - Welcome message
@@ -11,7 +11,7 @@ export function setupCommands(bot: Bot): void {
     if (!userId) return
 
     await ctx.reply(
-      `Welcome to Talkboy!\n\n` +
+      `Welcome to Talkie!\n\n` +
       `I'm your mobile interface to Claude Code conversations.\n\n` +
       `Commands:\n` +
       `/conversations - List recent conversations\n` +
@@ -27,7 +27,7 @@ export function setupCommands(bot: Bot): void {
   // /help - Show commands
   bot.command('help', async (ctx) => {
     await ctx.reply(
-      `Talkboy Commands:\n\n` +
+      `Talkie Commands:\n\n` +
       `/conversations - List recent conversations\n` +
       `/new <name> - Create new conversation\n` +
       `/current - Show current conversation\n` +
@@ -123,13 +123,13 @@ export function setupCommands(bot: Bot): void {
       }
 
       await ctx.reply(
-        `Talkboy Status:\n\n` +
+        `Talkie Status:\n\n` +
         `Server: ${data.running ? '✅ Running' : '❌ Stopped'}\n` +
         `Database: ${data.dbStatus === 'connected' ? '✅ Connected' : '⚠️ Unavailable'}\n` +
         `Claude: ${stateEmoji[data.avatarState] || '❓'} ${data.avatarState}`
       )
     } catch {
-      await ctx.reply('Could not reach Talkboy server. Is it running?')
+      await ctx.reply('Could not reach Talkie server. Is it running?')
     }
   })
 

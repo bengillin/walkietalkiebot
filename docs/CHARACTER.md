@@ -1,7 +1,7 @@
-# Talkboy Robot Character Design
+# Talkie Robot Character Design
 
 ## Character Name Ideas
-- **Talkboy** (use the app name)
+- **Talkie** (use the app name)
 - **Buddy**
 - **Chip**
 - **Bleep**

@@ -323,7 +323,7 @@ function MessageBubble({
         )}
       </div>
       <div className={`message-meta ${isUser ? 'user' : 'assistant'}`}>
-        <span className="message-meta__name">{isUser ? 'You' : 'Talkboy'}</span>
+        <span className="message-meta__name">{isUser ? 'You' : 'Talkie'}</span>
         {message.source && message.source !== 'web' && (
           <span className="message-meta__source">via {message.source}</span>
         )}
@@ -377,7 +377,7 @@ function StreamingBubble({
         </div>
       </div>
       <div className="message-meta assistant">
-        <span className="message-meta__name message-meta__name--recording">Talkboy</span>
+        <span className="message-meta__name message-meta__name--recording">Talkie</span>
         <span className="message-meta__time">
           <TypingIndicator />
         </span>

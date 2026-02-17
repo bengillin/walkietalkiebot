@@ -199,7 +199,7 @@ export function Settings({
               checked={useClaudeCode}
               onChange={(e) => {
                 setUseClaudeCode(e.target.checked)
-                localStorage.setItem('talkboy_use_claude_code', String(e.target.checked))
+                localStorage.setItem('talkie_use_claude_code', String(e.target.checked))
               }}
             />
             <span className="settings__slider" />
@@ -354,7 +354,7 @@ export function Settings({
                 className="settings__text-input"
                 value={customWakeWord}
                 onChange={(e) => setCustomWakeWord(e.target.value)}
-                placeholder="hey talkboy"
+                placeholder="hey talkie"
               />
               <p className="settings__hint">
                 Say this phrase to start recording hands-free.
@@ -465,7 +465,7 @@ export function Settings({
                 </div>
                 {!integrations.telegram.configured && (
                   <p className="settings__hint">
-                    Set TELEGRAM_BOT_TOKEN env or create ~/.talkboy/telegram.token
+                    Set TELEGRAM_BOT_TOKEN env or create ~/.talkie/telegram.token
                   </p>
                 )}
               </div>

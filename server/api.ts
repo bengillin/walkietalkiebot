@@ -467,7 +467,7 @@ api.get('/integrations', (c) => {
       const { existsSync } = require('fs')
       const { join } = require('path')
       const { homedir } = require('os')
-      const tokenPath = join(homedir(), '.talkboy', 'telegram.token')
+      const tokenPath = join(homedir(), '.talkie', 'telegram.token')
       telegramConfigured = existsSync(tokenPath)
     } catch {
       // ignore
@@ -479,11 +479,11 @@ api.get('/integrations', (c) => {
       configured: true,
       toolCount: 15,
       tools: [
-        'launch_talkboy', 'get_talkboy_status', 'get_transcript',
+        'launch_talkie', 'get_talkie_status', 'get_transcript',
         'get_conversation_history', 'get_claude_session', 'set_claude_session',
-        'disconnect_claude_session', 'get_pending_message', 'respond_to_talkboy',
-        'update_talkboy_state', 'analyze_image', 'open_url',
-        'create_talkboy_job', 'get_talkboy_job', 'list_talkboy_jobs',
+        'disconnect_claude_session', 'get_pending_message', 'respond_to_talkie',
+        'update_talkie_state', 'analyze_image', 'open_url',
+        'create_talkie_job', 'get_talkie_job', 'list_talkie_jobs',
       ],
       transport: 'stdio',
     },

@@ -30,7 +30,7 @@ function spawnClaude(options) {
   const { prompt, history, images, rawMode, callbacks } = options;
   const tempImagePaths = [];
   if (images && images.length > 0) {
-    const tempDir = join(tmpdir(), "talkboy-images");
+    const tempDir = join(tmpdir(), "talkie-images");
     mkdirSync(tempDir, { recursive: true });
     for (const img of images) {
       const base64Data = img.dataUrl.split(",")[1];
@@ -59,7 +59,7 @@ function spawnClaude(options) {
       imageBlock = "[Attached Images - Use the Read tool to view these image files]\n" + tempImagePaths.map((p) => p).join("\n") + "\n[/Attached Images]\n\n";
     }
     const isPlanRequest = /\b(?:plan|design|architect|propose|strategy|roadmap|outline)\b/i.test(prompt);
-    const planInstruction = isPlanRequest ? "\n[PLAN MODE - The user is asking you to make a plan. Write the full detailed plan (with markdown headings, numbered steps, etc.) to a file using the Write tool at /tmp/talkboy-plan.md. Then give a brief voice summary of what you planned.]" : "";
+    const planInstruction = isPlanRequest ? "\n[PLAN MODE - The user is asking you to make a plan. Write the full detailed plan (with markdown headings, numbered steps, etc.) to a file using the Write tool at /tmp/talkie-plan.md. Then give a brief voice summary of what you planned.]" : "";
     fullPrompt = `${contextBlock}${imageBlock}[VOICE MODE - Keep responses to 1-2 sentences, no markdown, speak naturally]${planInstruction}
 
 User: ${prompt}`;

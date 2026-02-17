@@ -1,12 +1,12 @@
-# TalkBoy Telegram Bot
+# Talkie Telegram Bot
 
 Chat with Claude Code from your phone via Telegram.
 
 ## Overview
 
-The Telegram bot provides a mobile-friendly text interface to TalkBoy. You can send text messages and photos to Claude Code, manage conversations, and check server status -- all from the Telegram app on your phone.
+The Telegram bot provides a mobile-friendly text interface to Talkie. You can send text messages and photos to Claude Code, manage conversations, and check server status -- all from the Telegram app on your phone.
 
-The bot is built with the [grammY](https://grammy.dev/) framework and connects to the TalkBoy server's existing HTTP API to process messages.
+The bot is built with the [grammY](https://grammy.dev/) framework and connects to the Talkie server's existing HTTP API to process messages.
 
 ## Setup
 
@@ -15,8 +15,8 @@ The bot is built with the [grammY](https://grammy.dev/) framework and connects t
 Open Telegram and message [@BotFather](https://t.me/BotFather):
 
 1. Send `/newbot`
-2. Choose a display name (e.g., "TalkBoy")
-3. Choose a username (e.g., "my_talkboy_bot")
+2. Choose a display name (e.g., "Talkie")
+3. Choose a username (e.g., "my_talkie_bot")
 4. Copy the token BotFather gives you
 
 ### 2. Configure the token
@@ -32,17 +32,17 @@ export TELEGRAM_BOT_TOKEN="123456:ABC-DEF..."
 **Token file:**
 
 ```bash
-mkdir -p ~/.talkboy
-echo "123456:ABC-DEF..." > ~/.talkboy/telegram.token
+mkdir -p ~/.talkie
+echo "123456:ABC-DEF..." > ~/.talkie/telegram.token
 ```
 
 The bot checks the environment variable first, then falls back to the token file.
 
-### 3. Start TalkBoy
+### 3. Start Talkie
 
-The Telegram bot starts automatically when the TalkBoy server launches (assuming a valid token is found). No additional configuration is needed.
+The Telegram bot starts automatically when the Talkie server launches (assuming a valid token is found). No additional configuration is needed.
 
-The bot connects to the TalkBoy server at the URL specified by the `TALKBOY_URL` environment variable, defaulting to `https://localhost:5173`.
+The bot connects to the Talkie server at the URL specified by the `TALKIE_URL` environment variable, defaulting to `https://localhost:5173`.
 
 ## Commands
 
@@ -84,7 +84,7 @@ Photos sent to the bot are analyzed using Claude's vision capability:
 
 ## Conversation State
 
-Each Telegram user has their own conversation state tracked in the `telegram_state` database table. This maps a Telegram user ID to a TalkBoy conversation ID.
+Each Telegram user has their own conversation state tracked in the `telegram_state` database table. This maps a Telegram user ID to a Talkie conversation ID.
 
 - When a user sends their first message, a new conversation is automatically created.
 - Users can switch conversations using the inline keyboard buttons shown by `/conversations`.
@@ -117,7 +117,7 @@ The bot responds with a helpful message for unsupported input types:
 ## Technical Details
 
 - **Framework**: grammY (`grammy` npm package)
-- **API communication**: The bot calls the TalkBoy HTTPS API using `undici` with `rejectUnauthorized: false` to support the self-signed TLS certificate.
+- **API communication**: The bot calls the Talkie HTTPS API using `undici` with `rejectUnauthorized: false` to support the self-signed TLS certificate.
 - **Database**: Conversation state is persisted in the `telegram_state` SQLite table. Messages and activities use the same tables as the web UI.
 - **Message source**: All messages created by the Telegram bot have `source: "telegram"` to distinguish them from web UI messages (`source: "web"`).
 - **SSE parsing**: The bot manually parses Server-Sent Events from the `/api/claude-code` response stream using a line-by-line buffer approach.

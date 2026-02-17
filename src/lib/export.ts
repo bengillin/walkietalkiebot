@@ -15,7 +15,7 @@ export function exportAsMarkdown(conversation: Conversation): string {
   lines.push(``)
 
   for (const msg of conversation.messages) {
-    const role = msg.role === 'user' ? 'You' : 'Talkboy'
+    const role = msg.role === 'user' ? 'You' : 'Talkie'
     const time = formatTimestamp(msg.timestamp)
     lines.push(`### ${role} — ${time}`)
     lines.push(``)

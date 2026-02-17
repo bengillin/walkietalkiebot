@@ -1,13 +1,13 @@
-# TalkBoy
+# Talkie
 
-A voice-first interface for Claude Code, styled after the classic TalkBoy cassette recorder from Home Alone 2.
+A voice-first interface for Claude Code, styled after the classic Talkie cassette recorder from Home Alone 2.
 
 Talk to Claude with push-to-talk, wake words, or continuous listening. Manage conversations as cassette tapes. Works with web UI, Telegram bot, and MCP integration.
 
 ## Quick Start
 
 ```bash
-npx talkboy
+npx talkie
 ```
 
 This starts the HTTPS server and opens https://localhost:5173 in your browser.
@@ -18,7 +18,7 @@ This starts the HTTPS server and opens https://localhost:5173 in your browser.
 
 1. Complete the onboarding flow to configure voice settings
 2. Choose your preferences:
-   - **Wake word**: Enable "hey talkboy" hands-free activation
+   - **Wake word**: Enable "hey talkie" hands-free activation
    - **Continuous listening**: Always-on with trigger word
    - **Text-to-speech**: Have responses read aloud
 3. Start talking!
@@ -28,7 +28,7 @@ This starts the HTTPS server and opens https://localhost:5173 in your browser.
 ### Voice Input
 
 - **Push-to-talk**: Hold spacebar or click the record button
-- **Wake word**: Say "hey talkboy" (customizable) for hands-free activation
+- **Wake word**: Say "hey talkie" (customizable) for hands-free activation
 - **Continuous listening**: Always-on mode that waits for your trigger word
 - **Trigger word**: Say "over" (customizable) to end your turn
 - **Silence detection**: Configurable delay (0.5-3.0s) after trigger word
@@ -80,16 +80,16 @@ Export conversations as Markdown, JSON, or plain text.
 ## Server Management
 
 ```bash
-talkboy-server start [-f]    # Start (background, or -f for foreground)
-talkboy-server stop          # Stop the server
-talkboy-server restart       # Restart
-talkboy-server status        # Show status (running, port, launchd, DB)
-talkboy-server logs [-f]     # View logs (-f to follow)
-talkboy-server install       # Install as macOS launchd daemon (auto-start on login)
-talkboy-server uninstall     # Remove launchd daemon
+talkie-server start [-f]    # Start (background, or -f for foreground)
+talkie-server stop          # Stop the server
+talkie-server restart       # Restart
+talkie-server status        # Show status (running, port, launchd, DB)
+talkie-server logs [-f]     # View logs (-f to follow)
+talkie-server install       # Install as macOS launchd daemon (auto-start on login)
+talkie-server uninstall     # Remove launchd daemon
 ```
 
-Set `TALKBOY_PORT` to change the default port (5173).
+Set `TALKIE_PORT` to change the default port (5173).
 
 ## Telegram Bot
 
@@ -100,7 +100,7 @@ Chat with Claude from your phone via Telegram.
 1. Create a bot via [@BotFather](https://t.me/BotFather)
 2. Provide the token:
    - Environment variable: `TELEGRAM_BOT_TOKEN=your-token`
-   - Or token file: `~/.talkboy/telegram.token`
+   - Or token file: `~/.talkie/telegram.token`
 3. Start the server — bot starts automatically
 
 ### Commands
@@ -118,7 +118,7 @@ Send text messages to chat. Send photos (with optional captions) for image analy
 
 ## MCP Integration
 
-Claude Code can launch and interact with TalkBoy via MCP tools.
+Claude Code can launch and interact with Talkie via MCP tools.
 
 ### Setup
 
@@ -127,9 +127,9 @@ Add to `~/.claude/settings.json`:
 ```json
 {
   "mcpServers": {
-    "talkboy": {
+    "talkie": {
       "command": "npx",
-      "args": ["talkboy-mcp"]
+      "args": ["talkie-mcp"]
     }
   }
 }
@@ -139,23 +139,23 @@ Add to `~/.claude/settings.json`:
 
 | Tool | Description |
 |------|-------------|
-| `launch_talkboy` | Start server and open browser |
-| `get_talkboy_status` | Check running status and avatar state |
+| `launch_talkie` | Start server and open browser |
+| `get_talkie_status` | Check running status and avatar state |
 | `get_transcript` | Get latest voice transcript |
 | `get_conversation_history` | Get current conversation messages |
 | `get_claude_session` | Get connected session ID |
 | `set_claude_session` | Connect to a Claude Code session |
 | `disconnect_claude_session` | Disconnect session |
 | `get_pending_message` | Poll for user messages (IPC mode) |
-| `respond_to_talkboy` | Send response to user (IPC mode) |
-| `update_talkboy_state` | Set avatar state, transcript |
+| `respond_to_talkie` | Send response to user (IPC mode) |
+| `update_talkie_state` | Set avatar state, transcript |
 | `analyze_image` | Analyze image via Claude vision |
 | `open_url` | Open URL in default browser |
 
 ## Persistence
 
 - **Browser**: localStorage for settings and conversation cache
-- **Server**: SQLite at `~/.talkboy/talkboy.db` (WAL mode, FTS5 full-text search)
+- **Server**: SQLite at `~/.talkie/talkie.db` (WAL mode, FTS5 full-text search)
 - **Migration**: On first server connection, localStorage data auto-migrates to SQLite
 
 ## Architecture
@@ -207,9 +207,9 @@ server/
 
 mcp-server/index.js            MCP server (12 tools, stdio)
 bin/
-├── talkboy.js                 Start server + open browser
-├── talkboy-server.js          Server lifecycle CLI
-└── talkboy-mcp.js             MCP server entry
+├── talkie.js                 Start server + open browser
+├── talkie-server.js          Server lifecycle CLI
+└── talkie-mcp.js             MCP server entry
 ```
 
 ### API Endpoints

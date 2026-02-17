@@ -1,6 +1,6 @@
-/* McCallister Theme - Silver Talkboy cassette recorder aesthetic */
+/* McCallister Theme - Silver Talkie cassette recorder aesthetic */
 [data-theme="mccallister"] {
-  /* Background Colors - Silver/gray like the Talkboy device body */
+  /* Background Colors - Silver/gray like the Talkie device body */
   --bg-primary: #a8a8a8;
   --bg-secondary: #b8b8b8;
   --bg-tertiary: #c8c8c8;
@@ -11,7 +11,7 @@
   --text-secondary: #3a3a3a;
   --text-muted: #5a5a5a;
 
-  /* Accent Colors - Red like the Talkboy record button */
+  /* Accent Colors - Red like the Talkie record button */
   --accent: #cc0000;
   --accent-hover: #ff1a1a;
   --accent-glow: rgba(204, 0, 0, 0.4);
@@ -51,7 +51,7 @@
   --header-border: #707070;
   --header-text: #1a1a1a;
 
-  /* Button styling - Dark charcoal like Talkboy buttons */
+  /* Button styling - Dark charcoal like Talkie buttons */
   --btn-bg: linear-gradient(180deg, #4a4a4a 0%, #3a3a3a 100%);
   --btn-hover: linear-gradient(180deg, #5a5a5a 0%, #4a4a4a 100%);
   --btn-border: #2a2a2a;
@@ -90,7 +90,7 @@
     );
 }
 
-/* McCallister header - Silver raised panel like Talkboy top */
+/* McCallister header - Silver raised panel like Talkie top */
 [data-theme="mccallister"] .app__header {
   background: linear-gradient(180deg, #d0d0d0 0%, #b8b8b8 30%, #a8a8a8 100%);
   border-bottom: 4px solid #707070;
@@ -259,7 +259,7 @@
     0 2px 0 rgba(0,0,0,0.3);
 }
 
-/* McCallister speaker avatar - TalkBoy style grille */
+/* McCallister speaker avatar - Talkie style grille */
 [data-theme="mccallister"] .speaker-avatar__grille {
   background: linear-gradient(145deg, #1a1a1a 0%, #0a0a0a 100%);
   border: 4px solid #3a3a3a;
@@ -270,7 +270,7 @@
     0 8px 16px rgba(0, 0, 0, 0.5);
 }
 
-/* Listening state - use TalkBoy orange/red accent */
+/* Listening state - use Talkie orange/red accent */
 [data-theme="mccallister"] .speaker-avatar--listening .speaker-avatar__grille {
   box-shadow:
     inset 0 -4px 8px rgba(255, 255, 255, 0.05),

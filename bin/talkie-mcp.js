@@ -10,61 +10,61 @@ import { spawn, exec } from 'child_process';
 import { promisify } from 'util';
 
 const execAsync = promisify(exec);
-const TALKBOY_PORT = parseInt(process.env.TALKBOY_PORT || '5173', 10);
-const TALKBOY_URL = `https://localhost:${TALKBOY_PORT}`;
+const TALKIE_PORT = parseInt(process.env.TALKIE_PORT || '5173', 10);
+const TALKIE_URL = `https://localhost:${TALKIE_PORT}`;
 
 // Allow self-signed certificates for local dev
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
-let talkboyProcess = null;
+let talkieProcess = null;
 
-// Check if Talkboy is running
-async function isTalkboyRunning() {
+// Check if Talkie is running
+async function isTalkieRunning() {
   try {
-    const response = await fetch(`${TALKBOY_URL}/api/status`);
+    const response = await fetch(`${TALKIE_URL}/api/status`);
     return response.ok;
   } catch {
     return false;
   }
 }
 
-// Launch Talkboy using npx
-async function launchTalkboy() {
-  if (await isTalkboyRunning()) {
+// Launch Talkie using npx
+async function launchTalkie() {
+  if (await isTalkieRunning()) {
     // Already running, just open the browser (prefer Chrome for Web Speech API)
-    exec(`open -a "Google Chrome" ${TALKBOY_URL} 2>/dev/null || open ${TALKBOY_URL}`);
-    return { success: true, message: 'Talkboy is already running (use Chrome/Edge for voice)', url: TALKBOY_URL };
+    exec(`open -a "Google Chrome" ${TALKIE_URL} 2>/dev/null || open ${TALKIE_URL}`);
+    return { success: true, message: 'Talkie is already running (use Chrome/Edge for voice)', url: TALKIE_URL };
   }
 
   return new Promise((resolve) => {
-    // Use npx talkboy to start the server
-    talkboyProcess = spawn('npx', ['talkboy'], {
+    // Use npx talkie to start the server
+    talkieProcess = spawn('npx', ['talkie'], {
       detached: true,
       stdio: 'ignore',
-      env: { ...process.env, TALKBOY_PORT: String(TALKBOY_PORT) },
+      env: { ...process.env, TALKIE_PORT: String(TALKIE_PORT) },
     });
 
-    talkboyProcess.unref();
+    talkieProcess.unref();
 
     // Wait for server to be ready
     let attempts = 0;
     const checkReady = setInterval(async () => {
       attempts++;
-      if (await isTalkboyRunning()) {
+      if (await isTalkieRunning()) {
         clearInterval(checkReady);
-        resolve({ success: true, message: 'Talkboy launched', url: TALKBOY_URL });
+        resolve({ success: true, message: 'Talkie launched', url: TALKIE_URL });
       } else if (attempts > 30) {
         clearInterval(checkReady);
-        resolve({ success: false, message: 'Talkboy failed to start' });
+        resolve({ success: false, message: 'Talkie failed to start' });
       }
     }, 500);
   });
 }
 
-// Get status from Talkboy
+// Get status from Talkie
 async function getStatus() {
   try {
-    const response = await fetch(`${TALKBOY_URL}/api/status`);
+    const response = await fetch(`${TALKIE_URL}/api/status`);
     if (response.ok) {
       return await response.json();
     }
@@ -77,46 +77,46 @@ async function getStatus() {
 // Get latest transcript
 async function getTranscript() {
   try {
-    const response = await fetch(`${TALKBOY_URL}/api/transcript`);
+    const response = await fetch(`${TALKIE_URL}/api/transcript`);
     if (response.ok) {
       return await response.json();
     }
     return { transcript: null, error: 'Failed to get transcript' };
   } catch {
-    return { transcript: null, error: 'Talkboy not running' };
+    return { transcript: null, error: 'Talkie not running' };
   }
 }
 
 // Get conversation history
 async function getHistory() {
   try {
-    const response = await fetch(`${TALKBOY_URL}/api/history`);
+    const response = await fetch(`${TALKIE_URL}/api/history`);
     if (response.ok) {
       return await response.json();
     }
     return { messages: [], error: 'Failed to get history' };
   } catch {
-    return { messages: [], error: 'Talkboy not running' };
+    return { messages: [], error: 'Talkie not running' };
   }
 }
 
 // Get Claude Code session info
 async function getSession() {
   try {
-    const response = await fetch(`${TALKBOY_URL}/api/session`);
+    const response = await fetch(`${TALKIE_URL}/api/session`);
     if (response.ok) {
       return await response.json();
     }
     return { sessionId: null, error: 'Failed to get session' };
   } catch {
-    return { sessionId: null, error: 'Talkboy not running' };
+    return { sessionId: null, error: 'Talkie not running' };
   }
 }
 
 // Set Claude Code session ID
 async function setSession(sessionId) {
   try {
-    const response = await fetch(`${TALKBOY_URL}/api/session`, {
+    const response = await fetch(`${TALKIE_URL}/api/session`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sessionId }),
@@ -126,14 +126,14 @@ async function setSession(sessionId) {
     }
     return { success: false, error: 'Failed to set session' };
   } catch {
-    return { success: false, error: 'Talkboy not running' };
+    return { success: false, error: 'Talkie not running' };
   }
 }
 
 // Disconnect Claude Code session
 async function disconnectSession() {
   try {
-    const response = await fetch(`${TALKBOY_URL}/api/session`, {
+    const response = await fetch(`${TALKIE_URL}/api/session`, {
       method: 'DELETE',
     });
     if (response.ok) {
@@ -141,27 +141,27 @@ async function disconnectSession() {
     }
     return { success: false, error: 'Failed to disconnect session' };
   } catch {
-    return { success: false, error: 'Talkboy not running' };
+    return { success: false, error: 'Talkie not running' };
   }
 }
 
 // Get pending message (for IPC mode)
 async function getPendingMessage() {
   try {
-    const response = await fetch(`${TALKBOY_URL}/api/pending`);
+    const response = await fetch(`${TALKIE_URL}/api/pending`);
     if (response.ok) {
       return await response.json();
     }
     return { pending: null, error: 'Failed to get pending message' };
   } catch {
-    return { pending: null, error: 'Talkboy not running' };
+    return { pending: null, error: 'Talkie not running' };
   }
 }
 
 // Respond to pending message (for IPC mode)
 async function respondToMessage(content) {
   try {
-    const response = await fetch(`${TALKBOY_URL}/api/respond`, {
+    const response = await fetch(`${TALKIE_URL}/api/respond`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content }),
@@ -171,14 +171,14 @@ async function respondToMessage(content) {
     }
     return { success: false, error: 'Failed to respond' };
   } catch {
-    return { success: false, error: 'Talkboy not running' };
+    return { success: false, error: 'Talkie not running' };
   }
 }
 
 // Update state
 async function updateState(stateUpdate) {
   try {
-    const response = await fetch(`${TALKBOY_URL}/api/state`, {
+    const response = await fetch(`${TALKIE_URL}/api/state`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(stateUpdate),
@@ -188,14 +188,14 @@ async function updateState(stateUpdate) {
     }
     return { success: false, error: 'Failed to update state' };
   } catch {
-    return { success: false, error: 'Talkboy not running' };
+    return { success: false, error: 'Talkie not running' };
   }
 }
 
 // Analyze an image
 async function analyzeImage(dataUrl, fileName, apiKey) {
   try {
-    const response = await fetch(`${TALKBOY_URL}/api/analyze-image`, {
+    const response = await fetch(`${TALKIE_URL}/api/analyze-image`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ dataUrl, fileName, apiKey }),
@@ -206,14 +206,14 @@ async function analyzeImage(dataUrl, fileName, apiKey) {
     const error = await response.text();
     return { error: `Failed to analyze image: ${error}` };
   } catch {
-    return { error: 'Talkboy not running' };
+    return { error: 'Talkie not running' };
   }
 }
 
 // Open URL in browser
 async function openUrl(url) {
   try {
-    const response = await fetch(`${TALKBOY_URL}/api/open-url`, {
+    const response = await fetch(`${TALKIE_URL}/api/open-url`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url }),
@@ -223,14 +223,14 @@ async function openUrl(url) {
     }
     return { success: false, error: 'Failed to open URL' };
   } catch {
-    return { success: false, error: 'Talkboy not running' };
+    return { success: false, error: 'Talkie not running' };
   }
 }
 
 // Job management
 async function createJob(conversationId, prompt) {
   try {
-    const response = await fetch(`${TALKBOY_URL}/api/jobs`, {
+    const response = await fetch(`${TALKIE_URL}/api/jobs`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ conversationId, prompt, source: 'mcp' }),
@@ -241,39 +241,39 @@ async function createJob(conversationId, prompt) {
     const error = await response.text();
     return { error: `Failed to create job: ${error}` };
   } catch {
-    return { error: 'Talkboy not running' };
+    return { error: 'Talkie not running' };
   }
 }
 
 async function getJobStatus(jobId) {
   try {
-    const response = await fetch(`${TALKBOY_URL}/api/jobs/${jobId}`);
+    const response = await fetch(`${TALKIE_URL}/api/jobs/${jobId}`);
     if (response.ok) {
       return await response.json();
     }
     return { error: 'Job not found' };
   } catch {
-    return { error: 'Talkboy not running' };
+    return { error: 'Talkie not running' };
   }
 }
 
-async function listTalkboyJobs(status) {
+async function listTalkieJobs(status) {
   try {
     const params = status ? `?status=${status}` : '';
-    const response = await fetch(`${TALKBOY_URL}/api/jobs${params}`);
+    const response = await fetch(`${TALKIE_URL}/api/jobs${params}`);
     if (response.ok) {
       return await response.json();
     }
     return { jobs: [], error: 'Failed to list jobs' };
   } catch {
-    return { jobs: [], error: 'Talkboy not running' };
+    return { jobs: [], error: 'Talkie not running' };
   }
 }
 
 // Create MCP server
 const server = new Server(
   {
-    name: 'talkboy',
+    name: 'talkie',
     version: '0.2.0',
   },
   {
@@ -289,8 +289,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
     tools: [
       // Core tools
       {
-        name: 'launch_talkboy',
-        description: 'Launch the Talkboy voice interface in a browser. Use this when the user wants to interact with voice.',
+        name: 'launch_talkie',
+        description: 'Launch the Talkie voice interface in a browser. Use this when the user wants to interact with voice.',
         inputSchema: {
           type: 'object',
           properties: {},
@@ -298,8 +298,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         },
       },
       {
-        name: 'get_talkboy_status',
-        description: 'Check if Talkboy is running and get its current state (idle, listening, thinking, speaking).',
+        name: 'get_talkie_status',
+        description: 'Check if Talkie is running and get its current state (idle, listening, thinking, speaking).',
         inputSchema: {
           type: 'object',
           properties: {},
@@ -308,7 +308,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: 'get_transcript',
-        description: 'Get the latest voice transcript from Talkboy. Use after user has spoken.',
+        description: 'Get the latest voice transcript from Talkie. Use after user has spoken.',
         inputSchema: {
           type: 'object',
           properties: {},
@@ -317,7 +317,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: 'get_conversation_history',
-        description: 'Get the full conversation history from the current tape/conversation in Talkboy.',
+        description: 'Get the full conversation history from the current tape/conversation in Talkie.',
         inputSchema: {
           type: 'object',
           properties: {},
@@ -336,7 +336,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: 'set_claude_session',
-        description: 'Set the Claude Code session ID to connect Talkboy to your session.',
+        description: 'Set the Claude Code session ID to connect Talkie to your session.',
         inputSchema: {
           type: 'object',
           properties: {
@@ -360,7 +360,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       // IPC tools for Claude Code integration
       {
         name: 'get_pending_message',
-        description: 'Check if there is a pending message from Talkboy waiting for a response. Use this to poll for user messages in IPC mode.',
+        description: 'Check if there is a pending message from Talkie waiting for a response. Use this to poll for user messages in IPC mode.',
         inputSchema: {
           type: 'object',
           properties: {},
@@ -368,14 +368,14 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         },
       },
       {
-        name: 'respond_to_talkboy',
-        description: 'Send a response back to Talkboy. Use this in IPC mode to respond to a pending message.',
+        name: 'respond_to_talkie',
+        description: 'Send a response back to Talkie. Use this in IPC mode to respond to a pending message.',
         inputSchema: {
           type: 'object',
           properties: {
             content: {
               type: 'string',
-              description: 'The response content to send to Talkboy',
+              description: 'The response content to send to Talkie',
             },
           },
           required: ['content'],
@@ -383,8 +383,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       // State management
       {
-        name: 'update_talkboy_state',
-        description: 'Update Talkboy state (avatar state, transcript, messages, etc.).',
+        name: 'update_talkie_state',
+        description: 'Update Talkie state (avatar state, transcript, messages, etc.).',
         inputSchema: {
           type: 'object',
           properties: {
@@ -440,8 +440,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       // Job tools
       {
-        name: 'create_talkboy_job',
-        description: 'Create a background job in Talkboy. The task runs asynchronously and you get a job ID back immediately. Use get_talkboy_job to check on progress.',
+        name: 'create_talkie_job',
+        description: 'Create a background job in Talkie. The task runs asynchronously and you get a job ID back immediately. Use get_talkie_job to check on progress.',
         inputSchema: {
           type: 'object',
           properties: {
@@ -458,7 +458,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         },
       },
       {
-        name: 'get_talkboy_job',
+        name: 'get_talkie_job',
         description: 'Get the status and result of a background job.',
         inputSchema: {
           type: 'object',
@@ -472,7 +472,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         },
       },
       {
-        name: 'list_talkboy_jobs',
+        name: 'list_talkie_jobs',
         description: 'List background jobs, optionally filtered by status.',
         inputSchema: {
           type: 'object',
@@ -495,8 +495,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
   switch (name) {
-    case 'launch_talkboy': {
-      const result = await launchTalkboy();
+    case 'launch_talkie': {
+      const result = await launchTalkie();
       return {
         content: [
           {
@@ -507,7 +507,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       };
     }
 
-    case 'get_talkboy_status': {
+    case 'get_talkie_status': {
       const status = await getStatus();
       return {
         content: [
@@ -591,7 +591,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       };
     }
 
-    case 'respond_to_talkboy': {
+    case 'respond_to_talkie': {
       const result = await respondToMessage(args.content);
       return {
         content: [
@@ -603,7 +603,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       };
     }
 
-    case 'update_talkboy_state': {
+    case 'update_talkie_state': {
       const result = await updateState(args);
       return {
         content: [
@@ -639,7 +639,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       };
     }
 
-    case 'create_talkboy_job': {
+    case 'create_talkie_job': {
       const result = await createJob(args.conversationId, args.prompt);
       return {
         content: [
@@ -651,7 +651,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       };
     }
 
-    case 'get_talkboy_job': {
+    case 'get_talkie_job': {
       const result = await getJobStatus(args.jobId);
       return {
         content: [
@@ -663,8 +663,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       };
     }
 
-    case 'list_talkboy_jobs': {
-      const result = await listTalkboyJobs(args.status);
+    case 'list_talkie_jobs': {
+      const result = await listTalkieJobs(args.status);
       return {
         content: [
           {
@@ -684,7 +684,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error('Talkboy MCP server running');
+  console.error('Talkie MCP server running');
 }
 
 main().catch(console.error);

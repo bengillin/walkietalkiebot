@@ -28,10 +28,10 @@ import './App.css'
 
 function App() {
   const [hasOnboarded, setHasOnboarded] = useState(() =>
-    localStorage.getItem('talkboy_onboarded') === 'true'
+    localStorage.getItem('talkie_onboarded') === 'true'
   )
   const [apiKey, setApiKey] = useState(() =>
-    localStorage.getItem('talkboy_api_key') || ''
+    localStorage.getItem('talkie_api_key') || ''
   )
   const [showSettings, setShowSettings] = useState(false)
   const [showMediaLibrary, setShowMediaLibrary] = useState(false)
@@ -45,11 +45,11 @@ function App() {
 
   // FAB position and size (draggable/resizable)
   const [fabPosition, setFabPosition] = useState(() => {
-    const saved = localStorage.getItem('talkboy_fab_position')
+    const saved = localStorage.getItem('talkie_fab_position')
     return saved ? JSON.parse(saved) : { x: 20, y: 100 } // Default: bottom-right offset from edges
   })
   const [fabSize, setFabSize] = useState(() => {
-    const saved = localStorage.getItem('talkboy_fab_size')
+    const saved = localStorage.getItem('talkie_fab_size')
     return saved ? parseInt(saved, 10) : 64
   })
   const [isDraggingFab, setIsDraggingFab] = useState(false)
@@ -59,7 +59,7 @@ function App() {
   const resizeStartRef = useRef<{ size: number; startY: number } | null>(null)
   const [error, setError] = useState('')
   const [useClaudeCode, setUseClaudeCode] = useState(() =>
-    localStorage.getItem('talkboy_use_claude_code') === 'true'
+    localStorage.getItem('talkie_use_claude_code') === 'true'
   )
   const [connectedSessionId, setConnectedSessionId] = useState<string | null>(null)
   const [lightboxImage, setLightboxImage] = useState<{ dataUrl: string; description?: string; fileName: string } | null>(null)
@@ -195,7 +195,7 @@ function App() {
   const handleOnboardingComplete = useCallback((settings: OnboardingSettings) => {
     // Claude Code is the default
     setUseClaudeCode(true)
-    localStorage.setItem('talkboy_use_claude_code', 'true')
+    localStorage.setItem('talkie_use_claude_code', 'true')
 
     // Apply onboarding settings
     setWakeWordEnabled(settings.wakeWordEnabled)
@@ -203,7 +203,7 @@ function App() {
     setTtsEnabled(settings.ttsEnabled)
 
     setHasOnboarded(true)
-    localStorage.setItem('talkboy_onboarded', 'true')
+    localStorage.setItem('talkie_onboarded', 'true')
   }, [setWakeWordEnabled, setContinuousListeningEnabled, setTtsEnabled])
 
   // Get messages from context conversations to include in API calls
@@ -588,7 +588,7 @@ function App() {
 
   // Wake word detection for hands-free activation
   useWakeWord({
-    wakeWord: customWakeWord || 'hey talkboy',
+    wakeWord: customWakeWord || 'hey talkie',
     enabled: wakeWordEnabled && !isListening && !isSpeaking && avatarState !== 'thinking',
     onWakeWord: () => {
       console.log('[App] Wake word detected, starting recording')
@@ -740,7 +740,7 @@ function App() {
 
   const handleFabDragEnd = useCallback(() => {
     if (isDraggingFab) {
-      localStorage.setItem('talkboy_fab_position', JSON.stringify(fabPosition))
+      localStorage.setItem('talkie_fab_position', JSON.stringify(fabPosition))
     }
     dragStartRef.current = null
     setIsDraggingFab(false)
@@ -766,7 +766,7 @@ function App() {
 
   const handleFabResizeEnd = useCallback(() => {
     if (isResizingFab) {
-      localStorage.setItem('talkboy_fab_size', String(fabSize))
+      localStorage.setItem('talkie_fab_size', String(fabSize))
     }
     resizeStartRef.current = null
     setIsResizingFab(false)
@@ -807,7 +807,7 @@ function App() {
   const handleSaveApiKey = (e: React.FormEvent) => {
     e.preventDefault()
     if (apiKey.trim()) {
-      localStorage.setItem('talkboy_api_key', apiKey.trim())
+      localStorage.setItem('talkie_api_key', apiKey.trim())
       setShowSettings(false)
     }
   }
@@ -819,7 +819,7 @@ function App() {
         <div className="app__unsupported">
           <h1>Browser Not Supported</h1>
           <p>
-            Talkboy requires speech recognition and synthesis.
+            Talkie requires speech recognition and synthesis.
             Please use Chrome or Edge.
           </p>
         </div>
@@ -1026,7 +1026,7 @@ function App() {
             }
           }}
           onResetOnboarding={() => {
-            localStorage.removeItem('talkboy_onboarded')
+            localStorage.removeItem('talkie_onboarded')
             setHasOnboarded(false)
             setShowSettings(false)
           }}

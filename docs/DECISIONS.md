@@ -155,7 +155,7 @@ Track key decisions and their rationale.
 - localStorage kept as offline cache with auto-migration
 **Consequences**:
 - Requires `better-sqlite3` native module (compiled per platform)
-- DB at `~/.talkboy/talkboy.db`
+- DB at `~/.talkie/talkie.db`
 - Need schema versioning system for migrations
 
 ---
@@ -194,29 +194,29 @@ Track key decisions and their rationale.
 ### ADR-007: MCP Server for Claude Code Integration
 **Date**: 2026-02-01
 **Status**: Accepted
-**Decision**: Expose TalkBoy functionality as MCP tools via stdio transport
+**Decision**: Expose Talkie functionality as MCP tools via stdio transport
 **Rationale**:
-- Allows Claude Code to launch TalkBoy, read transcripts, and respond to user voice input
-- Enables bidirectional IPC where Claude Code can be an active participant in TalkBoy conversations
+- Allows Claude Code to launch Talkie, read transcripts, and respond to user voice input
+- Enables bidirectional IPC where Claude Code can be an active participant in Talkie conversations
 **Consequences**:
 - 12 tools exposed
 - All tools proxy to the HTTPS API (self-signed cert bypass required)
-- Duplicate code between `mcp-server/index.js` and `bin/talkboy-mcp.js`
+- Duplicate code between `mcp-server/index.js` and `bin/talkie-mcp.js`
 
 ---
 
 ### ADR-008: Cassette Tape UI Theme
 **Date**: 2026-02-01
 **Status**: Accepted
-**Decision**: Use a cassette tape / TalkBoy (Home Alone 2) theme for the UI
+**Decision**: Use a cassette tape / Talkie (Home Alone 2) theme for the UI
 **Rationale**:
 - Strong brand identity
 - "Conversations as tapes" is an intuitive metaphor (insert, play, eject, switch)
 - Retro aesthetic is distinctive
-- The original TalkBoy was a voice recorder, fitting perfectly
+- The original Talkie was a voice recorder, fitting perfectly
 **Consequences**:
 - Custom CSS with theme variables
-- McAllister theme (silver TalkBoy) as default
+- McAllister theme (silver Talkie) as default
 - Cassette components: CassetteTape (animated reels), TapeDeck (input bar), TapeCollection (conversation switcher), RetroTape, TapeCase
 
 ---
@@ -227,7 +227,7 @@ Track key decisions and their rationale.
 **Decision**: Auto-generate self-signed certificates for localhost HTTPS
 **Rationale**:
 - Web Speech API requires a secure context (HTTPS or localhost)
-- Self-signed certs at `~/.talkboy/` allow HTTPS on any port
+- Self-signed certs at `~/.talkie/` allow HTTPS on any port
 - Tailscale certs preferred when available
 **Consequences**:
 - Browser shows certificate warning on first visit

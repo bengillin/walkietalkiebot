@@ -1,13 +1,14 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
+import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'fs'
 import { homedir } from 'os'
 import { join } from 'path'
 import selfsigned from 'selfsigned'
 
-const TALKBOY_DIR = join(homedir(), '.talkboy')
-const CERT_PATH = join(TALKBOY_DIR, 'cert.pem')
-const KEY_PATH = join(TALKBOY_DIR, 'key.pem')
-const TAILSCALE_CERT_PATH = join(TALKBOY_DIR, 'tailscale.crt')
-const TAILSCALE_KEY_PATH = join(TALKBOY_DIR, 'tailscale.key')
+const TALKIE_DIR = join(homedir(), '.talkie')
+const OLD_DIR = join(homedir(), '.talkboy')
+const CERT_PATH = join(TALKIE_DIR, 'cert.pem')
+const KEY_PATH = join(TALKIE_DIR, 'key.pem')
+const TAILSCALE_CERT_PATH = join(TALKIE_DIR, 'tailscale.crt')
+const TAILSCALE_KEY_PATH = join(TALKIE_DIR, 'tailscale.key')
 
 export interface SSLCerts {
   cert: string
@@ -16,9 +17,14 @@ export interface SSLCerts {
 }
 
 export function getSSLCerts(): SSLCerts {
-  // Ensure ~/.talkboy directory exists
-  if (!existsSync(TALKBOY_DIR)) {
-    mkdirSync(TALKBOY_DIR, { recursive: true })
+  // Migrate ~/.talkboy → ~/.talkie if needed
+  if (existsSync(OLD_DIR) && !existsSync(TALKIE_DIR)) {
+    renameSync(OLD_DIR, TALKIE_DIR)
+  }
+
+  // Ensure ~/.talkie directory exists
+  if (!existsSync(TALKIE_DIR)) {
+    mkdirSync(TALKIE_DIR, { recursive: true })
   }
 
   // Prefer Tailscale certs if available (real certs, no browser warnings)
@@ -60,7 +66,7 @@ export function getSSLCerts(): SSLCerts {
   // Save certificates
   writeFileSync(CERT_PATH, pems.cert)
   writeFileSync(KEY_PATH, pems.private)
-  console.log(`SSL certificates saved to ${TALKBOY_DIR}`)
+  console.log(`SSL certificates saved to ${TALKIE_DIR}`)
 
   return {
     cert: pems.cert,

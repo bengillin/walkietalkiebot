@@ -182,7 +182,7 @@ export async function sendMessageStreaming(
       model: options?.model || 'claude-sonnet-4-20250514',
       max_tokens: options?.maxTokens || 1024,
       stream: true,
-      system: options?.systemPrompt || `You are Talkboy. Be direct and brief - responses are spoken aloud. One to two sentences max unless asked for more. No filler phrases, no "Great question!", no "I'd be happy to help!". Just answer. Kind but not performative.`,
+      system: options?.systemPrompt || `You are Talkie. Be direct and brief - responses are spoken aloud. One to two sentences max unless asked for more. No filler phrases, no "Great question!", no "I'd be happy to help!". Just answer. Kind but not performative.`,
       messages: claudeMessages,
     }),
   })

@@ -8,16 +8,16 @@ import { fileURLToPath } from 'url'
 import { createInterface } from 'readline'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const PLIST_NAME = 'com.talkboy.server'
+const PLIST_NAME = 'com.talkie.server'
 const PLIST_PATH = join(homedir(), 'Library', 'LaunchAgents', `${PLIST_NAME}.plist`)
-const LOG_DIR = join(homedir(), '.talkboy', 'logs')
-const PID_FILE = join(homedir(), '.talkboy', 'server.pid')
-const PORT = parseInt(process.env.TALKBOY_PORT || '5173', 10)
+const LOG_DIR = join(homedir(), '.talkie', 'logs')
+const PID_FILE = join(homedir(), '.talkie', 'server.pid')
+const PORT = parseInt(process.env.TALKIE_PORT || '5173', 10)
 
 function ensureDirs() {
-  const talkboyDir = join(homedir(), '.talkboy')
-  if (!existsSync(talkboyDir)) {
-    mkdirSync(talkboyDir, { recursive: true })
+  const talkieDir = join(homedir(), '.talkie')
+  if (!existsSync(talkieDir)) {
+    mkdirSync(talkieDir, { recursive: true })
   }
   if (!existsSync(LOG_DIR)) {
     mkdirSync(LOG_DIR, { recursive: true })
@@ -137,7 +137,7 @@ async function startServer(foreground = false) {
   }
 
   if (foreground) {
-    console.log(`Starting Talkboy server in foreground on port ${PORT}...`)
+    console.log(`Starting Talkie server in foreground on port ${PORT}...`)
     const { startServer } = await import('../server/index.js')
     await startServer(PORT)
   } else {
@@ -173,12 +173,12 @@ async function startServer(foreground = false) {
     for (let i = 0; i < 30; i++) {
       await new Promise(r => setTimeout(r, 500))
       if (isServerRunning()) {
-        console.log(`Talkboy server running at https://localhost:${PORT}`)
+        console.log(`Talkie server running at https://localhost:${PORT}`)
         return
       }
     }
 
-    console.error('Server failed to start. Check logs with: talkboy-server logs')
+    console.error('Server failed to start. Check logs with: talkie-server logs')
   }
 }
 
@@ -223,7 +223,7 @@ async function showStatus() {
   const running = isServerRunning()
   const launchd = isLaunchctlLoaded()
 
-  console.log('Talkboy Server Status')
+  console.log('Talkie Server Status')
   console.log('=====================')
   console.log(`Server:   ${running ? '✅ Running' : '❌ Stopped'}`)
   console.log(`Port:     ${PORT}`)
@@ -293,7 +293,7 @@ async function installDaemon() {
   execSync(`launchctl load ${PLIST_PATH}`)
   console.log('Daemon loaded and started.')
   console.log(`Server will start automatically on login.`)
-  console.log(`\nTo uninstall: talkboy-server uninstall`)
+  console.log(`\nTo uninstall: talkie-server uninstall`)
 }
 
 async function uninstallDaemon() {
@@ -312,9 +312,9 @@ async function uninstallDaemon() {
 
 function showHelp() {
   console.log(`
-Talkboy Server CLI
+Talkie Server CLI
 
-Usage: talkboy-server <command> [options]
+Usage: talkie-server <command> [options]
 
 Commands:
   start [-f]      Start the server (use -f for foreground)
@@ -326,7 +326,7 @@ Commands:
   uninstall       Remove launchd daemon
 
 Environment:
-  TALKBOY_PORT    Server port (default: 5173)
+  TALKIE_PORT    Server port (default: 5173)
 `)
 }
 
