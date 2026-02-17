@@ -291,3 +291,514 @@
 .retro-tape--mini .retro-tape__inner .retro-tape__screw {
   width: 20%;
 }
+
+/* ═══════════════════════════════════════════════════
+   Per-theme cassette skins
+   ═══════════════════════════════════════════════════ */
+
+/* ── Bubble (iMessage) ── */
+.retro-tape--imessage {
+  --tape-body-color: #f2f2f7;
+  --tape-texture: none;
+  clip-path: none;
+  border-radius: 12px;
+  background-image: none;
+  background-color: var(--tape-body-color);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.retro-tape--imessage:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.retro-tape--imessage .retro-tape__label {
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.08);
+  clip-path: none;
+  border-radius: 8px;
+  margin: 4% 4% 0;
+  height: 68%;
+  background-image:
+    linear-gradient(transparent 45%,
+      var(--tape-label-accent) 45% 46%, transparent 46% 100%
+    );
+}
+
+.retro-tape--imessage .retro-tape__text {
+  font-family: -apple-system, 'SF Pro Text', BlinkMacSystemFont, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #1c1c1e;
+}
+
+.retro-tape--imessage .retro-tape__central {
+  background-color: #e5e5ea;
+  border: 1px solid #d1d1d6;
+  border-radius: 4px;
+}
+
+.retro-tape--imessage .retro-tape__central::after {
+  background-image: none;
+}
+
+.retro-tape--imessage .retro-tape__reel {
+  border-color: #c7c7cc;
+  background: #d1d1d6;
+}
+
+.retro-tape--imessage .retro-tape__arc {
+  background: #8e8e93;
+}
+
+.retro-tape--imessage .retro-tape__arc::before,
+.retro-tape--imessage .retro-tape__arc::after {
+  background: linear-gradient(#8e8e93 28%, transparent 28% 72%, #8e8e93 72%);
+}
+
+.retro-tape--imessage .retro-tape__axis {
+  background: #c7c7cc;
+}
+
+.retro-tape--imessage .retro-tape__axis::after {
+  border-color: #aeaeb2;
+  background: #d1d1d6;
+}
+
+.retro-tape--imessage .retro-tape__bottom {
+  background-color: #e5e5ea;
+  clip-path: none;
+  border-radius: 0 0 8px 8px;
+  width: auto;
+  margin: 2% 4% 0;
+  height: 18%;
+}
+
+.retro-tape--imessage .retro-tape__screw {
+  background: #c7c7cc;
+}
+
+.retro-tape--imessage .retro-tape__inner .retro-tape__screw {
+  background: #aeaeb2;
+}
+
+.retro-tape--imessage.retro-tape--selected {
+  box-shadow: 0 0 0 3px #007aff, 0 4px 16px rgba(0, 122, 255, 0.3);
+}
+
+.retro-tape--imessage.retro-tape--selected::before {
+  background: #007aff;
+  color: #fff;
+  border-radius: 10px;
+  font-family: -apple-system, 'SF Pro Text', sans-serif;
+}
+
+/* ── Dial-Up (AOL) ── */
+.retro-tape--aol {
+  --tape-body-color: #c0c0c0;
+  --tape-texture: none;
+  clip-path: none;
+  border-radius: 0;
+  background-image: none;
+  background-color: var(--tape-body-color);
+  border: 2px solid;
+  border-color: #ffffff #808080 #808080 #ffffff;
+  box-shadow: 1px 1px 0 #000;
+}
+
+.retro-tape--aol:hover {
+  transform: translateY(-2px);
+  box-shadow: 2px 2px 0 #000;
+}
+
+.retro-tape--aol .retro-tape__label {
+  box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #ffffff;
+  clip-path: none;
+  border-radius: 0;
+  margin: 4% 4% 0;
+  height: 68%;
+}
+
+.retro-tape--aol .retro-tape__text {
+  font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Arial, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: #000;
+}
+
+.retro-tape--aol .retro-tape__central {
+  background-color: #1a1a2e;
+  border: 2px solid;
+  border-color: #808080 #ffffff #ffffff #808080;
+  border-radius: 0;
+}
+
+.retro-tape--aol .retro-tape__reel {
+  border-color: #555;
+  background: #0a0a1a;
+}
+
+.retro-tape--aol .retro-tape__arc {
+  background: #888;
+}
+
+.retro-tape--aol .retro-tape__arc::before,
+.retro-tape--aol .retro-tape__arc::after {
+  background: linear-gradient(#888 28%, transparent 28% 72%, #888 72%);
+}
+
+.retro-tape--aol .retro-tape__axis {
+  background: #666;
+}
+
+.retro-tape--aol .retro-tape__axis::after {
+  border-color: #555;
+  background: #888;
+}
+
+.retro-tape--aol .retro-tape__bottom {
+  background-color: #a0a0a0;
+  clip-path: none;
+  border-radius: 0;
+  width: auto;
+  margin: 2% 4% 0;
+  height: 18%;
+  border: 1px solid;
+  border-color: #ffffff #808080 #808080 #ffffff;
+}
+
+.retro-tape--aol .retro-tape__screw {
+  background: #808080;
+  border: 1px solid #555;
+}
+
+.retro-tape--aol .retro-tape__inner .retro-tape__screw {
+  background: #666;
+}
+
+.retro-tape--aol.retro-tape--selected {
+  box-shadow: 0 0 0 3px #000080, 2px 2px 0 #000;
+  border-color: #000080 #000080 #000080 #000080;
+}
+
+.retro-tape--aol.retro-tape--selected::before {
+  background: #000080;
+  color: #fff;
+  border-radius: 0;
+  font-family: 'MS Sans Serif', Tahoma, sans-serif;
+}
+
+/* ── Finder (Classic Mac) ── */
+.retro-tape--classic-mac {
+  --tape-body-color: #eeeeee;
+  --tape-texture: none;
+  clip-path: none;
+  border-radius: 4px;
+  background-image: none;
+  background-color: var(--tape-body-color);
+  border: 1px solid #000;
+  box-shadow: 1px 1px 0 #000;
+}
+
+.retro-tape--classic-mac:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 2px 2px 0 #000, 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.retro-tape--classic-mac .retro-tape__label {
+  box-shadow: inset 0 0 0 1px #000;
+  clip-path: none;
+  border-radius: 3px;
+  margin: 4% 4% 0;
+  height: 68%;
+  background-color: #ffffff;
+}
+
+.retro-tape--classic-mac .retro-tape__text {
+  font-family: 'Chicago', 'Geneva', 'Charcoal', 'Lucida Grande', sans-serif;
+  font-weight: 700;
+  font-size: clamp(10px, 3vw, 14px);
+  letter-spacing: 0;
+  color: #000;
+}
+
+.retro-tape--classic-mac .retro-tape__central {
+  background-color: #ffffff;
+  border: 1px solid #000;
+  border-radius: 2px;
+}
+
+.retro-tape--classic-mac .retro-tape__reel {
+  border-color: #000;
+  background: #dddddd;
+}
+
+.retro-tape--classic-mac .retro-tape__arc {
+  background: #666;
+}
+
+.retro-tape--classic-mac .retro-tape__arc::before,
+.retro-tape--classic-mac .retro-tape__arc::after {
+  background: linear-gradient(#666 28%, transparent 28% 72%, #666 72%);
+}
+
+.retro-tape--classic-mac .retro-tape__axis {
+  background: #aaa;
+}
+
+.retro-tape--classic-mac .retro-tape__axis::after {
+  border-color: #888;
+  background: #ccc;
+}
+
+.retro-tape--classic-mac .retro-tape__bottom {
+  background-color: #cccccc;
+  clip-path: none;
+  border-radius: 0 0 3px 3px;
+  width: auto;
+  margin: 2% 4% 0;
+  height: 18%;
+  border: 1px solid #000;
+}
+
+.retro-tape--classic-mac .retro-tape__screw {
+  background: #444;
+  border: 1px solid #000;
+}
+
+.retro-tape--classic-mac .retro-tape__inner .retro-tape__screw {
+  background: #222;
+}
+
+.retro-tape--classic-mac.retro-tape--selected {
+  box-shadow: 0 0 0 3px #3366cc, 1px 1px 0 #000;
+}
+
+.retro-tape--classic-mac.retro-tape--selected::before {
+  background: #3366cc;
+  color: #fff;
+  border-radius: 3px;
+  font-family: 'Chicago', 'Geneva', sans-serif;
+}
+
+/* ── Guestbook (GeoCities) ── */
+.retro-tape--geocities {
+  --tape-body-color: #1a0033;
+  --tape-texture: none;
+  clip-path: none;
+  border-radius: 0;
+  background-image: none;
+  background-color: var(--tape-body-color);
+  border: 2px solid #ff00ff;
+  box-shadow: 0 0 8px rgba(255, 0, 255, 0.3);
+}
+
+.retro-tape--geocities:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 0 16px rgba(255, 0, 255, 0.5), 0 0 32px rgba(0, 255, 255, 0.2);
+}
+
+.retro-tape--geocities .retro-tape__label {
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.6);
+  clip-path: none;
+  border-radius: 0;
+  margin: 4% 4% 0;
+  height: 68%;
+  background-color: #0d001a;
+  border: 1px solid #6600cc;
+}
+
+.retro-tape--geocities .retro-tape__text {
+  font-family: 'Comic Sans MS', 'Comic Sans', cursive;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: #00ff00;
+  text-shadow: 0 0 6px rgba(0, 255, 0, 0.5);
+}
+
+.retro-tape--geocities .retro-tape__central {
+  background-color: #0a0020;
+  border: 1px solid #6600cc;
+  border-radius: 0;
+  box-shadow: 0 0 4px rgba(102, 0, 204, 0.4) inset;
+}
+
+.retro-tape--geocities .retro-tape__central::after {
+  background-image: none;
+}
+
+.retro-tape--geocities .retro-tape__reel {
+  border-color: #6600cc;
+  background: #110022;
+}
+
+.retro-tape--geocities .retro-tape__arc {
+  background: #9933ff;
+  box-shadow: 0 0 4px rgba(153, 51, 255, 0.5);
+}
+
+.retro-tape--geocities .retro-tape__arc::before,
+.retro-tape--geocities .retro-tape__arc::after {
+  background: linear-gradient(#9933ff 28%, transparent 28% 72%, #9933ff 72%);
+}
+
+.retro-tape--geocities .retro-tape__axis {
+  background: #1a0033;
+}
+
+.retro-tape--geocities .retro-tape__axis::after {
+  border-color: #6600cc;
+  background: #330066;
+}
+
+.retro-tape--geocities .retro-tape__bottom {
+  background-color: #110022;
+  clip-path: none;
+  border-radius: 0;
+  width: auto;
+  margin: 2% 4% 0;
+  height: 18%;
+  border: 1px solid #6600cc;
+}
+
+.retro-tape--geocities .retro-tape__screw {
+  background: #330066;
+  box-shadow: 0 0 3px rgba(153, 51, 255, 0.3);
+}
+
+.retro-tape--geocities .retro-tape__inner .retro-tape__screw {
+  background: #220044;
+}
+
+.retro-tape--geocities.retro-tape--selected {
+  box-shadow: 0 0 0 3px #00ffff, 0 0 16px rgba(0, 255, 255, 0.5), 0 0 32px rgba(255, 0, 255, 0.3);
+  border-color: #00ffff;
+}
+
+.retro-tape--geocities.retro-tape--selected::before {
+  content: "~* NOW PLAYING *~";
+  background: #ff00ff;
+  color: #fff;
+  border-radius: 0;
+  font-family: 'Comic Sans MS', cursive;
+  text-shadow: 0 0 6px rgba(255, 0, 255, 0.8);
+  box-shadow: 0 0 8px rgba(255, 0, 255, 0.5);
+}
+
+/* Neon label colors for geocities */
+.retro-tape--geocities { --tape-label-accent: #00ff00; }
+
+/* ── 1984 (Apple) ── */
+.retro-tape--apple-1984 {
+  --tape-body-color: #f0dfc0;
+  --tape-texture: none;
+  clip-path: none;
+  border-radius: 6px;
+  background-image: none;
+  background-color: var(--tape-body-color);
+  border: 1.5px solid #c4a882;
+  box-shadow: 0 1px 4px rgba(44, 24, 16, 0.1);
+  position: relative;
+  overflow: visible;
+}
+
+/* Rainbow stripe across top */
+.retro-tape--apple-1984::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  border-radius: 6px 6px 0 0;
+  background: linear-gradient(to right,
+    #61BB46 0%, #61BB46 16.66%,
+    #FDB827 16.66%, #FDB827 33.33%,
+    #F5821F 33.33%, #F5821F 50%,
+    #E03A3E 50%, #E03A3E 66.66%,
+    #963D97 66.66%, #963D97 83.33%,
+    #009DDC 83.33%, #009DDC 100%);
+  z-index: 1;
+}
+
+.retro-tape--apple-1984:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 4px 16px rgba(44, 24, 16, 0.15);
+}
+
+.retro-tape--apple-1984 .retro-tape__label {
+  box-shadow: inset 0 0 4px rgba(44, 24, 16, 0.1);
+  clip-path: none;
+  border-radius: 4px;
+  margin: 6% 4% 0;
+  height: 66%;
+  background-color: #f5e6c8;
+  border: 1px solid #c4a882;
+}
+
+.retro-tape--apple-1984 .retro-tape__text {
+  font-family: 'Futura', 'Century Gothic', 'Gill Sans', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #2c1810;
+}
+
+.retro-tape--apple-1984 .retro-tape__central {
+  background-color: #d4c0a0;
+  border: 1px solid #b0966e;
+  border-radius: 3px;
+}
+
+.retro-tape--apple-1984 .retro-tape__central::after {
+  background-image: none;
+}
+
+.retro-tape--apple-1984 .retro-tape__reel {
+  border-color: #8b6b4a;
+  background: #c4a882;
+}
+
+.retro-tape--apple-1984 .retro-tape__arc {
+  background: #8b6b4a;
+}
+
+.retro-tape--apple-1984 .retro-tape__arc::before,
+.retro-tape--apple-1984 .retro-tape__arc::after {
+  background: linear-gradient(#8b6b4a 28%, transparent 28% 72%, #8b6b4a 72%);
+}
+
+.retro-tape--apple-1984 .retro-tape__axis {
+  background: #d4c0a0;
+}
+
+.retro-tape--apple-1984 .retro-tape__axis::after {
+  border-color: #b0966e;
+  background: #c4a882;
+}
+
+.retro-tape--apple-1984 .retro-tape__bottom {
+  background-color: #d4c0a0;
+  clip-path: none;
+  border-radius: 0 0 4px 4px;
+  width: auto;
+  margin: 2% 4% 0;
+  height: 18%;
+  border: 1px solid #c4a882;
+}
+
+.retro-tape--apple-1984 .retro-tape__screw {
+  background: #8b6b4a;
+}
+
+.retro-tape--apple-1984 .retro-tape__inner .retro-tape__screw {
+  background: #6b4f32;
+}
+
+.retro-tape--apple-1984.retro-tape--selected {
+  box-shadow: 0 0 0 3px #E03A3E, 0 4px 16px rgba(224, 58, 62, 0.3);
+}
+
+.retro-tape--apple-1984.retro-tape--selected::before {
+  background: #E03A3E;
+  color: #f5e6c8;
+  border-radius: 6px;
+  font-family: 'Futura', 'Century Gothic', sans-serif;
+}

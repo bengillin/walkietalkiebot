@@ -102,8 +102,6 @@
   background: linear-gradient(180deg, #000080, #1084d0);
   border-bottom: 2px solid #808080;
   box-shadow: none;
-  min-height: 80px;
-  padding: 12px 20px;
 }
 
 [data-theme="aol"] .app__title {
@@ -128,10 +126,6 @@
   border-radius: 0;
   color: #000000;
   box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff, inset -2px -2px 0 #404040, inset 2px 2px 0 #dfdfdf;
-  padding: 2px;
-  width: 24px;
-  height: 22px;
-  min-width: 24px;
 }
 
 [data-theme="aol"] .app__header-btn:hover {
@@ -163,8 +157,6 @@
   background: #ff0000;
   border: none;
   color: #ffffff;
-  width: 24px;
-  height: 22px;
   border-radius: 0;
   box-shadow: inset -1px -1px 0 #800000, inset 1px 1px 0 #ff6666, inset -2px -2px 0 #400000, inset 2px 2px 0 #ff9999;
 }
@@ -254,22 +246,24 @@
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
 }
 
-/* Logo */
-[data-theme="aol"] .app__logo {
-  height: 28px;
-  margin-top: 2px;
-  margin-bottom: 2px;
-}
-
 /* Avatar */
 [data-theme="aol"] .app__avatar-mini {
   width: 32px;
   height: 32px;
 }
 
-[data-theme="aol"] .app__avatar-status {
-  width: 60px;
-  height: 60px;
+/* Theme button */
+[data-theme="aol"] .app__theme-btn {
+  background: #ffffff;
+  border: none;
+  border-radius: 0;
+  color: #000000;
+  font-family: 'MS Sans Serif', Tahoma, sans-serif;
+  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+}
+
+[data-theme="aol"] .app__theme-btn:hover {
+  background: #ffffff;
 }
 
 /* Mobile menu */

@@ -1,3 +1,4 @@
+import { useTheme } from '../../contexts/ThemeContext'
 import './RetroTape.css'
 
 export type TapeColor = 'orange' | 'blue' | 'pink' | 'green' | 'purple' | 'yellow' | 'red' | 'teal'
@@ -35,6 +36,7 @@ export function RetroTape({
   isEjecting = false,
   size = 'normal',
 }: RetroTapeProps) {
+  const { theme } = useTheme()
   const colors = TAPE_COLORS[color]
 
   // Calculate tape reel sizes based on usage
@@ -46,7 +48,7 @@ export function RetroTape({
 
   return (
     <div
-      className={`retro-tape ${sizeClass} ${ejectClass} ${className} ${isSelected ? 'retro-tape--selected' : ''}`}
+      className={`retro-tape retro-tape--${theme} ${sizeClass} ${ejectClass} ${className} ${isSelected ? 'retro-tape--selected' : ''}`}
       onClick={onClick}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}

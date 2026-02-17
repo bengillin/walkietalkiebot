@@ -116,8 +116,6 @@
   );
   border-bottom: 1px solid #000000;
   box-shadow: 0 1px 0 #ffffff;
-  min-height: 80px;
-  padding: 12px 20px;
 }
 
 [data-theme="classic-mac"] .app__title {
@@ -142,10 +140,6 @@
   border-radius: 3px;
   color: #000000;
   box-shadow: none;
-  padding: 2px 6px;
-  width: 28px;
-  height: 24px;
-  min-width: 28px;
 }
 
 [data-theme="classic-mac"] .app__header-btn:hover {
@@ -179,8 +173,6 @@
   background: #dddddd;
   border: 1px solid #000000;
   color: #cc0000;
-  width: 28px;
-  height: 24px;
   border-radius: 3px;
   box-shadow: none;
 }
@@ -275,22 +267,24 @@
   font-family: 'Geneva', 'Lucida Grande', sans-serif;
 }
 
-/* Logo */
-[data-theme="classic-mac"] .app__logo {
-  height: 28px;
-  margin-top: 2px;
-  margin-bottom: 2px;
-}
-
 /* Avatar */
 [data-theme="classic-mac"] .app__avatar-mini {
   width: 32px;
   height: 32px;
 }
 
-[data-theme="classic-mac"] .app__avatar-status {
-  width: 60px;
-  height: 60px;
+/* Theme button */
+[data-theme="classic-mac"] .app__theme-btn {
+  background: #ffffff;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  color: #000000;
+  font-family: 'Geneva', 'Lucida Grande', sans-serif;
+  box-shadow: 1px 1px 0 #000000;
+}
+
+[data-theme="classic-mac"] .app__theme-btn:hover {
+  background: #eeeeee;
 }
 
 /* Mobile menu */

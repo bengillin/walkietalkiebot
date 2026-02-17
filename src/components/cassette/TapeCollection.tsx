@@ -14,11 +14,11 @@ function summarizeTitle(title: string): string {
 
 const THEME_LABELS: Record<ThemeName, { title: string; newBtn: string; search: string; switchPrompt: string; empty: string; emptyBtn: string }> = {
   mccallister: { title: 'Recorded Conversations', newBtn: 'New Recording', search: 'Search tapes...', switchPrompt: 'Switch tapes?', empty: 'No tapes yet', emptyBtn: 'Create your first tape' },
-  imessage: { title: 'Conversations', newBtn: 'New Chat', search: 'Search conversations...', switchPrompt: 'Switch conversations?', empty: 'No conversations yet', emptyBtn: 'Start a conversation' },
-  aol: { title: 'Buddy List', newBtn: 'New Buddy', search: 'Search buddies...', switchPrompt: 'Switch buddies?', empty: 'No buddies online', emptyBtn: 'Add a buddy' },
-  'classic-mac': { title: 'Saved Disks', newBtn: 'New Disk', search: 'Search disks...', switchPrompt: 'Switch disks?', empty: 'No disks yet', emptyBtn: 'Initialize a disk' },
-  geocities: { title: 'Guest Book', newBtn: 'New Page', search: 'Search pages...', switchPrompt: 'Switch pages?', empty: 'No pages yet', emptyBtn: 'Create your first page' },
-  'apple-1984': { title: 'Saved Disks', newBtn: 'New Disk', search: 'Search disks...', switchPrompt: 'Switch disks?', empty: 'No disks yet', emptyBtn: 'Initialize a disk' },
+  imessage: { title: 'Saved Tapes', newBtn: 'New Tape', search: 'Search tapes...', switchPrompt: 'Switch tapes?', empty: 'No tapes yet', emptyBtn: 'Record your first tape' },
+  aol: { title: 'Tape Archive', newBtn: 'New Tape', search: 'Search tapes...', switchPrompt: 'Switch tapes?', empty: 'No tapes yet', emptyBtn: 'Record your first tape' },
+  'classic-mac': { title: 'Tape Library', newBtn: 'New Tape', search: 'Search tapes...', switchPrompt: 'Switch tapes?', empty: 'No tapes yet', emptyBtn: 'Record your first tape' },
+  geocities: { title: 'Tape Stash', newBtn: 'New Tape', search: 'Search tapes...', switchPrompt: 'Switch tapes?', empty: 'No tapes yet', emptyBtn: 'Record your first tape' },
+  'apple-1984': { title: 'Tape Collection', newBtn: 'New Tape', search: 'Search tapes...', switchPrompt: 'Switch tapes?', empty: 'No tapes yet', emptyBtn: 'Record your first tape' },
 }
 
 interface TapeCollectionProps {

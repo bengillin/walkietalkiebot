@@ -103,8 +103,6 @@
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   border-bottom: 0.5px solid rgba(60, 60, 67, 0.18);
   box-shadow: none;
-  min-height: 80px;
-  padding: 12px 20px;
 }
 
 [data-theme="imessage"] .app__title {
@@ -129,9 +127,6 @@
   border-radius: 50%;
   color: #007aff;
   box-shadow: none;
-  padding: 8px;
-  width: 36px;
-  height: 36px;
 }
 
 [data-theme="imessage"] .app__header-btn:hover {
@@ -162,8 +157,6 @@
   background: #ff3b30;
   border: none;
   color: #ffffff;
-  width: 40px;
-  height: 40px;
   border-radius: 50%;
   box-shadow: 0 2px 8px rgba(255, 59, 48, 0.3);
 }
@@ -248,22 +241,21 @@
   font-size: 16px;
 }
 
-/* Logo */
-[data-theme="imessage"] .app__logo {
-  height: 32px;
-  margin-top: 8px;
-  margin-bottom: 4px;
-}
-
 /* Avatar */
 [data-theme="imessage"] .app__avatar-mini {
   width: 40px;
   height: 40px;
 }
 
-[data-theme="imessage"] .app__avatar-status {
-  width: 60px;
-  height: 60px;
+/* Theme button */
+[data-theme="imessage"] .app__theme-btn {
+  background: rgba(0, 122, 255, 0.08);
+  border-color: transparent;
+  color: #000;
+}
+
+[data-theme="imessage"] .app__theme-btn:hover {
+  background: rgba(0, 122, 255, 0.14);
 }
 
 /* Mobile menu */

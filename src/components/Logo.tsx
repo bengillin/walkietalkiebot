@@ -1,9 +1,11 @@
+import { useTheme } from '../contexts/ThemeContext'
+
 export function Logo({ className }: { className?: string }) {
+  const { theme } = useTheme()
+
   return (
-    <img
-      src="/Talkie_logo.png"
-      alt="Talkie"
-      className={className}
-    />
+    <span className={`app__text-logo app__text-logo--${theme} ${className || ''}`}>
+      Talkie
+    </span>
   )
 }

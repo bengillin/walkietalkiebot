@@ -14,9 +14,7 @@ interface TapeDeckProps {
   onNewConversation: () => void
   onDeleteConversation: (id: string) => void
   onCloseCollection: () => void
-  onOpenCollection: () => void
   onClearTranscript?: () => void
-  onOpenSettings?: () => void
   onFilesAdd?: (files: import('../../types').DroppedFile[]) => void
   isDisabled?: boolean
   triggerWord?: string
@@ -39,9 +37,7 @@ export function TapeDeck({
   onNewConversation,
   onDeleteConversation,
   onCloseCollection,
-  onOpenCollection,
   onClearTranscript,
-  onOpenSettings,
   onFilesAdd,
   isDisabled = false,
   triggerWord = 'over',
@@ -207,35 +203,23 @@ export function TapeDeck({
         onToggleContext={onToggleContext}
       />
 
-      {/* Main deck area - Option B integrated single row */}
+      {/* Main deck area - [Mic] [Input] [Attach] [Send] */}
       <div className="tape-deck__main">
-        {/* Left side: drawer triggers */}
-        <div className="tape-deck__left-actions">
-          {/* Eject / Tape collection button */}
+        {/* Mic button - left of input (shown when not in continuous listening mode) */}
+        {onTalkStart && !continuousListening && (
           <button
-            className={`tape-deck__action-btn tape-deck__action-btn--eject ${isEjected ? 'tape-deck__action-btn--active' : ''}`}
-            onClick={() => isEjected ? onCloseCollection() : onOpenCollection()}
-            title={isEjected ? 'Close tape collection' : 'Eject tape'}
+            className={`tape-deck__action-btn tape-deck__action-btn--mic ${isRecording ? 'tape-deck__action-btn--recording' : ''}`}
+            onMouseDown={onTalkStart}
+            onMouseUp={onTalkEnd}
+            onMouseLeave={isRecording ? onTalkEnd : undefined}
+            disabled={isDisabled || isEjected}
+            title="Hold to record"
           >
             <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
-              <path d="M5 17h14v2H5zm7-12L5.33 15h13.34z" />
+              <path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/>
             </svg>
           </button>
-
-          {/* Settings button */}
-          {onOpenSettings && (
-            <button
-              className="tape-deck__action-btn tape-deck__action-btn--settings"
-              onClick={onOpenSettings}
-              title="Settings"
-            >
-              <svg viewBox="0 0 24 24" fill="none" width="18" height="18">
-                <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="currentColor" strokeWidth="2"/>
-                <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" stroke="currentColor" strokeWidth="2"/>
-              </svg>
-            </button>
-          )}
-        </div>
+        )}
 
         {/* Center: text input */}
         <div className="tape-deck__input-wrapper">
@@ -275,22 +259,6 @@ export function TapeDeck({
                 onChange={handleFileChange}
               />
             </>
-          )}
-
-          {/* Mic button (shown when not in continuous listening mode) */}
-          {onTalkStart && !continuousListening && (
-            <button
-              className={`tape-deck__action-btn tape-deck__action-btn--mic ${isRecording ? 'tape-deck__action-btn--recording' : ''}`}
-              onMouseDown={onTalkStart}
-              onMouseUp={onTalkEnd}
-              onMouseLeave={isRecording ? onTalkEnd : undefined}
-              disabled={isDisabled || isEjected}
-              title="Hold to record"
-            >
-              <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
-                <path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/>
-              </svg>
-            </button>
           )}
 
           {/* Send button */}

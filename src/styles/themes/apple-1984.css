@@ -103,8 +103,6 @@
   -webkit-backdrop-filter: none;
   border-bottom: 1px solid #c4a882;
   box-shadow: 0 2px 6px rgba(44, 24, 16, 0.08);
-  min-height: 80px;
-  padding: 12px 20px;
   position: relative;
 }
 
@@ -142,9 +140,6 @@
   border-radius: 50%;
   color: #E03A3E;
   box-shadow: none;
-  padding: 8px;
-  width: 36px;
-  height: 36px;
 }
 
 [data-theme="apple-1984"] .app__header-btn:hover {
@@ -175,8 +170,6 @@
   background: #E03A3E;
   border: none;
   color: #f5e6c8;
-  width: 40px;
-  height: 40px;
   border-radius: 50%;
   box-shadow: 0 2px 8px rgba(224, 58, 62, 0.3);
 }
@@ -261,22 +254,21 @@
   font-size: 16px;
 }
 
-/* Logo */
-[data-theme="apple-1984"] .app__logo {
-  height: 32px;
-  margin-top: 8px;
-  margin-bottom: 4px;
-}
-
 /* Avatar */
 [data-theme="apple-1984"] .app__avatar-mini {
   width: 40px;
   height: 40px;
 }
 
-[data-theme="apple-1984"] .app__avatar-status {
-  width: 60px;
-  height: 60px;
+/* Theme button */
+[data-theme="apple-1984"] .app__theme-btn {
+  background: rgba(224, 58, 62, 0.08);
+  border-color: transparent;
+  color: #2c1810;
+}
+
+[data-theme="apple-1984"] .app__theme-btn:hover {
+  background: rgba(224, 58, 62, 0.14);
 }
 
 /* Mobile menu */

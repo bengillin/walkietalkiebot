@@ -132,7 +132,6 @@
     4px 4px 0 rgba(0,0,0,0.5),
     6px 6px 12px rgba(0,0,0,0.4);
   transition: all 0.08s ease;
-  padding: 12px;
 }
 
 [data-theme="mccallister"] .app__header-btn:hover {

@@ -41,6 +41,8 @@ function App() {
   const [showPlans, setShowPlans] = useState(false)
   const [planNotification, setPlanNotification] = useState<string | null>(null)
   const [isTapeEjected, setIsTapeEjected] = useState(false)
+  const [showThemePicker, setShowThemePicker] = useState(false)
+  const [themeBeforePicker, setThemeBeforePicker] = useState<string | null>(null)
   const [responseText, setResponseText] = useState('')
 
   // FAB position and size (draggable/resizable)
@@ -86,8 +88,8 @@ function App() {
     setConnectedSessionId(null)
   }
 
-  // Theme context applies mcallister theme via data-theme attribute
-  useTheme()
+  // Theme context
+  const { theme, setTheme, themes: themeList } = useTheme()
 
   const {
     avatarState,
@@ -352,9 +354,9 @@ function App() {
     }
   }, [isListening, setAvatarState])
 
-  // Play success sound when response completes
+  // Play success sound when response completes (not on hover)
   useEffect(() => {
-    if (avatarState === 'happy') {
+    if (avatarState === 'happy' && !isAvatarHoverHappy.current) {
       playSound('success')
     }
   }, [avatarState, playSound])
@@ -380,6 +382,9 @@ function App() {
     }
     syncState()
   }, [avatarState, transcript, messages])
+
+  // Track whether happy state was triggered by avatar hover (skip success sound)
+  const isAvatarHoverHappy = useRef(false)
 
   // Track tool call IDs to activity IDs for updating status
   const toolActivityMap = useRef<Map<string, string>>(new Map())
@@ -838,13 +843,37 @@ function App() {
       {/* Header - simplified: just avatar, logo, and recording indicator */}
       <header className="app__header">
         <div className="app__header-left">
-          {/* Avatar status indicator */}
-          <div className="app__avatar-status">
+          {/* Avatar status indicator — interactive on hover when idle */}
+          <div
+            className={`app__avatar-status ${avatarState === 'idle' ? 'app__avatar-status--interactive' : ''}`}
+            onMouseEnter={() => { if (avatarState === 'idle') { isAvatarHoverHappy.current = true; setAvatarState('happy') } }}
+            onMouseLeave={() => { if (isAvatarHoverHappy.current) { isAvatarHoverHappy.current = false; setAvatarState('idle') } }}
+          >
             <RobotAvatarSmall state={avatarState} />
           </div>
           <div className="app__logo">
             <Logo />
           </div>
+          {/* Theme switcher */}
+          <button
+            className={`app__theme-btn ${showThemePicker ? 'app__theme-btn--active' : ''}`}
+            onClick={() => {
+              if (!showThemePicker) {
+                setThemeBeforePicker(theme)
+              }
+              setShowThemePicker(prev => !prev)
+            }}
+            title="Change theme"
+          >
+            <span className="app__theme-btn-eyebrow">THEME</span>
+            <span className="app__theme-btn-row">
+              <span className="app__theme-btn-swatch" />
+              <span className="app__theme-btn-name">{themeList.find(t => t.name === theme)?.displayName}</span>
+              <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                <path d="M7 10l5 5 5-5z" />
+              </svg>
+            </span>
+          </button>
         </div>
         <div className="app__header-right">
           {/* Recording indicator */}
@@ -854,6 +883,27 @@ function App() {
               <span className="app__recording-label">REC</span>
             </div>
           )}
+          {/* Conversations button */}
+          <button
+            className={`app__header-btn app__header-btn--eject ${isTapeEjected ? 'app__header-btn--active' : ''}`}
+            onClick={() => setIsTapeEjected(prev => !prev)}
+            title={isTapeEjected ? 'Close conversations' : 'Conversations'}
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+              <path d="M5 17h14v2H5zm7-12L5.33 15h13.34z" />
+            </svg>
+          </button>
+          {/* Settings button */}
+          <button
+            className="app__header-btn"
+            onClick={() => setShowSettings(true)}
+            title="Settings"
+          >
+            <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
+              <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="currentColor" strokeWidth="2"/>
+              <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" stroke="currentColor" strokeWidth="2"/>
+            </svg>
+          </button>
           {/* Plans button */}
           <button
             className="app__header-btn"
@@ -933,6 +983,62 @@ function App() {
 
       </main>
 
+      {/* Theme picker modal overlay */}
+      {showThemePicker && (
+        <div
+          className="app__theme-modal-overlay"
+          onClick={() => {
+            // Cancel — revert to previous theme
+            if (themeBeforePicker) {
+              setTheme(themeBeforePicker as import('./contexts/ThemeContext').ThemeName)
+            }
+            setShowThemePicker(false)
+            setThemeBeforePicker(null)
+          }}
+        >
+          <div className="app__theme-modal" onClick={e => e.stopPropagation()}>
+            <div className="app__theme-modal-bubble">
+              <h2 className="app__theme-modal-title">Choose a theme</h2>
+              <p className="app__theme-modal-subtitle">Pick a vibe. You can always change it later.</p>
+            </div>
+            <div className="app__theme-modal-grid">
+              {themeList.map(t => (
+                <button
+                  key={t.name}
+                  className={`onboarding__theme-swatch onboarding__theme-swatch--${t.name} ${theme === t.name ? 'onboarding__theme-swatch--active' : ''}`}
+                  onClick={() => setTheme(t.name)}
+                >
+                  <span className="onboarding__theme-swatch-label">{t.displayName}</span>
+                </button>
+              ))}
+            </div>
+            <div className="app__theme-modal-actions">
+              <button
+                className="app__theme-modal-cancel"
+                onClick={() => {
+                  if (themeBeforePicker) {
+                    setTheme(themeBeforePicker as import('./contexts/ThemeContext').ThemeName)
+                  }
+                  setShowThemePicker(false)
+                  setThemeBeforePicker(null)
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                className="app__theme-modal-confirm"
+                onClick={() => {
+                  setShowThemePicker(false)
+                  setThemeBeforePicker(null)
+                }}
+              >
+                Choose theme
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* File attachments preview - positioned above tape deck */}
       <FileDropZone
         files={attachedFiles}
@@ -961,8 +1067,6 @@ function App() {
         }}
         onDeleteConversation={deleteConversation}
         onCloseCollection={() => setIsTapeEjected(false)}
-        onOpenCollection={() => setIsTapeEjected(true)}
-        onOpenSettings={() => setShowSettings(true)}
         onFilesAdd={handleFilesAdd}
         isDisabled={(!useClaudeCode && !apiKey) || isSpeaking || avatarState === 'thinking'}
         triggerWord={customTriggerWord || 'over'}
