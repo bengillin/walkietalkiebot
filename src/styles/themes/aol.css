@@ -71,7 +71,7 @@
   --font-weight-normal: 400;
   --font-weight-medium: 400;
   --font-weight-bold: 700;
-  --title-font: 'Comic Sans MS', 'MS Sans Serif', Tahoma, cursive;
+  --title-font: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Arial, sans-serif;
   --title-style: normal;
   --title-transform: none;
   --letter-spacing: 0;
@@ -107,7 +107,7 @@
 }
 
 [data-theme="aol"] .app__title {
-  font-family: 'Comic Sans MS', 'MS Sans Serif', Tahoma, cursive;
+  font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Arial, sans-serif;
   font-weight: 700;
   font-size: 14px;
   font-style: normal;
@@ -370,7 +370,7 @@
 /* Message bubbles - AIM style (no bubbles, just colored text) */
 [data-theme="aol"] .message-bubble {
   border-radius: 0;
-  font-family: 'Comic Sans MS', 'MS Sans Serif', Tahoma, cursive;
+  font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Arial, sans-serif;
   font-weight: 400;
   border: none;
   box-shadow: none;
@@ -515,7 +515,7 @@
 /* Headings in messages */
 [data-theme="aol"] .msg-heading--1 {
   color: #000080;
-  font-family: 'Comic Sans MS', 'MS Sans Serif', cursive;
+  font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Arial, sans-serif;
 }
 
 /* Scrollbar - Win95 style */
@@ -694,7 +694,7 @@
   border-color: #808080 #ffffff #ffffff #808080;
   border-radius: 0;
   color: #000000;
-  font-family: 'Comic Sans MS', 'MS Sans Serif', Tahoma, cursive;
+  font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Arial, sans-serif;
   font-weight: 400;
   box-shadow: inset 1px 1px 0 #404040;
   height: auto;
@@ -2320,7 +2320,7 @@
 }
 
 [data-theme="aol"] .onboarding__title {
-  font-family: 'Comic Sans MS', 'MS Sans Serif', Tahoma, cursive;
+  font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Arial, sans-serif;
   font-weight: 700;
   font-style: normal;
   text-transform: none;
@@ -2463,7 +2463,7 @@
 
 [data-theme="aol"] .onboarding__wake-word,
 [data-theme="aol"] .onboarding__tutorial-word {
-  font-family: 'Comic Sans MS', 'MS Sans Serif', cursive;
+  font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Arial, sans-serif;
   font-weight: 700;
   font-style: normal;
   color: #ff0000;
@@ -2637,7 +2637,7 @@
 [data-theme="aol"] .dropzone-overlay__content {
   color: #ffffff;
   text-shadow: 1px 1px 0 #000000;
-  font-family: 'Comic Sans MS', 'MS Sans Serif', cursive;
+  font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Arial, sans-serif;
 }
 
 [data-theme="aol"] .dropzone-files {

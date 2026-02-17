@@ -392,10 +392,35 @@
   border-color: #990000;
 }
 
-/* iMessage — iOS grouped row with hairline border */
+/* iMessage — iOS-style pill toggle, clean white container */
 [data-theme="imessage"] .onboarding__toggle {
-  border: 1px solid rgba(60, 60, 67, 0.18);
+  background: #ffffff;
+  border: 1px solid rgba(60, 60, 67, 0.12);
+  border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+[data-theme="imessage"] .onboarding__toggle-slider {
+  width: 51px;
+  height: 31px;
+  border-radius: 15.5px;
+  background: rgba(120, 120, 128, 0.16);
+  border: none;
+}
+[data-theme="imessage"] .onboarding__toggle-slider::before {
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: none;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 1px 1px rgba(0, 0, 0, 0.06);
+  top: 50%;
+  left: 2px;
+}
+[data-theme="imessage"] .onboarding__toggle input:checked + .onboarding__toggle-slider {
+  background: #34c759;
+}
+[data-theme="imessage"] .onboarding__toggle input:checked + .onboarding__toggle-slider::before {
+  transform: translateX(20px) translateY(-50%);
 }
 
 /* AOL — Win95 beveled rectangle */
@@ -479,6 +504,46 @@
 [data-theme="geocities"] .onboarding__toggle input:checked + .onboarding__toggle-slider::before {
   background: #00ffff;
   box-shadow: 0 0 6px rgba(0, 255, 255, 0.6);
+}
+
+/* 1984 — warm beige container, rainbow-accented toggle */
+[data-theme="apple-1984"] .onboarding__toggle {
+  background: #e8d5b0;
+  border: 1.5px solid #c4a882;
+  border-radius: 8px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+[data-theme="apple-1984"] .onboarding__toggle:hover {
+  background: #dcc8a0;
+}
+[data-theme="apple-1984"] .onboarding__toggle-slider {
+  width: 44px;
+  height: 24px;
+  border-radius: 4px;
+  background: #c4a882;
+  border: 1.5px solid #b0966e;
+}
+[data-theme="apple-1984"] .onboarding__toggle-slider::before {
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #f5eed8, #e8d5b0);
+  border: 1px solid #b0966e;
+  box-shadow: 0 1px 2px rgba(44, 24, 16, 0.15);
+  top: 50%;
+  left: 2px;
+}
+[data-theme="apple-1984"] .onboarding__toggle input:checked + .onboarding__toggle-slider {
+  background: linear-gradient(to right,
+    #61BB46 0%, #FDB827 25%,
+    #F5821F 50%, #E03A3E 75%,
+    #963D97 100%);
+  border-color: #5a3a28;
+}
+[data-theme="apple-1984"] .onboarding__toggle input:checked + .onboarding__toggle-slider::before {
+  transform: translateX(20px) translateY(-50%);
+  background: linear-gradient(180deg, #ffffff, #f5eed8);
+  border-color: #5a3a28;
 }
 
 .onboarding__toggle-label {
