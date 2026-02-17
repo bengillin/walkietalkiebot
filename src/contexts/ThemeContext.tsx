@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 
-export type ThemeName = 'mccallister' | 'imessage' | 'aol' | 'classic-mac' | 'geocities'
+export type ThemeName = 'mccallister' | 'imessage' | 'aol' | 'classic-mac' | 'geocities' | 'apple-1984'
 
 export interface Theme {
   name: ThemeName
@@ -11,28 +11,33 @@ export interface Theme {
 export const themes: Theme[] = [
   {
     name: 'mccallister',
-    displayName: 'Talkie',
-    description: 'Silver 90s cassette recorder aesthetic'
+    displayName: 'TalkBoy',
+    description: 'Silver cassette recorder with chunky buttons and red accents.'
   },
   {
     name: 'imessage',
-    displayName: 'iMessage',
-    description: 'Clean Apple-style light theme'
+    displayName: 'Bubble',
+    description: 'Minimal and polished, inspired by modern Apple interfaces.'
   },
   {
     name: 'aol',
-    displayName: 'AOL 90s',
-    description: 'Windows 95 / AOL Instant Messenger nostalgia'
+    displayName: 'Dial-Up',
+    description: 'Beveled gray panels and buddy list energy from the 90s internet.'
   },
   {
     name: 'classic-mac',
-    displayName: 'Classic Mac',
-    description: 'Mac OS 7/8/9 Platinum appearance'
+    displayName: 'Finder',
+    description: 'The elegant gray desktop of classic Mac OS.'
   },
   {
     name: 'geocities',
-    displayName: 'Geocities',
-    description: 'Neon-on-dark 90s personal homepage chaos'
+    displayName: 'Guestbook',
+    description: 'Neon text on dark backgrounds, like a 90s homepage under construction.'
+  },
+  {
+    name: 'apple-1984',
+    displayName: '1984',
+    description: 'Rainbow Apple warmth from the original Macintosh era.'
   }
 ]
 

@@ -40,7 +40,7 @@
 .robot__antenna-stem {
   width: 2px;
   height: var(--antenna-height);
-  background: linear-gradient(180deg, #888 0%, #bbb 100%);
+  background: linear-gradient(180deg, var(--robot-shadow) 0%, var(--robot-body) 100%);
   border-radius: 1px;
 }
 
@@ -48,8 +48,8 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #4A9FD4;
-  box-shadow: 0 0 6px rgba(74, 159, 212, 0.6);
+  background: var(--screen-idle);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--screen-idle) 60%, transparent);
   margin-bottom: -2px;
   transition: all 0.3s ease;
 }
@@ -69,13 +69,13 @@
   width: var(--robot-size);
   height: var(--robot-size);
   border-radius: 50%;
-  background: linear-gradient(145deg, #F5F5F0 0%, #E0DED8 60%, #D0CEC8 100%);
+  background: linear-gradient(145deg, var(--robot-highlight) 0%, var(--robot-body) 60%, var(--robot-shadow) 100%);
   box-shadow:
     inset 0 -4px 8px rgba(0, 0, 0, 0.1),
-    inset 0 4px 8px rgba(255, 255, 255, 0.8),
+    inset 0 4px 8px rgba(255, 255, 255, 0.4),
     0 4px 12px rgba(0, 0, 0, 0.15),
     0 8px 24px rgba(0, 0, 0, 0.1);
-  border: 2px solid #D8D6D0;
+  border: 2px solid var(--robot-shadow);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -90,10 +90,13 @@
   width: 60%;
   height: 46%;
   border-radius: 8px;
-  background: linear-gradient(180deg, #3A8BC4 0%, #4A9FD4 50%, #5AAFE4 100%);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--screen-idle) 80%, black) 0%,
+    var(--screen-idle) 50%,
+    color-mix(in srgb, var(--screen-idle) 80%, white) 100%);
   box-shadow:
     inset 0 1px 4px rgba(0, 0, 0, 0.3),
-    0 0 8px rgba(74, 159, 212, 0.3);
+    0 0 8px color-mix(in srgb, var(--screen-idle) 30%, transparent);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -120,20 +123,21 @@
   width: var(--eye-size);
   height: var(--eye-size);
   border-radius: 50%;
-  background: #2D2D2D;
+  background: #ffffff;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
   position: relative;
 }
 
-/* Eye highlight */
+/* Eye pupil */
 .robot__eye::after {
   content: '';
   position: absolute;
-  top: 15%;
-  left: 20%;
-  width: 35%;
-  height: 35%;
-  background: rgba(255, 255, 255, 0.8);
+  top: 25%;
+  left: 25%;
+  width: 40%;
+  height: 40%;
+  background: #1a1a1a;
   border-radius: 50%;
 }
 
@@ -141,7 +145,7 @@
 .robot__mouth {
   width: calc(var(--eye-size) * 1.2);
   height: 2px;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.5);
   border-radius: 2px;
   transition: all 0.3s ease;
 }
@@ -162,7 +166,7 @@
 .robot__grille-line {
   width: calc(var(--robot-size) * 0.3);
   height: 1.5px;
-  background: rgba(0, 0, 0, 0.1);
+  background: color-mix(in srgb, var(--robot-shadow) 60%, transparent);
   border-radius: 1px;
 }
 
@@ -183,22 +187,22 @@
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #4CAF50;
-  box-shadow: 0 0 4px rgba(76, 175, 80, 0.6);
+  background: var(--accent-secondary, #4CAF50);
+  box-shadow: 0 0 4px color-mix(in srgb, var(--accent-secondary, #4CAF50) 60%, transparent);
   transition: all 0.3s ease;
 }
 
 .robot--small .robot__led {
   width: 3px;
   height: 3px;
-  box-shadow: 0 0 2px rgba(76, 175, 80, 0.5);
+  box-shadow: 0 0 2px color-mix(in srgb, var(--accent-secondary, #4CAF50) 50%, transparent);
 }
 
 /* ===== BASE ===== */
 .robot__base {
   width: calc(var(--robot-size) * 0.35);
   height: 4px;
-  background: linear-gradient(180deg, #C0BEB8 0%, #A0A098 100%);
+  background: linear-gradient(180deg, var(--robot-shadow) 0%, color-mix(in srgb, var(--robot-shadow) 70%, black) 100%);
   border-radius: 0 0 4px 4px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-top: -2px;
@@ -226,8 +230,8 @@
 }
 
 @keyframes idle-glow {
-  0%, 100% { box-shadow: 0 0 6px rgba(74, 159, 212, 0.4); }
-  50% { box-shadow: 0 0 10px rgba(74, 159, 212, 0.8); }
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
 }
 
 /* Blink every 4 seconds */
@@ -245,44 +249,46 @@
 .robot--listening .robot__eye {
   width: calc(var(--eye-size) * 1.15);
   height: calc(var(--eye-size) * 1.15);
-  background: #2D2D2D;
 }
 
 .robot--listening .robot__screen {
-  background: linear-gradient(180deg, #008BAA 0%, #00B4D8 50%, #00D4FF 100%);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--screen-listening) 80%, black) 0%,
+    var(--screen-listening) 50%,
+    color-mix(in srgb, var(--screen-listening) 80%, white) 100%);
   box-shadow:
     inset 0 1px 4px rgba(0, 0, 0, 0.2),
-    0 0 12px rgba(0, 212, 255, 0.4);
+    0 0 12px color-mix(in srgb, var(--screen-listening) 40%, transparent);
 }
 
 .robot--listening .robot__antenna-tip {
-  background: #00D4FF;
-  box-shadow: 0 0 12px rgba(0, 212, 255, 0.9);
+  background: var(--screen-listening);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--screen-listening) 90%, transparent);
   animation: listening-antenna 0.8s ease-in-out infinite;
 }
 
 @keyframes listening-antenna {
-  0%, 100% { box-shadow: 0 0 8px rgba(0, 212, 255, 0.6); }
-  50% { box-shadow: 0 0 16px rgba(0, 212, 255, 1); }
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
 }
 
 .robot--listening .robot__body {
   box-shadow:
     inset 0 -4px 8px rgba(0, 0, 0, 0.1),
-    inset 0 4px 8px rgba(255, 255, 255, 0.8),
+    inset 0 4px 8px rgba(255, 255, 255, 0.4),
     0 4px 12px rgba(0, 0, 0, 0.15),
-    0 0 20px rgba(0, 212, 255, 0.2);
+    0 0 20px color-mix(in srgb, var(--screen-listening) 20%, transparent);
 }
 
 .robot--listening .robot__led {
-  background: #00D4FF;
-  box-shadow: 0 0 6px rgba(0, 212, 255, 0.8);
+  background: var(--screen-listening);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--screen-listening) 80%, transparent);
 }
 
 .robot--listening .robot__mouth {
   width: calc(var(--eye-size) * 0.8);
   height: calc(var(--eye-size) * 0.5);
-  background: rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.4);
   border-radius: 50%;
 }
 
@@ -302,7 +308,7 @@
   height: 2px;
   border-radius: 2px;
   width: calc(var(--eye-size) * 1.1);
-  background: #2D2D2D;
+  background: #ffffff;
 }
 
 .robot--thinking .robot__eye::after {
@@ -310,10 +316,13 @@
 }
 
 .robot--thinking .robot__screen {
-  background: linear-gradient(180deg, #7B5CB8 0%, #A78BFA 50%, #B89EFF 100%);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--screen-thinking) 80%, black) 0%,
+    var(--screen-thinking) 50%,
+    color-mix(in srgb, var(--screen-thinking) 80%, white) 100%);
   box-shadow:
     inset 0 1px 4px rgba(0, 0, 0, 0.2),
-    0 0 10px rgba(167, 139, 250, 0.4);
+    0 0 10px color-mix(in srgb, var(--screen-thinking) 40%, transparent);
 }
 
 .robot--thinking .robot__mouth {
@@ -348,8 +357,8 @@
 }
 
 .robot--thinking .robot__antenna-tip {
-  background: #A78BFA;
-  box-shadow: 0 0 10px rgba(167, 139, 250, 0.8);
+  background: var(--screen-thinking);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--screen-thinking) 80%, transparent);
   animation: thinking-antenna 1s ease-in-out infinite;
 }
 
@@ -359,8 +368,8 @@
 }
 
 .robot--thinking .robot__led {
-  background: #A78BFA;
-  box-shadow: 0 0 4px rgba(167, 139, 250, 0.6);
+  background: var(--screen-thinking);
+  box-shadow: 0 0 4px color-mix(in srgb, var(--screen-thinking) 60%, transparent);
   animation: thinking-led 0.6s ease-in-out infinite;
 }
 
@@ -388,16 +397,19 @@
 }
 
 .robot--speaking .robot__screen {
-  background: linear-gradient(180deg, #3A8BC4 0%, #4A9FD4 50%, #5AAFE4 100%);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--screen-idle) 80%, black) 0%,
+    var(--screen-idle) 50%,
+    color-mix(in srgb, var(--screen-idle) 80%, white) 100%);
   box-shadow:
     inset 0 1px 4px rgba(0, 0, 0, 0.2),
-    0 0 10px rgba(90, 176, 224, 0.4);
+    0 0 10px color-mix(in srgb, var(--screen-idle) 40%, transparent);
 }
 
 .robot--speaking .robot__mouth {
   width: calc(var(--eye-size) * 1);
   height: calc(var(--eye-size) * 0.5);
-  background: rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.4);
   border-radius: 0 0 50% 50%;
   animation: speaking-mouth 0.3s ease-in-out infinite alternate;
 }
@@ -424,8 +436,8 @@
 }
 
 .robot--speaking .robot__led {
-  background: #5AAFE4;
-  box-shadow: 0 0 4px rgba(90, 176, 224, 0.6);
+  background: var(--screen-idle);
+  box-shadow: 0 0 4px color-mix(in srgb, var(--screen-idle) 60%, transparent);
 }
 
 /* === HAPPY === */
@@ -433,7 +445,6 @@
 .robot--happy .robot__eye {
   height: calc(var(--eye-size) * 0.4);
   border-radius: 50% 50% 0 0;
-  background: #2D2D2D;
 }
 
 .robot--happy .robot__eye::after {
@@ -441,35 +452,38 @@
 }
 
 .robot--happy .robot__screen {
-  background: linear-gradient(180deg, #E8C020 0%, #FFD93D 50%, #FFE873 100%);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--screen-happy) 80%, black) 0%,
+    var(--screen-happy) 50%,
+    color-mix(in srgb, var(--screen-happy) 80%, white) 100%);
   box-shadow:
     inset 0 1px 4px rgba(0, 0, 0, 0.15),
-    0 0 14px rgba(255, 217, 61, 0.5);
+    0 0 14px color-mix(in srgb, var(--screen-happy) 50%, transparent);
 }
 
 .robot--happy .robot__mouth {
   width: calc(var(--eye-size) * 1.3);
   height: calc(var(--eye-size) * 0.6);
-  background: rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.4);
   border-radius: 0 0 50% 50%;
 }
 
 .robot--happy .robot__antenna-tip {
-  background: #FFD93D;
-  box-shadow: 0 0 12px rgba(255, 217, 61, 0.8);
+  background: var(--screen-happy);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--screen-happy) 80%, transparent);
 }
 
 .robot--happy .robot__body {
   box-shadow:
     inset 0 -4px 8px rgba(0, 0, 0, 0.08),
-    inset 0 4px 8px rgba(255, 255, 255, 0.8),
+    inset 0 4px 8px rgba(255, 255, 255, 0.4),
     0 4px 12px rgba(0, 0, 0, 0.15),
-    0 0 24px rgba(255, 217, 61, 0.3);
+    0 0 24px color-mix(in srgb, var(--screen-happy) 30%, transparent);
 }
 
 .robot--happy .robot__led {
-  background: #FFD93D;
-  box-shadow: 0 0 4px rgba(255, 217, 61, 0.8);
+  background: var(--screen-happy);
+  box-shadow: 0 0 4px color-mix(in srgb, var(--screen-happy) 80%, transparent);
 }
 
 /* Celebration bounce */
@@ -499,27 +513,30 @@
 }
 
 .robot--confused .robot__screen {
-  background: linear-gradient(180deg, #D46A6A 0%, #FF8B8B 50%, #FFA8A8 100%);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--screen-error) 80%, black) 0%,
+    var(--screen-error) 50%,
+    color-mix(in srgb, var(--screen-error) 80%, white) 100%);
   box-shadow:
     inset 0 1px 4px rgba(0, 0, 0, 0.2),
-    0 0 10px rgba(255, 139, 139, 0.4);
+    0 0 10px color-mix(in srgb, var(--screen-error) 40%, transparent);
 }
 
 .robot--confused .robot__mouth {
   width: calc(var(--eye-size) * 0.8);
   height: calc(var(--eye-size) * 0.4);
-  background: rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.4);
   border-radius: 50%;
 }
 
 .robot--confused .robot__antenna-tip {
-  background: #FF8B8B;
-  box-shadow: 0 0 8px rgba(255, 139, 139, 0.6);
+  background: var(--screen-error);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--screen-error) 60%, transparent);
 }
 
 .robot--confused .robot__led {
-  background: #FF8B8B;
-  box-shadow: 0 0 4px rgba(255, 139, 139, 0.6);
+  background: var(--screen-error);
+  box-shadow: 0 0 4px color-mix(in srgb, var(--screen-error) 60%, transparent);
   animation: confused-led 0.5s ease-in-out infinite;
 }
 
@@ -544,4 +561,732 @@
 /* Hold the tilt after animation */
 .robot--confused {
   transform: rotate(-5deg);
+}
+
+/* ============================================================ */
+/* McCALLISTER — TalkBoy-inspired shape                          */
+/* Squared body with rounded corners, circular 5×5 speaker grille */
+/* ============================================================ */
+
+[data-theme="mccallister"] .robot__body {
+  border-radius: 22%;
+  background: linear-gradient(160deg, #e0e0e0 0%, #c0c0c0 40%, #a0a0a0 100%);
+  border: 2px solid #707070;
+  box-shadow:
+    inset 0 -3px 6px rgba(0,0,0,0.15),
+    inset 0 3px 6px rgba(255,255,255,0.5),
+    0 4px 0 #707070,
+    0 6px 12px rgba(0,0,0,0.2);
+}
+
+[data-theme="mccallister"] .robot__screen {
+  width: 68%;
+  height: 68%;
+  border-radius: 50%;
+  margin-top: 0;
+  overflow: hidden;
+  border: 1.5px solid #555555;
+  background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 50%, #1a1a1a 100%);
+  box-shadow:
+    inset 0 2px 6px rgba(0,0,0,0.5),
+    0 0 4px rgba(0,0,0,0.2);
+}
+
+/* 5×5 speaker grille dot pattern overlay */
+[data-theme="mccallister"] .robot__screen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background-image: radial-gradient(circle at 50% 50%, rgba(0,0,0,0.4) 22%, transparent 25%);
+  background-size: 20% 20%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Eyes and mouth stay above the grille dots */
+[data-theme="mccallister"] .robot__eyes {
+  position: relative;
+  z-index: 1;
+}
+[data-theme="mccallister"] .robot__mouth {
+  position: relative;
+  z-index: 1;
+}
+
+/* Hide the horizontal grille lines — replaced by dot grid */
+[data-theme="mccallister"] .robot__grille {
+  display: none;
+}
+
+/* Wider, flatter base to match squared body */
+[data-theme="mccallister"] .robot__base {
+  width: calc(var(--robot-size) * 0.45);
+  border-radius: 0 0 3px 3px;
+  background: linear-gradient(180deg, #909090 0%, #707070 100%);
+  box-shadow: 0 2px 0 #555555;
+}
+
+/* Industrial antenna — dark stem, red record LED tip */
+[data-theme="mccallister"] .robot__antenna-stem {
+  width: 3px;
+  background: linear-gradient(180deg, #555555 0%, #707070 100%);
+  border-radius: 1px;
+}
+
+[data-theme="mccallister"] .robot__antenna-tip {
+  background: #cc0000;
+  box-shadow: 0 0 6px rgba(204, 0, 0, 0.5);
+}
+
+/* McCallister state overrides — dark gray idle, warm orange/amber interactions */
+[data-theme="mccallister"] .robot--listening .robot__screen {
+  background: linear-gradient(180deg, #cc6600 0%, #b35500 50%, #994400 100%);
+  box-shadow:
+    inset 0 2px 6px rgba(0,0,0,0.3),
+    0 0 12px rgba(204, 102, 0, 0.4);
+}
+
+[data-theme="mccallister"] .robot--speaking .robot__screen {
+  background: linear-gradient(180deg, #e67300 0%, #cc6600 50%, #b35500 100%);
+  box-shadow:
+    inset 0 2px 6px rgba(0,0,0,0.3),
+    0 0 10px rgba(230, 115, 0, 0.35);
+}
+
+[data-theme="mccallister"] .robot--thinking .robot__screen {
+  background: linear-gradient(180deg, #4a4a5a 0%, #3a3a4a 50%, #2a2a3a 100%);
+  box-shadow:
+    inset 0 2px 6px rgba(0,0,0,0.4),
+    0 0 8px rgba(100, 100, 140, 0.2);
+}
+
+[data-theme="mccallister"] .robot--happy .robot__screen {
+  background: linear-gradient(180deg, #d4a020 0%, #c49018 50%, #a87810 100%);
+  box-shadow:
+    inset 0 2px 6px rgba(0,0,0,0.25),
+    0 0 14px rgba(212, 160, 32, 0.4);
+}
+
+[data-theme="mccallister"] .robot--confused .robot__screen {
+  background: linear-gradient(180deg, #993333 0%, #802020 50%, #661a1a 100%);
+  box-shadow:
+    inset 0 2px 6px rgba(0,0,0,0.4),
+    0 0 8px rgba(153, 51, 51, 0.3);
+}
+
+/* ============================================================ */
+/* CLASSIC MAC — Macintosh SE inspired                           */
+/* Boxy beige body, recessed CRT, floppy slot, wide stand       */
+/* ============================================================ */
+
+[data-theme="classic-mac"] .robot__body {
+  border-radius: 10%;
+  background: linear-gradient(180deg, #f0ead8 0%, #e6dcc8 40%, #d9cfb8 100%);
+  border: 1.5px solid #999999;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.6),
+    inset 0 -2px 4px rgba(0,0,0,0.08),
+    1px 1px 0 #aaaaaa,
+    2px 2px 0 #888888;
+  aspect-ratio: auto;
+  height: calc(var(--robot-size) * 1.15);
+}
+
+/* Recessed CRT — small screen in upper portion */
+[data-theme="classic-mac"] .robot__screen {
+  width: 58%;
+  height: 48%;
+  border-radius: 6%;
+  margin-top: -8%;
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--screen-idle) 70%, black) 0%,
+    var(--screen-idle) 50%,
+    color-mix(in srgb, var(--screen-idle) 70%, white) 100%);
+  border: 2px solid #333333;
+  box-shadow:
+    inset 0 1px 6px rgba(0,0,0,0.5),
+    0 0 0 1px #666666,
+    0 0 0 3px #d0c8b4;
+}
+
+/* Grille lines become floppy drive slot */
+[data-theme="classic-mac"] .robot__grille {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 6px;
+  align-items: center;
+}
+
+[data-theme="classic-mac"] .robot__grille-line {
+  display: none;
+}
+
+[data-theme="classic-mac"] .robot__grille-line:first-child {
+  display: block;
+  width: calc(var(--robot-size) * 0.28);
+  height: 3px;
+  background: #888888;
+  border-radius: 1px;
+  box-shadow: inset 0 1px 0 #666666, 0 1px 0 rgba(255,255,255,0.4);
+}
+
+/* LED becomes power light — lower left */
+[data-theme="classic-mac"] .robot__led {
+  bottom: 10%;
+  left: 18%;
+  right: auto;
+  width: 5px;
+  height: 5px;
+  border-radius: 0;
+  background: #44aa44;
+  box-shadow: 0 0 3px rgba(68, 170, 68, 0.6);
+}
+
+/* Wider flat base — Mac SE stand */
+[data-theme="classic-mac"] .robot__base {
+  width: calc(var(--robot-size) * 0.65);
+  height: 5px;
+  border-radius: 0 0 3px 3px;
+  background: linear-gradient(180deg, #c8c0ac 0%, #b8b0a0 100%);
+  border: 1px solid #999999;
+  border-top: none;
+  box-shadow: 1px 1px 0 #888888;
+  margin-top: -1px;
+}
+
+/* Shorter antenna — more like a handle nub */
+[data-theme="classic-mac"] .robot__antenna-stem {
+  width: 0;
+  height: 0;
+}
+
+[data-theme="classic-mac"] .robot__antenna-tip {
+  width: calc(var(--robot-size) * 0.18);
+  height: 4px;
+  border-radius: 2px;
+  background: #c8c0ac;
+  border: 1px solid #999999;
+  box-shadow: none;
+  margin-bottom: -1px;
+}
+
+/* ============================================================ */
+/* GEOCITIES — 90s CRT terminal with neon glow and scan lines    */
+/* Sharp edges, glowing borders, dark void body, pixelated feel  */
+/* ============================================================ */
+
+/* Boxy CRT body — dark void with neon magenta border + glow */
+[data-theme="geocities"] .robot__body {
+  border-radius: 0;
+  background: linear-gradient(180deg, #1a0033 0%, #0d001a 60%, #000000 100%);
+  border: 2px solid #ff00ff;
+  box-shadow:
+    0 0 10px rgba(255, 0, 255, 0.4),
+    0 0 30px rgba(255, 0, 255, 0.15),
+    inset 0 0 15px rgba(255, 0, 255, 0.1);
+  height: calc(var(--robot-size) * 1.05);
+}
+
+/* Screen — green-on-black terminal CRT with scan lines */
+[data-theme="geocities"] .robot__screen {
+  width: 70%;
+  height: 55%;
+  border-radius: 0;
+  margin-top: -2%;
+  border: 2px solid #00ff00;
+  box-shadow:
+    inset 0 0 10px rgba(0, 255, 0, 0.2),
+    0 0 6px rgba(0, 255, 0, 0.3);
+  overflow: hidden;
+}
+
+/* CRT scan line overlay */
+[data-theme="geocities"] .robot__screen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    180deg,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 0, 0, 0.15) 2px,
+    rgba(0, 0, 0, 0.15) 4px
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Pixelated square eyes — white with no pupils */
+[data-theme="geocities"] .robot__eyes {
+  position: relative;
+  z-index: 3;
+}
+
+[data-theme="geocities"] .robot__eye {
+  border-radius: 0;
+  background: #ffffff;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.4);
+}
+
+[data-theme="geocities"] .robot__eye::after {
+  background: #000000;
+  border-radius: 0;
+}
+
+/* Mouth — white pixelated bar */
+[data-theme="geocities"] .robot__mouth {
+  position: relative;
+  z-index: 3;
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 3px rgba(255, 255, 255, 0.3);
+  height: 2px;
+}
+
+/* Grille becomes horizontal neon bars */
+[data-theme="geocities"] .robot__grille {
+  margin-top: 3px;
+}
+
+[data-theme="geocities"] .robot__grille-line {
+  background: #ff00ff;
+  border-radius: 0;
+  height: 1px;
+  opacity: 0.4;
+  box-shadow: 0 0 2px rgba(255, 0, 255, 0.3);
+}
+
+/* LED — cyan pulsing dot */
+[data-theme="geocities"] .robot__led {
+  border-radius: 0;
+  background: #00ffff;
+  box-shadow: 0 0 6px rgba(0, 255, 255, 0.8);
+  animation: geocities-led 1s ease-in-out infinite;
+}
+
+@keyframes geocities-led {
+  0%, 100% { opacity: 1; box-shadow: 0 0 6px rgba(0, 255, 255, 0.8); }
+  50% { opacity: 0.5; box-shadow: 0 0 3px rgba(0, 255, 255, 0.4); }
+}
+
+/* Base — sharp neon platform */
+[data-theme="geocities"] .robot__base {
+  width: calc(var(--robot-size) * 0.5);
+  border-radius: 0;
+  background: linear-gradient(180deg, #1a0033 0%, #0d001a 100%);
+  border: 1px solid #ff00ff;
+  box-shadow: 0 0 6px rgba(255, 0, 255, 0.3);
+  margin-top: -1px;
+}
+
+/* Antenna — glowing neon cyan spike */
+[data-theme="geocities"] .robot__antenna-stem {
+  width: 2px;
+  background: #00ffff;
+  border-radius: 0;
+  box-shadow: 0 0 4px rgba(0, 255, 255, 0.5);
+}
+
+[data-theme="geocities"] .robot__antenna-tip {
+  border-radius: 0;
+  background: #ff00ff;
+  box-shadow: 0 0 8px rgba(255, 0, 255, 0.8);
+  width: 6px;
+  height: 6px;
+}
+
+/* ============================================================ */
+/* AOL — Win95 Buddy List window / AIM bot                       */
+/* Beveled 3D borders, blue title bar, gray chrome, yellow icon  */
+/* ============================================================ */
+
+/* Body — Win95 window with beveled 3D edges */
+[data-theme="aol"] .robot__body {
+  border-radius: 0;
+  background: #c0c0c0;
+  border: 2px solid;
+  border-color: #ffffff #808080 #808080 #ffffff;
+  box-shadow:
+    inset 1px 1px 0 #dfdfdf,
+    inset -1px -1px 0 #404040,
+    2px 2px 0 #000000;
+  height: calc(var(--robot-size) * 1.1);
+  overflow: visible;
+}
+
+/* Title bar across the top of the window */
+[data-theme="aol"] .robot__body::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  right: 3px;
+  height: 14px;
+  background: linear-gradient(90deg, #000080 0%, #1084d0 100%);
+  z-index: 4;
+}
+
+/* Screen — sunken display area below title bar */
+[data-theme="aol"] .robot__screen {
+  width: 72%;
+  height: 48%;
+  border-radius: 0;
+  margin-top: 8%;
+  border: 2px solid;
+  border-color: #808080 #ffffff #ffffff #808080;
+  box-shadow: inset 1px 1px 0 #404040;
+  background: #ffffff;
+}
+
+/* Eyes — white with dark pupils */
+[data-theme="aol"] .robot__eye {
+  background: #ffffff;
+  box-shadow: none;
+}
+
+[data-theme="aol"] .robot__eye::after {
+  background: #000080;
+}
+
+/* Mouth — soft white */
+[data-theme="aol"] .robot__mouth {
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 0 0 2px 2px;
+}
+
+/* Grille becomes a status bar at the bottom */
+[data-theme="aol"] .robot__grille {
+  margin-top: 3px;
+  gap: 0;
+}
+
+[data-theme="aol"] .robot__grille-line {
+  height: 1.5px;
+  background: #808080;
+  border-radius: 0;
+}
+
+[data-theme="aol"] .robot__grille-line:first-child {
+  width: calc(var(--robot-size) * 0.35);
+  background: #808080;
+  box-shadow: 0 1px 0 #ffffff;
+}
+
+/* LED — yellow AIM dot, bottom right */
+[data-theme="aol"] .robot__led {
+  border-radius: 0;
+  background: #ffcc00;
+  box-shadow: none;
+  width: 5px;
+  height: 5px;
+  bottom: 8%;
+  right: 10%;
+}
+
+/* Base — taskbar-style platform */
+[data-theme="aol"] .robot__base {
+  width: calc(var(--robot-size) * 0.55);
+  border-radius: 0;
+  height: 5px;
+  background: #c0c0c0;
+  border: 2px solid;
+  border-color: #ffffff #808080 #808080 #ffffff;
+  box-shadow: 1px 1px 0 #000000;
+  margin-top: -1px;
+}
+
+/* Antenna — short wire aerial */
+[data-theme="aol"] .robot__antenna-stem {
+  width: 2px;
+  background: #808080;
+  border-radius: 0;
+  height: calc(var(--antenna-height) * 0.7);
+}
+
+[data-theme="aol"] .robot__antenna-tip {
+  border-radius: 50%;
+  background: #ffcc00;
+  box-shadow: none;
+  width: 7px;
+  height: 7px;
+}
+
+/* ============================================================ */
+/* iMESSAGE — HomePod Mini / Siri-inspired Apple design          */
+/* Smooth white body, soft shadows, Siri gradient screen         */
+/* ============================================================ */
+
+/* Body — smooth white pod with Siri-blue ambient glow */
+[data-theme="imessage"] .robot__body {
+  border-radius: 42%;
+  background: linear-gradient(160deg, #ffffff 0%, #f5f5f7 50%, #e8e8ed 100%);
+  border: none;
+  box-shadow:
+    0 0 20px rgba(0, 122, 255, 0.15),
+    0 0 40px rgba(0, 122, 255, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* Screen — Siri multicolor gradient orb */
+[data-theme="imessage"] .robot__screen {
+  width: 56%;
+  height: 56%;
+  border-radius: 50%;
+  margin-top: -2%;
+  border: none;
+  box-shadow: 0 0 12px rgba(0, 122, 255, 0.15);
+  background:
+    radial-gradient(
+      circle at 35% 40%,
+      rgba(88, 86, 214, 0.25) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 65% 60%,
+      rgba(0, 122, 255, 0.25) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(52, 199, 89, 0.15) 0%,
+      transparent 60%
+    ),
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--screen-idle) 80%, black) 0%,
+      var(--screen-idle) 50%,
+      color-mix(in srgb, var(--screen-idle) 80%, white) 100%);
+}
+
+/* Eyes — white with dark pupils */
+[data-theme="imessage"] .robot__eye {
+  background: #ffffff;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="imessage"] .robot__eye::after {
+  background: #1d1d1f;
+}
+
+/* Mouth — soft white-ish */
+[data-theme="imessage"] .robot__mouth {
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 4px;
+}
+
+/* Hide grille — clean Apple look */
+[data-theme="imessage"] .robot__grille {
+  display: none;
+}
+
+/* LED — subtle blue dot */
+[data-theme="imessage"] .robot__led {
+  background: #007aff;
+  box-shadow: 0 0 4px rgba(0, 122, 255, 0.4);
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+}
+
+/* Base — minimal aluminum stand */
+[data-theme="imessage"] .robot__base {
+  width: calc(var(--robot-size) * 0.25);
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #d2d2d7 0%, #c7c7cc 100%);
+  border: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+/* Antenna — hidden, replaced by tiny top dimple */
+[data-theme="imessage"] .robot__antenna-stem {
+  width: 0;
+  height: 0;
+}
+
+[data-theme="imessage"] .robot__antenna-tip {
+  width: 6px;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: #d2d2d7;
+  box-shadow: none;
+  margin-bottom: 0;
+}
+
+/* ============================================
+   1984 Theme — Happy Rainbow Mac
+   Same boxy shape as Finder but with rainbow screen,
+   friendly smile, and warm Apple personality
+   ============================================ */
+
+/* Body — same boxy beige Mac shape as Finder */
+[data-theme="apple-1984"] .robot__body {
+  border-radius: 10%;
+  background: linear-gradient(180deg, #f0ead8 0%, #e8d5b0 40%, #dcc8a0 100%);
+  border: 1.5px solid #c4a882;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -2px 4px rgba(44, 24, 16, 0.06),
+    1px 1px 0 #c4a882,
+    2px 2px 0 #b0966e;
+  aspect-ratio: auto;
+  height: calc(var(--robot-size) * 1.15);
+}
+
+/* No rainbow stripe — the screen IS the rainbow */
+[data-theme="apple-1984"] .robot__body::after {
+  display: none;
+}
+
+/* Screen — rainbow vertical stripes as background */
+[data-theme="apple-1984"] .robot__screen {
+  width: 58%;
+  height: 48%;
+  border-radius: 6%;
+  margin-top: -8%;
+  background: linear-gradient(to right,
+    #61BB46 0%, #61BB46 16.66%,
+    #FDB827 16.66%, #FDB827 33.33%,
+    #F5821F 33.33%, #F5821F 50%,
+    #E03A3E 50%, #E03A3E 66.66%,
+    #963D97 66.66%, #963D97 83.33%,
+    #009DDC 83.33%, #009DDC 100%);
+  border: 2px solid #5a3a28;
+  box-shadow:
+    inset 0 1px 6px rgba(44, 24, 16, 0.3),
+    0 0 0 1px #8a6a52,
+    0 0 0 3px #dcc8a0;
+}
+
+/* Eyes — big friendly white circles */
+[data-theme="apple-1984"] .robot__eye {
+  width: 12px;
+  height: 12px;
+  background: #ffffff;
+  border-radius: 50%;
+  border: 1.5px solid #2c1810;
+}
+
+[data-theme="apple-1984"] .robot__eye::after {
+  width: 5px;
+  height: 5px;
+  background: #2c1810;
+  border-radius: 50%;
+}
+
+/* Mouth — happy smile arc */
+[data-theme="apple-1984"] .robot__mouth {
+  width: 14px;
+  height: 7px;
+  background: transparent;
+  border: 2px solid #ffffff;
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  margin-top: 1px;
+}
+
+/* Grille — floppy slot, absolute positioned right, aligned with screen edge */
+[data-theme="apple-1984"] .robot__grille {
+  position: absolute;
+  bottom: 7%;
+  right: 21%;
+  margin: 0;
+  display: block;
+}
+
+[data-theme="apple-1984"] .robot__grille-line {
+  display: none;
+}
+
+[data-theme="apple-1984"] .robot__grille-line:first-child {
+  display: block;
+  width: calc(var(--robot-size) * 0.22);
+  height: 3px;
+  background: #b0966e;
+  border-radius: 1px;
+  box-shadow: inset 0 1px 0 #8a6a52, 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+/* LED — green Apple power light, left side aligned with screen edge */
+[data-theme="apple-1984"] .robot__led {
+  bottom: 7%;
+  left: 21%;
+  right: auto;
+  width: 5px;
+  height: 5px;
+  border-radius: 0;
+  background: #61BB46;
+  box-shadow: 0 0 4px rgba(97, 187, 70, 0.7);
+  z-index: 3;
+}
+
+/* Base — wide flat stand like Finder */
+[data-theme="apple-1984"] .robot__base {
+  width: calc(var(--robot-size) * 0.65);
+  height: 5px;
+  border-radius: 0 0 3px 3px;
+  background: linear-gradient(180deg, #dcc8a0 0%, #c4a882 100%);
+  border: 1px solid #c4a882;
+  border-top: none;
+  box-shadow: 1px 1px 0 #b0966e;
+  margin-top: -1px;
+}
+
+/* Antenna — handle nub like Finder */
+[data-theme="apple-1984"] .robot__antenna-stem {
+  width: 0;
+  height: 0;
+}
+
+[data-theme="apple-1984"] .robot__antenna-tip {
+  width: calc(var(--robot-size) * 0.18);
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(to right, #E03A3E, #FDB827);
+  border: none;
+  box-shadow: none;
+  margin-bottom: -1px;
+}
+
+/* Screen state colors — rainbow stays, glow changes */
+[data-theme="apple-1984"] .robot--listening .robot__screen {
+  box-shadow:
+    inset 0 1px 6px rgba(44, 24, 16, 0.3),
+    0 0 0 1px #0088bb,
+    0 0 0 3px #dcc8a0,
+    0 0 10px rgba(0, 157, 220, 0.3);
+}
+
+[data-theme="apple-1984"] .robot--thinking .robot__screen {
+  box-shadow:
+    inset 0 1px 6px rgba(44, 24, 16, 0.3),
+    0 0 0 1px #7a2e80,
+    0 0 0 3px #dcc8a0,
+    0 0 10px rgba(150, 61, 151, 0.3);
+}
+
+[data-theme="apple-1984"] .robot--happy .robot__screen {
+  box-shadow:
+    inset 0 1px 6px rgba(44, 24, 16, 0.2),
+    0 0 0 1px #e5a020,
+    0 0 0 3px #dcc8a0,
+    0 0 10px rgba(253, 184, 39, 0.3);
+}
+
+[data-theme="apple-1984"] .robot--confused .robot__screen {
+  box-shadow:
+    inset 0 1px 6px rgba(44, 24, 16, 0.3),
+    0 0 0 1px #c42e32,
+    0 0 0 3px #dcc8a0,
+    0 0 10px rgba(224, 58, 62, 0.3);
+}
+
+[data-theme="apple-1984"] .robot--speaking .robot__screen {
+  box-shadow:
+    inset 0 1px 6px rgba(44, 24, 16, 0.2),
+    0 0 0 1px #4ea038,
+    0 0 0 3px #dcc8a0,
+    0 0 10px rgba(97, 187, 70, 0.3);
 }

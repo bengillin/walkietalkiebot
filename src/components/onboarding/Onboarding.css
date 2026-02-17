@@ -1,3 +1,12 @@
+/* Per-theme onboarding text — hardcoded for guaranteed legibility on each bg */
+:root .onboarding                       { --onb-heading: #ffffff; --onb-text: #a0a0b8; }
+[data-theme="mccallister"] .onboarding  { --onb-heading: #000000; --onb-text: #1a1a1a; }
+[data-theme="imessage"] .onboarding     { --onb-heading: #000000; --onb-text: #3c3c43; }
+[data-theme="aol"] .onboarding          { --onb-heading: #000000; --onb-text: #000080; }
+[data-theme="classic-mac"] .onboarding  { --onb-heading: #000000; --onb-text: #222222; }
+[data-theme="geocities"] .onboarding    { --onb-heading: #ffffff; --onb-text: #00ffff; }
+[data-theme="apple-1984"] .onboarding  { --onb-heading: #2c1810; --onb-text: #5a3a28; }
+
 .onboarding {
   position: fixed;
   inset: 0;
@@ -10,7 +19,11 @@
 
 .onboarding__container {
   width: 100%;
-  max-width: 420px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   padding: 24px;
   position: relative;
 }
@@ -20,6 +33,9 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
+  width: 100%;
+  max-width: 420px;
+  min-height: 320px;
   animation: fadeIn 0.3s ease;
 }
 
@@ -34,16 +50,17 @@
   }
 }
 
-/* Progress bar */
+/* Progress bar — use bg-tertiary as track for better contrast with accent */
 .onboarding__progress {
-  position: absolute;
+  position: fixed;
   top: 0;
-  left: 24px;
-  right: 24px;
+  left: 0;
+  right: 0;
   height: 3px;
-  background: var(--border-light);
-  border-radius: 2px;
+  background: var(--bg-tertiary);
+  border-radius: 0;
   overflow: hidden;
+  z-index: 1001;
 }
 
 .onboarding__progress-bar {
@@ -52,28 +69,186 @@
   transition: width 0.3s ease;
 }
 
+/* Per-theme progress bar fixes — bar must have ≥3:1 contrast against track */
+[data-theme="mccallister"] .onboarding__progress { background: #c8c8c8; } /* bar #cc0000 vs track: 3.5:1 */
+[data-theme="aol"] .onboarding__progress { background: #a8a8a8; } /* bar #003399 vs track: 4.2:1 */
+[data-theme="classic-mac"] .onboarding__progress { background: #cccccc; } /* bar #3366cc vs track: 3.1:1 */
+[data-theme="geocities"] .onboarding__progress { background: #222266; } /* distinct from page #000033 */
+[data-theme="geocities"] .onboarding__progress-bar { background: #00ffff; }
+
+/* Welcome step — wider to fit speech bubble + swatches */
+.onboarding__step--welcome {
+  max-width: 560px;
+  gap: 0;
+}
+
+.onboarding__step--welcome .onboarding__button {
+  margin-top: auto;
+}
+
+/* Speech bubble — mirrors assistant chat bubble per theme */
+.onboarding__speech-bubble {
+  padding: 20px 32px 16px;
+  border-radius: 27px;
+  border-bottom-left-radius: 4px;
+  background: var(--bg-secondary, #2a2a2a);
+  width: fit-content;
+  margin-bottom: 28px;
+  text-align: center;
+}
+
+.onboarding__speech-bubble .onboarding__title {
+  color: #e0e0e0;
+}
+.onboarding__speech-bubble .onboarding__subtitle {
+  color: #a0a0b8;
+  margin-bottom: 0;
+}
+
+/* McCallister bubble — industrial gray gradient, hard shadow */
+[data-theme="mccallister"] .onboarding__speech-bubble {
+  background: linear-gradient(180deg, #d8d8d8 0%, #c8c8c8 100%);
+  border: 3px solid #909090;
+  border-radius: 8px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.5),
+    3px 3px 0 rgba(0,0,0,0.2);
+}
+[data-theme="mccallister"] .onboarding__speech-bubble .onboarding__title {
+  color: #1a1a1a;
+}
+[data-theme="mccallister"] .onboarding__speech-bubble .onboarding__subtitle {
+  color: #4a4a4a;
+}
+
+/* iMessage bubble — light gray, rounded, clean */
+[data-theme="imessage"] .onboarding__speech-bubble {
+  background: #e5e5ea;
+  border: none;
+  border-radius: 18px 18px 18px 4px;
+  box-shadow: none;
+}
+[data-theme="imessage"] .onboarding__speech-bubble .onboarding__title {
+  color: #000000;
+}
+[data-theme="imessage"] .onboarding__speech-bubble .onboarding__subtitle {
+  color: #3c3c43;
+}
+
+/* AOL bubble — Win95 beveled panel */
+[data-theme="aol"] .onboarding__speech-bubble {
+  background: #c0c0c0;
+  border: 2px solid;
+  border-color: #ffffff #808080 #808080 #ffffff;
+  border-radius: 0;
+  box-shadow: 1px 1px 0 #000000;
+}
+[data-theme="aol"] .onboarding__speech-bubble .onboarding__title {
+  color: #000000;
+}
+[data-theme="aol"] .onboarding__speech-bubble .onboarding__subtitle {
+  color: #000080;
+}
+
+/* Classic Mac bubble — white, 1px black border, Platinum */
+[data-theme="classic-mac"] .onboarding__speech-bubble {
+  background: #ffffff;
+  border: 1px solid #000000;
+  border-radius: 5px;
+  box-shadow: 1px 1px 0 #999999;
+}
+[data-theme="classic-mac"] .onboarding__speech-bubble .onboarding__title {
+  color: #000000;
+}
+[data-theme="classic-mac"] .onboarding__speech-bubble .onboarding__subtitle {
+  color: #333333;
+}
+
+/* GeoCities bubble — dark purple, neon magenta border, glow */
+[data-theme="geocities"] .onboarding__speech-bubble {
+  background: #330033;
+  border: 2px solid #ff00ff;
+  border-radius: 0;
+  box-shadow: 0 0 8px rgba(255, 0, 255, 0.3);
+}
+[data-theme="geocities"] .onboarding__speech-bubble .onboarding__title {
+  color: #ffffff;
+}
+[data-theme="geocities"] .onboarding__speech-bubble .onboarding__subtitle {
+  color: #ff00ff;
+}
+
+/* 1984 bubble — warm beige, brown border, rainbow stripe top */
+[data-theme="apple-1984"] .onboarding__speech-bubble {
+  background: #e8d5b0;
+  border: 1px solid #c4a882;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(44, 24, 16, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+[data-theme="apple-1984"] .onboarding__speech-bubble::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(to right,
+    #61BB46 0%, #61BB46 16.66%,
+    #FDB827 16.66%, #FDB827 33.33%,
+    #F5821F 33.33%, #F5821F 50%,
+    #E03A3E 50%, #E03A3E 66.66%,
+    #963D97 66.66%, #963D97 83.33%,
+    #009DDC 83.33%, #009DDC 100%);
+}
+[data-theme="apple-1984"] .onboarding__speech-bubble .onboarding__title {
+  color: #2c1810;
+}
+[data-theme="apple-1984"] .onboarding__speech-bubble .onboarding__subtitle {
+  color: #5a3a28;
+}
+
+/* Theme section wrapper */
+.onboarding__theme-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.onboarding__theme-section .onboarding__theme-row {
+  margin-bottom: 12px;
+}
+
+.onboarding__theme-section .onboarding__theme-blurb {
+  margin-bottom: 0;
+}
+
 /* Titles */
 .onboarding__title {
-  font-size: 28px;
+  font-size: 34px;
   font-weight: 600;
   letter-spacing: -0.5px;
-  color: var(--text-primary);
+  color: var(--onb-heading);
   margin: 0 0 8px;
 }
 
 .onboarding__subtitle {
-  font-size: 16px;
-  color: var(--text-secondary);
-  margin: 0 0 32px;
+  font-size: 18px;
+  color: var(--onb-text);
+  margin: 0 0 28px;
+  white-space: nowrap;
 }
 
 /* Buttons */
 .onboarding__button {
-  padding: 14px 24px;
+  padding: 16px 32px;
   background: var(--accent);
   border: none;
   border-radius: var(--radius-md);
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 500;
   color: white;
   cursor: pointer;
@@ -93,89 +268,52 @@
   background: var(--accent);
 }
 
-/* Tutorial (spacebar instruction) */
-.onboarding__tutorial {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 24px;
-  margin-bottom: 32px;
+/* Per-theme button text color fixes — white on bright accents fails */
+:root .onboarding__button { color: #000000; } /* default cyan accent needs dark text */
+[data-theme="mccallister"] .onboarding__button { color: #ffffff; } /* white on red passes */
+[data-theme="imessage"] .onboarding__button { color: #ffffff; background: #0055cc; } /* darken accent for AA */
+[data-theme="aol"] .onboarding__button { color: #ffffff; } /* white on navy passes */
+[data-theme="classic-mac"] .onboarding__button { color: #ffffff; } /* white on blue passes */
+[data-theme="geocities"] .onboarding__button { color: #000000; } /* dark on magenta */
+
+/* Setting steps */
+.onboarding__step--setting {
+  gap: 8px;
 }
 
-.onboarding__tutorial-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
-
-.onboarding__tutorial-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.onboarding__tutorial-icon kbd {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 24px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-md);
-  font-family: inherit;
-  font-size: 18px;
-  font-weight: 500;
-  color: var(--text-primary);
-  box-shadow: 0 2px 0 var(--border-light);
-}
-
-.onboarding__tutorial-item p {
-  margin: 0;
-  font-size: 15px;
-  color: var(--text-secondary);
-}
-
-.onboarding__tutorial-divider {
-  font-size: 13px;
-  color: var(--text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-/* Feature steps */
-.onboarding__step--feature {
-  padding-top: 32px;
-}
-
-.onboarding__feature-header {
-  margin-bottom: 32px;
-}
-
+/* Step label pill — use solid bg for reliable contrast */
 .onboarding__step-label {
   display: inline-block;
-  padding: 4px 12px;
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-size: 12px;
+  padding: 5px 14px;
+  font-size: 13px;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  border-radius: 20px;
-  margin-bottom: 12px;
+  border-radius: var(--radius-full);
+  margin-bottom: 8px;
 }
 
-.onboarding__feature-title {
-  font-size: 24px;
+/* Per-theme step label pill with guaranteed contrast */
+:root .onboarding__step-label { background: #0a2a3a; color: #00d4ff; }
+[data-theme="mccallister"] .onboarding__step-label { background: #3a1010; color: #ff6666; }
+[data-theme="imessage"] .onboarding__step-label { background: #002d66; color: #66b3ff; }
+[data-theme="aol"] .onboarding__step-label { background: #000066; color: #99ccff; }
+[data-theme="classic-mac"] .onboarding__step-label { background: #1a2a55; color: #99bbff; }
+[data-theme="geocities"] .onboarding__step-label { background: #330066; color: #ff66ff; }
+
+.onboarding__setting-title {
+  font-size: 28px;
   font-weight: 600;
   letter-spacing: -0.3px;
-  color: var(--text-primary);
+  color: var(--onb-heading);
   margin: 0;
 }
 
-.onboarding__feature-content {
-  width: 100%;
-  margin-bottom: 24px;
+.onboarding__setting-desc {
+  font-size: 17px;
+  color: var(--onb-text);
+  margin: 0 0 24px;
+  line-height: 1.5;
 }
 
 /* Toggle switches */
@@ -188,6 +326,8 @@
   background: var(--bg-secondary);
   border-radius: var(--radius-md);
   transition: background 0.15s ease;
+  width: 100%;
+  margin-bottom: 24px;
 }
 
 .onboarding__toggle:hover {
@@ -211,12 +351,13 @@
 .onboarding__toggle-slider::before {
   content: '';
   position: absolute;
-  top: 2px;
+  top: 50%;
   left: 2px;
   width: 20px;
   height: 20px;
   background: white;
   border-radius: 50%;
+  transform: translateY(-50%);
   transition: transform 0.2s ease;
 }
 
@@ -225,13 +366,125 @@
 }
 
 .onboarding__toggle input:checked + .onboarding__toggle-slider::before {
-  transform: translateX(20px);
+  transform: translateX(20px) translateY(-50%);
+}
+
+/* Per-theme toggle styling — match each theme's border-radius and visual language */
+
+/* McCallister — chunky industrial slide switch */
+[data-theme="mccallister"] .onboarding__toggle {
+  border: 1px solid #707070;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
+}
+[data-theme="mccallister"] .onboarding__toggle-slider {
+  border-radius: 4px;
+  background: #808080;
+  border: 1px solid #555555;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
+}
+[data-theme="mccallister"] .onboarding__toggle-slider::before {
+  border-radius: 3px;
+  background: linear-gradient(180deg, #e0e0e0 0%, #c0c0c0 100%);
+  box-shadow: 0 1px 0 #707070;
+}
+[data-theme="mccallister"] .onboarding__toggle input:checked + .onboarding__toggle-slider {
+  background: #cc0000;
+  border-color: #990000;
+}
+
+/* iMessage — iOS grouped row with hairline border */
+[data-theme="imessage"] .onboarding__toggle {
+  border: 1px solid rgba(60, 60, 67, 0.18);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+/* AOL — Win95 beveled rectangle */
+[data-theme="aol"] .onboarding__toggle {
+  border-radius: 0;
+  border: 2px solid #808080;
+  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+}
+[data-theme="aol"] .onboarding__toggle-slider {
+  border-radius: 0;
+  background: #808080;
+  border: 2px solid;
+  border-color: #808080 #ffffff #ffffff #808080;
+}
+[data-theme="aol"] .onboarding__toggle-slider::before {
+  border-radius: 0;
+  background: #c0c0c0;
+  border: 2px solid;
+  border-color: #ffffff #808080 #808080 #ffffff;
+  box-shadow: none;
+  width: 16px;
+  height: 16px;
+  top: 50%;
+  left: 2px;
+}
+[data-theme="aol"] .onboarding__toggle input:checked + .onboarding__toggle-slider {
+  background: #000080;
+  border-color: #808080 #ffffff #ffffff #808080;
+}
+[data-theme="aol"] .onboarding__toggle input:checked + .onboarding__toggle-slider::before {
+  transform: translateX(20px) translateY(-50%);
+}
+
+/* Classic Mac — Platinum appearance with 1px black borders */
+[data-theme="classic-mac"] .onboarding__toggle {
+  border: 1px solid #000000;
+  box-shadow: 1px 1px 0 #000000;
+}
+[data-theme="classic-mac"] .onboarding__toggle-slider {
+  border-radius: 4px;
+  background: #aaaaaa;
+  border: 1px solid #000000;
+}
+[data-theme="classic-mac"] .onboarding__toggle-slider::before {
+  border-radius: 3px;
+  background: #eeeeee;
+  border: 1px solid #000000;
+  width: 18px;
+  height: 18px;
+  top: 50%;
+  left: 2px;
+}
+[data-theme="classic-mac"] .onboarding__toggle input:checked + .onboarding__toggle-slider {
+  background: #3366cc;
+  border-color: #000000;
+}
+[data-theme="classic-mac"] .onboarding__toggle input:checked + .onboarding__toggle-slider::before {
+  transform: translateX(20px) translateY(-50%);
+}
+
+/* GeoCities — sharp neon edges */
+[data-theme="geocities"] .onboarding__toggle {
+  border-radius: 0;
+  border: 2px solid #6600cc;
+  box-shadow: 0 0 6px rgba(255, 0, 255, 0.2);
+}
+[data-theme="geocities"] .onboarding__toggle-slider {
+  border-radius: 0;
+  background: #1a1a44;
+  border: 1px solid #6600cc;
+}
+[data-theme="geocities"] .onboarding__toggle-slider::before {
+  border-radius: 0;
+  background: #9933ff;
+  box-shadow: 0 0 4px rgba(153, 51, 255, 0.5);
+}
+[data-theme="geocities"] .onboarding__toggle input:checked + .onboarding__toggle-slider {
+  background: #330066;
+  border-color: #ff00ff;
+}
+[data-theme="geocities"] .onboarding__toggle input:checked + .onboarding__toggle-slider::before {
+  background: #00ffff;
+  box-shadow: 0 0 6px rgba(0, 255, 255, 0.6);
 }
 
 .onboarding__toggle-label {
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 500;
-  color: var(--text-primary);
+  color: var(--onb-heading);
 }
 
 .onboarding__toggle-content {
@@ -242,23 +495,282 @@
 }
 
 .onboarding__toggle-desc {
-  font-size: 13px;
-  color: var(--text-secondary);
+  font-size: 15px;
+  color: var(--onb-text);
 }
 
-/* Options list */
-.onboarding__options-list {
-  display: flex;
-  flex-direction: column;
+/* Theme section heading */
+.onboarding__theme-heading {
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--onb-text);
+  margin: 0 0 12px;
+}
+
+/* Theme swatch row — 3 columns, 2 rows for 6 themes */
+.onboarding__theme-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
   width: 100%;
-  margin-bottom: 16px;
+  margin-bottom: 28px;
 }
 
-.onboarding__hint {
+.onboarding__theme-swatch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 22px 6px 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  opacity: 0.6;
+  transform: scale(0.95);
+}
+
+.onboarding__theme-swatch--active {
+  opacity: 1;
+  transform: scale(1.08);
+  z-index: 1;
+}
+
+/* Swatch iconic ::before pseudo-elements */
+.onboarding__theme-swatch::before {
+  content: '';
+  display: block;
+  margin-bottom: 6px;
+}
+
+.onboarding__theme-swatch-label {
   font-size: 13px;
-  color: var(--text-tertiary);
-  margin: 0;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Selected theme description */
+.onboarding__theme-blurb {
+  font-size: 15px;
+  color: var(--onb-text);
+  margin: 0 0 28px;
+  min-height: 20px;
+  transition: opacity 0.15s ease;
+}
+
+[data-theme="mccallister"] .onboarding__theme-blurb { white-space: nowrap; }
+[data-theme="classic-mac"] .onboarding__theme-blurb { white-space: nowrap; }
+[data-theme="geocities"] .onboarding__theme-blurb { white-space: nowrap; }
+[data-theme="apple-1984"] .onboarding__theme-blurb { white-space: nowrap; }
+
+/* TalkBoy (McCallister) swatch — red record dot */
+.onboarding__theme-swatch--mccallister {
+  background: linear-gradient(180deg, #c8c8c8 0%, #b0b0b0 100%);
+  border: 2px solid #707070;
+  border-radius: 0;
+  box-shadow: 0 2px 0 #707070, inset 0 1px 0 rgba(255,255,255,0.3);
+  font-family: 'Arial Black', 'Helvetica Neue', Impact, sans-serif;
+}
+.onboarding__theme-swatch--mccallister::before {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #cc0000;
+  box-shadow: 0 0 6px rgba(204, 0, 0, 0.5);
+}
+.onboarding__theme-swatch--mccallister .onboarding__theme-swatch-label {
+  color: #1a1a1a;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.03em;
+}
+.onboarding__theme-swatch--mccallister.onboarding__theme-swatch--active {
+  border-color: #cc0000;
+  box-shadow: 0 2px 0 #707070, 0 0 0 2px rgba(204, 0, 0, 0.4);
+}
+
+/* Bubble (iMessage) swatch — blue speech bubble */
+.onboarding__theme-swatch--imessage {
+  background: #ffffff;
+  border: 1px solid rgba(60, 60, 67, 0.12);
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  font-family: -apple-system, 'SF Pro Text', BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+}
+/* Speech bubble with bottom-right tail */
+.onboarding__theme-swatch--imessage::before {
+  width: 18px;
+  height: 13px;
+  border-radius: 7px;
+  background: #007aff;
+  margin-bottom: 10px;
+}
+.onboarding__theme-swatch--imessage::after {
+  content: '';
+  position: absolute;
+  top: 33px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid #007aff;
+}
+.onboarding__theme-swatch--imessage .onboarding__theme-swatch-label {
+  color: #000000;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.onboarding__theme-swatch--imessage.onboarding__theme-swatch--active {
+  border-color: #007aff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 0 0 2px rgba(0, 122, 255, 0.25);
+}
+
+/* Dial-Up (AOL) swatch — mini Win95 blue title bar */
+.onboarding__theme-swatch--aol {
+  background: #c0c0c0;
+  border: 2px solid #808080;
+  border-radius: 0;
+  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Arial, sans-serif;
+  overflow: hidden;
+}
+.onboarding__theme-swatch--aol::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: linear-gradient(90deg, #000080, #1084d0);
+}
+/* AOL triangle logo */
+.onboarding__theme-swatch--aol::before {
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 14px solid #000080;
+  background: none;
+  border-radius: 0;
+}
+.onboarding__theme-swatch--aol .onboarding__theme-swatch-label {
+  color: #000000;
+  font-weight: 400;
+}
+.onboarding__theme-swatch--aol.onboarding__theme-swatch--active {
+  border-color: #000080;
+  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff, 0 0 0 2px rgba(0, 51, 153, 0.4);
+}
+
+/* Finder (Classic Mac) swatch — ⌘ command key */
+.onboarding__theme-swatch--classic-mac {
+  background: #eeeeee;
+  border: 1px solid #000000;
+  border-radius: 4px;
+  box-shadow: 1px 1px 0 #000000;
+  font-family: 'Geneva', 'Lucida Grande', 'Helvetica Neue', Helvetica, sans-serif;
+}
+.onboarding__theme-swatch--classic-mac::before {
+  content: '⌘';
+  width: auto;
+  height: auto;
+  font-size: 16px;
+  line-height: 1;
+  color: #000000;
+}
+.onboarding__theme-swatch--classic-mac .onboarding__theme-swatch-label {
+  color: #000000;
+  font-weight: 500;
+}
+.onboarding__theme-swatch--classic-mac.onboarding__theme-swatch--active {
+  border-color: #3366cc;
+  box-shadow: 1px 1px 0 #000000, 0 0 0 2px rgba(51, 102, 204, 0.4);
+}
+
+/* Guestbook (GeoCities) swatch — animated sparkle star */
+.onboarding__theme-swatch--geocities {
+  background: #000066;
+  border: 2px solid #ff00ff;
+  border-radius: 0;
+  box-shadow: 0 0 6px rgba(255, 0, 255, 0.3);
+  font-family: 'Comic Sans MS', 'Comic Sans', cursive, sans-serif;
+}
+.onboarding__theme-swatch--geocities::before {
+  content: '✦';
+  width: auto;
+  height: auto;
+  font-size: 18px;
+  line-height: 1;
+  color: #ffff00;
+  text-shadow: 0 0 8px rgba(255, 255, 0, 0.8);
+  animation: onb-sparkle 1.5s ease-in-out infinite;
+}
+@keyframes onb-sparkle {
+  0%, 100% { opacity: 1; text-shadow: 0 0 6px rgba(255, 255, 0, 0.8); }
+  50% { opacity: 0.5; text-shadow: 0 0 2px rgba(255, 255, 0, 0.3); }
+}
+.onboarding__theme-swatch--geocities .onboarding__theme-swatch-label {
+  color: #00ff00;
+  font-weight: 400;
+}
+.onboarding__theme-swatch--geocities.onboarding__theme-swatch--active {
+  border-color: #00ffff;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.5), 0 0 6px rgba(255, 0, 255, 0.3);
+}
+
+/* 1984 (Apple) swatch — rainbow stripe across top */
+.onboarding__theme-swatch--apple-1984 {
+  background: #f0dfc0;
+  border: 2px solid #c4a882;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(44, 24, 16, 0.1);
+  font-family: 'Futura', 'Century Gothic', 'Gill Sans', sans-serif;
+  overflow: hidden;
+}
+.onboarding__theme-swatch--apple-1984::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(to right,
+    #61BB46 0%, #61BB46 16.66%,
+    #FDB827 16.66%, #FDB827 33.33%,
+    #F5821F 33.33%, #F5821F 50%,
+    #E03A3E 50%, #E03A3E 66.66%,
+    #963D97 66.66%, #963D97 83.33%,
+    #009DDC 83.33%, #009DDC 100%);
+}
+/* CSS floppy disk with rainbow fill */
+.onboarding__theme-swatch--apple-1984::before {
+  width: 16px;
+  height: 18px;
+  border-radius: 2px;
+  background:
+    /* Metal shutter at top center */
+    linear-gradient(#e8e8e8, #888888) no-repeat center 0 / 10px 5px,
+    /* Label area at bottom */
+    linear-gradient(#ffffff, #f0e0c0) no-repeat center bottom / 12px 6px,
+    /* Rainbow body — saturated bands */
+    linear-gradient(180deg,
+      #4CAF00 0%, #FFB300 20%,
+      #FF6D00 40%, #D50000 60%,
+      #7B1FA2 80%, #0077CC 100%);
+  border: 2px solid #2c1810;
+}
+.onboarding__theme-swatch--apple-1984 .onboarding__theme-swatch-label {
+  color: #2c1810;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.onboarding__theme-swatch--apple-1984.onboarding__theme-swatch--active {
+  border-color: #E03A3E;
+  box-shadow: 0 1px 3px rgba(44, 24, 16, 0.1), 0 0 0 2px rgba(224, 58, 62, 0.3);
 }
 
 /* Navigation */
@@ -271,47 +783,47 @@
 }
 
 .onboarding__nav-back {
-  padding: 14px 24px;
+  padding: 16px 32px;
   background: transparent;
-  border: 1px solid var(--border-light);
+  border: 1px solid var(--onb-text);
   border-radius: var(--radius-md);
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 500;
-  color: var(--text-secondary);
+  color: var(--onb-text);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .onboarding__nav-back:hover {
-  border-color: var(--text-tertiary);
-  color: var(--text-primary);
+  border-color: var(--onb-heading);
+  color: var(--onb-heading);
 }
 
 /* Skip button */
 .onboarding__skip {
-  position: absolute;
-  bottom: -40px;
+  position: fixed;
+  bottom: 32px;
   left: 50%;
   transform: translateX(-50%);
   padding: 8px 16px;
   background: none;
   border: none;
-  font-size: 13px;
-  color: var(--text-tertiary);
+  font-size: 15px;
+  color: var(--onb-text);
   cursor: pointer;
   transition: color 0.15s ease;
 }
 
 .onboarding__skip:hover {
-  color: var(--text-secondary);
+  color: var(--onb-heading);
 }
 
-/* Robot avatar demo on welcome screen */
-.onboarding__robot-demo {
+/* Robot avatar — persistent across all screens */
+.onboarding__robot {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: 16px 24px;
   margin-bottom: 16px;
   cursor: pointer;
 }
