@@ -163,7 +163,7 @@ api.get('/conversations/:id/liner-notes', (c) => {
   }
 
   return c.json({
-    linerNotes: (conv as Record<string, unknown>).liner_notes || null,
+    linerNotes: conversations.getLinerNotes(id),
   })
 })
 

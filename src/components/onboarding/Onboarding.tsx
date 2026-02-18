@@ -16,9 +16,9 @@ export interface OnboardingSettings {
   theme: ThemeName
 }
 
-type Step = 'welcome' | 'tts' | 'sound-effects' | 'wake-word' | 'continuous-listening' | 'done'
+type Step = 'welcome' | 'how-it-works' | 'tts' | 'sound-effects' | 'wake-word' | 'continuous-listening' | 'done'
 
-const STEPS: Step[] = ['welcome', 'tts', 'sound-effects', 'wake-word', 'continuous-listening', 'done']
+const STEPS: Step[] = ['welcome', 'how-it-works', 'tts', 'sound-effects', 'wake-word', 'continuous-listening', 'done']
 
 export function Onboarding({ onComplete }: OnboardingProps) {
   const { themes, setTheme } = useTheme()
@@ -82,6 +82,9 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               <p className="onboarding__subtitle">
                 Your walkie talkie for Claude Code.
               </p>
+              <p className="onboarding__value-prop">
+                Talk hands-free, see tool activity in real-time, and save every conversation as a cassette tape you can search and replay.
+              </p>
               <p className="onboarding__subtitle">
                 Choose a theme below, you can always change it later.
               </p>
@@ -107,6 +110,33 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             <button className="onboarding__button" onClick={nextStep}>
               Get Started
             </button>
+          </div>
+        )}
+
+        {step === 'how-it-works' && (
+          <div className="onboarding__step onboarding__step--setting">
+            <span className="onboarding__step-label">Modes</span>
+            <h2 className="onboarding__setting-title">How it works</h2>
+            <div className="onboarding__modes">
+              <div className="onboarding__mode">
+                <span className="onboarding__mode-badge">Default</span>
+                <strong className="onboarding__mode-name">Claude Code mode</strong>
+                <p className="onboarding__mode-desc">
+                  Connects to your running Claude Code session. Full tool use, file editing, and real-time activity feed. No API key needed.
+                </p>
+              </div>
+              <div className="onboarding__mode">
+                <span className="onboarding__mode-badge onboarding__mode-badge--alt">Alternative</span>
+                <strong className="onboarding__mode-name">Direct API mode</strong>
+                <p className="onboarding__mode-desc">
+                  Uses your Anthropic API key for faster responses. Great for quick conversations without tool use.
+                </p>
+              </div>
+            </div>
+            <div className="onboarding__nav">
+              <button className="onboarding__nav-back" onClick={prevStep}>Back</button>
+              <button className="onboarding__button" onClick={nextStep}>Next</button>
+            </div>
           </div>
         )}
 
@@ -214,6 +244,26 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           <div className="onboarding__step onboarding__step--setting">
             <span className="onboarding__step-label">Ready</span>
             <h2 className="onboarding__setting-title">You're all set</h2>
+
+            <ul className="onboarding__summary">
+              <li>
+                <span className="onboarding__summary-label">Voice responses</span>
+                <span className="onboarding__summary-value">{settings.ttsEnabled ? 'On' : 'Off'}</span>
+              </li>
+              <li>
+                <span className="onboarding__summary-label">Sound effects</span>
+                <span className="onboarding__summary-value">{settings.soundEffects ? 'On' : 'Off'}</span>
+              </li>
+              <li>
+                <span className="onboarding__summary-label">Wake word</span>
+                <span className="onboarding__summary-value">{settings.wakeWord ? 'On' : 'Off'}</span>
+              </li>
+              <li>
+                <span className="onboarding__summary-label">Continuous listening</span>
+                <span className="onboarding__summary-value">{settings.continuousListening ? 'On' : 'Off'}</span>
+              </li>
+            </ul>
+
             <p className="onboarding__setting-desc">Hold spacebar and start talking. Everything can be changed in settings later.</p>
 
             <div className="onboarding__nav">

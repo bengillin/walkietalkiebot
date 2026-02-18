@@ -11,12 +11,12 @@
   "bin": {
     "talkie": "bin/talkie.js",
     "talkie-server": "bin/talkie-server.js",
-    "talkie-mcp": "mcp-server/index.js"
+    "talkie-mcp": "mcp-server/dist/index.js"
   },
   "files": [
     "bin/talkie.js",
     "bin/talkie-server.js",
-    "mcp-server/",
+    "mcp-server/dist/",
     "server/**/*.js",
     "dist/",
     ".claude-plugin/",
@@ -29,7 +29,9 @@
     "build:server": "node scripts/build-server.js",
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx",
-    "test": "vitest run",
+    "test": "vitest run && vitest run --config vitest.config.server.ts",
+    "test:client": "vitest run",
+    "test:server": "vitest run --config vitest.config.server.ts",
     "test:watch": "vitest",
     "prepublishOnly": "npm run build"
   },

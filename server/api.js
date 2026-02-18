@@ -126,7 +126,7 @@ api.get("/conversations/:id/liner-notes", (c) => {
     return c.json({ error: "Conversation not found" }, 404);
   }
   return c.json({
-    linerNotes: conv.liner_notes || null
+    linerNotes: conversations.getLinerNotes(id)
   });
 });
 api.put("/conversations/:id/liner-notes", async (c) => {

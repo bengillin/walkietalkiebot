@@ -1,6 +1,6 @@
 import { useCallback, useRef, useEffect } from 'react'
 
-type SoundType = 'startListening' | 'stopListening' | 'thinking' | 'success' | 'error'
+export type SoundType = 'startListening' | 'stopListening' | 'thinking' | 'success' | 'error'
 
 interface SoundConfig {
   frequency: number

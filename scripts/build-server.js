@@ -12,7 +12,7 @@ function findTsFiles(dir, base = dir) {
     const stat = statSync(fullPath)
     if (stat.isDirectory()) {
       files.push(...findTsFiles(fullPath, base))
-    } else if (entry.endsWith('.ts') && !entry.endsWith('.d.ts')) {
+    } else if (entry.endsWith('.ts') && !entry.endsWith('.d.ts') && !entry.endsWith('.test.ts')) {
       files.push(fullPath)
     }
   }
@@ -33,3 +33,17 @@ await build({
 })
 
 console.log('Server build complete')
+
+// Build MCP server
+console.log('Building MCP server: mcp-server/index.ts')
+
+await build({
+  entryPoints: ['mcp-server/index.ts'],
+  outdir: 'mcp-server/dist',
+  format: 'esm',
+  platform: 'node',
+  packages: 'external',
+  banner: { js: '#!/usr/bin/env node' },
+})
+
+console.log('MCP server build complete')

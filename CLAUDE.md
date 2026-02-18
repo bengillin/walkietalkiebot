@@ -15,7 +15,9 @@ A voice-first, cassette tape-themed interface for Claude Code with 6 retro theme
 
 - `npm run dev` — Start Vite dev server (frontend only, no API)
 - `npm run build` — TypeScript check + Vite build + esbuild server bundle
-- `npm run test` — Run vitest
+- `npm run test` — Run all tests (client + server, 140 tests across 10 files)
+- `npm run test:client` — Run frontend tests only (vitest, jsdom)
+- `npm run test:server` — Run server tests only (vitest, node, in-memory SQLite)
 - `talkie-server start -f` — Start HTTPS server in foreground (serves API + built frontend)
 - `talkie-server start` — Start as background process or via launchd
 
@@ -23,7 +25,7 @@ A voice-first, cassette tape-themed interface for Claude Code with 6 retro theme
 
 ```
 src/                    Frontend React app
-  App.tsx               Main orchestration (voice, chat, settings, FAB)
+  App.tsx               Main orchestration (~470 lines, delegates to custom hooks)
   lib/claude.ts         Claude API integration (direct + Claude Code CLI modes)
   lib/store.ts          Zustand state (conversations, messages, activities, settings)
   lib/api.ts            REST client for server API
@@ -43,11 +45,19 @@ src/                    Frontend React app
   components/search/    Full-text search overlay (Cmd+K)
   components/jobs/      Job status bar and detail panel
   components/media/     Image lightbox, media library
-  components/onboarding/ 6-step setup wizard
+  components/onboarding/ 7-step setup wizard (welcome, how-it-works, tts, sounds, wake word, continuous, done)
   components/settings/  Settings drawer
   components/shortcuts/ Keyboard shortcuts guide
   components/dropzone/  Image drag-and-drop
-  hooks/                Keyboard shortcuts, sound effects
+  hooks/                8 custom hooks extracted from App.tsx
+    useClaudeChat.ts    Message flow, plan detection, tool activity tracking
+    useVoiceIO.ts       STT/TTS, wake word, avatar state, sound effects
+    useKeyboardControl.ts  Spacebar PTT, shortcuts, continuous listening
+    useDraggableFab.ts  FAB drag/resize with touch support
+    useImageAnalysis.ts Image drop handling and Claude vision analysis
+    useServerSync.ts    DB init, migration, server sync on mount
+    useKeyboardShortcuts.ts  Low-level keyboard event hooks (Escape, Cmd+K, Cmd+E)
+    useSoundEffects.ts  Web Audio API tone generation
 server/                 Hono HTTPS server
   api.ts                All API routes (conversations, claude-code, IPC, media, plans, jobs)
   index.ts              Server startup (HTTPS, Telegram bot, DB init)
@@ -55,9 +65,12 @@ server/                 Hono HTTPS server
   ssl.ts                Self-signed cert generation
   db/schema.ts          SQLite schema with versioned migrations (v1–v4)
   db/repositories/      CRUD: conversations, messages, activities, search, plans, jobs, telegram
+  test/helpers.ts       Test utilities (in-memory SQLite via initDbForTesting)
   jobs/                 Async job execution
   telegram/             grammy bot (commands, handlers)
-mcp-server/index.js     MCP server: 15 data tools (direct SQLite) + 15 server tools (HTTP proxy)
+mcp-server/             MCP server (TypeScript, compiled to dist/)
+  index.ts              30 typed tools: 15 data (direct SQLite) + 15 server (HTTP proxy)
+  dist/index.js         Compiled output with shebang (entry point for bin/MCP)
 bin/                    CLI entry points
   talkie.js            Start server + open browser
   talkie-server.js     Server lifecycle (start/stop/restart/status/logs/install)
@@ -89,7 +102,9 @@ site/                   Marketing site (walkietalkie.bot)
 - **Tool identity**: Centralized in `lib/toolConfig.ts` — maps 40+ tools to icons, labels, display names, and 6 categories (fs, exec, voice, data, plan, media) with per-theme colors
 - **Dual distribution**: npm package (`npx talkiebot`) for full server + web UI; Claude Code plugin for MCP tools + skills (data tools work offline via direct SQLite)
 - **MCP hybrid architecture**: Data tools (conversations, plans, search, notes, export) use SQLite directly; server tools (voice, IPC, session, jobs) proxy HTTP to the Talkie server
-- **Auto-generated JS**: `server/**/*.js` files are compiled from TypeScript by `npm run build:server` — do not edit them directly
+- **Auto-generated JS**: `server/**/*.js` and `mcp-server/dist/` are compiled from TypeScript by `npm run build:server` — do not edit them directly
+- **Hook architecture**: App.tsx delegates to 8 custom hooks for voice, chat, keyboard, FAB, images, server sync, sounds, and shortcuts. Circular dependency between voice and chat is resolved via a ref pattern (useVoiceIO accepts onSendMessageRef)
+- **Testing**: Separate vitest configs for client (jsdom) and server (node). Server tests use in-memory SQLite via initDbForTesting(). API tests use Hono's app.request() method
 
 ## Themes
 

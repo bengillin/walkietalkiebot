@@ -65,3 +65,9 @@ export function closeDb(): void {
 export function isDbConnected(): boolean {
   return db !== null
 }
+
+export function initDbForTesting(testDb: Database.Database): void {
+  testDb.pragma('foreign_keys = ON')
+  initSchema(testDb)
+  db = testDb
+}

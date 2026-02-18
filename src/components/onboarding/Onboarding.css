@@ -971,3 +971,91 @@
   margin-bottom: 4px;
   cursor: pointer;
 }
+
+/* Value proposition text in welcome bubble */
+.onboarding__value-prop {
+  font-size: 15px;
+  color: var(--onb-text);
+  margin: 8px 0 12px;
+  line-height: 1.5;
+  opacity: 0.85;
+}
+
+/* How-it-works mode cards */
+.onboarding__modes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.onboarding__mode {
+  padding: 16px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  text-align: left;
+}
+
+.onboarding__mode-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: var(--radius-sm, 4px);
+  background: var(--accent);
+  color: #ffffff;
+  margin-bottom: 6px;
+}
+
+.onboarding__mode-badge--alt {
+  background: var(--bg-tertiary);
+  color: var(--onb-text);
+}
+
+.onboarding__mode-name {
+  display: block;
+  font-size: 16px;
+  color: var(--onb-heading);
+  margin-bottom: 4px;
+}
+
+.onboarding__mode-desc {
+  font-size: 14px;
+  color: var(--onb-text);
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* Settings summary on done step */
+.onboarding__summary {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+  width: 100%;
+}
+
+.onboarding__summary li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border-light, rgba(255,255,255,0.1));
+}
+
+.onboarding__summary li:last-child {
+  border-bottom: none;
+}
+
+.onboarding__summary-label {
+  font-size: 15px;
+  color: var(--onb-text);
+}
+
+.onboarding__summary-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--onb-heading);
+}

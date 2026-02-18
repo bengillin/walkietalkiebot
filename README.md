@@ -156,9 +156,11 @@ talkie-server install        # Install as macOS launchd daemon
 ```bash
 npm install       # Install dependencies
 npm run dev       # Vite dev server (frontend only)
-npm run build     # TypeScript check + Vite build + server bundle
-npm run test      # Run tests
+npm run build     # TypeScript check + Vite build + server bundle + MCP server
+npm run test      # Run all tests (140 tests across 10 files)
 ```
+
+The frontend is decomposed into custom hooks (`src/hooks/`) for voice I/O, Claude chat, keyboard control, FAB dragging, image analysis, and server sync. The server has full test coverage for all database repositories and HTTP API endpoints.
 
 Full architecture, API reference, and integration guides at [walkietalkie.bot/docs](https://walkietalkie.bot/docs/).
 

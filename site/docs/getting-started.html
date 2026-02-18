@@ -98,7 +98,7 @@
         <ul>
           <li>Downloads and installs the <code>talkiebot</code> package from npm</li>
           <li>Generates self-signed TLS certificates at <code>~/.talkie/</code></li>
-          <li>Starts an HTTPS server on port 3443 (configurable)</li>
+          <li>Starts an HTTPS server on port 5173 (configurable via <code>TALKIE_PORT</code>)</li>
           <li>Opens your default browser to the Talkie interface</li>
         </ul>
 
@@ -155,32 +155,35 @@ talkiebot</code></pre>
           <li><strong>Server start</strong> &mdash; The HTTPS server starts on port 5173 (or the port set by <code>TALKIE_PORT</code>).</li>
           <li><strong>Browser opens</strong> &mdash; Your default browser navigates to <code>https://localhost:5173</code>.</li>
           <li><strong>Certificate warning</strong> &mdash; Your browser will show a security warning because the certificate is self-signed. Accept it to continue (see <a href="#troubleshooting">Troubleshooting</a> below).</li>
-          <li><strong>Onboarding wizard</strong> &mdash; On your first visit, a 6-step setup wizard walks you through configuration.</li>
+          <li><strong>Onboarding wizard</strong> &mdash; On your first visit, a 7-step setup wizard walks you through configuration.</li>
         </ol>
 
         <!-- ── Onboarding ── -->
         <h2 id="onboarding">Onboarding</h2>
 
-        <p>The onboarding wizard runs automatically on your first visit. It consists of six steps that configure your Talkie experience:</p>
+        <p>The onboarding wizard runs automatically on your first visit. It consists of seven steps that configure your Talkie experience:</p>
 
         <ol>
           <li>
-            <strong>Theme selection</strong> &mdash; Choose from 6 retro themes: TalkBoy, Bubble, Dial-Up, Finder, Guestbook, or 1984. Each theme completely reskins the entire interface. You can change this later from the settings drawer.
+            <strong>Welcome &amp; theme selection</strong> &mdash; Meet Talkie and learn what it does. Choose from 6 retro themes: TalkBoy, Bubble, Dial-Up, Finder, Guestbook, or 1984. Each theme completely reskins the entire interface.
           </li>
           <li>
-            <strong>Text-to-speech</strong> &mdash; Toggle TTS on or off and pick a voice from the voices available in your browser. Claude's responses will be read aloud when TTS is enabled.
+            <strong>How it works</strong> &mdash; Learn about the two modes: Claude Code mode (recommended, full tool use, no API key needed) and Direct API mode (faster responses, no tools).
           </li>
           <li>
-            <strong>Sound effects</strong> &mdash; Enable or disable UI sound effects for actions like sending messages, receiving responses, and navigation.
+            <strong>Text-to-speech</strong> &mdash; Toggle TTS on or off. Claude's responses will be read aloud when TTS is enabled. You can pick a specific voice in settings later.
           </li>
           <li>
-            <strong>Wake word</strong> &mdash; Configure a wake word that activates voice input hands-free. When enabled, Talkie continuously listens for the trigger phrase in the background.
+            <strong>Sound effects</strong> &mdash; Enable or disable cassette tape sounds when recording starts and stops.
           </li>
           <li>
-            <strong>Continuous listening</strong> &mdash; Set up continuous listening mode and a trigger word. In this mode, Talkie keeps the microphone open and sends transcriptions when the trigger word is detected.
+            <strong>Wake word</strong> &mdash; Say "Hey Talkie" to start recording without touching the keyboard. Customizable in settings.
           </li>
           <li>
-            <strong>Done</strong> &mdash; Review your settings and start using Talkie. All settings can be changed later from the settings drawer.
+            <strong>Continuous listening</strong> &mdash; Always listening mode &mdash; say "over" when you're done talking to send your message. No spacebar needed.
+          </li>
+          <li>
+            <strong>Done</strong> &mdash; Review a summary of your configured settings and start using Talkie. All settings can be changed later from the settings drawer.
           </li>
         </ol>
 
@@ -264,7 +267,7 @@ talkiebot</code></pre>
 
         <h3>Port conflicts</h3>
 
-        <p>If port 3443 is already in use, set a different port with the <code>TALKIE_PORT</code> environment variable:</p>
+        <p>If port 5173 is already in use, set a different port with the <code>TALKIE_PORT</code> environment variable:</p>
 
         <pre><code>TALKIE_PORT=4443 npx talkiebot</code></pre>
 

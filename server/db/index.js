@@ -48,10 +48,16 @@ function closeDb() {
 function isDbConnected() {
   return db !== null;
 }
+function initDbForTesting(testDb) {
+  testDb.pragma("foreign_keys = ON");
+  initSchema(testDb);
+  db = testDb;
+}
 export {
   closeDb,
   getDb,
   getDbPath,
   initDb,
+  initDbForTesting,
   isDbConnected
 };
