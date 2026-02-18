@@ -12,11 +12,7 @@ Two ways to use Talkie. Pick one (or both).
 
 Add Talkie as a Claude Code plugin for 30 MCP tools + 5 skills, no server required. Data tools talk directly to SQLite.
 
-```
-/plugin install talkie
-```
-
-Or add manually to `~/.claude/settings.json`:
+Add to `~/.claude/settings.json`:
 
 ```json
 {

@@ -147,8 +147,8 @@ talkiebot</code></pre>
         <ol>
           <li><strong>Certificate generation</strong> &mdash; A self-signed TLS certificate and private key are created at <code>~/.talkie/cert.pem</code> and <code>~/.talkie/key.pem</code>. These are reused on subsequent launches.</li>
           <li><strong>Database creation</strong> &mdash; An SQLite database is initialized at <code>~/.talkie/talkie.db</code> with WAL mode enabled for concurrent reads.</li>
-          <li><strong>Server start</strong> &mdash; The HTTPS server starts on port 3443 (or the port set by <code>TALKIE_PORT</code>).</li>
-          <li><strong>Browser opens</strong> &mdash; Your default browser navigates to <code>https://localhost:3443</code>.</li>
+          <li><strong>Server start</strong> &mdash; The HTTPS server starts on port 5173 (or the port set by <code>TALKIE_PORT</code>).</li>
+          <li><strong>Browser opens</strong> &mdash; Your default browser navigates to <code>https://localhost:5173</code>.</li>
           <li><strong>Certificate warning</strong> &mdash; Your browser will show a security warning because the certificate is self-signed. Accept it to continue (see <a href="#troubleshooting">Troubleshooting</a> below).</li>
           <li><strong>Onboarding wizard</strong> &mdash; On your first visit, a 6-step setup wizard walks you through configuration.</li>
         </ol>
@@ -253,7 +253,7 @@ talkiebot</code></pre>
 
         <ul>
           <li>Verify you are accessing Talkie over <code>https://</code> (not <code>http://</code>).</li>
-          <li>Check your browser's site settings and ensure microphone access is allowed for <code>https://localhost:3443</code>.</li>
+          <li>Check your browser's site settings and ensure microphone access is allowed for <code>https://localhost:5173</code>.</li>
           <li>On macOS, ensure your browser has microphone permission in System Settings &gt; Privacy &amp; Security &gt; Microphone.</li>
         </ul>
 
