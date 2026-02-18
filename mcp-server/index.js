@@ -17,6 +17,23 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const TALKIE_PORT = parseInt(process.env.TALKIE_PORT || '5173', 10);
 const TALKIE_URL = `https://localhost:${TALKIE_PORT}`;
 
+// ─── Anonymous telemetry (opt out: TALKIE_TELEMETRY=0) ───
+const POSTHOG_KEY = 'POSTHOG_API_KEY';
+const TELEMETRY = process.env.TALKIE_TELEMETRY !== '0' && POSTHOG_KEY !== 'POSTHOG_API_KEY';
+function trackTool(toolName, category, ok) {
+  if (!TELEMETRY) return;
+  fetch('https://us.i.posthog.com/capture/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      api_key: POSTHOG_KEY,
+      event: 'mcp_tool_called',
+      distinct_id: 'anon',
+      properties: { tool: toolName, category, success: ok },
+    }),
+  }).catch(() => {}); // fire-and-forget
+}
+
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 let talkieProcess = null;
@@ -169,22 +186,27 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     // ════════════════════════════════════════
     // SERVER TOOLS (require Talkie running)
     // ════════════════════════════════════════
-    switch (name) {
-      case 'launch_talkie': return jsonResult(await launchTalkie());
-      case 'get_talkie_status': return jsonResult(await serverCall(() => apiGet('/api/status')));
-      case 'get_transcript': return jsonResult(await serverCall(() => apiGet('/api/transcript')));
-      case 'get_conversation_history': return jsonResult(await serverCall(() => apiGet('/api/history')));
-      case 'get_claude_session': return jsonResult(await serverCall(() => apiGet('/api/session')));
-      case 'set_claude_session': return jsonResult(await serverCall(() => apiPost('/api/session', { sessionId: args.sessionId })));
-      case 'disconnect_claude_session': return jsonResult(await serverCall(() => apiDelete('/api/session')));
-      case 'get_pending_message': return jsonResult(await serverCall(() => apiGet('/api/pending')));
-      case 'respond_to_talkie': return jsonResult(await serverCall(() => apiPost('/api/respond', { content: args.content })));
-      case 'update_talkie_state': return jsonResult(await serverCall(() => apiPost('/api/state', args)));
-      case 'analyze_image': return jsonResult(await serverCall(() => apiPost('/api/analyze-image', { dataUrl: args.dataUrl, fileName: args.fileName, apiKey: args.apiKey })));
-      case 'open_url': return jsonResult(await serverCall(() => apiPost('/api/open-url', { url: args.url })));
-      case 'create_talkie_job': return jsonResult(await serverCall(() => apiPost('/api/jobs', { conversationId: args.conversationId, prompt: args.prompt, source: 'mcp' })));
-      case 'get_talkie_job': return jsonResult(await serverCall(() => apiGet(`/api/jobs/${args.jobId}`)));
-      case 'list_talkie_jobs': return jsonResult(await serverCall(() => apiGet(`/api/jobs${args.status ? `?status=${args.status}` : ''}`)));
+    const serverTools = {
+      launch_talkie: () => launchTalkie(),
+      get_talkie_status: () => serverCall(() => apiGet('/api/status')),
+      get_transcript: () => serverCall(() => apiGet('/api/transcript')),
+      get_conversation_history: () => serverCall(() => apiGet('/api/history')),
+      get_claude_session: () => serverCall(() => apiGet('/api/session')),
+      set_claude_session: () => serverCall(() => apiPost('/api/session', { sessionId: args.sessionId })),
+      disconnect_claude_session: () => serverCall(() => apiDelete('/api/session')),
+      get_pending_message: () => serverCall(() => apiGet('/api/pending')),
+      respond_to_talkie: () => serverCall(() => apiPost('/api/respond', { content: args.content })),
+      update_talkie_state: () => serverCall(() => apiPost('/api/state', args)),
+      analyze_image: () => serverCall(() => apiPost('/api/analyze-image', { dataUrl: args.dataUrl, fileName: args.fileName, apiKey: args.apiKey })),
+      open_url: () => serverCall(() => apiPost('/api/open-url', { url: args.url })),
+      create_talkie_job: () => serverCall(() => apiPost('/api/jobs', { conversationId: args.conversationId, prompt: args.prompt, source: 'mcp' })),
+      get_talkie_job: () => serverCall(() => apiGet(`/api/jobs/${args.jobId}`)),
+      list_talkie_jobs: () => serverCall(() => apiGet(`/api/jobs${args.status ? `?status=${args.status}` : ''}`)),
+    };
+    if (serverTools[name]) {
+      const result = await serverTools[name]();
+      trackTool(name, 'server', !result?.error);
+      return jsonResult(result);
     }
 
     // ════════════════════════════════════════
@@ -220,6 +242,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
 
     // Direct SQLite calls
+    trackTool(name, 'data', true);
     switch (name) {
       case 'list_conversations': {
         const convos = d.convos.listConversations(args.limit || 50, args.offset || 0);
@@ -317,6 +340,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         throw new Error(`Unknown tool: ${name}`);
     }
   } catch (err) {
+    trackTool(name, 'data', false);
     return jsonResult({ error: err.message });
   }
 });

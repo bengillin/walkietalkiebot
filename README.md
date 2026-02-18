@@ -1,5 +1,7 @@
 # Talkie Bot
 
+[![npm version](https://img.shields.io/npm/v/talkiebot.svg)](https://www.npmjs.com/package/talkiebot) [![npm downloads](https://img.shields.io/npm/dm/talkiebot.svg)](https://www.npmjs.com/package/talkiebot)
+
 A walkie talkie for Claude. Your voice is the interface.
 
 > **Website**: [walkietalkie.bot](https://walkietalkie.bot) -- **Docs**: [walkietalkie.bot/docs](https://walkietalkie.bot/docs/)
