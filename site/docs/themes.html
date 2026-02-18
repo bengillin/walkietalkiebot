@@ -50,6 +50,7 @@
           <li class="docs-sidebar__item"><a href="#properties">CSS Custom Properties</a></li>
           <li class="docs-sidebar__item"><a href="#borders">Viewport Borders</a></li>
           <li class="docs-sidebar__item"><a href="#switching">How Theme Switching Works</a></li>
+          <li class="docs-sidebar__item"><a href="#tool-colors">Tool Category Colors</a></li>
           <li class="docs-sidebar__item"><a href="#components">Using Themes in Components</a></li>
         </ul>
       </aside>
@@ -426,6 +427,98 @@
 
         <h3>1984</h3>
         <p>A rainbow stripe across the top — red, orange, yellow, green, blue, and purple bands. The iconic Apple rainbow, rendered as a horizontal gradient strip.</p>
+
+        <!-- ── Tool Category Colors ── -->
+        <h2 id="tool-colors">Tool Category Colors</h2>
+        <p>The activity feed and chat timeline use 6 tool categories, each with a color accent that adapts per-theme. Categories are rendered as a subtle left-border and tinted background on tool badges.</p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>CSS Class</th>
+              <th>TalkBoy</th>
+              <th>Bubble</th>
+              <th>Dial-Up</th>
+              <th>Finder</th>
+              <th>Guestbook</th>
+              <th>1984</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>fs</strong></td>
+              <td><code>tool-cat--fs</code></td>
+              <td>Steel blue</td>
+              <td>iOS blue</td>
+              <td>Navy</td>
+              <td>Mac blue</td>
+              <td>Cyan</td>
+              <td>Apple blue</td>
+            </tr>
+            <tr>
+              <td><strong>exec</strong></td>
+              <td><code>tool-cat--exec</code></td>
+              <td>Orange</td>
+              <td>iOS orange</td>
+              <td>Red</td>
+              <td>Muted red</td>
+              <td>Magenta</td>
+              <td>Apple red</td>
+            </tr>
+            <tr>
+              <td><strong>voice</strong></td>
+              <td><code>tool-cat--voice</code></td>
+              <td>Purple</td>
+              <td>iOS purple</td>
+              <td>Purple</td>
+              <td>Deep purple</td>
+              <td>Lime</td>
+              <td>Violet</td>
+            </tr>
+            <tr>
+              <td><strong>data</strong></td>
+              <td><code>tool-cat--data</code></td>
+              <td>Green</td>
+              <td>iOS green</td>
+              <td>Teal</td>
+              <td>Forest green</td>
+              <td>Yellow</td>
+              <td>Apple green</td>
+            </tr>
+            <tr>
+              <td><strong>plan</strong></td>
+              <td><code>tool-cat--plan</code></td>
+              <td>Rose</td>
+              <td>iOS pink</td>
+              <td>Fuchsia</td>
+              <td>Maroon</td>
+              <td>Hot pink</td>
+              <td>Amber</td>
+            </tr>
+            <tr>
+              <td><strong>media</strong></td>
+              <td><code>tool-cat--media</code></td>
+              <td>Amber</td>
+              <td>iOS cyan</td>
+              <td>Olive</td>
+              <td>Brown</td>
+              <td>Red</td>
+              <td>Gold</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>Override category colors in theme-specific CSS using the <code>.tool-cat--*</code> class selectors:</p>
+
+        <pre><code>.theme-geocities .tool-badge.tool-cat--voice {
+  border-left-color: rgba(0, 255, 0, 0.6);
+  background: rgba(0, 255, 0, 0.08);
+}
+
+.theme-geocities .activity-feed__item.tool-cat--voice {
+  border-left-color: rgba(0, 255, 0, 0.5);
+}</code></pre>
 
         <!-- ── How Theme Switching Works ── -->
         <h2 id="switching">How Theme Switching Works</h2>

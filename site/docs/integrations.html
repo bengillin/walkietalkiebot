@@ -46,6 +46,7 @@
         <div class="docs-sidebar__title">On this page</div>
         <ul class="docs-sidebar__list">
           <li class="docs-sidebar__item"><a href="#claude-code">Claude Code Mode</a></li>
+          <li class="docs-sidebar__item"><a href="#tool-categories">Tool Categories</a></li>
           <li class="docs-sidebar__item"><a href="#direct-api">Direct API Mode</a></li>
           <li class="docs-sidebar__item"><a href="#mcp">MCP Server</a></li>
           <li class="docs-sidebar__item"><a href="#telegram">Telegram Bot</a></li>
@@ -85,11 +86,61 @@
         <p>As Claude works, Talkie displays a live activity feed showing each tool call in real-time. You can see when Claude reads a file, edits code, runs a bash command, searches the web, or uses any other tool. The activity feed shows:</p>
 
         <ul>
-          <li><strong>Tool name</strong> &mdash; Read, Edit, Write, Bash, Glob, Grep, WebSearch, and others</li>
+          <li><strong>Tool icon and label</strong> &mdash; Each of 40+ tools has a unique emoji icon and human-readable label (e.g. "Reading file", "Running command")</li>
+          <li><strong>Category color coding</strong> &mdash; Tools are grouped into 6 categories, each with a distinct accent color</li>
+          <li><strong>Clean display names</strong> &mdash; MCP tools like <code>mcp__talkie__list_conversations</code> display as "Conversations"</li>
           <li><strong>Input parameters</strong> &mdash; The arguments passed to each tool</li>
           <li><strong>Status</strong> &mdash; Whether the tool call is in progress, succeeded, or failed</li>
           <li><strong>Duration</strong> &mdash; How long each tool call took to complete</li>
         </ul>
+
+        <h3 id="tool-categories">Tool categories</h3>
+
+        <p>Every tool in the activity feed is color-coded by category. Each category has a subtle left-border accent and tinted background that adapts to the active theme:</p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Color</th>
+              <th>Tools</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Filesystem</strong></td>
+              <td>Blue</td>
+              <td>Read, Edit, Write, Glob, Grep</td>
+            </tr>
+            <tr>
+              <td><strong>Execution</strong></td>
+              <td>Orange</td>
+              <td>Bash, Task, WebFetch, WebSearch</td>
+            </tr>
+            <tr>
+              <td><strong>Voice</strong></td>
+              <td>Purple</td>
+              <td>launch_talkie, get_transcript, update_talkie_state, and other voice tools</td>
+            </tr>
+            <tr>
+              <td><strong>Data</strong></td>
+              <td>Green</td>
+              <td>list/get/create/rename/delete conversations, search, messages, liner notes, export</td>
+            </tr>
+            <tr>
+              <td><strong>Plans</strong></td>
+              <td>Pink</td>
+              <td>list/get/create/update/delete plans, background jobs</td>
+            </tr>
+            <tr>
+              <td><strong>Media</strong></td>
+              <td>Amber</td>
+              <td>analyze_image, open_url, session management</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>Category colors are defined per-theme, so they match each theme's design language (e.g. neon accents in Guestbook, muted tones in Finder).</p>
 
         <h3>Image attachments</h3>
 
