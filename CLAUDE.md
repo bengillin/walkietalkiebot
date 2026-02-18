@@ -57,11 +57,19 @@ server/                 Hono HTTPS server
   db/repositories/      CRUD: conversations, messages, activities, search, plans, jobs, telegram
   jobs/                 Async job execution
   telegram/             grammy bot (commands, handlers)
-mcp-server/index.js     MCP server with 30 tools (stdio transport)
+mcp-server/index.js     MCP server: 15 data tools (direct SQLite) + 15 server tools (HTTP proxy)
 bin/                    CLI entry points
   talkie.js            Start server + open browser
   talkie-server.js     Server lifecycle (start/stop/restart/status/logs/install)
-  talkie-mcp.js        MCP server entry point
+.claude-plugin/         Claude Code plugin manifest
+  plugin.json          Plugin name, version, description
+.mcp.json               MCP server config for plugin mode
+skills/                 Claude Code skills (5 skills)
+  save-conversation/   Save conversation as cassette tape
+  search-tapes/        Full-text search across conversations
+  manage-plans/        Plan lifecycle management
+  launch-voice/        Launch web UI
+  export-tape/         Export as markdown/JSON
 site/                   Marketing site (walkietalkie.bot)
   index.html            Landing page with dual-audience hero
   docs/                 6 documentation pages (getting-started, features, api, integrations, themes)
@@ -79,6 +87,9 @@ site/                   Marketing site (walkietalkie.bot)
 - **SSE streaming**: Claude Code events and job events use Server-Sent Events
 - **Theming**: React context applies `data-theme` attribute to root; each theme has a dedicated CSS file with custom properties for all UI elements
 - **Tool identity**: Centralized in `lib/toolConfig.ts` — maps 40+ tools to icons, labels, display names, and 6 categories (fs, exec, voice, data, plan, media) with per-theme colors
+- **Dual distribution**: npm package (`npx talkiebot`) for full server + web UI; Claude Code plugin for MCP tools + skills (data tools work offline via direct SQLite)
+- **MCP hybrid architecture**: Data tools (conversations, plans, search, notes, export) use SQLite directly; server tools (voice, IPC, session, jobs) proxy HTTP to the Talkie server
+- **Auto-generated JS**: `server/**/*.js` files are compiled from TypeScript by `npm run build:server` — do not edit them directly
 
 ## Themes
 

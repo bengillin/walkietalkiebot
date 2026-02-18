@@ -1,6 +1,6 @@
 {
   "name": "talkiebot",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A voice-first, cassette tape-themed interface for Claude Code with 6 retro themes, conversation management, Telegram bot, and MCP integration",
   "homepage": "https://walkietalkie.bot",
   "repository": {
@@ -16,9 +16,12 @@
   "files": [
     "bin/talkie.js",
     "bin/talkie-server.js",
-    "mcp-server/index.js",
+    "mcp-server/",
     "server/**/*.js",
-    "dist/"
+    "dist/",
+    ".claude-plugin/",
+    "skills/",
+    ".mcp.json"
   ],
   "scripts": {
     "dev": "vite",

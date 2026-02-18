@@ -45,6 +45,7 @@
       <aside class="docs-sidebar">
         <div class="docs-sidebar__title">On this page</div>
         <ul class="docs-sidebar__list">
+          <li class="docs-sidebar__item"><a href="#plugin">Plugin Installation</a></li>
           <li class="docs-sidebar__item"><a href="#claude-code">Claude Code Mode</a></li>
           <li class="docs-sidebar__item"><a href="#tool-categories">Tool Categories</a></li>
           <li class="docs-sidebar__item"><a href="#direct-api">Direct API Mode</a></li>
@@ -66,6 +67,24 @@
 
         <h1>Integrations</h1>
         <p class="docs-subtitle">Connect Talkie to Claude Code, the Anthropic API, MCP tools, Telegram, and manage your server.</p>
+
+        <!-- ── Plugin Installation ── -->
+        <h2 id="plugin">Plugin Installation</h2>
+
+        <p>Talkie is available as a Claude Code plugin, giving you 30 MCP tools and 5 skills without needing to run the full Talkie server. The 15 data tools work entirely offline by reading and writing directly to the SQLite database at <code>~/.talkie/talkie.db</code>. The other 15 server tools require the Talkie server to be running for voice, IPC, and UI interaction.</p>
+
+        <p>Add the following to your Claude Code MCP configuration (typically <code>~/.claude.json</code> or your project's <code>.mcp.json</code>):</p>
+
+        <pre><code>{
+  "mcpServers": {
+    "talkie": {
+      "command": "npx",
+      "args": ["talkie-mcp"]
+    }
+  }
+}</code></pre>
+
+        <p>Once configured, Claude Code will automatically have access to all Talkie tools and skills. Data tools like <code>list_conversations</code>, <code>search_conversations</code>, <code>create_plan</code>, and <code>export_conversation</code> work immediately with no server required. To use server tools like <code>launch_talkie</code>, <code>get_transcript</code>, or <code>respond_to_talkie</code>, start the Talkie server with <code>npx talkiebot</code>.</p>
 
         <!-- ── Claude Code Mode ── -->
         <h2 id="claude-code">Claude Code Mode</h2>
@@ -196,7 +215,103 @@
 
         <p>Once configured, Claude Code will have access to all 30 Talkie tools.</p>
 
-        <h3>Available tools</h3>
+        <h3>Data tools (work offline)</h3>
+
+        <p>These 15 tools read and write directly to the SQLite database at <code>~/.talkie/talkie.db</code>. They do not require the Talkie server to be running, making them available in any Claude Code session as soon as the MCP server is configured.</p>
+
+        <div class="tool-card">
+          <div class="tool-card__name">list_conversations</div>
+          <div class="tool-card__desc">List all saved conversations with pagination.</div>
+          <div class="tool-card__params">Params: <code>limit</code> (number), <code>offset</code> (number)</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card__name">get_conversation</div>
+          <div class="tool-card__desc">Get full conversation by ID with messages, images, and tool activities.</div>
+          <div class="tool-card__params">Params: <code>conversationId</code> (string, required)</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card__name">create_conversation</div>
+          <div class="tool-card__desc">Create a new conversation (cassette tape).</div>
+          <div class="tool-card__params">Params: <code>title</code> (string), <code>id</code> (string)</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card__name">rename_conversation</div>
+          <div class="tool-card__desc">Rename an existing conversation.</div>
+          <div class="tool-card__params">Params: <code>conversationId</code> (string, required), <code>title</code> (string, required)</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card__name">delete_conversation</div>
+          <div class="tool-card__desc">Delete a conversation and all its messages permanently.</div>
+          <div class="tool-card__params">Params: <code>conversationId</code> (string, required)</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card__name">search_conversations</div>
+          <div class="tool-card__desc">Full-text search across all conversations using FTS5. Returns ranked results with highlighted snippets.</div>
+          <div class="tool-card__params">Params: <code>query</code> (string, required), <code>limit</code> (number)</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card__name">add_message</div>
+          <div class="tool-card__desc">Add a message to an existing conversation programmatically.</div>
+          <div class="tool-card__params">Params: <code>conversationId</code> (string, required), <code>role</code> (string: user/assistant, required), <code>content</code> (string, required), <code>source</code> (string)</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card__name">list_plans</div>
+          <div class="tool-card__desc">List all plans with status workflow tracking.</div>
+          <div class="tool-card__params">Params: <code>limit</code> (number), <code>offset</code> (number)</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card__name">get_plan</div>
+          <div class="tool-card__desc">Get a plan by ID with full content and status.</div>
+          <div class="tool-card__params">Params: <code>planId</code> (string, required)</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card__name">create_plan</div>
+          <div class="tool-card__desc">Create a new plan linked to a conversation.</div>
+          <div class="tool-card__params">Params: <code>title</code> (string, required), <code>content</code> (string, required), <code>status</code> (string: draft/approved/in_progress/completed/archived), <code>conversationId</code> (string)</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card__name">update_plan</div>
+          <div class="tool-card__desc">Update a plan's title, content, or advance its status.</div>
+          <div class="tool-card__params">Params: <code>planId</code> (string, required), <code>title</code> (string), <code>content</code> (string), <code>status</code> (string)</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card__name">delete_plan</div>
+          <div class="tool-card__desc">Delete a plan permanently.</div>
+          <div class="tool-card__params">Params: <code>planId</code> (string, required)</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card__name">get_liner_notes</div>
+          <div class="tool-card__desc">Get the markdown liner notes for a conversation.</div>
+          <div class="tool-card__params">Params: <code>conversationId</code> (string, required)</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card__name">set_liner_notes</div>
+          <div class="tool-card__desc">Set or clear liner notes for a conversation.</div>
+          <div class="tool-card__params">Params: <code>conversationId</code> (string, required), <code>linerNotes</code> (string)</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card__name">export_conversation</div>
+          <div class="tool-card__desc">Export a conversation as formatted markdown or JSON.</div>
+          <div class="tool-card__params">Params: <code>conversationId</code> (string, required), <code>format</code> (string: markdown/json)</div>
+        </div>
+
+        <h3>Server tools (require Talkie server)</h3>
+
+        <p>These 15 tools communicate with the Talkie server over HTTP for voice interaction, UI state management, IPC messaging, and background jobs. The Talkie server must be running (<code>npx talkiebot</code>) for these tools to work.</p>
 
         <div class="tool-card">
           <div class="tool-card__name">launch_talkie</div>
@@ -286,108 +401,6 @@
           <div class="tool-card__name">list_talkie_jobs</div>
           <div class="tool-card__desc">List all background jobs, optionally filtered by status.</div>
           <div class="tool-card__params">Params: <code>status</code> (enum: queued, running, completed, failed, cancelled)</div>
-        </div>
-
-        <!-- Conversations -->
-
-        <div class="tool-card">
-          <div class="tool-card__name">list_conversations</div>
-          <div class="tool-card__desc">List all saved conversations with pagination.</div>
-          <div class="tool-card__params">Params: <code>limit</code> (number), <code>offset</code> (number)</div>
-        </div>
-
-        <div class="tool-card">
-          <div class="tool-card__name">get_conversation</div>
-          <div class="tool-card__desc">Get full conversation by ID with messages, images, and tool activities.</div>
-          <div class="tool-card__params">Params: <code>conversationId</code> (string, required)</div>
-        </div>
-
-        <div class="tool-card">
-          <div class="tool-card__name">create_conversation</div>
-          <div class="tool-card__desc">Create a new conversation (cassette tape).</div>
-          <div class="tool-card__params">Params: <code>title</code> (string), <code>id</code> (string)</div>
-        </div>
-
-        <div class="tool-card">
-          <div class="tool-card__name">rename_conversation</div>
-          <div class="tool-card__desc">Rename an existing conversation.</div>
-          <div class="tool-card__params">Params: <code>conversationId</code> (string, required), <code>title</code> (string, required)</div>
-        </div>
-
-        <div class="tool-card">
-          <div class="tool-card__name">delete_conversation</div>
-          <div class="tool-card__desc">Delete a conversation and all its messages permanently.</div>
-          <div class="tool-card__params">Params: <code>conversationId</code> (string, required)</div>
-        </div>
-
-        <!-- Search -->
-
-        <div class="tool-card">
-          <div class="tool-card__name">search_conversations</div>
-          <div class="tool-card__desc">Full-text search across all conversations using FTS5. Returns ranked results with highlighted snippets.</div>
-          <div class="tool-card__params">Params: <code>query</code> (string, required), <code>limit</code> (number)</div>
-        </div>
-
-        <!-- Messages -->
-
-        <div class="tool-card">
-          <div class="tool-card__name">add_message</div>
-          <div class="tool-card__desc">Add a message to an existing conversation programmatically.</div>
-          <div class="tool-card__params">Params: <code>conversationId</code> (string, required), <code>role</code> (string: user/assistant, required), <code>content</code> (string, required), <code>source</code> (string)</div>
-        </div>
-
-        <!-- Plans -->
-
-        <div class="tool-card">
-          <div class="tool-card__name">list_plans</div>
-          <div class="tool-card__desc">List all plans with status workflow tracking.</div>
-          <div class="tool-card__params">Params: <code>limit</code> (number), <code>offset</code> (number)</div>
-        </div>
-
-        <div class="tool-card">
-          <div class="tool-card__name">get_plan</div>
-          <div class="tool-card__desc">Get a plan by ID with full content and status.</div>
-          <div class="tool-card__params">Params: <code>planId</code> (string, required)</div>
-        </div>
-
-        <div class="tool-card">
-          <div class="tool-card__name">create_plan</div>
-          <div class="tool-card__desc">Create a new plan linked to a conversation.</div>
-          <div class="tool-card__params">Params: <code>title</code> (string, required), <code>content</code> (string, required), <code>status</code> (string: draft/approved/in_progress/completed/archived), <code>conversationId</code> (string)</div>
-        </div>
-
-        <div class="tool-card">
-          <div class="tool-card__name">update_plan</div>
-          <div class="tool-card__desc">Update a plan's title, content, or advance its status.</div>
-          <div class="tool-card__params">Params: <code>planId</code> (string, required), <code>title</code> (string), <code>content</code> (string), <code>status</code> (string)</div>
-        </div>
-
-        <div class="tool-card">
-          <div class="tool-card__name">delete_plan</div>
-          <div class="tool-card__desc">Delete a plan permanently.</div>
-          <div class="tool-card__params">Params: <code>planId</code> (string, required)</div>
-        </div>
-
-        <!-- Liner Notes -->
-
-        <div class="tool-card">
-          <div class="tool-card__name">get_liner_notes</div>
-          <div class="tool-card__desc">Get the markdown liner notes for a conversation.</div>
-          <div class="tool-card__params">Params: <code>conversationId</code> (string, required)</div>
-        </div>
-
-        <div class="tool-card">
-          <div class="tool-card__name">set_liner_notes</div>
-          <div class="tool-card__desc">Set or clear liner notes for a conversation.</div>
-          <div class="tool-card__params">Params: <code>conversationId</code> (string, required), <code>linerNotes</code> (string)</div>
-        </div>
-
-        <!-- Export -->
-
-        <div class="tool-card">
-          <div class="tool-card__name">export_conversation</div>
-          <div class="tool-card__desc">Export a conversation as formatted markdown or JSON.</div>
-          <div class="tool-card__params">Params: <code>conversationId</code> (string, required), <code>format</code> (string: markdown/json)</div>
         </div>
 
         <h3>IPC workflow</h3>

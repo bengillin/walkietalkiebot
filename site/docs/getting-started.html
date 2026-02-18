@@ -70,6 +70,20 @@
         <!-- ── Installation ── -->
         <h2 id="installation">Installation</h2>
 
+        <div class="docs-tip">
+          <strong>Plugin alternative</strong>
+          If you just want MCP tools and skills without running a server, you can install Talkie as a Claude Code plugin. Add this to your MCP configuration:
+          <pre><code>{
+  "mcpServers": {
+    "talkie": {
+      "command": "npx",
+      "args": ["talkie-mcp"]
+    }
+  }
+}</code></pre>
+          This gives you 15 data tools that work offline via direct SQLite access (conversations, plans, search, export) plus 15 server tools for when the Talkie server is running. See <a href="/docs/integrations#plugin">Plugin Installation</a> for details.
+        </div>
+
         <p>Talkie is distributed as an npm package. A single command downloads the package, starts an HTTPS server, generates self-signed certificates, and opens your browser:</p>
 
         <pre><code>npx talkiebot</code></pre>

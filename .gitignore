@@ -5,3 +5,4 @@ dist/
 .env
 .env.local
 mcp-server/node_modules/
+server/db/talkboy.db

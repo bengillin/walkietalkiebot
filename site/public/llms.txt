@@ -8,8 +8,23 @@
   Repository: https://github.com/bengillin/walkietalkiebot
   npm: https://www.npmjs.com/package/talkiebot
   Website: https://walkietalkie.bot
-  Version: 0.2.0
+  Version: 0.3.0
   License: MIT
+
+## Plugin Installation
+
+  Add to your Claude Code MCP settings (~/.claude/settings.json):
+  {
+    "mcpServers": {
+      "talkie": {
+        "command": "npx",
+        "args": ["talkie-mcp"]
+      }
+    }
+  }
+
+  The plugin provides 30 MCP tools (15 work offline via direct SQLite, 15 require the Talkie server)
+  and 5 skills for common workflows.
 
 ## Documentation
 
@@ -47,17 +62,36 @@
 
 ## MCP Server (30 Tools)
 
-  Setup: Add to Claude Code settings:
-  {
-    "mcpServers": {
-      "talkie": {
-        "command": "npx",
-        "args": ["talkie-mcp"]
-      }
-    }
-  }
+  Data Tools (15, work offline via direct SQLite):
 
-  Tools:
+  Conversations:
+  - list_conversations: List all saved conversations with pagination
+  - get_conversation: Get full conversation with messages, images, and activities
+  - create_conversation: Create a new conversation (cassette tape)
+  - rename_conversation: Rename an existing conversation
+  - delete_conversation: Delete a conversation permanently
+
+  Search:
+  - search_conversations: Full-text search across all conversations (FTS5)
+
+  Messages:
+  - add_message: Add a message to an existing conversation
+
+  Plans:
+  - list_plans: List all plans with status workflow
+  - get_plan: Get a plan by ID with full content
+  - create_plan: Create a new plan (draft/approved/in_progress/completed/archived)
+  - update_plan: Update plan title, content, or status
+  - delete_plan: Delete a plan permanently
+
+  Liner Notes:
+  - get_liner_notes: Get per-conversation markdown notes
+  - set_liner_notes: Set or clear liner notes for a conversation
+
+  Export:
+  - export_conversation: Export conversation as markdown or JSON
+
+  Server Tools (15, require Talkie server):
 
   Core:
   - launch_talkie: Start server and open browser
@@ -86,32 +120,13 @@
   - get_talkie_job: Get job status and result
   - list_talkie_jobs: List jobs, optionally filtered by status
 
-  Conversations:
-  - list_conversations: List all saved conversations with pagination
-  - get_conversation: Get full conversation with messages, images, and activities
-  - create_conversation: Create a new conversation (cassette tape)
-  - rename_conversation: Rename an existing conversation
-  - delete_conversation: Delete a conversation permanently
+## Skills (5)
 
-  Search:
-  - search_conversations: Full-text search across all conversations (FTS5)
-
-  Messages:
-  - add_message: Add a message to an existing conversation
-
-  Plans:
-  - list_plans: List all plans with status workflow
-  - get_plan: Get a plan by ID with full content
-  - create_plan: Create a new plan (draft/approved/in_progress/completed/archived)
-  - update_plan: Update plan title, content, or status
-  - delete_plan: Delete a plan permanently
-
-  Liner Notes:
-  - get_liner_notes: Get per-conversation markdown notes
-  - set_liner_notes: Set or clear liner notes for a conversation
-
-  Export:
-  - export_conversation: Export conversation as markdown or JSON
+  - save-conversation: Save the current Claude Code conversation as a cassette tape
+  - search-tapes: Search across all saved conversations using full-text search
+  - manage-plans: Create, update, and track plans with status workflow
+  - launch-voice: Launch the Talkie voice interface in a browser
+  - export-tape: Export a conversation as markdown or JSON
 
 ## REST API
 
@@ -145,4 +160,4 @@
   Location: ~/.talkie/talkie.db (SQLite WAL mode)
 
 ---
-Last updated: 2026-02-17
+Last updated: 2026-02-18
