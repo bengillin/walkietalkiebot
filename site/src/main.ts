@@ -35,7 +35,7 @@ function setTheme(name: ThemeName) {
 
 function initTheme() {
   const saved = localStorage.getItem('talkie_theme') as ThemeName | null
-  setTheme(saved && themes.some(t => t.name === saved) ? saved : 'mccallister')
+  setTheme(saved && themes.some(t => t.name === saved) ? saved : 'apple-1984')
 }
 
 // ── Robot animation cycling ──

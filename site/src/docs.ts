@@ -15,7 +15,7 @@ function setTheme(name: ThemeName) {
 
 function initTheme() {
   const saved = localStorage.getItem('talkie_theme') as ThemeName | null
-  setTheme(saved && themes.includes(saved) ? saved : 'mccallister')
+  setTheme(saved && themes.includes(saved) ? saved : 'apple-1984')
 }
 
 // ── Mobile nav toggle ──

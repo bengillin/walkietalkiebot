@@ -57,7 +57,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('talkie_theme', 'mccallister')
       return 'mccallister'
     }
-    return (saved as ThemeName) || 'mccallister'
+    return (saved as ThemeName) || 'apple-1984'
   })
 
   const setTheme = (newTheme: ThemeName) => {

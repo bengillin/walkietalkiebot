@@ -28,7 +28,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     soundEffects: true,
     wakeWord: false,
     continuousListening: false,
-    theme: 'mccallister'
+    theme: 'apple-1984'
   })
   const [robotState, setRobotState] = useState<AvatarState>('idle')
 
