@@ -18,8 +18,8 @@ const TALKIE_PORT = parseInt(process.env.TALKIE_PORT || '5173', 10);
 const TALKIE_URL = `https://localhost:${TALKIE_PORT}`;
 
 // ─── Anonymous telemetry (opt out: TALKIE_TELEMETRY=0) ───
-const POSTHOG_KEY = 'POSTHOG_API_KEY';
-const TELEMETRY = process.env.TALKIE_TELEMETRY !== '0' && POSTHOG_KEY !== 'POSTHOG_API_KEY';
+const POSTHOG_KEY = 'phc_j7rWavXkXFqSjJIvxhnnAMX3I5UmkcCsnU8J0sKAzog';
+const TELEMETRY = process.env.TALKIE_TELEMETRY !== '0';
 function trackTool(toolName, category, ok) {
   if (!TELEMETRY) return;
   fetch('https://us.i.posthog.com/capture/', {
