@@ -14,6 +14,8 @@ This starts the HTTPS server and opens https://localhost:5173 in your browser.
 
 > Requires Chrome or Edge (Web Speech API).
 
+> **Website**: [walkietalkie.bot](https://walkietalkie.bot) — **Docs**: [walkietalkie.bot/docs](https://walkietalkie.bot/docs/)
+
 ### Setup
 
 1. Complete the onboarding wizard (theme selection, voice preferences)
@@ -85,10 +87,13 @@ Two modes:
 ### Activity Feed
 
 When Claude Code runs tools, the UI shows:
-- Tool name with emoji icon (Read, Edit, Write, Bash, Glob, Grep, etc.)
+- Tool name with emoji icon and human-readable label
+- 6 color-coded categories: filesystem (blue), execution (orange), voice (purple), data (green), plans (pink), media (amber)
+- MCP tool names cleaned for display (e.g., `mcp__talkie__list_conversations` → "Conversations")
 - Input details and live status (spinner, checkmark, error)
 - Duration tracking
 - Collapsible per-message activity history persisted to SQLite
+- Per-theme category colors matching each theme's design language
 
 ### Plans
 
@@ -224,7 +229,9 @@ Add to `~/.claude/settings.json`:
 }
 ```
 
-### Tools
+### Tools (30)
+
+**Core & Voice**
 
 | Tool | Description |
 |------|-------------|
@@ -232,17 +239,57 @@ Add to `~/.claude/settings.json`:
 | `get_talkie_status` | Check running status and avatar state |
 | `get_transcript` | Get latest voice transcript |
 | `get_conversation_history` | Get current conversation messages |
-| `get_claude_session` | Get connected session ID |
-| `set_claude_session` | Connect to a Claude Code session |
-| `disconnect_claude_session` | Disconnect session |
 | `get_pending_message` | Poll for user messages (IPC mode) |
 | `respond_to_talkie` | Send response to user (IPC mode) |
 | `update_talkie_state` | Set avatar state, transcript |
+
+**Session**
+
+| Tool | Description |
+|------|-------------|
+| `get_claude_session` | Get connected session ID |
+| `set_claude_session` | Connect to a Claude Code session |
+| `disconnect_claude_session` | Disconnect session |
+
+**Conversations**
+
+| Tool | Description |
+|------|-------------|
+| `list_conversations` | List all saved conversations with pagination |
+| `get_conversation` | Get full conversation with messages and activities |
+| `create_conversation` | Create a new conversation (cassette tape) |
+| `rename_conversation` | Rename an existing conversation |
+| `delete_conversation` | Delete a conversation permanently |
+| `search_conversations` | Full-text search across all conversations |
+| `add_message` | Add a message to a conversation |
+
+**Plans**
+
+| Tool | Description |
+|------|-------------|
+| `list_plans` | List all plans |
+| `get_plan` | Get plan by ID with full content |
+| `create_plan` | Create a new plan |
+| `update_plan` | Update plan title, content, or status |
+| `delete_plan` | Delete a plan |
+
+**Liner Notes & Export**
+
+| Tool | Description |
+|------|-------------|
+| `get_liner_notes` | Get per-conversation markdown notes |
+| `set_liner_notes` | Set or clear liner notes |
+| `export_conversation` | Export as markdown or JSON |
+
+**Media & Jobs**
+
+| Tool | Description |
+|------|-------------|
 | `analyze_image` | Analyze image via Claude vision |
 | `open_url` | Open URL in default browser |
 | `create_talkie_job` | Create background async job |
 | `get_talkie_job` | Get job status and result |
-| `list_talkie_jobs` | List jobs, optionally filtered by status |
+| `list_talkie_jobs` | List jobs by status |
 
 ## Persistence
 
@@ -307,7 +354,8 @@ src/
 │   ├── export.ts              Markdown and JSON export
 │   ├── jobStore.ts            Background job state
 │   ├── planDetection.ts       Auto-detect plans in responses
-│   └── store.ts               Zustand state
+│   ├── store.ts               Zustand state
+│   └── toolConfig.ts          Tool identity system (icons, categories, labels)
 ├── styles/
 │   ├── globals.css            Base styles + viewport borders
 │   └── themes/                Per-theme CSS (6 files)
@@ -326,6 +374,10 @@ server/
 └── telegram/                  Bot commands and handlers
 
 mcp-server/index.js            MCP server (30 tools, stdio)
+site/                          Marketing site (walkietalkie.bot)
+├── index.html                 Landing page
+├── docs/                      Documentation (6 pages)
+└── src/                       CSS, TypeScript, themes
 bin/
 ├── talkie.js                  Start server + open browser
 ├── talkie-server.js           Server lifecycle CLI
@@ -358,7 +410,7 @@ bin/
 | `/api/search` | GET | Full-text search across messages |
 | `/api/migrate` | POST | Migrate localStorage to server |
 
-See [docs/API.md](docs/API.md) for detailed request/response formats.
+See the [API Reference](https://walkietalkie.bot/docs/api.html) for detailed request/response formats.
 
 ## Settings
 

@@ -2,6 +2,11 @@
   "name": "talkiebot",
   "version": "0.2.0",
   "description": "A voice-first, cassette tape-themed interface for Claude Code with 6 retro themes, conversation management, Telegram bot, and MCP integration",
+  "homepage": "https://walkietalkie.bot",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bengillin/walkietalkiebot"
+  },
   "type": "module",
   "bin": {
     "talkie": "bin/talkie.js",

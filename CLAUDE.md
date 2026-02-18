@@ -30,6 +30,7 @@ src/                    Frontend React app
   lib/export.ts         Markdown and JSON export
   lib/jobStore.ts       Background job state (Zustand)
   lib/planDetection.ts  Auto-detect plans in Claude responses
+  lib/toolConfig.ts     Tool identity system (icons, labels, categories for 40+ tools)
   contexts/ThemeContext.tsx  Theme provider (6 themes via data-theme attribute)
   styles/themes/        Per-theme CSS files (mccallister, imessage, aol, classic-mac, geocities, apple-1984)
   components/voice/     Speech recognition, TTS, wake word
@@ -61,6 +62,11 @@ bin/                    CLI entry points
   talkie.js            Start server + open browser
   talkie-server.js     Server lifecycle (start/stop/restart/status/logs/install)
   talkie-mcp.js        MCP server entry point
+site/                   Marketing site (walkietalkie.bot)
+  index.html            Landing page with dual-audience hero
+  docs/                 6 documentation pages (getting-started, features, api, integrations, themes)
+  src/                  Shared CSS, TypeScript, theme system
+  public/               llms.txt, robots.txt, sitemap.xml, og.png
 ```
 
 ## Key Patterns
@@ -72,6 +78,7 @@ bin/                    CLI entry points
 - **One-shot processes**: Each `/api/claude-code` call spawns a fresh `claude -p` with `--no-session-persistence --permission-mode bypassPermissions`
 - **SSE streaming**: Claude Code events and job events use Server-Sent Events
 - **Theming**: React context applies `data-theme` attribute to root; each theme has a dedicated CSS file with custom properties for all UI elements
+- **Tool identity**: Centralized in `lib/toolConfig.ts` — maps 40+ tools to icons, labels, display names, and 6 categories (fs, exec, voice, data, plan, media) with per-theme colors
 
 ## Themes
 
