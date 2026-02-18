@@ -1,4 +1,4 @@
-# Talkie App — Walkie Talkie AI Assistant
+# Talkie Bot — Walkie Talkie AI Assistant
 
 > A voice-first, cassette tape-themed interface for Claude Code with 6 retro themes, conversation management, Telegram bot, and MCP integration.
 
