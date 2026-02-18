@@ -2280,6 +2280,21 @@
   color: #cc0000;
 }
 
+/* Tool Category Colors */
+[data-theme="classic-mac"] .tool-badge.tool-cat--fs    { border-left: 2px solid #3366CC; }
+[data-theme="classic-mac"] .tool-badge.tool-cat--exec  { border-left: 2px solid #993333; }
+[data-theme="classic-mac"] .tool-badge.tool-cat--voice { border-left: 2px solid #663399; }
+[data-theme="classic-mac"] .tool-badge.tool-cat--data  { border-left: 2px solid #006633; }
+[data-theme="classic-mac"] .tool-badge.tool-cat--plan  { border-left: 2px solid #800000; }
+[data-theme="classic-mac"] .tool-badge.tool-cat--media { border-left: 2px solid #996633; }
+
+[data-theme="classic-mac"] .activity-feed__item.tool-cat--fs    { border-left: 2px solid #3366CC; }
+[data-theme="classic-mac"] .activity-feed__item.tool-cat--exec  { border-left: 2px solid #993333; }
+[data-theme="classic-mac"] .activity-feed__item.tool-cat--voice { border-left: 2px solid #663399; }
+[data-theme="classic-mac"] .activity-feed__item.tool-cat--data  { border-left: 2px solid #006633; }
+[data-theme="classic-mac"] .activity-feed__item.tool-cat--plan  { border-left: 2px solid #800000; }
+[data-theme="classic-mac"] .activity-feed__item.tool-cat--media { border-left: 2px solid #996633; }
+
 /* ============================================
    Job Status Bar
    ============================================ */

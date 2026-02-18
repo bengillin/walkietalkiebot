@@ -2072,6 +2072,21 @@
   color: #ff3b30;
 }
 
+/* Tool Category Colors */
+[data-theme="imessage"] .tool-badge.tool-cat--fs    { border-left: 2px solid rgba(0, 122, 255, 0.3); }
+[data-theme="imessage"] .tool-badge.tool-cat--exec  { border-left: 2px solid rgba(255, 149, 0, 0.3); }
+[data-theme="imessage"] .tool-badge.tool-cat--voice { border-left: 2px solid rgba(175, 82, 222, 0.3); }
+[data-theme="imessage"] .tool-badge.tool-cat--data  { border-left: 2px solid rgba(52, 199, 89, 0.3); }
+[data-theme="imessage"] .tool-badge.tool-cat--plan  { border-left: 2px solid rgba(255, 45, 85, 0.3); }
+[data-theme="imessage"] .tool-badge.tool-cat--media { border-left: 2px solid rgba(90, 200, 250, 0.3); }
+
+[data-theme="imessage"] .activity-feed__item.tool-cat--fs    { border-left: 2px solid rgba(0, 122, 255, 0.3); }
+[data-theme="imessage"] .activity-feed__item.tool-cat--exec  { border-left: 2px solid rgba(255, 149, 0, 0.3); }
+[data-theme="imessage"] .activity-feed__item.tool-cat--voice { border-left: 2px solid rgba(175, 82, 222, 0.3); }
+[data-theme="imessage"] .activity-feed__item.tool-cat--data  { border-left: 2px solid rgba(52, 199, 89, 0.3); }
+[data-theme="imessage"] .activity-feed__item.tool-cat--plan  { border-left: 2px solid rgba(255, 45, 85, 0.3); }
+[data-theme="imessage"] .activity-feed__item.tool-cat--media { border-left: 2px solid rgba(90, 200, 250, 0.3); }
+
 /* ============================================
    Job Status Bar
    ============================================ */

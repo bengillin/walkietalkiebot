@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, memo } from 'react'
 import { Message, Activity, AvatarState, StoredActivity } from '../../types'
 import { openUrl } from '../../lib/claude'
+import { getToolIcon, getToolCategoryClass, getToolDisplayName } from '../../lib/toolConfig'
 import { MessageContent } from './MessageContent'
 import './ChatTimeline.css'
 
@@ -57,21 +58,9 @@ function TypingIndicator() {
   )
 }
 
-// Tool icons mapping
-const TOOL_ICONS: Record<string, string> = {
-  Read: '📖',
-  Edit: '✏️',
-  Write: '📝',
-  Bash: '⚡',
-  Glob: '🔍',
-  Grep: '🔎',
-  Task: '📋',
-  default: '🔧',
-}
-
 // Tool activity badge component
 function ToolBadge({ activity }: { activity: DisplayActivity }) {
-  const icon = TOOL_ICONS[activity.tool] || TOOL_ICONS.default
+  const icon = getToolIcon(activity.tool)
   const isRunning = activity.status === 'running'
   const isError = activity.status === 'error'
 
@@ -83,9 +72,9 @@ function ToolBadge({ activity }: { activity: DisplayActivity }) {
     : ''
 
   return (
-    <div className={`tool-badge ${isRunning ? 'running' : ''} ${isError ? 'error' : ''}`}>
+    <div className={`tool-badge ${getToolCategoryClass(activity.tool)} ${isRunning ? 'running' : ''} ${isError ? 'error' : ''}`}>
       <span className="tool-icon">{icon}</span>
-      <span className="tool-name">{activity.tool}</span>
+      <span className="tool-name">{getToolDisplayName(activity.tool)}</span>
       {shortInput && <span className="tool-input">{shortInput}</span>}
       {isRunning && <span className="tool-spinner"></span>}
       {isError && <span className="tool-error">✗</span>}
@@ -133,7 +122,7 @@ function CollapsibleTools({
             <span className="collapsible-tools__icons">
               {toolNames.slice(0, 4).map(name => (
                 <span key={name} className="collapsible-tools__icon">
-                  {TOOL_ICONS[name] || TOOL_ICONS.default}
+                  {getToolIcon(name)}
                 </span>
               ))}
               {toolNames.length > 4 && <span className="collapsible-tools__more">+{toolNames.length - 4}</span>}
@@ -157,7 +146,7 @@ function CollapsibleTools({
           <span className="collapsible-tools__icons">
             {toolNames.slice(0, 4).map(name => (
               <span key={name} className="collapsible-tools__icon">
-                {TOOL_ICONS[name] || TOOL_ICONS.default}
+                {getToolIcon(name)}
               </span>
             ))}
             {toolNames.length > 4 && <span className="collapsible-tools__more">+{toolNames.length - 4}</span>}

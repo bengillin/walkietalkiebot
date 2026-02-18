@@ -2240,6 +2240,21 @@
   color: #ff0000;
 }
 
+/* Tool Category Colors */
+[data-theme="aol"] .tool-badge.tool-cat--fs    { border-left: 2px solid #000080; }
+[data-theme="aol"] .tool-badge.tool-cat--exec  { border-left: 2px solid #FF0000; }
+[data-theme="aol"] .tool-badge.tool-cat--voice { border-left: 2px solid #800080; }
+[data-theme="aol"] .tool-badge.tool-cat--data  { border-left: 2px solid #008080; }
+[data-theme="aol"] .tool-badge.tool-cat--plan  { border-left: 2px solid #FF00FF; }
+[data-theme="aol"] .tool-badge.tool-cat--media { border-left: 2px solid #808000; }
+
+[data-theme="aol"] .activity-feed__item.tool-cat--fs    { border-left: 2px solid #000080; }
+[data-theme="aol"] .activity-feed__item.tool-cat--exec  { border-left: 2px solid #FF0000; }
+[data-theme="aol"] .activity-feed__item.tool-cat--voice { border-left: 2px solid #800080; }
+[data-theme="aol"] .activity-feed__item.tool-cat--data  { border-left: 2px solid #008080; }
+[data-theme="aol"] .activity-feed__item.tool-cat--plan  { border-left: 2px solid #FF00FF; }
+[data-theme="aol"] .activity-feed__item.tool-cat--media { border-left: 2px solid #808000; }
+
 /* ============================================
    Job Status Bar
    ============================================ */

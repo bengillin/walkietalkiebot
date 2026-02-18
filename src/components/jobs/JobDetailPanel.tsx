@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useJobStore } from '../../lib/jobStore'
 import * as api from '../../lib/api'
+import { getToolIcon, getToolCategoryClass } from '../../lib/toolConfig'
 import './JobDetailPanel.css'
 
 interface JobDetailPanelProps {
@@ -110,7 +111,7 @@ function EventItem({ event }: { event: JobEvent }) {
       const activity = JSON.parse(event.data || '{}')
       const icon = getToolIcon(activity.tool)
       return (
-        <div className="job-detail-panel__event job-detail-panel__event--activity">
+        <div className={`job-detail-panel__event job-detail-panel__event--activity ${getToolCategoryClass(activity.tool || activity.type || '')}`}>
           <span className="job-detail-panel__event-icon">{icon}</span>
           <span className="job-detail-panel__event-tool">{activity.tool || activity.type}</span>
           {activity.input && (
@@ -152,14 +153,4 @@ function EventItem({ event }: { event: JobEvent }) {
   return null
 }
 
-function getToolIcon(tool: string): string {
-  switch (tool?.toLowerCase()) {
-    case 'read': return '\uD83D\uDCD6'
-    case 'edit': return '\u270F\uFE0F'
-    case 'write': return '\uD83D\uDCDD'
-    case 'bash': return '\u26A1'
-    case 'glob': return '\uD83D\uDD0D'
-    case 'grep': return '\uD83D\uDD0E'
-    default: return '\uD83D\uDD27'
-  }
-}
+// getToolIcon imported from lib/toolConfig

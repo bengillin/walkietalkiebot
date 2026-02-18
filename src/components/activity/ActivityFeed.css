@@ -102,6 +102,14 @@
   background: rgba(239, 68, 68, 0.1);
 }
 
+/* Tool category color accents */
+.activity-feed__item.tool-cat--fs    { border-left: 2px solid rgba(59, 130, 246, 0.5); }
+.activity-feed__item.tool-cat--exec  { border-left: 2px solid rgba(245, 158, 11, 0.5); }
+.activity-feed__item.tool-cat--voice { border-left: 2px solid rgba(139, 92, 246, 0.5); }
+.activity-feed__item.tool-cat--data  { border-left: 2px solid rgba(16, 185, 129, 0.5); }
+.activity-feed__item.tool-cat--plan  { border-left: 2px solid rgba(236, 72, 153, 0.5); }
+.activity-feed__item.tool-cat--media { border-left: 2px solid rgba(244, 63, 94, 0.5); }
+
 .activity-feed__icon {
   font-size: 16px;
   flex-shrink: 0;

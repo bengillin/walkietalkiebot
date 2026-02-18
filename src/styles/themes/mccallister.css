@@ -450,6 +450,69 @@
   opacity: 0.7;
 }
 
+/* Activity Feed */
+[data-theme="mccallister"] .activity-feed {
+  background: linear-gradient(180deg, #d8d8d8 0%, #c0c0c0 100%);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 2px solid #909090;
+  border-radius: 6px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 2px 4px rgba(0,0,0,0.3);
+}
+
+[data-theme="mccallister"] .activity-feed__header {
+  border-bottom: 1px solid #909090;
+}
+
+[data-theme="mccallister"] .activity-feed__title {
+  color: #1a1a1a;
+  font-family: 'Courier New', 'Courier', monospace;
+  font-weight: 700;
+}
+
+[data-theme="mccallister"] .activity-feed__toggle {
+  color: #cc0000;
+}
+
+[data-theme="mccallister"] .activity-feed__toggle:hover {
+  background: rgba(204, 0, 0, 0.08);
+}
+
+[data-theme="mccallister"] .activity-feed__item--running {
+  background: rgba(255, 107, 43, 0.08);
+}
+
+[data-theme="mccallister"] .activity-feed__item--error {
+  background: rgba(204, 0, 0, 0.08);
+}
+
+[data-theme="mccallister"] .activity-feed__spinner {
+  border-color: #c0c0c0;
+  border-top-color: #ff6b2b;
+}
+
+[data-theme="mccallister"] .activity-feed__check {
+  color: #00802b;
+}
+
+[data-theme="mccallister"] .activity-feed__error {
+  color: #cc0000;
+}
+
+/* Tool Category Colors */
+[data-theme="mccallister"] .tool-badge.tool-cat--fs    { border-left-color: #6B8DAE; }
+[data-theme="mccallister"] .tool-badge.tool-cat--exec  { border-left-color: #FF6B2B; }
+[data-theme="mccallister"] .tool-badge.tool-cat--voice { border-left-color: #8B5AA6; }
+[data-theme="mccallister"] .tool-badge.tool-cat--data  { border-left-color: #4A9060; }
+[data-theme="mccallister"] .tool-badge.tool-cat--plan  { border-left-color: #C06080; }
+[data-theme="mccallister"] .tool-badge.tool-cat--media { border-left-color: #B08030; }
+
+[data-theme="mccallister"] .activity-feed__item.tool-cat--fs    { border-left-color: #6B8DAE; }
+[data-theme="mccallister"] .activity-feed__item.tool-cat--exec  { border-left-color: #FF6B2B; }
+[data-theme="mccallister"] .activity-feed__item.tool-cat--voice { border-left-color: #8B5AA6; }
+[data-theme="mccallister"] .activity-feed__item.tool-cat--data  { border-left-color: #4A9060; }
+[data-theme="mccallister"] .activity-feed__item.tool-cat--plan  { border-left-color: #C06080; }
+[data-theme="mccallister"] .activity-feed__item.tool-cat--media { border-left-color: #B08030; }
 
 /* McCallister message images - Chunky frame */
 [data-theme="mccallister"] .message-image-thumb {

@@ -1,48 +1,11 @@
 import { useState, useEffect } from 'react'
 import type { Activity } from '../../types'
+import { getToolIcon, getToolLabel, getToolCategoryClass } from '../../lib/toolConfig'
 import './ActivityFeed.css'
 
 interface ActivityFeedProps {
   activities: Activity[]
   isVisible: boolean
-}
-
-function getToolIcon(tool: string): string {
-  switch (tool?.toLowerCase()) {
-    case 'read':
-      return '📖'
-    case 'edit':
-      return '✏️'
-    case 'write':
-      return '📝'
-    case 'bash':
-      return '⚡'
-    case 'glob':
-      return '🔍'
-    case 'grep':
-      return '🔎'
-    default:
-      return '🔧'
-  }
-}
-
-function getToolLabel(tool: string): string {
-  switch (tool?.toLowerCase()) {
-    case 'read':
-      return 'Reading file'
-    case 'edit':
-      return 'Editing file'
-    case 'write':
-      return 'Writing file'
-    case 'bash':
-      return 'Running command'
-    case 'glob':
-      return 'Finding files'
-    case 'grep':
-      return 'Searching code'
-    default:
-      return tool || 'Working'
-  }
 }
 
 function formatInput(_tool: string, input?: string): string {
@@ -129,7 +92,7 @@ export function ActivityFeed({ activities, isVisible }: ActivityFeedProps) {
         {displayActivities.map((activity) => (
           <div
             key={activity.id}
-            className={`activity-feed__item activity-feed__item--${activity.status || 'running'}`}
+            className={`activity-feed__item activity-feed__item--${activity.status || 'running'} ${getToolCategoryClass(activity.tool || '')}`}
           >
             <span className="activity-feed__icon">
               {getToolIcon(activity.tool || '')}

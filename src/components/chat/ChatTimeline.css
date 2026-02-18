@@ -382,6 +382,14 @@
   background: rgba(255, 59, 48, 0.1);
 }
 
+/* Tool category color accents */
+.tool-badge.tool-cat--fs    { border-left: 2px solid rgba(59, 130, 246, 0.4); }
+.tool-badge.tool-cat--exec  { border-left: 2px solid rgba(245, 158, 11, 0.4); }
+.tool-badge.tool-cat--voice { border-left: 2px solid rgba(139, 92, 246, 0.4); }
+.tool-badge.tool-cat--data  { border-left: 2px solid rgba(16, 185, 129, 0.4); }
+.tool-badge.tool-cat--plan  { border-left: 2px solid rgba(236, 72, 153, 0.4); }
+.tool-badge.tool-cat--media { border-left: 2px solid rgba(244, 63, 94, 0.4); }
+
 .tool-icon {
   font-size: 0.8rem;
 }
