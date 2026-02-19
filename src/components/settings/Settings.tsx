@@ -199,7 +199,7 @@ export function Settings({
               checked={useClaudeCode}
               onChange={(e) => {
                 setUseClaudeCode(e.target.checked)
-                localStorage.setItem('talkie_use_claude_code', String(e.target.checked))
+                localStorage.setItem('wtb_use_claude_code', String(e.target.checked))
               }}
             />
             <span className="settings__slider" />
@@ -465,7 +465,7 @@ export function Settings({
                 </div>
                 {!integrations.telegram.configured && (
                   <p className="settings__hint">
-                    Set TELEGRAM_BOT_TOKEN env or create ~/.talkie/telegram.token
+                    Set TELEGRAM_BOT_TOKEN env or create ~/.wtb/telegram.token
                   </p>
                 )}
               </div>

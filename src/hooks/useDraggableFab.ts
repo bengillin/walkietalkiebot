@@ -7,11 +7,11 @@ interface FabPosition {
 
 export function useDraggableFab() {
   const [fabPosition, setFabPosition] = useState<FabPosition>(() => {
-    const saved = localStorage.getItem('talkie_fab_position')
+    const saved = localStorage.getItem('wtb_fab_position')
     return saved ? JSON.parse(saved) : { x: 20, y: 100 }
   })
   const [fabSize, setFabSize] = useState(() => {
-    const saved = localStorage.getItem('talkie_fab_size')
+    const saved = localStorage.getItem('wtb_fab_size')
     return saved ? parseInt(saved, 10) : 64
   })
   const [isDraggingFab, setIsDraggingFab] = useState(false)
@@ -43,7 +43,7 @@ export function useDraggableFab() {
 
   const handleFabDragEnd = useCallback(() => {
     if (isDraggingFab) {
-      localStorage.setItem('talkie_fab_position', JSON.stringify(fabPosition))
+      localStorage.setItem('wtb_fab_position', JSON.stringify(fabPosition))
     }
     dragStartRef.current = null
     setIsDraggingFab(false)
@@ -68,7 +68,7 @@ export function useDraggableFab() {
 
   const handleFabResizeEnd = useCallback(() => {
     if (isResizingFab) {
-      localStorage.setItem('talkie_fab_size', String(fabSize))
+      localStorage.setItem('wtb_fab_size', String(fabSize))
     }
     resizeStartRef.current = null
     setIsResizingFab(false)

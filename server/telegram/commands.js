@@ -1,13 +1,13 @@
 import { InlineKeyboard } from "grammy";
 import * as conversations from "../db/repositories/conversations.js";
 import * as telegramState from "../db/repositories/telegram.js";
-const WEB_UI_URL = process.env.TALKIE_URL || "https://localhost:5173";
+const WEB_UI_URL = process.env.WTB_URL || "https://localhost:5173";
 function setupCommands(bot) {
   bot.command("start", async (ctx) => {
     const userId = ctx.from?.id;
     if (!userId) return;
     await ctx.reply(
-      `Welcome to Talkie!
+      `Welcome to Walkie Talkie Bot!
 
 I'm your mobile interface to Claude Code conversations.
 
@@ -25,7 +25,7 @@ Just send me a text message to chat with Claude!`
   });
   bot.command("help", async (ctx) => {
     await ctx.reply(
-      `Talkie Commands:
+      `Walkie Talkie Bot Commands:
 
 /conversations - List recent conversations
 /new <name> - Create new conversation
@@ -100,14 +100,14 @@ Last updated: ${new Date(conv.updated_at).toLocaleString()}`,
         confused: "\u{1F615}"
       };
       await ctx.reply(
-        `Talkie Status:
+        `Walkie Talkie Bot Status:
 
 Server: ${data.running ? "\u2705 Running" : "\u274C Stopped"}
 Database: ${data.dbStatus === "connected" ? "\u2705 Connected" : "\u26A0\uFE0F Unavailable"}
 Claude: ${stateEmoji[data.avatarState] || "\u2753"} ${data.avatarState}`
       );
     } catch {
-      await ctx.reply("Could not reach Talkie server. Is it running?");
+      await ctx.reply("Could not reach Walkie Talkie Bot server. Is it running?");
     }
   });
   bot.callbackQuery(/^select_conv:(.+)$/, async (ctx) => {

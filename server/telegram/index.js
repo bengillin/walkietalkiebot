@@ -9,7 +9,7 @@ function getToken() {
   if (process.env.TELEGRAM_BOT_TOKEN) {
     return process.env.TELEGRAM_BOT_TOKEN;
   }
-  const tokenPath = join(homedir(), ".talkie", "telegram.token");
+  const tokenPath = join(homedir(), ".wtb", "telegram.token");
   if (existsSync(tokenPath)) {
     return readFileSync(tokenPath, "utf-8").trim();
   }
@@ -18,7 +18,7 @@ function getToken() {
 async function startTelegramBot() {
   const token = getToken();
   if (!token) {
-    throw new Error("Telegram bot token not found. Set TELEGRAM_BOT_TOKEN env or create ~/.talkie/telegram.token");
+    throw new Error("Telegram bot token not found. Set TELEGRAM_BOT_TOKEN env or create ~/.wtb/telegram.token");
   }
   bot = new Bot(token);
   setupCommands(bot);

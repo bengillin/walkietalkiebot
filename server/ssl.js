@@ -2,18 +2,21 @@ import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "
 import { homedir } from "os";
 import { join } from "path";
 import selfsigned from "selfsigned";
-const TALKIE_DIR = join(homedir(), ".talkie");
-const OLD_DIR = join(homedir(), ".talkboy");
-const CERT_PATH = join(TALKIE_DIR, "cert.pem");
-const KEY_PATH = join(TALKIE_DIR, "key.pem");
-const TAILSCALE_CERT_PATH = join(TALKIE_DIR, "tailscale.crt");
-const TAILSCALE_KEY_PATH = join(TALKIE_DIR, "tailscale.key");
+const WTB_DIR = join(homedir(), ".wtb");
+const OLD_DIR_2 = join(homedir(), ".talkie");
+const OLD_DIR_1 = join(homedir(), ".talkboy");
+const CERT_PATH = join(WTB_DIR, "cert.pem");
+const KEY_PATH = join(WTB_DIR, "key.pem");
+const TAILSCALE_CERT_PATH = join(WTB_DIR, "tailscale.crt");
+const TAILSCALE_KEY_PATH = join(WTB_DIR, "tailscale.key");
 function getSSLCerts() {
-  if (existsSync(OLD_DIR) && !existsSync(TALKIE_DIR)) {
-    renameSync(OLD_DIR, TALKIE_DIR);
+  if (existsSync(OLD_DIR_2) && !existsSync(WTB_DIR)) {
+    renameSync(OLD_DIR_2, WTB_DIR);
+  } else if (existsSync(OLD_DIR_1) && !existsSync(WTB_DIR)) {
+    renameSync(OLD_DIR_1, WTB_DIR);
   }
-  if (!existsSync(TALKIE_DIR)) {
-    mkdirSync(TALKIE_DIR, { recursive: true });
+  if (!existsSync(WTB_DIR)) {
+    mkdirSync(WTB_DIR, { recursive: true });
   }
   if (existsSync(TAILSCALE_CERT_PATH) && existsSync(TAILSCALE_KEY_PATH)) {
     console.log("Using Tailscale HTTPS certificates");
@@ -47,7 +50,7 @@ function getSSLCerts() {
   });
   writeFileSync(CERT_PATH, pems.cert);
   writeFileSync(KEY_PATH, pems.private);
-  console.log(`SSL certificates saved to ${TALKIE_DIR}`);
+  console.log(`SSL certificates saved to ${WTB_DIR}`);
   return {
     cert: pems.cert,
     key: pems.private

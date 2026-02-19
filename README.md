@@ -1,6 +1,6 @@
-# Talkie Bot
+# Walkie Talkie Bot
 
-[![npm version](https://img.shields.io/npm/v/talkiebot.svg)](https://www.npmjs.com/package/talkiebot) [![npm downloads](https://img.shields.io/npm/dm/talkiebot.svg)](https://www.npmjs.com/package/talkiebot)
+[![npm version](https://img.shields.io/npm/v/walkietalkiebot.svg)](https://www.npmjs.com/package/walkietalkiebot) [![npm downloads](https://img.shields.io/npm/dm/walkietalkiebot.svg)](https://www.npmjs.com/package/walkietalkiebot)
 
 A walkie talkie for Claude. Your voice is the interface.
 
@@ -8,20 +8,20 @@ A walkie talkie for Claude. Your voice is the interface.
 
 ## Install
 
-Two ways to use Talkie. Pick one (or both).
+Two ways to use Walkie Talkie Bot. Pick one (or both).
 
 ### Plugin (recommended)
 
-Add Talkie as a Claude Code plugin for 30 MCP tools + 5 skills, no server required. Data tools talk directly to SQLite.
+Add Walkie Talkie Bot as a Claude Code plugin for 30 MCP tools + 5 skills, no server required. Data tools talk directly to SQLite.
 
 Add to `~/.claude/settings.json`:
 
 ```json
 {
   "mcpServers": {
-    "talkie": {
+    "wtb": {
       "command": "npx",
-      "args": ["talkie-mcp"]
+      "args": ["wtb-mcp"]
     }
   }
 }
@@ -32,7 +32,7 @@ Add to `~/.claude/settings.json`:
 The full server gives you the web UI, voice interface, Telegram bot, and everything.
 
 ```bash
-npx talkiebot
+npx walkietalkiebot
 ```
 
 This starts the HTTPS server and opens `https://localhost:5173` in your browser.
@@ -44,7 +44,7 @@ This starts the HTTPS server and opens `https://localhost:5173` in your browser.
 ### Plugin
 
 - **15 data tools** -- conversations, messages, plans, search, liner notes, export. Always work via direct SQLite, no server needed.
-- **15 server tools** -- voice, IPC, sessions, jobs, image analysis, browser control. Require the Talkie server to be running.
+- **15 server tools** -- voice, IPC, sessions, jobs, image analysis, browser control. Require the Walkie Talkie Bot server to be running.
 - **5 skills** -- save-conversation, search-tapes, manage-plans, launch-voice, export-tape.
 
 ### Full Install
@@ -83,7 +83,7 @@ Switch themes via the header button or settings drawer.
 
 ### Data Tools (offline)
 
-Work directly against SQLite at `~/.talkie/talkie.db`. No server needed.
+Work directly against SQLite at `~/.wtb/wtb.db`. No server needed.
 
 | Tool | Description |
 |------|-------------|
@@ -105,25 +105,25 @@ Work directly against SQLite at `~/.talkie/talkie.db`. No server needed.
 
 ### Server Tools (requires server)
 
-Require the Talkie server to be running (`npx talkiebot`).
+Require the Walkie Talkie Bot server to be running (`npx walkietalkiebot`).
 
 | Tool | Description |
 |------|-------------|
-| `launch_talkie` | Start server and open browser |
-| `get_talkie_status` | Check running status and avatar state |
+| `launch_wtb` | Start server and open browser |
+| `get_wtb_status` | Check running status and avatar state |
 | `get_transcript` | Get latest voice transcript |
 | `get_conversation_history` | Get current tape's conversation messages |
 | `get_claude_session` | Get connected session ID |
 | `set_claude_session` | Connect to a Claude Code session |
 | `disconnect_claude_session` | Disconnect session |
 | `get_pending_message` | Poll for user messages (IPC mode) |
-| `respond_to_talkie` | Send response to user (IPC mode) |
-| `update_talkie_state` | Set avatar state and transcript |
+| `respond_to_wtb` | Send response to user (IPC mode) |
+| `update_wtb_state` | Set avatar state and transcript |
 | `analyze_image` | Analyze image via Claude vision |
 | `open_url` | Open URL in default browser |
-| `create_talkie_job` | Create background async job |
-| `get_talkie_job` | Get job status and result |
-| `list_talkie_jobs` | List jobs by status |
+| `create_wtb_job` | Create background async job |
+| `get_wtb_job` | Get job status and result |
+| `list_wtb_jobs` | List jobs by status |
 
 ### Skills
 
@@ -137,19 +137,19 @@ Require the Talkie server to be running (`npx talkiebot`).
 
 ## Configuration
 
-Set `TALKIE_PORT` to change the default port (5173).
+Set `WTB_PORT` to change the default port (5173).
 
 **Server management:**
 
 ```bash
-talkie-server start [-f]    # Start (background or foreground)
-talkie-server stop           # Stop
-talkie-server status         # Show status
-talkie-server logs [-f]      # View logs
-talkie-server install        # Install as macOS launchd daemon
+wtb-server start [-f]    # Start (background or foreground)
+wtb-server stop           # Stop
+wtb-server status         # Show status
+wtb-server logs [-f]      # View logs
+wtb-server install        # Install as macOS launchd daemon
 ```
 
-**Telegram bot:** Create a bot via [@BotFather](https://t.me/BotFather), then set `TELEGRAM_BOT_TOKEN` or save to `~/.talkie/telegram.token`. The bot starts automatically with the server.
+**Telegram bot:** Create a bot via [@BotFather](https://t.me/BotFather), then set `TELEGRAM_BOT_TOKEN` or save to `~/.wtb/telegram.token`. The bot starts automatically with the server.
 
 ## Development
 

@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Getting Started — Talkie Bot</title>
+  <title>Getting Started — Walkie Walkie Talkie Bot</title>
   <meta name="description" content="Install Talkie, configure your environment, and start talking to Claude in minutes." />
-  <meta property="og:title" content="Getting Started — Talkie Bot" />
+  <meta property="og:title" content="Getting Started — Walkie Talkie Bot" />
   <meta property="og:description" content="Install Talkie, configure your environment, and start talking to Claude in minutes." />
   <meta property="og:image" content="https://walkietalkie.bot/og.png" />
   <meta property="og:url" content="https://walkietalkie.bot/docs/getting-started.html" />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Getting Started — Talkie Bot" />
+  <meta name="twitter:title" content="Getting Started — Walkie Talkie Bot" />
   <meta name="twitter:description" content="Install Talkie, configure your environment, and start talking to Claude in minutes." />
   <meta name="twitter:image" content="https://walkietalkie.bot/og.png" />
   <link rel="canonical" href="https://walkietalkie.bot/docs/getting-started.html" />
@@ -29,7 +29,7 @@
       <div class="site-nav__inner">
         <a class="site-nav__brand" href="/">
           <span class="mini-robot"><span class="mini-robot__face"><span class="mini-robot__eye"></span><span class="mini-robot__eye"></span></span></span>
-          Talkie Bot
+          Walkie Talkie Bot
         </a>
         <button class="site-nav__toggle" aria-label="Menu">&#9776;</button>
         <div class="site-nav__links">
@@ -80,9 +80,9 @@
           If you just want MCP tools and skills without running a server, you can install Talkie as a Claude Code plugin. Add this to your MCP configuration:
           <pre><code>{
   "mcpServers": {
-    "talkie": {
+    "wtb": {
       "command": "npx",
-      "args": ["talkie-mcp"]
+      "args": ["wtb-mcp"]
     }
   }
 }</code></pre>
@@ -91,14 +91,14 @@
 
         <p>Talkie is distributed as an npm package. A single command downloads the package, starts an HTTPS server, generates self-signed certificates, and opens your browser:</p>
 
-        <pre><code>npx talkiebot</code></pre>
+        <pre><code>npx walkietalkiebot</code></pre>
 
-        <p>That is all you need. The <code>npx talkiebot</code> command handles everything:</p>
+        <p>That is all you need. The <code>npx walkietalkiebot</code> command handles everything:</p>
 
         <ul>
-          <li>Downloads and installs the <code>talkiebot</code> package from npm</li>
-          <li>Generates self-signed TLS certificates at <code>~/.talkie/</code></li>
-          <li>Starts an HTTPS server on port 5173 (configurable via <code>TALKIE_PORT</code>)</li>
+          <li>Downloads and installs the <code>walkietalkiebot</code> package from npm</li>
+          <li>Generates self-signed TLS certificates at <code>~/.wtb/</code></li>
+          <li>Starts an HTTPS server on port 5173 (configurable via <code>WTB_PORT</code>)</li>
           <li>Opens your default browser to the Talkie interface</li>
         </ul>
 
@@ -109,8 +109,8 @@
 
         <p>If you prefer a global install:</p>
 
-        <pre><code>npm install -g talkiebot
-talkiebot</code></pre>
+        <pre><code>npm install -g walkietalkiebot
+walkietalkiebot</code></pre>
 
         <!-- ── System Requirements ── -->
         <h2 id="requirements">System Requirements</h2>
@@ -147,12 +147,12 @@ talkiebot</code></pre>
         <!-- ── First Launch ── -->
         <h2 id="first-launch">First Launch</h2>
 
-        <p>When you run <code>npx talkiebot</code> for the first time, several things happen in sequence:</p>
+        <p>When you run <code>npx walkietalkiebot</code> for the first time, several things happen in sequence:</p>
 
         <ol>
-          <li><strong>Certificate generation</strong> &mdash; A self-signed TLS certificate and private key are created at <code>~/.talkie/cert.pem</code> and <code>~/.talkie/key.pem</code>. These are reused on subsequent launches.</li>
-          <li><strong>Database creation</strong> &mdash; An SQLite database is initialized at <code>~/.talkie/talkie.db</code> with WAL mode enabled for concurrent reads.</li>
-          <li><strong>Server start</strong> &mdash; The HTTPS server starts on port 5173 (or the port set by <code>TALKIE_PORT</code>).</li>
+          <li><strong>Certificate generation</strong> &mdash; A self-signed TLS certificate and private key are created at <code>~/.wtb/cert.pem</code> and <code>~/.wtb/key.pem</code>. These are reused on subsequent launches.</li>
+          <li><strong>Database creation</strong> &mdash; An SQLite database is initialized at <code>~/.wtb/wtb.db</code> with WAL mode enabled for concurrent reads.</li>
+          <li><strong>Server start</strong> &mdash; The HTTPS server starts on port 5173 (or the port set by <code>WTB_PORT</code>).</li>
           <li><strong>Browser opens</strong> &mdash; Your default browser navigates to <code>https://localhost:5173</code>.</li>
           <li><strong>Certificate warning</strong> &mdash; Your browser will show a security warning because the certificate is self-signed. Accept it to continue (see <a href="#troubleshooting">Troubleshooting</a> below).</li>
           <li><strong>Onboarding wizard</strong> &mdash; On your first visit, a 7-step setup wizard walks you through configuration.</li>
@@ -253,7 +253,7 @@ talkiebot</code></pre>
           <li><strong>Edge</strong> &mdash; Click "Advanced" then "Continue to localhost (unsafe)".</li>
         </ul>
 
-        <p>The certificate is stored at <code>~/.talkie/cert.pem</code>. If you need to regenerate it, delete the file and restart Talkie.</p>
+        <p>The certificate is stored at <code>~/.wtb/cert.pem</code>. If you need to regenerate it, delete the file and restart Talkie.</p>
 
         <h3>Microphone permissions</h3>
 
@@ -267,13 +267,13 @@ talkiebot</code></pre>
 
         <h3>Port conflicts</h3>
 
-        <p>If port 5173 is already in use, set a different port with the <code>TALKIE_PORT</code> environment variable:</p>
+        <p>If port 5173 is already in use, set a different port with the <code>WTB_PORT</code> environment variable:</p>
 
-        <pre><code>TALKIE_PORT=4443 npx talkiebot</code></pre>
+        <pre><code>WTB_PORT=4443 npx walkietalkiebot</code></pre>
 
         <p>You can also export it in your shell profile to make it permanent:</p>
 
-        <pre><code>export TALKIE_PORT=4443</code></pre>
+        <pre><code>export WTB_PORT=4443</code></pre>
 
         <div class="docs-warning">
           <strong>Still stuck?</strong>
@@ -308,7 +308,7 @@ talkiebot</code></pre>
         <span class="site-footer__divider">&middot;</span>
         <a class="site-footer__link" href="/docs/integrations">Integrations</a>
         <span class="site-footer__divider">&middot;</span>
-        <a class="site-footer__link" href="https://www.npmjs.com/package/talkiebot" target="_blank" rel="noopener">npm</a>
+        <a class="site-footer__link" href="https://www.npmjs.com/package/walkietalkiebot" target="_blank" rel="noopener">npm</a>
         <span class="site-footer__divider">&middot;</span>
         <a class="site-footer__link" href="https://github.com/bengillin/walkietalkiebot" target="_blank" rel="noopener">GitHub</a>
         <span class="site-footer__divider">&middot;</span>

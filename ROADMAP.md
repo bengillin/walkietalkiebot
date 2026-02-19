@@ -1,8 +1,8 @@
-# Talkie Roadmap
+# Walkie Talkie Bot Roadmap
 
 ## Current State
 
-Talkie is a voice-first, cassette tape-themed interface for Claude Code with dual distribution (Claude Code plugin + full server with web UI). The codebase is TypeScript throughout, with 140 tests across 10 test files covering the frontend (store, exports, components, plan detection) and server (5 database repositories + HTTP API layer).
+Walkie Talkie Bot is a voice-first, cassette tape-themed interface for Claude Code with dual distribution (Claude Code plugin + full server with web UI). The codebase is TypeScript throughout, with 140 tests across 10 test files covering the frontend (store, exports, components, plan detection) and server (5 database repositories + HTTP API layer).
 
 ### Architecture highlights
 - **Frontend**: React 18 + Zustand, decomposed into 6 custom hooks (`useVoiceIO`, `useClaudeChat`, `useKeyboardControl`, `useDraggableFab`, `useImageAnalysis`, `useServerSync`)
@@ -54,7 +54,7 @@ Talkie is a voice-first, cassette tape-themed interface for Claude Code with dua
 - [x] Background jobs with SSE streaming
 
 ### Distribution
-- [x] npm package (`npx talkiebot`)
+- [x] npm package (`npx walkietalkiebot`)
 - [x] Claude Code plugin (MCP tools + skills)
 - [x] Telegram bot integration
 - [x] Marketing site (walkietalkie.bot) with docs

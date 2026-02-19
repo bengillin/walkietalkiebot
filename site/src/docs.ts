@@ -10,11 +10,11 @@ const themes: ThemeName[] = ['mccallister', 'imessage', 'aol', 'classic-mac', 'g
 function setTheme(name: ThemeName) {
   themes.forEach(t => document.documentElement.classList.remove(`theme-${t}`))
   document.documentElement.classList.add(`theme-${name}`)
-  localStorage.setItem('talkie_theme', name)
+  localStorage.setItem('wtb_theme', name)
 }
 
 function initTheme() {
-  const saved = localStorage.getItem('talkie_theme') as ThemeName | null
+  const saved = localStorage.getItem('wtb_theme') as ThemeName | null
   setTheme(saved && themes.includes(saved) ? saved : 'apple-1984')
 }
 

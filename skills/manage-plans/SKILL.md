@@ -1,12 +1,12 @@
 ---
 name: manage-plans
-description: Create, update, and track implementation plans in Talkie. Use when the user wants to manage structured plans.
+description: Create, update, and track implementation plans in Walkie Talkie Bot. Use when the user wants to manage structured plans.
 allowed-tools: list_plans, get_plan, create_plan, update_plan, delete_plan
 ---
 
 # Manage Plans
 
-Create and manage implementation plans in Talkie's database.
+Create and manage implementation plans in Walkie Talkie Bot's database.
 
 ## Status Workflow
 
@@ -29,4 +29,4 @@ Plans follow this lifecycle:
 
 - Plans can be linked to conversations via `conversationId`
 - Use markdown formatting in plan content
-- Works offline (no Talkie server needed)
+- Works offline (no WTB server needed)

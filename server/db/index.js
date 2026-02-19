@@ -4,16 +4,20 @@ import { dirname, join } from "path";
 import { homedir } from "os";
 import { initSchema } from "./schema.js";
 function migrateDataDir() {
-  const oldDir = join(homedir(), ".talkboy");
-  const newDir = join(homedir(), ".talkie");
-  if (existsSync(oldDir) && !existsSync(newDir)) {
-    console.log(`Migrating ${oldDir} \u2192 ${newDir}`);
-    renameSync(oldDir, newDir);
+  const wtbDir = join(homedir(), ".wtb");
+  const oldDir2 = join(homedir(), ".talkie");
+  const oldDir1 = join(homedir(), ".talkboy");
+  if (existsSync(oldDir2) && !existsSync(wtbDir)) {
+    console.log(`Migrating ${oldDir2} \u2192 ${wtbDir}`);
+    renameSync(oldDir2, wtbDir);
+  } else if (existsSync(oldDir1) && !existsSync(wtbDir)) {
+    console.log(`Migrating ${oldDir1} \u2192 ${wtbDir}`);
+    renameSync(oldDir1, wtbDir);
   }
 }
 let db = null;
 function getDbPath() {
-  return join(homedir(), ".talkie", "talkie.db");
+  return join(homedir(), ".wtb", "wtb.db");
 }
 function getDb() {
   if (!db) {

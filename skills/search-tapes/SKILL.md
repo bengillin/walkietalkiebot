@@ -1,12 +1,12 @@
 ---
 name: search-tapes
-description: Search across all Talkie conversations for specific content. Use when the user wants to find something they discussed before.
+description: Search across all Walkie Talkie Bot conversations for specific content. Use when the user wants to find something they discussed before.
 allowed-tools: search_conversations, get_conversation
 ---
 
-# Search Talkie Tapes
+# Search Tapes
 
-Full-text search across all saved conversations in Talkie.
+Full-text search across all saved conversations in Walkie Talkie Bot.
 
 ## Steps
 
@@ -17,5 +17,5 @@ Full-text search across all saved conversations in Talkie.
 ## Notes
 
 - Uses FTS5 for fast, ranked full-text search
-- Works offline (no Talkie server needed)
+- Works offline (no WTB server needed)
 - Returns highlighted snippets showing where the match was found

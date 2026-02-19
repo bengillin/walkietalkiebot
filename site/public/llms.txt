@@ -1,12 +1,12 @@
-# Talkie Bot — A Walkie Talkie for Claude
+# Walkie Talkie Bot — A Walkie Talkie for Claude
 
 > Voice-first AI assistant for Claude Code — use as a Claude Code plugin (30 MCP tools + 5 skills, offline SQLite) or full server (web UI, 6 retro themes, voice, Telegram).
 
 ## Quick Start
 
-  Install: npx talkiebot
+  Install: npx walkietalkiebot
   Repository: https://github.com/bengillin/walkietalkiebot
-  npm: https://www.npmjs.com/package/talkiebot
+  npm: https://www.npmjs.com/package/walkietalkiebot
   Website: https://walkietalkie.bot
   Version: 0.3.0
   License: MIT
@@ -16,14 +16,14 @@
   Add to your Claude Code MCP settings (~/.claude/settings.json):
   {
     "mcpServers": {
-      "talkie": {
+      "wtb": {
         "command": "npx",
-        "args": ["talkie-mcp"]
+        "args": ["wtb-mcp"]
       }
     }
   }
 
-  The plugin provides 30 MCP tools (15 work offline via direct SQLite, 15 require the Talkie server)
+  The plugin provides 30 MCP tools (15 work offline via direct SQLite, 15 require the Walkie Talkie Bot server)
   and 5 skills for common workflows.
 
 ## Documentation
@@ -41,7 +41,7 @@
   Telegram: grammy
   MCP: @modelcontextprotocol/sdk (stdio transport)
   Voice: Web Speech API (browser-native STT/TTS)
-  Database: SQLite at ~/.talkie/talkie.db
+  Database: SQLite at ~/.wtb/wtb.db
 
 ## Features
 
@@ -91,11 +91,11 @@
   Export:
   - export_conversation: Export conversation as markdown or JSON
 
-  Server Tools (15, require Talkie server):
+  Server Tools (15, require Walkie Talkie Bot server):
 
   Core:
-  - launch_talkie: Start server and open browser
-  - get_talkie_status: Check running status and avatar state
+  - launch_wtb: Start server and open browser
+  - get_wtb_status: Check running status and avatar state
 
   Session:
   - get_claude_session: Get connected session ID
@@ -104,28 +104,28 @@
 
   IPC:
   - get_pending_message: Poll for user messages (IPC mode)
-  - respond_to_talkie: Send response to user (IPC mode)
+  - respond_to_wtb: Send response to user (IPC mode)
   - get_transcript: Get latest voice transcript
   - get_conversation_history: Get current conversation messages
 
   State:
-  - update_talkie_state: Set avatar state, transcript
+  - update_wtb_state: Set avatar state, transcript
 
   Media:
   - analyze_image: Claude vision analysis of images
   - open_url: Open URL in default browser
 
   Jobs:
-  - create_talkie_job: Create background async job
-  - get_talkie_job: Get job status and result
-  - list_talkie_jobs: List jobs, optionally filtered by status
+  - create_wtb_job: Create background async job
+  - get_wtb_job: Get job status and result
+  - list_wtb_jobs: List jobs, optionally filtered by status
 
 ## Skills (5)
 
   - save-conversation: Save the current Claude Code conversation as a cassette tape
   - search-tapes: Search across all saved conversations using full-text search
   - manage-plans: Create, update, and track plans with status workflow
-  - launch-voice: Launch the Talkie voice interface in a browser
+  - launch-voice: Launch the Walkie Talkie Bot voice interface in a browser
   - export-tape: Export a conversation as markdown or JSON
 
 ## REST API
@@ -146,18 +146,18 @@
 
 ## CLI Commands
 
-  talkie-server start [-f]    Start server (background or -f foreground)
-  talkie-server stop          Stop the server
-  talkie-server restart       Restart
-  talkie-server status        Show status (running, port, DB)
-  talkie-server logs [-f]     View logs (-f to follow)
-  talkie-server install       Install as macOS launchd daemon
-  talkie-server uninstall     Remove launchd daemon
+  wtb-server start [-f]    Start server (background or -f foreground)
+  wtb-server stop          Stop the server
+  wtb-server restart       Restart
+  wtb-server status        Show status (running, port, DB)
+  wtb-server logs [-f]     View logs (-f to follow)
+  wtb-server install       Install as macOS launchd daemon
+  wtb-server uninstall     Remove launchd daemon
 
 ## Database Schema (v4)
 
   Tables: conversations, messages, message_images, activities, plans, jobs, telegram_state, messages_fts, schema_version
-  Location: ~/.talkie/talkie.db (SQLite WAL mode)
+  Location: ~/.wtb/wtb.db (SQLite WAL mode)
 
 ---
 Last updated: 2026-02-18

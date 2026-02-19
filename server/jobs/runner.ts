@@ -86,7 +86,7 @@ export function spawnClaude(options: RunnerOptions): RunnerHandle {
   // Save attached images to temp files so Claude Code can read them natively
   const tempImagePaths: string[] = []
   if (images && images.length > 0) {
-    const tempDir = join(tmpdir(), 'talkie-images')
+    const tempDir = join(tmpdir(), 'wtb-images')
     mkdirSync(tempDir, { recursive: true })
     for (const img of images) {
       const base64Data = img.dataUrl.split(',')[1]
@@ -128,7 +128,7 @@ export function spawnClaude(options: RunnerOptions): RunnerHandle {
     // Detect if user is asking for a plan
     const isPlanRequest = /\b(?:plan|design|architect|propose|strategy|roadmap|outline)\b/i.test(prompt)
     const planInstruction = isPlanRequest
-      ? '\n[PLAN MODE - The user is asking you to make a plan. Write the full detailed plan (with markdown headings, numbered steps, etc.) to a file using the Write tool at /tmp/talkie-plan.md. Then give a brief voice summary of what you planned.]'
+      ? '\n[PLAN MODE - The user is asking you to make a plan. Write the full detailed plan (with markdown headings, numbered steps, etc.) to a file using the Write tool at /tmp/wtb-plan.md. Then give a brief voice summary of what you planned.]'
       : ''
 
     fullPrompt = `${contextBlock}${imageBlock}[VOICE MODE - Keep responses to 1-2 sentences, no markdown, speak naturally]${planInstruction}\n\nUser: ${prompt}`

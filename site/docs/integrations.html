@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Integrations — Talkie Bot</title>
+  <title>Integrations — Walkie Talkie Bot</title>
   <meta name="description" content="Connect Talkie to Claude Code CLI, the Anthropic API, MCP tools, Telegram, and manage your server." />
-  <meta property="og:title" content="Integrations — Talkie Bot" />
+  <meta property="og:title" content="Integrations — Walkie Talkie Bot" />
   <meta property="og:description" content="Connect Talkie to Claude Code CLI, the Anthropic API, MCP tools, Telegram, and manage your server." />
   <meta property="og:image" content="https://walkietalkie.bot/og.png" />
   <meta property="og:url" content="https://walkietalkie.bot/docs/integrations.html" />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Integrations — Talkie Bot" />
+  <meta name="twitter:title" content="Integrations — Walkie Talkie Bot" />
   <meta name="twitter:description" content="Connect Talkie to Claude Code CLI, the Anthropic API, MCP tools, Telegram, and manage your server." />
   <meta name="twitter:image" content="https://walkietalkie.bot/og.png" />
   <link rel="canonical" href="https://walkietalkie.bot/docs/integrations.html" />
@@ -29,7 +29,7 @@
       <div class="site-nav__inner">
         <a class="site-nav__brand" href="/">
           <span class="mini-robot"><span class="mini-robot__face"><span class="mini-robot__eye"></span><span class="mini-robot__eye"></span></span></span>
-          Talkie Bot
+          Walkie Talkie Bot
         </a>
         <button class="site-nav__toggle" aria-label="Menu">&#9776;</button>
         <div class="site-nav__links">
@@ -76,20 +76,20 @@
         <!-- ── Plugin Installation ── -->
         <h2 id="plugin">Plugin Installation</h2>
 
-        <p>Talkie is available as a Claude Code plugin, giving you 30 MCP tools and 5 skills without needing to run the full Talkie server. The 15 data tools work entirely offline by reading and writing directly to the SQLite database at <code>~/.talkie/talkie.db</code>. The other 15 server tools require the Talkie server to be running for voice, IPC, and UI interaction.</p>
+        <p>Talkie is available as a Claude Code plugin, giving you 30 MCP tools and 5 skills without needing to run the full Talkie server. The 15 data tools work entirely offline by reading and writing directly to the SQLite database at <code>~/.wtb/wtb.db</code>. The other 15 server tools require the Talkie server to be running for voice, IPC, and UI interaction.</p>
 
         <p>Add the following to your Claude Code MCP configuration (typically <code>~/.claude/settings.json</code> or your project's <code>.mcp.json</code>):</p>
 
         <pre><code>{
   "mcpServers": {
-    "talkie": {
+    "wtb": {
       "command": "npx",
-      "args": ["talkie-mcp"]
+      "args": ["wtb-mcp"]
     }
   }
 }</code></pre>
 
-        <p>Once configured, Claude Code will automatically have access to all Talkie tools and skills. Data tools like <code>list_conversations</code>, <code>search_conversations</code>, <code>create_plan</code>, and <code>export_conversation</code> work immediately with no server required. To use server tools like <code>launch_talkie</code>, <code>get_transcript</code>, or <code>respond_to_talkie</code>, start the Talkie server with <code>npx talkiebot</code>.</p>
+        <p>Once configured, Claude Code will automatically have access to all Walkie Walkie Talkie Bot tools and skills. Data tools like <code>list_conversations</code>, <code>search_conversations</code>, <code>create_plan</code>, and <code>export_conversation</code> work immediately with no server required. To use server tools like <code>launch_wtb</code>, <code>get_transcript</code>, or <code>respond_to_wtb</code>, start the WTB server with <code>npx walkietalkiebot</code>.</p>
 
         <!-- ── Claude Code Mode ── -->
         <h2 id="claude-code">Claude Code Mode</h2>
@@ -144,7 +144,7 @@
             <tr>
               <td><strong>Voice</strong></td>
               <td>Purple</td>
-              <td>launch_talkie, get_transcript, update_talkie_state, and other voice tools</td>
+              <td>launch_wtb, get_transcript, update_wtb_state, and other voice tools</td>
             </tr>
             <tr>
               <td><strong>Data</strong></td>
@@ -203,7 +203,7 @@
         <!-- ── MCP Server ── -->
         <h2 id="mcp">MCP Server</h2>
 
-        <p>Talkie includes an MCP (Model Context Protocol) server with 30 tools that allow Claude Code to interact with the Talkie interface. The MCP server uses stdio transport and is launched via the <code>talkie-mcp</code> command.</p>
+        <p>Talkie includes an MCP (Model Context Protocol) server with 30 tools that allow Claude Code to interact with the Talkie interface. The MCP server uses stdio transport and is launched via the <code>wtb-mcp</code> command.</p>
 
         <h3>Setup</h3>
 
@@ -211,9 +211,9 @@
 
         <pre><code>{
   "mcpServers": {
-    "talkie": {
+    "wtb": {
       "command": "npx",
-      "args": ["talkie-mcp"]
+      "args": ["wtb-mcp"]
     }
   }
 }</code></pre>
@@ -222,7 +222,7 @@
 
         <h3>Data tools (work offline)</h3>
 
-        <p>These 15 tools read and write directly to the SQLite database at <code>~/.talkie/talkie.db</code>. They do not require the Talkie server to be running, making them available in any Claude Code session as soon as the MCP server is configured.</p>
+        <p>These 15 tools read and write directly to the SQLite database at <code>~/.wtb/wtb.db</code>. They do not require the Talkie server to be running, making them available in any Claude Code session as soon as the MCP server is configured.</p>
 
         <div class="tool-card">
           <div class="tool-card__name">list_conversations</div>
@@ -314,25 +314,25 @@
           <div class="tool-card__params">Params: <code>conversationId</code> (string, required), <code>format</code> (string: markdown/json)</div>
         </div>
 
-        <h3>Server tools (require Talkie server)</h3>
+        <h3>Server tools (require WTB server)</h3>
 
-        <p>These 15 tools communicate with the Talkie server over HTTP for voice interaction, UI state management, IPC messaging, and background jobs. The Talkie server must be running (<code>npx talkiebot</code>) for these tools to work.</p>
+        <p>These 15 tools communicate with the WTB server over HTTP for voice interaction, UI state management, IPC messaging, and background jobs. The WTB server must be running (<code>npx walkietalkiebot</code>) for these tools to work.</p>
 
         <div class="tool-card">
-          <div class="tool-card__name">launch_talkie</div>
-          <div class="tool-card__desc">Start the Talkie server and open the interface in the default browser.</div>
+          <div class="tool-card__name">launch_wtb</div>
+          <div class="tool-card__desc">Start the WTB server and open the interface in the default browser.</div>
           <div class="tool-card__params">Params: none</div>
         </div>
 
         <div class="tool-card">
-          <div class="tool-card__name">get_talkie_status</div>
-          <div class="tool-card__desc">Check if Talkie is running and get its current state (idle, listening, thinking, speaking).</div>
+          <div class="tool-card__name">get_wtb_status</div>
+          <div class="tool-card__desc">Check if Walkie Walkie Talkie Bot is running and get its current state (idle, listening, thinking, speaking).</div>
           <div class="tool-card__params">Params: none</div>
         </div>
 
         <div class="tool-card">
           <div class="tool-card__name">get_transcript</div>
-          <div class="tool-card__desc">Get the latest voice transcript from Talkie. Use after the user has spoken.</div>
+          <div class="tool-card__desc">Get the latest voice transcript. Use after the user has spoken.</div>
           <div class="tool-card__params">Params: none</div>
         </div>
 
@@ -350,7 +350,7 @@
 
         <div class="tool-card">
           <div class="tool-card__name">set_claude_session</div>
-          <div class="tool-card__desc">Connect Talkie to a Claude Code session by setting the session ID.</div>
+          <div class="tool-card__desc">Connect to a Claude Code session by setting the session ID.</div>
           <div class="tool-card__params">Params: <code>sessionId</code> (string, required)</div>
         </div>
 
@@ -367,14 +367,14 @@
         </div>
 
         <div class="tool-card">
-          <div class="tool-card__name">respond_to_talkie</div>
-          <div class="tool-card__desc">Send a response back to Talkie in IPC mode. The response will be displayed and spoken.</div>
+          <div class="tool-card__name">respond_to_wtb</div>
+          <div class="tool-card__desc">Send a response back in IPC mode. The response will be displayed and spoken.</div>
           <div class="tool-card__params">Params: <code>content</code> (string, required)</div>
         </div>
 
         <div class="tool-card">
-          <div class="tool-card__name">update_talkie_state</div>
-          <div class="tool-card__desc">Update the Talkie UI state, including the avatar animation state and transcript text.</div>
+          <div class="tool-card__name">update_wtb_state</div>
+          <div class="tool-card__desc">Update the UI state, including the avatar animation state and transcript text.</div>
           <div class="tool-card__params">Params: <code>avatarState</code> (enum: idle, listening, thinking, speaking), <code>transcript</code> (string)</div>
         </div>
 
@@ -432,7 +432,7 @@
 
         <ol>
           <li>Create a new bot via <a href="https://t.me/BotFather" target="_blank" rel="noopener">@BotFather</a> on Telegram and copy the bot token.</li>
-          <li>Save the token as the <code>TELEGRAM_BOT_TOKEN</code> environment variable, or write it to <code>~/.talkie/telegram.token</code>.</li>
+          <li>Save the token as the <code>TELEGRAM_BOT_TOKEN</code> environment variable, or write it to <code>~/.wtb/telegram.token</code>.</li>
           <li>Start (or restart) the Talkie server. The bot will connect automatically.</li>
         </ol>
 
@@ -440,7 +440,7 @@
 export TELEGRAM_BOT_TOKEN="123456:ABC-DEF..."
 
 # Option 2: Token file
-echo "123456:ABC-DEF..." > ~/.talkie/telegram.token</code></pre>
+echo "123456:ABC-DEF..." > ~/.wtb/telegram.token</code></pre>
 
         <h3>Bot commands</h3>
 
@@ -469,18 +469,18 @@ echo "123456:ABC-DEF..." > ~/.talkie/telegram.token</code></pre>
         <!-- ── Server Management ── -->
         <h2 id="server">Server Management</h2>
 
-        <p>The <code>talkie-server</code> CLI manages the Talkie server lifecycle. It can run the server as a background process or install it as a macOS launchd daemon for automatic startup.</p>
+        <p>The <code>wtb-server</code> CLI manages the Talkie server lifecycle. It can run the server as a background process or install it as a macOS launchd daemon for automatic startup.</p>
 
         <h3>CLI commands</h3>
 
         <ul>
-          <li><code>talkie-server start [-f]</code> &mdash; Start the server. Use <code>-f</code> to run in the foreground (useful for debugging). Without <code>-f</code>, starts as a background process.</li>
-          <li><code>talkie-server stop</code> &mdash; Stop the running server.</li>
-          <li><code>talkie-server restart</code> &mdash; Stop and restart the server.</li>
-          <li><code>talkie-server status</code> &mdash; Show server status including whether it is running, the port, launchd status, and database path.</li>
-          <li><code>talkie-server logs [-f]</code> &mdash; View server logs. Use <code>-f</code> to follow (tail) the log output in real-time.</li>
-          <li><code>talkie-server install</code> &mdash; Install Talkie as a macOS launchd daemon. The server will start automatically on login.</li>
-          <li><code>talkie-server uninstall</code> &mdash; Remove the launchd daemon.</li>
+          <li><code>wtb-server start [-f]</code> &mdash; Start the server. Use <code>-f</code> to run in the foreground (useful for debugging). Without <code>-f</code>, starts as a background process.</li>
+          <li><code>wtb-server stop</code> &mdash; Stop the running server.</li>
+          <li><code>wtb-server restart</code> &mdash; Stop and restart the server.</li>
+          <li><code>wtb-server status</code> &mdash; Show server status including whether it is running, the port, launchd status, and database path.</li>
+          <li><code>wtb-server logs [-f]</code> &mdash; View server logs. Use <code>-f</code> to follow (tail) the log output in real-time.</li>
+          <li><code>wtb-server install</code> &mdash; Install Talkie as a macOS launchd daemon. The server will start automatically on login.</li>
+          <li><code>wtb-server uninstall</code> &mdash; Remove the launchd daemon.</li>
         </ul>
 
         <h3>Environment variables</h3>
@@ -495,7 +495,7 @@ echo "123456:ABC-DEF..." > ~/.talkie/telegram.token</code></pre>
           </thead>
           <tbody>
             <tr>
-              <td><code>TALKIE_PORT</code></td>
+              <td><code>WTB_PORT</code></td>
               <td>Server port number</td>
               <td>5173</td>
             </tr>
@@ -514,18 +514,18 @@ echo "123456:ABC-DEF..." > ~/.talkie/telegram.token</code></pre>
 
         <h3>SSL certificates</h3>
 
-        <p>Self-signed TLS certificates are automatically generated on first launch and stored at <code>~/.talkie/</code>. The files are:</p>
+        <p>Self-signed TLS certificates are automatically generated on first launch and stored at <code>~/.wtb/</code>. The files are:</p>
 
         <ul>
-          <li><code>~/.talkie/cert.pem</code> &mdash; The self-signed certificate</li>
-          <li><code>~/.talkie/key.pem</code> &mdash; The private key</li>
+          <li><code>~/.wtb/cert.pem</code> &mdash; The self-signed certificate</li>
+          <li><code>~/.wtb/key.pem</code> &mdash; The private key</li>
         </ul>
 
         <p>Your browser will show a security warning on first visit because the certificate is self-signed. Accept the warning to continue. This is required because the Web Speech API needs a secure (HTTPS) context to function.</p>
 
         <div class="docs-warning">
           <strong>Regenerating certificates</strong>
-          If you need to regenerate the SSL certificates, delete the <code>cert.pem</code> and <code>key.pem</code> files from <code>~/.talkie/</code> and restart the server. New certificates will be generated automatically.
+          If you need to regenerate the SSL certificates, delete the <code>cert.pem</code> and <code>key.pem</code> files from <code>~/.wtb/</code> and restart the server. New certificates will be generated automatically.
         </div>
 
         <!-- ── Prev / Next ── -->
@@ -556,7 +556,7 @@ echo "123456:ABC-DEF..." > ~/.talkie/telegram.token</code></pre>
         <span class="site-footer__divider">&middot;</span>
         <a class="site-footer__link" href="/docs/integrations">Integrations</a>
         <span class="site-footer__divider">&middot;</span>
-        <a class="site-footer__link" href="https://www.npmjs.com/package/talkiebot" target="_blank" rel="noopener">npm</a>
+        <a class="site-footer__link" href="https://www.npmjs.com/package/walkietalkiebot" target="_blank" rel="noopener">npm</a>
         <span class="site-footer__divider">&middot;</span>
         <a class="site-footer__link" href="https://github.com/bengillin/walkietalkiebot" target="_blank" rel="noopener">GitHub</a>
         <span class="site-footer__divider">&middot;</span>

@@ -18,30 +18,30 @@ function activityToStored(activity: Activity): StoredActivity | null {
   }
 }
 
-// One-time migration: rename talkboy_* localStorage keys → talkie_*
+// One-time migration: rename talkboy_*/talkie_* localStorage keys → wtb_*
 function migrateLocalStorageKeys() {
-  if (localStorage.getItem('_talkie_keys_migrated')) return
+  if (localStorage.getItem('_wtb_keys_migrated')) return
   const keysToMigrate: string[] = []
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i)
-    if (key?.startsWith('talkboy_')) keysToMigrate.push(key)
+    if (key?.startsWith('talkboy_') || key?.startsWith('wtb_')) keysToMigrate.push(key)
   }
   for (const oldKey of keysToMigrate) {
-    const newKey = oldKey.replace('talkboy_', 'talkie_')
+    const newKey = oldKey.replace(/^talkboy_|^talkie_/, 'wtb_')
     if (!localStorage.getItem(newKey)) {
       localStorage.setItem(newKey, localStorage.getItem(oldKey)!)
     }
     localStorage.removeItem(oldKey)
   }
   if (keysToMigrate.length > 0) {
-    console.log(`Migrated ${keysToMigrate.length} localStorage keys from talkboy_* → talkie_*`)
+    console.log(`Migrated ${keysToMigrate.length} localStorage keys to wtb_*`)
   }
-  localStorage.setItem('_talkie_keys_migrated', '1')
+  localStorage.setItem('_wtb_keys_migrated', '1')
 }
 
 migrateLocalStorageKeys()
 
-const STORAGE_KEY = 'talkie_conversations'
+const STORAGE_KEY = 'wtb_conversations'
 
 // Load conversations from localStorage (used as fallback/cache)
 function loadConversationsFromStorage(): Conversation[] {
@@ -335,75 +335,75 @@ export const useStore = create<AppState>((set, get) => {
     },
 
     // Text-to-speech enabled
-    ttsEnabled: localStorage.getItem('talkie_tts_enabled') !== 'false',
+    ttsEnabled: localStorage.getItem('wtb_tts_enabled') !== 'false',
     setTtsEnabled: (ttsEnabled) => {
-      localStorage.setItem('talkie_tts_enabled', String(ttsEnabled))
+      localStorage.setItem('wtb_tts_enabled', String(ttsEnabled))
       set({ ttsEnabled })
     },
 
     // Continuous listening (always-on with "over" trigger)
-    continuousListeningEnabled: localStorage.getItem('talkie_continuous_listening') === 'true',
+    continuousListeningEnabled: localStorage.getItem('wtb_continuous_listening') === 'true',
     setContinuousListeningEnabled: (enabled) => {
-      localStorage.setItem('talkie_continuous_listening', String(enabled))
+      localStorage.setItem('wtb_continuous_listening', String(enabled))
       set({ continuousListeningEnabled: enabled })
     },
 
     // Wake word detection (hands-free activation)
-    wakeWordEnabled: localStorage.getItem('talkie_wake_word') === 'true',
+    wakeWordEnabled: localStorage.getItem('wtb_wake_word') === 'true',
     setWakeWordEnabled: (enabled) => {
-      localStorage.setItem('talkie_wake_word', String(enabled))
+      localStorage.setItem('wtb_wake_word', String(enabled))
       set({ wakeWordEnabled: enabled })
     },
 
     // Custom wake word
-    customWakeWord: localStorage.getItem('talkie_custom_wake_word') || '',
+    customWakeWord: localStorage.getItem('wtb_custom_wake_word') || '',
     setCustomWakeWord: (word) => {
-      localStorage.setItem('talkie_custom_wake_word', word)
+      localStorage.setItem('wtb_custom_wake_word', word)
       set({ customWakeWord: word })
     },
 
     // Custom trigger word for ending messages
-    customTriggerWord: localStorage.getItem('talkie_custom_trigger_word') || '',
+    customTriggerWord: localStorage.getItem('wtb_custom_trigger_word') || '',
     setCustomTriggerWord: (word) => {
-      localStorage.setItem('talkie_custom_trigger_word', word)
+      localStorage.setItem('wtb_custom_trigger_word', word)
       set({ customTriggerWord: word })
     },
 
     // Trigger word delay (silence required after trigger word before ending turn)
-    triggerWordDelay: parseInt(localStorage.getItem('talkie_trigger_delay') || '1000', 10),
+    triggerWordDelay: parseInt(localStorage.getItem('wtb_trigger_delay') || '1000', 10),
     setTriggerWordDelay: (delay) => {
-      localStorage.setItem('talkie_trigger_delay', String(delay))
+      localStorage.setItem('wtb_trigger_delay', String(delay))
       set({ triggerWordDelay: delay })
     },
 
     // Sound effects
-    soundEffectsEnabled: localStorage.getItem('talkie_sound_effects') !== 'false',
+    soundEffectsEnabled: localStorage.getItem('wtb_sound_effects') !== 'false',
     setSoundEffectsEnabled: (enabled) => {
-      localStorage.setItem('talkie_sound_effects', String(enabled))
+      localStorage.setItem('wtb_sound_effects', String(enabled))
       set({ soundEffectsEnabled: enabled })
     },
 
     // TTS voice selection
-    ttsVoice: localStorage.getItem('talkie_tts_voice') || '',
+    ttsVoice: localStorage.getItem('wtb_tts_voice') || '',
     setTtsVoice: (voice) => {
-      localStorage.setItem('talkie_tts_voice', voice)
+      localStorage.setItem('wtb_tts_voice', voice)
       set({ ttsVoice: voice })
     },
 
     // Claude settings
-    claudeModel: localStorage.getItem('talkie_claude_model') || 'claude-sonnet-4-20250514',
+    claudeModel: localStorage.getItem('wtb_claude_model') || 'claude-sonnet-4-20250514',
     setClaudeModel: (model) => {
-      localStorage.setItem('talkie_claude_model', model)
+      localStorage.setItem('wtb_claude_model', model)
       set({ claudeModel: model })
     },
-    claudeMaxTokens: parseInt(localStorage.getItem('talkie_claude_max_tokens') || '1024', 10),
+    claudeMaxTokens: parseInt(localStorage.getItem('wtb_claude_max_tokens') || '1024', 10),
     setClaudeMaxTokens: (tokens) => {
-      localStorage.setItem('talkie_claude_max_tokens', String(tokens))
+      localStorage.setItem('wtb_claude_max_tokens', String(tokens))
       set({ claudeMaxTokens: tokens })
     },
-    claudeSystemPrompt: localStorage.getItem('talkie_claude_system_prompt') || 'You are Talkie. Be direct and brief - responses are spoken aloud. One to two sentences max unless asked for more. No filler phrases, no "Great question!", no "I\'d be happy to help!". Just answer. Kind but not performative.',
+    claudeSystemPrompt: localStorage.getItem('wtb_claude_system_prompt') || 'You are Walkie Talkie Bot. Be direct and brief - responses are spoken aloud. One to two sentences max unless asked for more. No filler phrases, no "Great question!", no "I\'d be happy to help!". Just answer. Kind but not performative.',
     setClaudeSystemPrompt: (prompt) => {
-      localStorage.setItem('talkie_claude_system_prompt', prompt)
+      localStorage.setItem('wtb_claude_system_prompt', prompt)
       set({ claudeSystemPrompt: prompt })
     },
 

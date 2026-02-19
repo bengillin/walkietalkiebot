@@ -4,20 +4,24 @@ import { dirname, join } from 'path'
 import { homedir } from 'os'
 import { initSchema } from './schema.js'
 
-// One-time migration: rename ~/.talkboy/ → ~/.talkie/
+// One-time migration: rename ~/.talkboy/ or ~/.talkie/ → ~/.wtb/
 function migrateDataDir() {
-  const oldDir = join(homedir(), '.talkboy')
-  const newDir = join(homedir(), '.talkie')
-  if (existsSync(oldDir) && !existsSync(newDir)) {
-    console.log(`Migrating ${oldDir} → ${newDir}`)
-    renameSync(oldDir, newDir)
+  const wtbDir = join(homedir(), '.wtb')
+  const oldDir2 = join(homedir(), '.talkie')
+  const oldDir1 = join(homedir(), '.talkboy')
+  if (existsSync(oldDir2) && !existsSync(wtbDir)) {
+    console.log(`Migrating ${oldDir2} → ${wtbDir}`)
+    renameSync(oldDir2, wtbDir)
+  } else if (existsSync(oldDir1) && !existsSync(wtbDir)) {
+    console.log(`Migrating ${oldDir1} → ${wtbDir}`)
+    renameSync(oldDir1, wtbDir)
   }
 }
 
 let db: Database.Database | null = null
 
 export function getDbPath(): string {
-  return join(homedir(), '.talkie', 'talkie.db')
+  return join(homedir(), '.wtb', 'wtb.db')
 }
 
 export function getDb(): Database.Database {

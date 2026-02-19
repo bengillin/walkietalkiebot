@@ -8,16 +8,16 @@ import { fileURLToPath } from 'url'
 import { createInterface } from 'readline'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const PLIST_NAME = 'com.talkie.server'
+const PLIST_NAME = 'com.wtb.server'
 const PLIST_PATH = join(homedir(), 'Library', 'LaunchAgents', `${PLIST_NAME}.plist`)
-const LOG_DIR = join(homedir(), '.talkie', 'logs')
-const PID_FILE = join(homedir(), '.talkie', 'server.pid')
-const PORT = parseInt(process.env.TALKIE_PORT || '5173', 10)
+const LOG_DIR = join(homedir(), '.wtb', 'logs')
+const PID_FILE = join(homedir(), '.wtb', 'server.pid')
+const PORT = parseInt(process.env.WTB_PORT || '5173', 10)
 
 function ensureDirs() {
-  const talkieDir = join(homedir(), '.talkie')
-  if (!existsSync(talkieDir)) {
-    mkdirSync(talkieDir, { recursive: true })
+  const wtbDir = join(homedir(), '.wtb')
+  if (!existsSync(wtbDir)) {
+    mkdirSync(wtbDir, { recursive: true })
   }
   if (!existsSync(LOG_DIR)) {
     mkdirSync(LOG_DIR, { recursive: true })
@@ -137,7 +137,7 @@ async function startServer(foreground = false) {
   }
 
   if (foreground) {
-    console.log(`Starting Talkie server in foreground on port ${PORT}...`)
+    console.log(`Starting Walkie Talkie Bot server in foreground on port ${PORT}...`)
     const { startServer } = await import('../server/index.js')
     await startServer(PORT)
   } else {
@@ -173,12 +173,12 @@ async function startServer(foreground = false) {
     for (let i = 0; i < 30; i++) {
       await new Promise(r => setTimeout(r, 500))
       if (isServerRunning()) {
-        console.log(`Talkie server running at https://localhost:${PORT}`)
+        console.log(`Walkie Talkie Bot server running at https://localhost:${PORT}`)
         return
       }
     }
 
-    console.error('Server failed to start. Check logs with: talkie-server logs')
+    console.error('Server failed to start. Check logs with: wtb-server logs')
   }
 }
 
@@ -223,8 +223,8 @@ async function showStatus() {
   const running = isServerRunning()
   const launchd = isLaunchctlLoaded()
 
-  console.log('Talkie Server Status')
-  console.log('=====================')
+  console.log('Walkie Talkie Bot Server Status')
+  console.log('================================')
   console.log(`Server:   ${running ? '✅ Running' : '❌ Stopped'}`)
   console.log(`Port:     ${PORT}`)
   console.log(`launchd:  ${launchd ? '✅ Loaded' : '⚪ Not loaded'}`)
@@ -293,7 +293,7 @@ async function installDaemon() {
   execSync(`launchctl load ${PLIST_PATH}`)
   console.log('Daemon loaded and started.')
   console.log(`Server will start automatically on login.`)
-  console.log(`\nTo uninstall: talkie-server uninstall`)
+  console.log(`\nTo uninstall: wtb-server uninstall`)
 }
 
 async function uninstallDaemon() {
@@ -312,9 +312,9 @@ async function uninstallDaemon() {
 
 function showHelp() {
   console.log(`
-Talkie Server CLI
+Walkie Talkie Bot Server CLI
 
-Usage: talkie-server <command> [options]
+Usage: wtb-server <command> [options]
 
 Commands:
   start [-f]      Start the server (use -f for foreground)
@@ -326,7 +326,7 @@ Commands:
   uninstall       Remove launchd daemon
 
 Environment:
-  TALKIE_PORT    Server port (default: 5173)
+  WTB_PORT    Server port (default: 5173)
 `)
 }
 

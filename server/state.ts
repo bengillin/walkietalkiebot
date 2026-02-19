@@ -1,5 +1,5 @@
 // In-memory state store for API
-export interface TalkieState {
+export interface WtbState {
   avatarState: string
   transcript: string
   lastUserMessage: string
@@ -10,7 +10,7 @@ export interface TalkieState {
   responseCallbacks: Array<(response: string) => void>
 }
 
-export let state: TalkieState = {
+export let state: WtbState = {
   avatarState: 'idle',
   transcript: '',
   lastUserMessage: '',
@@ -21,7 +21,7 @@ export let state: TalkieState = {
   responseCallbacks: [],
 }
 
-export function updateState(update: Partial<TalkieState>) {
+export function updateState(update: Partial<WtbState>) {
   state = { ...state, ...update }
 }
 

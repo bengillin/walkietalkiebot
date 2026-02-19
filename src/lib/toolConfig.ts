@@ -36,46 +36,46 @@ const TOOL_REGISTRY: Record<string, ToolIdentity> = {
   webfetch:    { icon: '🌐', label: 'Fetching web page', displayName: 'WebFetch',   category: 'media' },
   websearch:   { icon: '🔎', label: 'Searching web',     displayName: 'WebSearch',  category: 'media' },
 
-  // Talkie MCP tools — Core & Voice
-  launch_talkie:            { icon: '🚀', label: 'Launching Talkie',        displayName: 'Launch',        category: 'voice' },
-  get_talkie_status:        { icon: '📡', label: 'Checking status',         displayName: 'Status',        category: 'voice' },
+  // WTB MCP tools — Core & Voice
+  launch_wtb:               { icon: '🚀', label: 'Launching WTB',           displayName: 'Launch',        category: 'voice' },
+  get_wtb_status:           { icon: '📡', label: 'Checking status',         displayName: 'Status',        category: 'voice' },
   get_transcript:           { icon: '🎙️',  label: 'Getting transcript',     displayName: 'Transcript',    category: 'voice' },
   get_conversation_history: { icon: '📜', label: 'Loading history',         displayName: 'History',       category: 'voice' },
   get_pending_message:      { icon: '💬', label: 'Checking messages',       displayName: 'Pending',       category: 'voice' },
-  respond_to_talkie:        { icon: '💬', label: 'Sending response',        displayName: 'Respond',       category: 'voice' },
-  update_talkie_state:      { icon: '🔄', label: 'Updating state',          displayName: 'State',         category: 'voice' },
+  respond_to_wtb:           { icon: '💬', label: 'Sending response',        displayName: 'Respond',       category: 'voice' },
+  update_wtb_state:         { icon: '🔄', label: 'Updating state',          displayName: 'State',         category: 'voice' },
 
-  // Talkie MCP tools — Session & Media
+  // WTB MCP tools — Session & Media
   get_claude_session:       { icon: '🔗', label: 'Getting session',         displayName: 'Session',       category: 'media' },
   set_claude_session:       { icon: '🔗', label: 'Setting session',         displayName: 'Session',       category: 'media' },
   disconnect_claude_session:{ icon: '🔗', label: 'Disconnecting session',   displayName: 'Disconnect',    category: 'media' },
   analyze_image:            { icon: '🖼️',  label: 'Analyzing image',        displayName: 'Analyze Image', category: 'media' },
   open_url:                 { icon: '🌐', label: 'Opening URL',             displayName: 'Open URL',      category: 'media' },
 
-  // Talkie MCP tools — Jobs
-  create_talkie_job:        { icon: '⏳', label: 'Creating job',            displayName: 'Create Job',    category: 'plan' },
-  get_talkie_job:           { icon: '⏳', label: 'Checking job',            displayName: 'Job Status',    category: 'plan' },
-  list_talkie_jobs:         { icon: '⏳', label: 'Listing jobs',            displayName: 'Jobs',          category: 'plan' },
+  // WTB MCP tools — Jobs
+  create_wtb_job:           { icon: '⏳', label: 'Creating job',            displayName: 'Create Job',    category: 'plan' },
+  get_wtb_job:              { icon: '⏳', label: 'Checking job',            displayName: 'Job Status',    category: 'plan' },
+  list_wtb_jobs:            { icon: '⏳', label: 'Listing jobs',            displayName: 'Jobs',          category: 'plan' },
 
-  // Talkie MCP tools — Conversations
+  // WTB MCP tools — Conversations
   list_conversations:       { icon: '📚', label: 'Listing conversations',   displayName: 'Conversations', category: 'data' },
   get_conversation:         { icon: '📚', label: 'Loading conversation',    displayName: 'Conversation',  category: 'data' },
   create_conversation:      { icon: '📚', label: 'Creating conversation',   displayName: 'New Tape',      category: 'data' },
   rename_conversation:      { icon: '📚', label: 'Renaming conversation',   displayName: 'Rename',        category: 'data' },
   delete_conversation:      { icon: '🗑️',  label: 'Deleting conversation',  displayName: 'Delete',        category: 'data' },
 
-  // Talkie MCP tools — Search & Messages
+  // WTB MCP tools — Search & Messages
   search_conversations:     { icon: '🔍', label: 'Searching conversations', displayName: 'Search',        category: 'data' },
   add_message:              { icon: '💬', label: 'Adding message',           displayName: 'Add Message',   category: 'data' },
 
-  // Talkie MCP tools — Plans
+  // WTB MCP tools — Plans
   list_plans:               { icon: '📐', label: 'Listing plans',           displayName: 'Plans',         category: 'plan' },
   get_plan:                 { icon: '📐', label: 'Loading plan',            displayName: 'Plan',          category: 'plan' },
   create_plan:              { icon: '📐', label: 'Creating plan',           displayName: 'New Plan',      category: 'plan' },
   update_plan:              { icon: '📐', label: 'Updating plan',           displayName: 'Update Plan',   category: 'plan' },
   delete_plan:              { icon: '🗑️',  label: 'Deleting plan',          displayName: 'Delete Plan',   category: 'plan' },
 
-  // Talkie MCP tools — Liner Notes & Export
+  // WTB MCP tools — Liner Notes & Export
   get_liner_notes:          { icon: '🏷️',  label: 'Loading liner notes',    displayName: 'Liner Notes',   category: 'data' },
   set_liner_notes:          { icon: '🏷️',  label: 'Saving liner notes',     displayName: 'Liner Notes',   category: 'data' },
   export_conversation:      { icon: '📤', label: 'Exporting conversation',  displayName: 'Export',        category: 'data' },
@@ -90,7 +90,7 @@ const DEFAULT_IDENTITY: ToolIdentity = {
 
 /**
  * Strip MCP prefix from tool name.
- * "mcp__talkie__launch_talkie" → "launch_talkie"
+ * "mcp__wtb__launch_wtb" → "launch_wtb"
  * "Read" → "Read"
  */
 export function parseToolName(rawName: string): string {

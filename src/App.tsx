@@ -26,10 +26,10 @@ import './App.css'
 function App() {
   // --- Local UI state ---
   const [hasOnboarded, setHasOnboarded] = useState(() =>
-    localStorage.getItem('talkie_onboarded') === 'true'
+    localStorage.getItem('wtb_onboarded') === 'true'
   )
   const [apiKey, setApiKey] = useState(() =>
-    localStorage.getItem('talkie_api_key') || ''
+    localStorage.getItem('wtb_api_key') || ''
   )
   const [showSettings, setShowSettings] = useState(false)
   const [showMediaLibrary, setShowMediaLibrary] = useState(false)
@@ -41,7 +41,7 @@ function App() {
   const [showThemePicker, setShowThemePicker] = useState(false)
   const [themeBeforePicker, setThemeBeforePicker] = useState<string | null>(null)
   const [useClaudeCode, setUseClaudeCode] = useState(() =>
-    localStorage.getItem('talkie_use_claude_code') === 'true'
+    localStorage.getItem('wtb_use_claude_code') === 'true'
   )
   const [connectedSessionId, setConnectedSessionId] = useState<string | null>(null)
   const [lightboxImage, setLightboxImage] = useState<{ dataUrl: string; description?: string; fileName: string } | null>(null)
@@ -184,19 +184,19 @@ function App() {
   // --- Onboarding ---
   const handleOnboardingComplete = useCallback((settings: OnboardingSettings) => {
     setUseClaudeCode(true)
-    localStorage.setItem('talkie_use_claude_code', 'true')
+    localStorage.setItem('wtb_use_claude_code', 'true')
     setTtsEnabled(settings.ttsEnabled)
     setSoundEffectsEnabled(settings.soundEffects)
     setWakeWordEnabled(settings.wakeWord)
     setContinuousListeningEnabled(settings.continuousListening)
     setHasOnboarded(true)
-    localStorage.setItem('talkie_onboarded', 'true')
+    localStorage.setItem('wtb_onboarded', 'true')
   }, [setTtsEnabled, setSoundEffectsEnabled, setWakeWordEnabled, setContinuousListeningEnabled])
 
   const handleSaveApiKey = (e: React.FormEvent) => {
     e.preventDefault()
     if (apiKey.trim()) {
-      localStorage.setItem('talkie_api_key', apiKey.trim())
+      localStorage.setItem('wtb_api_key', apiKey.trim())
       setShowSettings(false)
     }
   }
@@ -395,7 +395,7 @@ function App() {
           onRenameConversation={(title) => {
             if (currentConversationId) useStore.getState().renameConversation(currentConversationId, title)
           }}
-          onResetOnboarding={() => { localStorage.removeItem('talkie_onboarded'); setHasOnboarded(false); setShowSettings(false) }}
+          onResetOnboarding={() => { localStorage.removeItem('wtb_onboarded'); setHasOnboarded(false); setShowSettings(false) }}
           onClose={() => setShowSettings(false)}
         />
       )}

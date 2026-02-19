@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Themes — Talkie Bot</title>
-  <meta name="description" content="Talkie Bot theme system: 6 retro themes with 70+ CSS custom properties each. Learn how theming works and how to use it in your components." />
-  <meta property="og:title" content="Themes — Talkie Bot" />
-  <meta property="og:description" content="Talkie Bot theme system: 6 retro themes with 70+ CSS custom properties each. Learn how theming works and how to use it in your components." />
+  <title>Themes — Walkie Talkie Bot</title>
+  <meta name="description" content="Walkie Talkie Bot theme system: 6 retro themes with 70+ CSS custom properties each. Learn how theming works and how to use it in your components." />
+  <meta property="og:title" content="Themes — Walkie Talkie Bot" />
+  <meta property="og:description" content="Walkie Talkie Bot theme system: 6 retro themes with 70+ CSS custom properties each. Learn how theming works and how to use it in your components." />
   <meta property="og:image" content="https://walkietalkie.bot/og.png" />
   <meta property="og:url" content="https://walkietalkie.bot/docs/themes.html" />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Themes — Talkie Bot" />
-  <meta name="twitter:description" content="Talkie Bot theme system: 6 retro themes with 70+ CSS custom properties each. Learn how theming works and how to use it in your components." />
+  <meta name="twitter:title" content="Themes — Walkie Talkie Bot" />
+  <meta name="twitter:description" content="Walkie Talkie Bot theme system: 6 retro themes with 70+ CSS custom properties each. Learn how theming works and how to use it in your components." />
   <meta name="twitter:image" content="https://walkietalkie.bot/og.png" />
   <link rel="canonical" href="https://walkietalkie.bot/docs/themes.html" />
     <!-- PostHog Analytics -->
@@ -29,7 +29,7 @@
       <div class="site-nav__inner">
         <a class="site-nav__brand" href="/">
           <span class="mini-robot"><span class="mini-robot__face"><span class="mini-robot__eye"></span><span class="mini-robot__eye"></span></span></span>
-          Talkie Bot
+          Walkie Talkie Bot
         </a>
         <button class="site-nav__toggle" aria-label="Menu">&#9776;</button>
         <div class="site-nav__links">
@@ -541,7 +541,7 @@
 &lt;/div&gt;</code></pre>
 
         <h3>localStorage persistence</h3>
-        <p>The selected theme is stored under the <code>talkie_theme</code> key in localStorage. On page load, the saved theme is read and applied before the first paint to avoid a flash of the wrong theme.</p>
+        <p>The selected theme is stored under the <code>wtb_theme</code> key in localStorage. On page load, the saved theme is read and applied before the first paint to avoid a flash of the wrong theme.</p>
 
         <h3>setTheme function</h3>
         <p>The theme switching logic removes all theme classes, adds the new one, and persists the choice:</p>
@@ -559,7 +559,7 @@ function setTheme(name: ThemeName) {
     document.documentElement.classList.remove(`theme-${t}`)
   )
   document.documentElement.classList.add(`theme-${name}`)
-  localStorage.setItem('talkie_theme', name)
+  localStorage.setItem('wtb_theme', name)
 }</code></pre>
 
         <!-- ── Using Themes in Components ── -->
@@ -672,7 +672,7 @@ function setTheme(name: ThemeName) {
         <span class="site-footer__divider">&middot;</span>
         <a class="site-footer__link" href="/docs/integrations">Integrations</a>
         <span class="site-footer__divider">&middot;</span>
-        <a class="site-footer__link" href="https://www.npmjs.com/package/talkiebot" target="_blank" rel="noopener">npm</a>
+        <a class="site-footer__link" href="https://www.npmjs.com/package/walkietalkiebot" target="_blank" rel="noopener">npm</a>
         <span class="site-footer__divider">&middot;</span>
         <a class="site-footer__link" href="https://github.com/bengillin/walkietalkiebot" target="_blank" rel="noopener">GitHub</a>
         <span class="site-footer__divider">&middot;</span>

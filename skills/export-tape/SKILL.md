@@ -1,12 +1,12 @@
 ---
 name: export-tape
-description: Export a Talkie conversation as markdown or JSON. Use when the user wants to export or share a conversation.
+description: Export a Walkie Talkie Bot conversation as markdown or JSON. Use when the user wants to export or share a conversation.
 allowed-tools: list_conversations, export_conversation
 ---
 
 # Export Conversation
 
-Export a saved Talkie conversation as formatted markdown or structured JSON.
+Export a saved conversation as formatted markdown or structured JSON.
 
 ## Steps
 
@@ -22,5 +22,5 @@ Export a saved Talkie conversation as formatted markdown or structured JSON.
 
 ## Notes
 
-- Works offline (no Talkie server needed)
+- Works offline (no WTB server needed)
 - Exported markdown includes tool activity history at the end

@@ -51,10 +51,10 @@ const ThemeContext = createContext<ThemeContextValue | null>(null)
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<ThemeName>(() => {
-    const saved = localStorage.getItem('talkie_theme')
+    const saved = localStorage.getItem('wtb_theme')
     // Migrate old spelling to new spelling
     if (saved === 'mcallister') {
-      localStorage.setItem('talkie_theme', 'mccallister')
+      localStorage.setItem('wtb_theme', 'mccallister')
       return 'mccallister'
     }
     return (saved as ThemeName) || 'apple-1984'
@@ -62,7 +62,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const setTheme = (newTheme: ThemeName) => {
     setThemeState(newTheme)
-    localStorage.setItem('talkie_theme', newTheme)
+    localStorage.setItem('wtb_theme', newTheme)
   }
 
   // Apply theme to document

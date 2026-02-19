@@ -4,7 +4,7 @@ import * as messages from '../db/repositories/messages.js'
 import * as telegramState from '../db/repositories/telegram.js'
 import * as activities from '../db/repositories/activities.js'
 
-const WEB_UI_URL = process.env.TALKIE_URL || 'https://localhost:5173'
+const WEB_UI_URL = process.env.WTB_URL || 'https://localhost:5173'
 
 export function setupHandlers(bot: Bot): void {
   // Handle text messages
@@ -180,7 +180,7 @@ export function setupHandlers(bot: Bot): void {
 
       await ctx.reply(
         'Sorry, I encountered an error processing your message. ' +
-        'Make sure the Talkie server is running and Claude Code is available.',
+        'Make sure the Walkie Talkie Bot server is running and Claude Code is available.',
         { reply_markup: keyboard }
       )
     }
@@ -366,7 +366,7 @@ export function setupHandlers(bot: Bot): void {
       console.error('Error processing Telegram photo:', err)
       await ctx.reply(
         'Sorry, I had trouble processing that image. ' +
-        'Make sure the Talkie server is running and an API key is configured.'
+        'Make sure the Walkie Talkie Bot server is running and an API key is configured.'
       )
     }
   })

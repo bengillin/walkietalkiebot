@@ -342,7 +342,7 @@ api.get("/integrations", (c) => {
       const { existsSync } = require("fs");
       const { join } = require("path");
       const { homedir } = require("os");
-      const tokenPath = join(homedir(), ".talkie", "telegram.token");
+      const tokenPath = join(homedir(), ".wtb", "telegram.token");
       telegramConfigured = existsSync(tokenPath);
     } catch {
     }
@@ -352,21 +352,21 @@ api.get("/integrations", (c) => {
       configured: true,
       toolCount: 30,
       tools: [
-        "launch_talkie",
-        "get_talkie_status",
+        "launch_wtb",
+        "get_wtb_status",
         "get_transcript",
         "get_conversation_history",
         "get_claude_session",
         "set_claude_session",
         "disconnect_claude_session",
         "get_pending_message",
-        "respond_to_talkie",
-        "update_talkie_state",
+        "respond_to_wtb",
+        "update_wtb_state",
         "analyze_image",
         "open_url",
-        "create_talkie_job",
-        "get_talkie_job",
-        "list_talkie_jobs",
+        "create_wtb_job",
+        "get_wtb_job",
+        "list_wtb_jobs",
         "list_conversations",
         "get_conversation",
         "create_conversation",

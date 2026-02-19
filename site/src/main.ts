@@ -30,11 +30,11 @@ function setTheme(name: ThemeName) {
   const heroScope = document.getElementById('hero-scope')
   if (heroScope) heroScope.setAttribute('data-theme', name)
 
-  localStorage.setItem('talkie_theme', name)
+  localStorage.setItem('wtb_theme', name)
 }
 
 function initTheme() {
-  const saved = localStorage.getItem('talkie_theme') as ThemeName | null
+  const saved = localStorage.getItem('wtb_theme') as ThemeName | null
   setTheme(saved && themes.some(t => t.name === saved) ? saved : 'apple-1984')
 }
 
