@@ -364,7 +364,7 @@ function formatMarkdown(conv: ConversationData, messages: MessageData[], activit
 
 // ─── MCP Server ───
 const server = new Server(
-  { name: 'wtb', version: '0.3.0' },
+  { name: 'wtb', version: '0.3.1' },
   { capabilities: { tools: {} } }
 )
 

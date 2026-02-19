@@ -1,7 +1,7 @@
 {
   "name": "wtb",
   "description": "Walkie Talkie Bot — voice-first cassette tape interface for Claude Code. 30 MCP tools for conversations, plans, search, voice, and more. Data tools work offline via direct SQLite.",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "author": { "name": "Ben Gillin" },
   "homepage": "https://walkietalkie.bot",
   "repository": "https://github.com/bengillin/walkietalkiebot"
