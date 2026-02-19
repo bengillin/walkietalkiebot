@@ -298,7 +298,7 @@ async function isWtbRunning(): Promise<boolean> {
 }
 
 function serverNotRunning(): ApiResult {
-  return { error: 'Walkie Talkie Bot server not running. Data tools work offline. Start server with: npx walkietalkiebot' }
+  return { error: 'This is a server tool — it requires the WTB web server to be running. You can start it with: npx walkietalkiebot\n\nNote: Data tools (conversations, plans, search, export) work without the server.' }
 }
 
 async function serverCall(fn: () => Promise<ApiResult>): Promise<ApiResult> {
@@ -642,7 +642,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 async function main(): Promise<void> {
   const transport = new StdioServerTransport()
   await server.connect(transport)
-  console.error('Walkie Talkie Bot MCP server running (30 tools — 15 data + 15 server)')
+  const running = await isWtbRunning()
+  if (running) {
+    console.error('Walkie Talkie Bot MCP ready — all 30 tools available (server detected at ' + WTB_URL + ')')
+  } else {
+    console.error('Walkie Talkie Bot MCP ready — 15 data tools available (conversations, plans, search, export). Start the server for voice/UI tools: npx walkietalkiebot')
+  }
 }
 
 main().catch(console.error)
