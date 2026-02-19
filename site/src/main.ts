@@ -77,9 +77,9 @@ function initCopy() {
       const cmd = el.querySelector('.hero__install-cmd') as HTMLElement | null
       navigator.clipboard.writeText(text).then(() => {
         if (cmd) {
-          const orig = cmd.textContent
+          const orig = cmd.innerHTML
           cmd.textContent = 'Copied!'
-          setTimeout(() => { cmd.textContent = orig }, 1500)
+          setTimeout(() => { cmd.innerHTML = orig }, 1500)
         }
       })
     })

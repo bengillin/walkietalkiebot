@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Walkie Walkie Talkie Bot — Walkie Talkie AI Assistant</title>
-  <meta name="description" content="Walkie Talkie AI Assistant. A voice-first, cassette tape-themed interface for Claude Code with 6 retro themes." />
-  <meta property="og:title" content="Walkie Talkie Bot — Walkie Talkie AI Assistant" />
-  <meta property="og:description" content="A voice-first, cassette tape-themed interface for Claude Code with 6 retro themes." />
+  <title>Walkie Talkie Bot — Voice Interface for Claude Code</title>
+  <meta name="description" content="A voice-first AI assistant for Claude Code. Talk instead of type. 30 MCP tools, 6 retro themes, Telegram bot, and a REST API. Open source." />
+  <meta property="og:title" content="Walkie Talkie Bot — Voice Interface for Claude Code" />
+  <meta property="og:description" content="A voice-first AI assistant for Claude Code. Talk instead of type. 30 MCP tools, 6 retro themes, and a cassette tape UI." />
   <meta property="og:image" content="https://walkietalkie.bot/og.png" />
   <meta property="og:url" content="https://walkietalkie.bot" />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Walkie Talkie Bot — Walkie Talkie AI Assistant" />
-  <meta name="twitter:description" content="A voice-first, cassette tape-themed interface for Claude Code with 6 retro themes." />
+  <meta name="twitter:title" content="Walkie Talkie Bot — Voice Interface for Claude Code" />
+  <meta name="twitter:description" content="A voice-first AI assistant for Claude Code. Talk instead of type. 30 MCP tools, 6 retro themes, and a cassette tape UI." />
   <meta name="twitter:image" content="https://walkietalkie.bot/og.png" />
   <link rel="canonical" href="https://walkietalkie.bot/" />
   <script type="application/ld+json">
@@ -23,7 +23,7 @@
     "applicationCategory": "DeveloperApplication",
     "operatingSystem": "macOS, Linux, Windows",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-    "description": "A voice-first, cassette tape-themed interface for Claude Code with 6 retro themes, conversation management, Telegram bot, and MCP integration.",
+    "description": "A voice-first AI assistant for Claude Code. Talk instead of type. 30 MCP tools, 6 retro themes, Telegram bot, and a REST API.",
     "url": "https://walkietalkie.bot",
     "softwareVersion": "0.3.0",
     "installUrl": "https://www.npmjs.com/package/walkietalkiebot",
@@ -92,7 +92,7 @@
       <div class="hero__columns">
         <div class="hero__column">
           <p class="hero__column-label">For humans</p>
-          <p class="hero__column-text">Voice-first AI assistant with 6 retro themes. Run <code>npx walkietalkiebot</code> for the full UI, or install as a Claude Code plugin for MCP tools without a server.</p>
+          <p class="hero__column-text">Voice-first AI assistant with 6 retro themes. One command to get the full web UI with voice, cassette tapes, and Telegram bot.</p>
           <div class="hero__cta">
             <div class="hero__install" data-copy="npx walkietalkiebot">
               <span class="hero__install-cmd">npx walkietalkiebot</span>
@@ -106,10 +106,16 @@
         </div>
         <div class="hero__column">
           <p class="hero__column-label">For bots</p>
-          <p class="hero__column-text">Machine-readable docs at <a href="/llms.txt">/llms.txt</a>. 15 offline data tools + 15 server tools. REST API with 40+ endpoints.</p>
-          <div class="hero__cta">
+          <p class="hero__column-text">30 MCP tools, 40+ REST endpoints, and machine-readable docs at <a href="/llms.txt">/llms.txt</a>. Add the plugin to Claude Code:</p>
+          <div class="hero__cta hero__cta--vertical">
+            <div class="hero__install hero__install--mcp" data-copy='{ "wtb": { "command": "npx", "args": ["wtb-mcp"] } }'>
+              <pre class="hero__install-cmd hero__install-cmd--block"><code>"wtb": {
+  "command": "npx",
+  "args": ["wtb-mcp"]
+}</code></pre>
+              <span class="hero__install-copy" title="Copy to clipboard">&#x2398;</span>
+            </div>
             <a class="hero__github" href="/docs/">View Docs</a>
-            <a class="hero__github" href="/docs/integrations">Integrations</a>
           </div>
         </div>
       </div>
