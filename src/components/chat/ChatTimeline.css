@@ -672,9 +672,10 @@
   margin-top: 8px;
   padding: 4px 8px;
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid currentColor;
   border-radius: 12px;
-  color: rgba(255, 255, 255, 0.5);
+  color: inherit;
+  opacity: 0.45;
   font-size: 11px;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -682,13 +683,13 @@
 }
 
 .message-bubble__pin-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.8);
-  border-color: rgba(255, 255, 255, 0.3);
+  opacity: 0.75;
+  background: rgba(128, 128, 128, 0.1);
 }
 
 .message-bubble__pin-btn:active {
-  background: rgba(255, 255, 255, 0.15);
+  opacity: 0.85;
+  background: rgba(128, 128, 128, 0.15);
 }
 
 /* Scroll to bottom button */
