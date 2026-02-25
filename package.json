@@ -34,6 +34,7 @@
     "test:client": "vitest run",
     "test:server": "vitest run --config vitest.config.server.ts",
     "test:watch": "vitest",
+    "version": "node scripts/sync-version.js",
     "prepublishOnly": "npm run build"
   },
   "keywords": [

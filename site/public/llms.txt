@@ -8,7 +8,7 @@
   Repository: https://github.com/bengillin/walkietalkiebot
   npm: https://www.npmjs.com/package/walkietalkiebot
   Website: https://walkietalkie.bot
-  Version: 0.3.6
+  Version: 0.3.7
   License: MIT
 
 ## Plugin Installation
