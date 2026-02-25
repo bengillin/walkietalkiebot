@@ -33,8 +33,6 @@ function trackTool(toolName: string, category: string, ok: boolean): void {
   }).catch(() => {}) // fire-and-forget
 }
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
-
 let wtbProcess: ChildProcess | null = null
 
 // ─── Types ───
