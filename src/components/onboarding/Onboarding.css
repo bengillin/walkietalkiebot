@@ -1006,7 +1006,7 @@
   letter-spacing: 0.5px;
   border-radius: var(--radius-sm, 4px);
   background: var(--accent);
-  color: #ffffff;
+  color: var(--bg-primary);
   margin-bottom: 6px;
 }
 
@@ -1014,69 +1014,6 @@
   background: var(--bg-tertiary);
   color: var(--onb-text);
 }
-
-/* Per-theme mode card overrides — match each theme's visual language */
-
-/* McCallister — industrial card with beveled edges */
-[data-theme="mccallister"] .onboarding__mode {
-  border: 1px solid #707070;
-  border-radius: 0;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 2px 2px 0 rgba(0,0,0,0.15);
-}
-[data-theme="mccallister"] .onboarding__mode-badge { color: #ffffff; }
-[data-theme="mccallister"] .onboarding__mode-badge--alt { background: #808080; color: #ffffff; }
-
-/* iMessage — clean rounded card */
-[data-theme="imessage"] .onboarding__mode {
-  background: #ffffff;
-  border: 1px solid rgba(60, 60, 67, 0.12);
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-}
-[data-theme="imessage"] .onboarding__mode-badge { background: #0055cc; color: #ffffff; }
-[data-theme="imessage"] .onboarding__mode-badge--alt { background: #e5e5ea; color: #3c3c43; }
-
-/* AOL — Win95 beveled card */
-[data-theme="aol"] .onboarding__mode {
-  border-radius: 0;
-  border: 2px solid;
-  border-color: #ffffff #808080 #808080 #ffffff;
-  box-shadow: 1px 1px 0 #000000;
-}
-[data-theme="aol"] .onboarding__mode-badge { color: #ffffff; }
-[data-theme="aol"] .onboarding__mode-badge--alt { background: #c0c0c0; color: #000000; }
-
-/* Classic Mac — Platinum card with 1px border */
-[data-theme="classic-mac"] .onboarding__mode {
-  background: #ffffff;
-  border: 1px solid #000000;
-  border-radius: 4px;
-  box-shadow: 1px 1px 0 #999999;
-}
-[data-theme="classic-mac"] .onboarding__mode-badge { color: #ffffff; }
-[data-theme="classic-mac"] .onboarding__mode-badge--alt { background: #cccccc; color: #000000; }
-
-/* GeoCities — neon-bordered card */
-[data-theme="geocities"] .onboarding__mode {
-  border: 1px solid #6600cc;
-  border-radius: 0;
-  box-shadow: 0 0 4px rgba(255, 0, 255, 0.15);
-}
-[data-theme="geocities"] .onboarding__mode-badge { background: #cc00cc; color: #ffffff; }
-[data-theme="geocities"] .onboarding__mode-badge--alt { background: #1a0033; color: #ff66ff; }
-
-/* 1984 — warm beige card with subtle border */
-[data-theme="apple-1984"] .onboarding__mode {
-  border: 1px solid #c4a882;
-  border-radius: 6px;
-  box-shadow: 0 1px 3px rgba(44, 24, 16, 0.06);
-}
-[data-theme="apple-1984"] .onboarding__mode-badge { color: #ffffff; }
-[data-theme="apple-1984"] .onboarding__mode-badge--alt { background: #c4a882; color: #2c1810; }
-
-/* Default dark theme — badge needs dark text on cyan accent */
-:root .onboarding__mode-badge { color: #000000; }
-:root .onboarding__mode-badge--alt { background: #1a2a3a; color: #a0a0b8; }
 
 .onboarding__mode-name {
   display: block;
@@ -1092,10 +1029,10 @@
   line-height: 1.45;
 }
 
-/* Selectable mode cards */
+/* Selectable mode cards — border managed here to avoid theme conflicts */
 .onboarding__mode--selectable {
   cursor: pointer;
-  border: 2px solid transparent;
+  border: 2px solid var(--border-light);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
   text-align: left;
   width: 100%;
@@ -1103,11 +1040,11 @@
 }
 
 .onboarding__mode--selectable:hover {
-  border-color: var(--border-light);
+  border-color: var(--text-muted);
 }
 
 .onboarding__mode--selected {
-  border-color: var(--accent) !important;
+  border-color: var(--accent);
   box-shadow: 0 0 0 1px var(--accent);
 }
 
@@ -1130,13 +1067,13 @@
 }
 
 .onboarding__mode-status--ok {
-  background: #22c55e;
-  color: white;
+  background: var(--accent-secondary, #22c55e);
+  color: var(--bg-primary);
 }
 
 .onboarding__mode-status--warn {
-  background: #f59e0b;
-  color: white;
+  background: var(--text-secondary);
+  color: var(--bg-primary);
 }
 
 /* API key input in onboarding */
