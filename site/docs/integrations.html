@@ -512,21 +512,9 @@ echo "123456:ABC-DEF..." > ~/.wtb/telegram.token</code></pre>
           </tbody>
         </table>
 
-        <h3>SSL certificates</h3>
+        <h3>Networking</h3>
 
-        <p>Self-signed TLS certificates are automatically generated on first launch and stored at <code>~/.wtb/</code>. The files are:</p>
-
-        <ul>
-          <li><code>~/.wtb/cert.pem</code> &mdash; The self-signed certificate</li>
-          <li><code>~/.wtb/key.pem</code> &mdash; The private key</li>
-        </ul>
-
-        <p>Your browser will show a security warning on first visit because the certificate is self-signed. Accept the warning to continue. This is required because the Web Speech API needs a secure (HTTPS) context to function.</p>
-
-        <div class="docs-warning">
-          <strong>Regenerating certificates</strong>
-          If you need to regenerate the SSL certificates, delete the <code>cert.pem</code> and <code>key.pem</code> files from <code>~/.wtb/</code> and restart the server. New certificates will be generated automatically.
-        </div>
+        <p>Talkie runs over plain HTTP on localhost, which is a secure context in all modern browsers. No certificates or HTTPS setup needed. For remote access (e.g., via Tailscale), place your own TLS certificates at <code>~/.wtb/cert.pem</code> and <code>~/.wtb/key.pem</code> and Talkie will automatically use HTTPS.</p>
 
         <!-- ── Prev / Next ── -->
         <div class="docs-page-nav">

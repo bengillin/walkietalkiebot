@@ -77,12 +77,8 @@
         <h1>API Reference</h1>
         <p class="docs-subtitle">Complete REST API for managing conversations, plans, jobs, and integrations.</p>
 
-        <p>Base URL is <code>https://localhost:5173/api</code> (port configurable via the <code>WTB_PORT</code> environment variable). All responses are JSON unless otherwise noted. SSE endpoints return <code>text/event-stream</code>.</p>
+        <p>Base URL is <code>http://localhost:5173/api</code> (port configurable via the <code>WTB_PORT</code> environment variable). All responses are JSON unless otherwise noted. SSE endpoints return <code>text/event-stream</code>.</p>
 
-        <div class="docs-note">
-          <strong>Self-signed certificates</strong>
-          Talkie uses self-signed HTTPS certificates. When making requests with <code>curl</code> or other HTTP clients, you will need to pass the <code>--insecure</code> flag (or equivalent) to skip certificate verification.
-        </div>
 
         <!-- ── Status & Health ── -->
         <h2 id="status">Status &amp; Health</h2>
@@ -324,36 +320,35 @@
 
         <p>Create a new conversation using <code>curl</code>:</p>
 
-        <pre><code>curl -X POST https://localhost:5173/api/conversations \
+        <pre><code>curl -X POST http://localhost:5173/api/conversations \
   -H "Content-Type: application/json" \
   -d '{"title": "My First Tape"}' \
-  --insecure</code></pre>
+</code></pre>
 
-        <p>The <code>--insecure</code> flag is needed because Talkie uses self-signed certificates. In production HTTP clients, you would configure the CA certificate or disable verification as appropriate for your environment.</p>
 
         <p>List all conversations with pagination:</p>
 
-        <pre><code>curl https://localhost:5173/api/conversations?limit=10&amp;offset=0 \
-  --insecure</code></pre>
+        <pre><code>curl http://localhost:5173/api/conversations?limit=10&amp;offset=0 \
+</code></pre>
 
         <p>Search across all messages:</p>
 
-        <pre><code>curl "https://localhost:5173/api/search?q=cassette&amp;limit=5" \
-  --insecure</code></pre>
+        <pre><code>curl "http://localhost:5173/api/search?q=cassette&amp;limit=5" \
+</code></pre>
 
         <p>Create a background job:</p>
 
-        <pre><code>curl -X POST https://localhost:5173/api/jobs \
+        <pre><code>curl -X POST http://localhost:5173/api/jobs \
   -H "Content-Type: application/json" \
   -d '{"conversation_id": "abc-123", "prompt": "Summarize this conversation"}' \
-  --insecure</code></pre>
+</code></pre>
 
         <p>Stream Claude Code output with SSE:</p>
 
-        <pre><code>curl -N -X POST https://localhost:5173/api/claude-code \
+        <pre><code>curl -N -X POST http://localhost:5173/api/claude-code \
   -H "Content-Type: application/json" \
   -d '{"prompt": "Hello, Claude!", "conversation_id": "abc-123"}' \
-  --insecure</code></pre>
+</code></pre>
 
         <div class="docs-tip">
           <strong>Tip</strong>

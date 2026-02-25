@@ -35,9 +35,9 @@ The full server gives you the web UI, voice interface, Telegram bot, and everyth
 npx walkietalkiebot
 ```
 
-This starts the HTTPS server and opens `https://localhost:5173` in your browser.
+This starts the server and opens `http://localhost:5173` in your browser.
 
-> Requires Chrome or Edge for voice (Web Speech API needs secure context).
+> Requires Chrome or Edge for voice (Web Speech API).
 
 ## What You Get
 

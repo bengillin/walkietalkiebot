@@ -89,7 +89,7 @@
           This gives you 15 data tools that work offline via direct SQLite access (conversations, plans, search, export) plus 15 server tools for when the Talkie server is running. See <a href="/docs/integrations#plugin">Plugin Installation</a> for details.
         </div>
 
-        <p>Talkie is distributed as an npm package. A single command downloads the package, starts an HTTPS server, generates self-signed certificates, and opens your browser:</p>
+        <p>Talkie is distributed as an npm package. A single command downloads the package, starts a server, and opens your browser:</p>
 
         <pre><code>npx walkietalkiebot</code></pre>
 
@@ -97,8 +97,8 @@
 
         <ul>
           <li>Downloads and installs the <code>walkietalkiebot</code> package from npm</li>
-          <li>Generates self-signed TLS certificates at <code>~/.wtb/</code></li>
-          <li>Starts an HTTPS server on port 5173 (configurable via <code>WTB_PORT</code>)</li>
+          <li>Initializes an SQLite database at <code>~/.wtb/wtb.db</code></li>
+          <li>Starts the server on port 5173 (configurable via <code>WTB_PORT</code>)</li>
           <li>Opens your default browser to the Talkie interface</li>
         </ul>
 
@@ -128,10 +128,6 @@ walkietalkiebot</code></pre>
               <td>Chrome or Edge (required for Web Speech API support)</td>
             </tr>
             <tr>
-              <td><strong>HTTPS</strong></td>
-              <td>Auto-handled. Self-signed certs generated on first launch.</td>
-            </tr>
-            <tr>
               <td><strong>Node.js</strong></td>
               <td>Version 18 or later</td>
             </tr>
@@ -142,7 +138,7 @@ walkietalkiebot</code></pre>
           </tbody>
         </table>
 
-        <p>The Web Speech API is used for both speech-to-text and text-to-speech. It requires a secure context (HTTPS), which Talkie provides automatically with self-signed certificates. Firefox and Safari have limited or no support for the Web Speech API recognition interface.</p>
+        <p>The Web Speech API is used for both speech-to-text and text-to-speech. Localhost is a secure context in all browsers, so no HTTPS setup is needed. Firefox and Safari have limited or no support for the Web Speech API recognition interface.</p>
 
         <!-- ── First Launch ── -->
         <h2 id="first-launch">First Launch</h2>
@@ -150,11 +146,9 @@ walkietalkiebot</code></pre>
         <p>When you run <code>npx walkietalkiebot</code> for the first time, several things happen in sequence:</p>
 
         <ol>
-          <li><strong>Certificate generation</strong> &mdash; A self-signed TLS certificate and private key are created at <code>~/.wtb/cert.pem</code> and <code>~/.wtb/key.pem</code>. These are reused on subsequent launches.</li>
           <li><strong>Database creation</strong> &mdash; An SQLite database is initialized at <code>~/.wtb/wtb.db</code> with WAL mode enabled for concurrent reads.</li>
-          <li><strong>Server start</strong> &mdash; The HTTPS server starts on port 5173 (or the port set by <code>WTB_PORT</code>).</li>
-          <li><strong>Browser opens</strong> &mdash; Your default browser navigates to <code>https://localhost:5173</code>.</li>
-          <li><strong>Certificate warning</strong> &mdash; Your browser will show a security warning because the certificate is self-signed. Accept it to continue (see <a href="#troubleshooting">Troubleshooting</a> below).</li>
+          <li><strong>Server start</strong> &mdash; The HTTP server starts on port 5173 (or the port set by <code>WTB_PORT</code>).</li>
+          <li><strong>Browser opens</strong> &mdash; Your default browser navigates to <code>http://localhost:5173</code>.</li>
           <li><strong>Onboarding wizard</strong> &mdash; On your first visit, a 7-step setup wizard walks you through configuration.</li>
         </ol>
 
@@ -168,7 +162,7 @@ walkietalkiebot</code></pre>
             <strong>Welcome &amp; theme selection</strong> &mdash; Meet Talkie and learn what it does. Choose from 6 retro themes: TalkBoy, Bubble, Dial-Up, Finder, Guestbook, or 1984. Each theme completely reskins the entire interface.
           </li>
           <li>
-            <strong>How it works</strong> &mdash; Learn about the two modes: Claude Code mode (recommended, full tool use, no API key needed) and Direct API mode (faster responses, no tools).
+            <strong>Choose your mode</strong> &mdash; Pick between Claude Code mode (recommended, full tool use, auto-detected) and Direct API mode (uses your Anthropic API key, no tools).
           </li>
           <li>
             <strong>Text-to-speech</strong> &mdash; Toggle TTS on or off. Claude's responses will be read aloud when TTS is enabled. You can pick a specific voice in settings later.
@@ -244,24 +238,12 @@ walkietalkiebot</code></pre>
         <!-- ── Troubleshooting ── -->
         <h2 id="troubleshooting">Troubleshooting</h2>
 
-        <h3>Certificate warnings</h3>
-
-        <p>Because Talkie uses a self-signed certificate, your browser will show a security warning on first visit. This is expected and safe for local development:</p>
-
-        <ul>
-          <li><strong>Chrome</strong> &mdash; Click "Advanced" then "Proceed to localhost (unsafe)".</li>
-          <li><strong>Edge</strong> &mdash; Click "Advanced" then "Continue to localhost (unsafe)".</li>
-        </ul>
-
-        <p>The certificate is stored at <code>~/.wtb/cert.pem</code>. If you need to regenerate it, delete the file and restart Talkie.</p>
-
         <h3>Microphone permissions</h3>
 
-        <p>Voice input requires microphone access over HTTPS. If the browser does not prompt for permission:</p>
+        <p>Voice input requires microphone access. If the browser does not prompt for permission:</p>
 
         <ul>
-          <li>Verify you are accessing Talkie over <code>https://</code> (not <code>http://</code>).</li>
-          <li>Check your browser's site settings and ensure microphone access is allowed for <code>https://localhost:5173</code>.</li>
+          <li>Check your browser's site settings and ensure microphone access is allowed for <code>http://localhost:5173</code>.</li>
           <li>On macOS, ensure your browser has microphone permission in System Settings &gt; Privacy &amp; Security &gt; Microphone.</li>
         </ul>
 

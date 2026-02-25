@@ -130,7 +130,7 @@
 
 ## REST API
 
-  Base URL: https://localhost:5173/api
+  Base URL: http://localhost:5173/api
   40+ endpoints covering:
   - Status & Health: GET /api/status, GET /api/integrations
   - Conversations: CRUD, messages, liner notes, images (9 endpoints)
