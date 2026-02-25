@@ -1,11 +1,11 @@
 import { Hono } from 'hono'
 import { serveStatic } from '@hono/node-server/serve-static'
-import { createServer as createHttpsServer, ServerOptions, Server } from 'https'
-import { IncomingMessage, ServerResponse } from 'http'
+import { createServer as createHttpsServer, ServerOptions } from 'https'
+import { createServer as createHttpServer, IncomingMessage, ServerResponse, Server } from 'http'
 import { readFileSync, existsSync } from 'fs'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
-import { getSSLCerts } from './ssl.js'
+import { getSSLCerts, ensureWtbDir } from './ssl.js'
 import { api } from './api.js'
 import { initDb, closeDb } from './db/index.js'
 import { startTelegramBot, stopTelegramBot } from './telegram/index.js'
@@ -16,7 +16,7 @@ import { getJobManager } from './jobs/manager.js'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const distPath = join(__dirname, '..', 'dist')
 
-let server: Server | null = null
+let server: Server | import('https').Server | null = null
 
 export function startServer(port: number = 5173): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -66,18 +66,15 @@ export function startServer(port: number = 5173): Promise<void> {
       return c.text('Not found', 404)
     })
 
-    // Get SSL certificates
+    // Use HTTPS only when Tailscale certs are available (for remote access).
+    // Localhost is a secure context in all browsers — HTTP works fine.
+    ensureWtbDir()
     const certs = getSSLCerts()
+    const protocol = certs ? 'https' : 'http'
 
-    // Create HTTPS server with Hono handler
-    const serverOptions: ServerOptions = {
-      key: certs.key,
-      cert: certs.cert,
-    }
-
-    server = createHttpsServer(serverOptions, async (req: IncomingMessage, res: ServerResponse) => {
+    const handler = async (req: IncomingMessage, res: ServerResponse) => {
       // Convert Node request to Web Request
-      const url = new URL(req.url || '/', `https://localhost:${port}`)
+      const url = new URL(req.url || '/', `${protocol}://localhost:${port}`)
       const headers = new Headers()
       for (const [key, value] of Object.entries(req.headers)) {
         if (value) {
@@ -127,10 +124,17 @@ export function startServer(port: number = 5173): Promise<void> {
         }
       }
       res.end()
-    })
+    }
+
+    if (certs) {
+      const serverOptions: ServerOptions = { key: certs.key, cert: certs.cert }
+      server = createHttpsServer(serverOptions, handler)
+    } else {
+      server = createHttpServer(handler)
+    }
 
     server.listen(port, () => {
-      console.log(`Talkie server running at https://localhost:${port}`)
+      console.log(`Talkie server running at ${protocol}://localhost:${port}`)
       resolve()
     })
 

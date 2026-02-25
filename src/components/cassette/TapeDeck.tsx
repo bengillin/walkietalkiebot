@@ -17,6 +17,7 @@ interface TapeDeckProps {
   onClearTranscript?: () => void
   onFilesAdd?: (files: import('../../types').DroppedFile[]) => void
   isDisabled?: boolean
+  disabledReason?: string
   triggerWord?: string
   isRecording?: boolean
   continuousListening?: boolean
@@ -40,6 +41,7 @@ export function TapeDeck({
   onClearTranscript,
   onFilesAdd,
   isDisabled = false,
+  disabledReason,
   triggerWord = 'over',
   isRecording = false,
   continuousListening = false,
@@ -229,7 +231,7 @@ export function TapeDeck({
             value={inputValue}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
-            placeholder={isListening ? `Listening... say "${triggerWord}" to send` : 'Type a message...'}
+            placeholder={disabledReason || (isListening ? `Listening... say "${triggerWord}" to send` : 'Type a message...')}
             disabled={isDisabled || isEjected}
             rows={1}
           />

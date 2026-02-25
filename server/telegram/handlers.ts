@@ -4,7 +4,7 @@ import * as messages from '../db/repositories/messages.js'
 import * as telegramState from '../db/repositories/telegram.js'
 import * as activities from '../db/repositories/activities.js'
 
-const WEB_UI_URL = process.env.WTB_URL || 'https://localhost:5173'
+const WEB_UI_URL = process.env.WTB_URL || 'http://localhost:5173'
 
 export function setupHandlers(bot: Bot): void {
   // Handle text messages
@@ -58,9 +58,7 @@ export function setupHandlers(bot: Bot): void {
 
     try {
       // Call Claude Code via the existing API endpoint
-      // Use undici dispatcher for self-signed cert support
-      const { Agent: UndiciAgent, fetch: undiciFetch } = await import('undici')
-      const response = await undiciFetch(`${WEB_UI_URL}/api/claude-code`, {
+      const response = await fetch(`${WEB_UI_URL}/api/claude-code`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -70,7 +68,6 @@ export function setupHandlers(bot: Bot): void {
             content: m.content,
           })),
         }),
-        dispatcher: new UndiciAgent({ connect: { rejectUnauthorized: false } }),
       })
 
       if (!response.ok) {
@@ -251,8 +248,7 @@ export function setupHandlers(bot: Bot): void {
       const conversationId = state.current_conversation_id!
 
       // Analyze image via server endpoint
-      const { Agent, fetch: undiciFetch } = await import('undici')
-      const analyzeResponse = await undiciFetch(`${WEB_UI_URL}/api/analyze-image`, {
+      const analyzeResponse = await fetch(`${WEB_UI_URL}/api/analyze-image`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -261,7 +257,6 @@ export function setupHandlers(bot: Bot): void {
           type: mimeType,
           apiKey: process.env.ANTHROPIC_API_KEY,
         }),
-        dispatcher: new Agent({ connect: { rejectUnauthorized: false } }),
       })
 
       if (!analyzeResponse.ok) {
@@ -294,7 +289,7 @@ export function setupHandlers(bot: Bot): void {
       })
 
       // Send to Claude Code
-      const response = await undiciFetch(`${WEB_UI_URL}/api/claude-code`, {
+      const response = await fetch(`${WEB_UI_URL}/api/claude-code`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -304,7 +299,6 @@ export function setupHandlers(bot: Bot): void {
             content: m.content,
           })),
         }),
-        dispatcher: new Agent({ connect: { rejectUnauthorized: false } }),
       })
 
       if (!response.ok) {

@@ -1,4 +1,4 @@
-import { spawn, type ChildProcess } from 'child_process'
+import { spawn, execSync, type ChildProcess } from 'child_process'
 import { writeFileSync, mkdirSync, unlinkSync } from 'fs'
 import { join } from 'path'
 import { tmpdir } from 'os'
@@ -80,8 +80,43 @@ function detectPlanFromTool(toolName: string, input: { file_path?: string; conte
   return { title, content }
 }
 
+/**
+ * Check if the Claude CLI is installed and reachable.
+ * Caches the result for 60 seconds.
+ */
+let claudeCliCache: { available: boolean; checkedAt: number } | null = null
+
+export function isClaudeCliAvailable(): boolean {
+  if (claudeCliCache && Date.now() - claudeCliCache.checkedAt < 60_000) {
+    return claudeCliCache.available
+  }
+  const claudePath = process.env.CLAUDE_PATH || 'claude'
+  try {
+    execSync(`which ${claudePath}`, { stdio: 'ignore' })
+    claudeCliCache = { available: true, checkedAt: Date.now() }
+    return true
+  } catch {
+    claudeCliCache = { available: false, checkedAt: Date.now() }
+    return false
+  }
+}
+
 export function spawnClaude(options: RunnerOptions): RunnerHandle {
   const { prompt, history, images, rawMode, callbacks } = options
+
+  // Pre-flight: check if claude CLI exists before trying to spawn it
+  if (!isClaudeCliAvailable()) {
+    const promise = Promise.resolve(1)
+    // Use setTimeout to make this async so the caller gets the handle back first
+    setTimeout(() => {
+      callbacks.onError(
+        'Claude Code CLI not found. Install it with: npm install -g @anthropic-ai/claude-code\n' +
+        'Or switch to Direct API mode in Settings and enter your Anthropic API key.'
+      )
+      callbacks.onComplete(1)
+    }, 0)
+    return { pid: 0, kill: () => {}, promise }
+  }
 
   // Save attached images to temp files so Claude Code can read them natively
   const tempImagePaths: string[] = []

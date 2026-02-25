@@ -54,6 +54,7 @@ export interface ServerStatus {
   running: boolean
   avatarState: string
   dbStatus: 'connected' | 'unavailable'
+  claudeCliAvailable?: boolean
 }
 
 export interface MigrationResult {

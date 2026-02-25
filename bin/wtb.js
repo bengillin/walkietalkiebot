@@ -4,7 +4,7 @@ import { startServer } from '../server/index.js'
 import open from 'open'
 
 const PORT = parseInt(process.env.WTB_PORT || '5173', 10)
-const URL = `https://localhost:${PORT}`
+const URL = `http://localhost:${PORT}`
 
 async function main() {
   console.log('Starting Walkie Talkie Bot...')

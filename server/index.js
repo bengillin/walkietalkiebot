@@ -1,10 +1,11 @@
 import { Hono } from "hono";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { createServer as createHttpsServer } from "https";
+import { createServer as createHttpServer } from "http";
 import { readFileSync, existsSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
-import { getSSLCerts } from "./ssl.js";
+import { getSSLCerts, ensureWtbDir } from "./ssl.js";
 import { api } from "./api.js";
 import { initDb, closeDb } from "./db/index.js";
 import { startTelegramBot, stopTelegramBot } from "./telegram/index.js";
@@ -45,13 +46,11 @@ function startServer(port = 5173) {
       }
       return c.text("Not found", 404);
     });
+    ensureWtbDir();
     const certs = getSSLCerts();
-    const serverOptions = {
-      key: certs.key,
-      cert: certs.cert
-    };
-    server = createHttpsServer(serverOptions, async (req, res) => {
-      const url = new URL(req.url || "/", `https://localhost:${port}`);
+    const protocol = certs ? "https" : "http";
+    const handler = async (req, res) => {
+      const url = new URL(req.url || "/", `${protocol}://localhost:${port}`);
       const headers = new Headers();
       for (const [key, value] of Object.entries(req.headers)) {
         if (value) {
@@ -92,9 +91,15 @@ function startServer(port = 5173) {
         }
       }
       res.end();
-    });
+    };
+    if (certs) {
+      const serverOptions = { key: certs.key, cert: certs.cert };
+      server = createHttpsServer(serverOptions, handler);
+    } else {
+      server = createHttpServer(handler);
+    }
     server.listen(port, () => {
-      console.log(`Talkie server running at https://localhost:${port}`);
+      console.log(`Talkie server running at ${protocol}://localhost:${port}`);
       resolve();
     });
     server.on("error", (err) => {

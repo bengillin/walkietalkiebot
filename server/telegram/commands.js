@@ -1,7 +1,7 @@
 import { InlineKeyboard } from "grammy";
 import * as conversations from "../db/repositories/conversations.js";
 import * as telegramState from "../db/repositories/telegram.js";
-const WEB_UI_URL = process.env.WTB_URL || "https://localhost:5173";
+const WEB_UI_URL = process.env.WTB_URL || "http://localhost:5173";
 function setupCommands(bot) {
   bot.command("start", async (ctx) => {
     const userId = ctx.from?.id;
@@ -86,10 +86,7 @@ Last updated: ${new Date(conv.updated_at).toLocaleString()}`,
   });
   bot.command("status", async (ctx) => {
     try {
-      const { Agent, fetch: undiciFetch } = await import("undici");
-      const response = await undiciFetch(`${WEB_UI_URL}/api/status`, {
-        dispatcher: new Agent({ connect: { rejectUnauthorized: false } })
-      });
+      const response = await fetch(`${WEB_UI_URL}/api/status`);
       const data = await response.json();
       const stateEmoji = {
         idle: "\u{1F634}",

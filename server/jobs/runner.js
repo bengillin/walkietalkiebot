@@ -1,4 +1,4 @@
-import { spawn } from "child_process";
+import { spawn, execSync } from "child_process";
 import { writeFileSync, mkdirSync, unlinkSync } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
@@ -26,8 +26,34 @@ function detectPlanFromTool(toolName, input) {
   if (title.length > 100) title = title.slice(0, 97) + "...";
   return { title, content };
 }
+let claudeCliCache = null;
+function isClaudeCliAvailable() {
+  if (claudeCliCache && Date.now() - claudeCliCache.checkedAt < 6e4) {
+    return claudeCliCache.available;
+  }
+  const claudePath = process.env.CLAUDE_PATH || "claude";
+  try {
+    execSync(`which ${claudePath}`, { stdio: "ignore" });
+    claudeCliCache = { available: true, checkedAt: Date.now() };
+    return true;
+  } catch {
+    claudeCliCache = { available: false, checkedAt: Date.now() };
+    return false;
+  }
+}
 function spawnClaude(options) {
   const { prompt, history, images, rawMode, callbacks } = options;
+  if (!isClaudeCliAvailable()) {
+    const promise2 = Promise.resolve(1);
+    setTimeout(() => {
+      callbacks.onError(
+        "Claude Code CLI not found. Install it with: npm install -g @anthropic-ai/claude-code\nOr switch to Direct API mode in Settings and enter your Anthropic API key."
+      );
+      callbacks.onComplete(1);
+    }, 0);
+    return { pid: 0, kill: () => {
+    }, promise: promise2 };
+  }
   const tempImagePaths = [];
   if (images && images.length > 0) {
     const tempDir = join(tmpdir(), "wtb-images");
@@ -242,5 +268,6 @@ User: ${prompt}`;
   };
 }
 export {
+  isClaudeCliAvailable,
   spawnClaude
 };

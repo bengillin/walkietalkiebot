@@ -3,7 +3,7 @@ import * as conversations from "../db/repositories/conversations.js";
 import * as messages from "../db/repositories/messages.js";
 import * as telegramState from "../db/repositories/telegram.js";
 import * as activities from "../db/repositories/activities.js";
-const WEB_UI_URL = process.env.WTB_URL || "https://localhost:5173";
+const WEB_UI_URL = process.env.WTB_URL || "http://localhost:5173";
 function setupHandlers(bot) {
   bot.on("message:text", async (ctx) => {
     const userId = ctx.from?.id;
@@ -38,8 +38,7 @@ function setupHandlers(bot) {
     });
     await ctx.replyWithChatAction("typing");
     try {
-      const { Agent: UndiciAgent, fetch: undiciFetch } = await import("undici");
-      const response = await undiciFetch(`${WEB_UI_URL}/api/claude-code`, {
+      const response = await fetch(`${WEB_UI_URL}/api/claude-code`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -48,8 +47,7 @@ function setupHandlers(bot) {
             role: m.role,
             content: m.content
           }))
-        }),
-        dispatcher: new UndiciAgent({ connect: { rejectUnauthorized: false } })
+        })
       });
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
@@ -183,8 +181,7 @@ function setupHandlers(bot) {
         state = { user_id: userId, current_conversation_id: id, updated_at: Date.now() };
       }
       const conversationId = state.current_conversation_id;
-      const { Agent, fetch: undiciFetch } = await import("undici");
-      const analyzeResponse = await undiciFetch(`${WEB_UI_URL}/api/analyze-image`, {
+      const analyzeResponse = await fetch(`${WEB_UI_URL}/api/analyze-image`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -192,8 +189,7 @@ function setupHandlers(bot) {
           fileName: file.file_path || "photo.jpg",
           type: mimeType,
           apiKey: process.env.ANTHROPIC_API_KEY
-        }),
-        dispatcher: new Agent({ connect: { rejectUnauthorized: false } })
+        })
       });
       if (!analyzeResponse.ok) {
         const error = await analyzeResponse.text();
@@ -222,7 +218,7 @@ Describe what you see and ask if I have any questions about it.`;
           description
         }]
       });
-      const response = await undiciFetch(`${WEB_UI_URL}/api/claude-code`, {
+      const response = await fetch(`${WEB_UI_URL}/api/claude-code`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -231,8 +227,7 @@ Describe what you see and ask if I have any questions about it.`;
             role: m.role,
             content: m.content
           }))
-        }),
-        dispatcher: new Agent({ connect: { rejectUnauthorized: false } })
+        })
       });
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);

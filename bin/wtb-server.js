@@ -75,7 +75,7 @@ function isLaunchctlLoaded() {
 
 function isServerRunning() {
   try {
-    execSync(`curl -s -k https://localhost:${PORT}/api/status`, { encoding: 'utf-8' })
+    execSync(`curl -s http://localhost:${PORT}/api/status`, { encoding: 'utf-8' })
     return true
   } catch {
     return false
@@ -173,7 +173,7 @@ async function startServer(foreground = false) {
     for (let i = 0; i < 30; i++) {
       await new Promise(r => setTimeout(r, 500))
       if (isServerRunning()) {
-        console.log(`Walkie Talkie Bot server running at https://localhost:${PORT}`)
+        console.log(`Walkie Talkie Bot server running at http://localhost:${PORT}`)
         return
       }
     }
@@ -232,10 +232,7 @@ async function showStatus() {
 
   if (running) {
     try {
-      const response = await fetch(`https://localhost:${PORT}/api/status`, {
-        // @ts-expect-error
-        agent: new (await import('https')).Agent({ rejectUnauthorized: false })
-      })
+      const response = await fetch(`http://localhost:${PORT}/api/status`)
       const data = await response.json()
       console.log(`Database: ${data.dbStatus === 'connected' ? '✅ Connected' : '⚠️ Unavailable'}`)
       console.log(`Avatar:   ${data.avatarState}`)

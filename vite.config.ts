@@ -1,6 +1,5 @@
 import { defineConfig, Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
-import basicSsl from '@vitejs/plugin-basic-ssl'
 import { spawn } from 'child_process'
 
 // In-memory state store for API
@@ -638,8 +637,5 @@ User: ${message}`
 }
 
 export default defineConfig({
-  plugins: [react(), basicSsl(), wtbApi()],
-  server: {
-    https: true,
-  },
+  plugins: [react(), wtbApi()],
 })

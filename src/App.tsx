@@ -183,8 +183,12 @@ function App() {
 
   // --- Onboarding ---
   const handleOnboardingComplete = useCallback((settings: OnboardingSettings) => {
-    setUseClaudeCode(true)
-    localStorage.setItem('wtb_use_claude_code', 'true')
+    setUseClaudeCode(settings.useClaudeCode)
+    localStorage.setItem('wtb_use_claude_code', String(settings.useClaudeCode))
+    if (settings.apiKey) {
+      setApiKey(settings.apiKey)
+      localStorage.setItem('wtb_api_key', settings.apiKey)
+    }
     setTtsEnabled(settings.ttsEnabled)
     setSoundEffectsEnabled(settings.soundEffects)
     setWakeWordEnabled(settings.wakeWord)
@@ -353,6 +357,7 @@ function App() {
         onCloseCollection={() => setIsTapeEjected(false)}
         onFilesAdd={handleFilesAdd}
         isDisabled={(!useClaudeCode && !apiKey) || voiceIO.isSpeaking || avatarState === 'thinking'}
+        disabledReason={!useClaudeCode && !apiKey ? 'Add an API key in Settings, or switch to Claude Code mode' : undefined}
         triggerWord={customTriggerWord || 'over'}
         onClearTranscript={() => setTranscript('')}
         isRecording={voiceIO.isListening}

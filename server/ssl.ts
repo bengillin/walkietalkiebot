@@ -1,7 +1,6 @@
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'fs'
+import { existsSync, mkdirSync, readFileSync, renameSync } from 'fs'
 import { homedir } from 'os'
 import { join } from 'path'
-import selfsigned from 'selfsigned'
 
 const WTB_DIR = join(homedir(), '.wtb')
 const OLD_DIR_2 = join(homedir(), '.talkie')
@@ -14,65 +13,38 @@ const TAILSCALE_KEY_PATH = join(WTB_DIR, 'tailscale.key')
 export interface SSLCerts {
   cert: string
   key: string
-  isTailscale?: boolean
 }
 
-export function getSSLCerts(): SSLCerts {
-  // Migrate ~/.talkboy → ~/.wtb or ~/.talkie → ~/.wtb if needed
+/**
+ * Ensure the ~/.wtb directory exists, migrating from legacy paths if needed.
+ */
+export function ensureWtbDir(): void {
   if (existsSync(OLD_DIR_2) && !existsSync(WTB_DIR)) {
     renameSync(OLD_DIR_2, WTB_DIR)
   } else if (existsSync(OLD_DIR_1) && !existsSync(WTB_DIR)) {
     renameSync(OLD_DIR_1, WTB_DIR)
   }
-
-  // Ensure ~/.wtb directory exists
   if (!existsSync(WTB_DIR)) {
     mkdirSync(WTB_DIR, { recursive: true })
   }
+}
 
-  // Prefer Tailscale certs if available (real certs, no browser warnings)
+/**
+ * Returns Tailscale HTTPS certs if available, otherwise null.
+ * Localhost is already a secure context in browsers, so HTTPS is only
+ * needed for remote access (e.g., via Tailscale).
+ */
+export function getSSLCerts(): SSLCerts | null {
+  ensureWtbDir()
+
   if (existsSync(TAILSCALE_CERT_PATH) && existsSync(TAILSCALE_KEY_PATH)) {
     console.log('Using Tailscale HTTPS certificates')
     return {
       cert: readFileSync(TAILSCALE_CERT_PATH, 'utf-8'),
       key: readFileSync(TAILSCALE_KEY_PATH, 'utf-8'),
-      isTailscale: true,
     }
   }
 
-  // Fall back to self-signed certs
-  if (existsSync(CERT_PATH) && existsSync(KEY_PATH)) {
-    return {
-      cert: readFileSync(CERT_PATH, 'utf-8'),
-      key: readFileSync(KEY_PATH, 'utf-8'),
-    }
-  }
-
-  // Generate new self-signed certificates
-  console.log('Generating self-signed SSL certificates...')
-  const attrs = [{ name: 'commonName', value: 'localhost' }]
-  const pems = selfsigned.generate(attrs, {
-    algorithm: 'sha256',
-    days: 365,
-    keySize: 2048,
-    extensions: [
-      {
-        name: 'subjectAltName',
-        altNames: [
-          { type: 2, value: 'localhost' },
-          { type: 7, ip: '127.0.0.1' },
-        ],
-      },
-    ],
-  })
-
-  // Save certificates
-  writeFileSync(CERT_PATH, pems.cert)
-  writeFileSync(KEY_PATH, pems.private)
-  console.log(`SSL certificates saved to ${WTB_DIR}`)
-
-  return {
-    cert: pems.cert,
-    key: pems.private,
-  }
+  // No HTTPS needed for localhost — it's a secure context in all browsers
+  return null
 }

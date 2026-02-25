@@ -9,7 +9,7 @@ import * as messages from "./db/repositories/messages.js";
 import * as activities from "./db/repositories/activities.js";
 import * as search from "./db/repositories/search.js";
 import * as plans from "./db/repositories/plans.js";
-import { spawnClaude } from "./jobs/runner.js";
+import { spawnClaude, isClaudeCliAvailable } from "./jobs/runner.js";
 import { jobRoutes } from "./jobs/api.js";
 const api = new Hono();
 api.use("*", cors());
@@ -18,7 +18,8 @@ api.get("/status", (c) => {
   return c.json({
     running: true,
     avatarState: state.avatarState,
-    dbStatus: isDbConnected() ? "connected" : "unavailable"
+    dbStatus: isDbConnected() ? "connected" : "unavailable",
+    claudeCliAvailable: isClaudeCliAvailable()
   });
 });
 api.get("/conversations", (c) => {

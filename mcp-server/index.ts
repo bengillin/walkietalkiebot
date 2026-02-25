@@ -14,7 +14,7 @@ import type { ChildProcess } from 'child_process'
 const execAsync = promisify(exec)
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const WTB_PORT = parseInt(process.env.WTB_PORT || '5173', 10)
-const WTB_URL = `https://localhost:${WTB_PORT}`
+const WTB_URL = `http://localhost:${WTB_PORT}`
 
 // ─── Anonymous telemetry (opt out: WTB_TELEMETRY=0) ───
 const POSTHOG_KEY = 'phc_j7rWavXkXFqSjJIvxhnnAMX3I5UmkcCsnU8J0sKAzog'
