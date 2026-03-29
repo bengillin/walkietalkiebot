@@ -10,11 +10,29 @@ export interface Plan {
   updated_at: number
 }
 
-export function listPlans(limit = 50, offset = 0): Plan[] {
+export interface PlanWithConversation extends Plan {
+  conversation_title: string | null
+}
+
+export function listPlans(limit = 50, offset = 0, conversationId?: string): PlanWithConversation[] {
   const db = getDb()
-  return db.prepare(
-    'SELECT * FROM plans ORDER BY updated_at DESC LIMIT ? OFFSET ?'
-  ).all(limit, offset) as Plan[]
+  const query = `SELECT p.*, c.title as conversation_title FROM plans p LEFT JOIN conversations c ON p.conversation_id = c.id${conversationId ? ' WHERE p.conversation_id = ?' : ''} ORDER BY p.updated_at DESC LIMIT ? OFFSET ?`
+  if (conversationId) {
+    return db.prepare(query).all(conversationId, limit, offset) as PlanWithConversation[]
+  }
+  return db.prepare(query).all(limit, offset) as PlanWithConversation[]
+}
+
+export function countPlansByConversation(): Record<string, number> {
+  const db = getDb()
+  const rows = db.prepare(
+    "SELECT conversation_id, COUNT(*) as count FROM plans WHERE conversation_id IS NOT NULL AND status != 'archived' GROUP BY conversation_id"
+  ).all() as Array<{ conversation_id: string; count: number }>
+  const result: Record<string, number> = {}
+  for (const row of rows) {
+    result[row.conversation_id] = row.count
+  }
+  return result
 }
 
 export function getPlan(id: string): Plan | undefined {

@@ -421,7 +421,13 @@ function App() {
         onSelectResult={(conversationId) => { loadConversation(conversationId); setIsTapeEjected(false) }}
       />
 
-      <Plans isOpen={showPlans} onClose={() => setShowPlans(false)} conversationId={currentConversationId || undefined} />
+      <Plans
+        isOpen={showPlans}
+        onClose={() => setShowPlans(false)}
+        conversationId={currentConversationId || undefined}
+        conversationTitle={conversations.find(c => c.id === currentConversationId)?.title}
+        onNavigateToConversation={(id) => { loadConversation(id); setShowPlans(false); setIsTapeEjected(false) }}
+      />
 
       <KeyboardShortcuts isOpen={showShortcuts} onClose={() => setShowShortcuts(false)} />
 

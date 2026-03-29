@@ -1,9 +1,22 @@
 import { getDb } from "../index.js";
-function listPlans(limit = 50, offset = 0) {
+function listPlans(limit = 50, offset = 0, conversationId) {
   const db = getDb();
-  return db.prepare(
-    "SELECT * FROM plans ORDER BY updated_at DESC LIMIT ? OFFSET ?"
-  ).all(limit, offset);
+  const query = `SELECT p.*, c.title as conversation_title FROM plans p LEFT JOIN conversations c ON p.conversation_id = c.id${conversationId ? " WHERE p.conversation_id = ?" : ""} ORDER BY p.updated_at DESC LIMIT ? OFFSET ?`;
+  if (conversationId) {
+    return db.prepare(query).all(conversationId, limit, offset);
+  }
+  return db.prepare(query).all(limit, offset);
+}
+function countPlansByConversation() {
+  const db = getDb();
+  const rows = db.prepare(
+    "SELECT conversation_id, COUNT(*) as count FROM plans WHERE conversation_id IS NOT NULL AND status != 'archived' GROUP BY conversation_id"
+  ).all();
+  const result = {};
+  for (const row of rows) {
+    result[row.conversation_id] = row.count;
+  }
+  return result;
 }
 function getPlan(id) {
   const db = getDb();
@@ -49,6 +62,7 @@ function deletePlan(id) {
   db.prepare("DELETE FROM plans WHERE id = ?").run(id);
 }
 export {
+  countPlansByConversation,
   createPlan,
   deletePlan,
   getPlan,

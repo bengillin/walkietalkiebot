@@ -7,6 +7,7 @@ export interface ConversationItemProps {
   isSelected?: boolean
   isEjecting?: boolean
   colorIndex: number
+  planCount?: number
 }
 
 export function ConversationItem(props: ConversationItemProps) {
@@ -18,6 +19,7 @@ export function ConversationItem(props: ConversationItemProps) {
       isSelected={props.isSelected}
       isEjecting={props.isEjecting}
       onClick={props.onClick}
+      planCount={props.planCount}
     />
   )
 }

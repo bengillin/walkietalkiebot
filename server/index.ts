@@ -8,7 +8,6 @@ import { dirname, join } from 'path'
 import { getSSLCerts, ensureWtbDir } from './ssl.js'
 import { api } from './api.js'
 import { initDb, closeDb } from './db/index.js'
-import { startTelegramBot, stopTelegramBot } from './telegram/index.js'
 import { getNotificationDispatcher } from './notifications/dispatcher.js'
 import { MacOSNotificationChannel } from './notifications/macos.js'
 import { getJobManager } from './jobs/manager.js'
@@ -42,11 +41,6 @@ export function startServer(port: number = 5173): Promise<void> {
     // Initialize job manager (cleans up stale jobs from previous runs)
     const jobManager = getJobManager()
     jobManager.init()
-
-    // Start Telegram bot (non-blocking, will log if token not found)
-    startTelegramBot().catch(err => {
-      console.log('Telegram bot not started:', err.message)
-    })
 
     const app = new Hono()
 
@@ -149,7 +143,6 @@ export function startServer(port: number = 5173): Promise<void> {
 }
 
 export async function stopServer(): Promise<void> {
-  stopTelegramBot()
   closeDb()
 
   if (server) {

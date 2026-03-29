@@ -10,6 +10,7 @@
   --text-primary: #1a1a1a;
   --text-secondary: #3a3a3a;
   --text-muted: #5a5a5a;
+  --text-tertiary: #7a7a7a;
 
   /* Accent Colors - Red like the Talkie record button */
   --accent: #cc0000;
@@ -41,6 +42,8 @@
   /* Borders & Shadows - Raised plastic look */
   --border-subtle: rgba(0, 0, 0, 0.1);
   --border-light: rgba(0, 0, 0, 0.15);
+  --border-color: #707070;
+  --color-border: #707070;
   --shadow-soft: 0 4px 0 rgba(0, 0, 0, 0.3);
   --shadow-glow: 0 0 30px var(--accent-glow);
   --shadow-inset: inset 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -74,6 +77,12 @@
   --title-style: italic;
   --title-transform: uppercase;
   --letter-spacing: 0.05em;
+
+  /* Border Radius - Chunky plastic device feel */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-full: 9999px;
 }
 
 /* McCallister body background - Silver plastic texture */

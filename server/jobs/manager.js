@@ -107,6 +107,8 @@ class JobManager {
     const job = queued[0];
     this.runJob(job);
   }
+  static JOB_TIMEOUT_MS = 10 * 60 * 1e3;
+  // 10 minutes
   async runJob(job) {
     const jobId = job.id;
     this.currentJobId = jobId;
@@ -217,6 +219,26 @@ class JobManager {
     });
     this.currentHandle = handle;
     jobsRepo.updateJob(jobId, { pid: handle.pid });
+    const timeout = setTimeout(() => {
+      const currentJob = jobsRepo.getJob(jobId);
+      if (currentJob?.status === "running") {
+        console.warn(`Job ${jobId} timed out after ${JobManager.JOB_TIMEOUT_MS / 1e3}s, killing`);
+        handle.kill();
+        jobsRepo.updateJob(jobId, {
+          status: "failed",
+          error: `Timed out after ${JobManager.JOB_TIMEOUT_MS / 6e4} minutes`,
+          completed_at: Date.now()
+        });
+        this.emitEvent(jobId, {
+          type: "status_change",
+          data: JSON.stringify({ status: "failed", error: "Job timed out" })
+        });
+        this.currentHandle = null;
+        this.currentJobId = null;
+        this.processNext();
+      }
+    }, JobManager.JOB_TIMEOUT_MS);
+    handle.promise.then(() => clearTimeout(timeout));
   }
 }
 let manager = null;

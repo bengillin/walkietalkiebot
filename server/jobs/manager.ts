@@ -149,6 +149,8 @@ class JobManager {
     this.runJob(job)
   }
 
+  private static readonly JOB_TIMEOUT_MS = 10 * 60 * 1000 // 10 minutes
+
   private async runJob(job: jobsRepo.JobRow): Promise<void> {
     const jobId = job.id
     this.currentJobId = jobId
@@ -279,6 +281,30 @@ class JobManager {
 
     this.currentHandle = handle
     jobsRepo.updateJob(jobId, { pid: handle.pid })
+
+    // Set a timeout to kill hung jobs
+    const timeout = setTimeout(() => {
+      const currentJob = jobsRepo.getJob(jobId)
+      if (currentJob?.status === 'running') {
+        console.warn(`Job ${jobId} timed out after ${JobManager.JOB_TIMEOUT_MS / 1000}s, killing`)
+        handle.kill()
+        jobsRepo.updateJob(jobId, {
+          status: 'failed',
+          error: `Timed out after ${JobManager.JOB_TIMEOUT_MS / 60000} minutes`,
+          completed_at: Date.now(),
+        })
+        this.emitEvent(jobId, {
+          type: 'status_change',
+          data: JSON.stringify({ status: 'failed', error: 'Job timed out' }),
+        })
+        this.currentHandle = null
+        this.currentJobId = null
+        this.processNext()
+      }
+    }, JobManager.JOB_TIMEOUT_MS)
+
+    // Clear timeout when job completes naturally
+    handle.promise.then(() => clearTimeout(timeout))
   }
 }
 

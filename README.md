@@ -29,7 +29,7 @@ Add to `~/.claude/settings.json`:
 
 ### Full Install
 
-The full server gives you the web UI, voice interface, Telegram bot, and everything.
+The full server gives you the web UI, voice interface, and everything.
 
 ```bash
 npx walkietalkiebot
@@ -60,7 +60,6 @@ Everything above, plus:
 - Per-conversation liner notes
 - Full-text search across all conversations (Cmd+K)
 - Background job execution with SSE streaming
-- Telegram bot integration
 - Image drag-and-drop with Claude vision analysis
 - Markdown and JSON export
 
@@ -148,8 +147,6 @@ wtb-server status         # Show status
 wtb-server logs [-f]      # View logs
 wtb-server install        # Install as macOS launchd daemon
 ```
-
-**Telegram bot:** Create a bot via [@BotFather](https://t.me/BotFather), then set `TELEGRAM_BOT_TOKEN` or save to `~/.wtb/telegram.token`. The bot starts automatically with the server.
 
 ## Development
 

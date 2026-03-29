@@ -8,7 +8,6 @@ import { dirname, join } from "path";
 import { getSSLCerts, ensureWtbDir } from "./ssl.js";
 import { api } from "./api.js";
 import { initDb, closeDb } from "./db/index.js";
-import { startTelegramBot, stopTelegramBot } from "./telegram/index.js";
 import { getNotificationDispatcher } from "./notifications/dispatcher.js";
 import { MacOSNotificationChannel } from "./notifications/macos.js";
 import { getJobManager } from "./jobs/manager.js";
@@ -32,9 +31,6 @@ function startServer(port = 5173) {
     dispatcher.register(new MacOSNotificationChannel());
     const jobManager = getJobManager();
     jobManager.init();
-    startTelegramBot().catch((err) => {
-      console.log("Telegram bot not started:", err.message);
-    });
     const app = new Hono();
     app.route("/api", api);
     app.use("/*", serveStatic({ root: distPath.replace(process.cwd(), ".") }));
@@ -112,7 +108,6 @@ function startServer(port = 5173) {
   });
 }
 async function stopServer() {
-  stopTelegramBot();
   closeDb();
   if (server) {
     await new Promise((resolve) => {

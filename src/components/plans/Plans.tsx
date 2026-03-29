@@ -7,6 +7,8 @@ interface PlansProps {
   isOpen: boolean
   onClose: () => void
   conversationId?: string
+  conversationTitle?: string
+  onNavigateToConversation?: (id: string) => void
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -19,17 +21,19 @@ const STATUS_LABELS: Record<string, string> = {
 
 const STATUS_ORDER = ['in_progress', 'approved', 'draft', 'completed', 'archived']
 
-export function Plans({ isOpen, onClose, conversationId }: PlansProps) {
+export function Plans({ isOpen, onClose, conversationId, onNavigateToConversation }: PlansProps) {
   const [plans, setPlans] = useState<api.Plan[]>([])
   const [selectedPlan, setSelectedPlan] = useState<api.Plan | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [filterCurrentTape, setFilterCurrentTape] = useState(false)
 
   const loadPlans = useCallback(async () => {
     setLoading(true)
     setError('')
     try {
-      const { plans: fetched } = await api.listPlans()
+      const filterId = filterCurrentTape ? conversationId : undefined
+      const { plans: fetched } = await api.listPlans(50, filterId)
       // Sort by status priority, then by updated time
       fetched.sort((a, b) => {
         const aIdx = STATUS_ORDER.indexOf(a.status)
@@ -44,7 +48,7 @@ export function Plans({ isOpen, onClose, conversationId }: PlansProps) {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [filterCurrentTape, conversationId])
 
   useEffect(() => {
     if (isOpen) {
@@ -130,10 +134,27 @@ export function Plans({ isOpen, onClose, conversationId }: PlansProps) {
               setSelectedPlan(prev => prev ? { ...prev, ...updates, updatedAt: Date.now() } : null)
               setPlans(prev => prev.map(p => p.id === selectedPlan.id ? { ...p, ...updates, updatedAt: Date.now() } : p))
             }}
+            onNavigateToConversation={onNavigateToConversation}
           />
         ) : (
           <div className="plans__list-view">
             <div className="plans__actions">
+              {conversationId && (
+                <div className="plans__filter-toggle">
+                  <button
+                    className={`plans__filter-btn ${!filterCurrentTape ? 'plans__filter-btn--active' : ''}`}
+                    onClick={() => setFilterCurrentTape(false)}
+                  >
+                    All
+                  </button>
+                  <button
+                    className={`plans__filter-btn ${filterCurrentTape ? 'plans__filter-btn--active' : ''}`}
+                    onClick={() => setFilterCurrentTape(true)}
+                  >
+                    This Tape
+                  </button>
+                </div>
+              )}
               <button className="plans__new-btn" onClick={handleCreatePlan}>
                 + New Plan
               </button>
@@ -165,6 +186,11 @@ export function Plans({ isOpen, onClose, conversationId }: PlansProps) {
                   </div>
                   <div className="plans__item-meta">
                     <span className="plans__item-status">{STATUS_LABELS[plan.status]}</span>
+                    {!filterCurrentTape && plan.conversationTitle && (
+                      <span className="plans__item-tape" title={plan.conversationTitle}>
+                        {plan.conversationTitle.split(/\s+/).slice(0, 3).join(' ')}
+                      </span>
+                    )}
                     <span className="plans__item-time">{formatTime(plan.updatedAt)}</span>
                   </div>
                   {plan.content && (
@@ -188,12 +214,14 @@ function PlanDetail({
   onUpdateStatus,
   onDelete,
   onUpdate,
+  onNavigateToConversation,
 }: {
   plan: api.Plan
   onBack: () => void
   onUpdateStatus: (plan: api.Plan, status: string) => void
   onDelete: () => void
   onUpdate: (updates: Partial<api.Plan>) => void
+  onNavigateToConversation?: (id: string) => void
 }) {
   const [isEditing, setIsEditing] = useState(false)
   const [editTitle, setEditTitle] = useState(plan.title)
@@ -278,6 +306,17 @@ function PlanDetail({
                 <option key={key} value={key}>{label}</option>
               ))}
             </select>
+            {plan.conversationId && plan.conversationTitle && onNavigateToConversation && (
+              <button
+                className="plans__tape-link"
+                onClick={() => onNavigateToConversation(plan.conversationId!)}
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                {plan.conversationTitle.split(/\s+/).slice(0, 4).join(' ')}
+              </button>
+            )}
           </div>
 
           {plan.content ? (

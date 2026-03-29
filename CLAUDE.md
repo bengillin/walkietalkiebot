@@ -1,12 +1,11 @@
 # Talkie
 
-A voice-first, cassette tape-themed interface for Claude Code with 6 retro themes, conversation management, Telegram bot, and MCP integration.
+A voice-first, cassette tape-themed interface for Claude Code with 6 retro themes, conversation management, and MCP integration.
 
 ## Tech Stack
 
 - **Frontend**: React 18, TypeScript, Vite, Zustand
 - **Server**: Node.js, Hono, better-sqlite3 (WAL mode)
-- **Telegram**: grammy
 - **MCP**: @modelcontextprotocol/sdk (stdio transport)
 - **Voice**: Web Speech API (browser-native STT/TTS)
 - **Themes**: 6 CSS theme files with ~70+ custom properties each
@@ -60,14 +59,13 @@ src/                    Frontend React app
     useSoundEffects.ts  Web Audio API tone generation
 server/                 Hono HTTP server (HTTPS only with Tailscale certs)
   api.ts                All API routes (conversations, claude-code, IPC, media, plans, jobs)
-  index.ts              Server startup (HTTP/HTTPS, Telegram bot, DB init)
+  index.ts              Server startup (HTTP/HTTPS, DB init)
   state.ts              In-memory state for IPC callbacks
   ssl.ts                Tailscale cert detection (no self-signed generation)
-  db/schema.ts          SQLite schema with versioned migrations (v1–v4)
-  db/repositories/      CRUD: conversations, messages, activities, search, plans, jobs, telegram
+  db/schema.ts          SQLite schema with versioned migrations (v1–v5)
+  db/repositories/      CRUD: conversations, messages, activities, search, plans, jobs
   test/helpers.ts       Test utilities (in-memory SQLite via initDbForTesting)
   jobs/                 Async job execution
-  telegram/             grammy bot (commands, handlers)
 mcp-server/             MCP server (TypeScript, compiled to dist/)
   index.ts              30 typed tools: 15 data (direct SQLite) + 15 server (HTTP proxy)
   dist/index.js         Compiled output with shebang (entry point for bin/MCP)
@@ -112,12 +110,11 @@ site/                   Marketing site (walkietalkie.bot)
 
 ## Database
 
-SQLite at `~/.wtb/wtb.db`. Schema version tracked in `schema_version` table (currently v4). Tables:
+SQLite at `~/.wtb/wtb.db`. Schema version tracked in `schema_version` table (currently v5). Tables:
 - `conversations` — id, title, timestamps, project_id, parent_id, liner_notes
 - `messages` — role, content, position, source
 - `message_images` — base64 data URLs with descriptions
 - `activities` — tool usage (tool, input, status, duration, error)
 - `plans` — title, content, status (draft/approved/in_progress/completed/archived), conversation_id
 - `jobs` — async background tasks with status, result, error
-- `telegram_state` — per-user conversation tracking
 - `messages_fts` — FTS5 full-text search with sync triggers

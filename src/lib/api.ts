@@ -203,12 +203,19 @@ export interface Plan {
   content: string
   status: 'draft' | 'approved' | 'in_progress' | 'completed' | 'archived'
   conversationId: string | null
+  conversationTitle: string | null
   createdAt: number
   updatedAt: number
 }
 
-export async function listPlans(limit = 50): Promise<{ plans: Plan[] }> {
-  return fetchJson(`${API_BASE}/plans?limit=${limit}`)
+export async function listPlans(limit = 50, conversationId?: string): Promise<{ plans: Plan[] }> {
+  const params = new URLSearchParams({ limit: String(limit) })
+  if (conversationId) params.set('conversationId', conversationId)
+  return fetchJson(`${API_BASE}/plans?${params}`)
+}
+
+export async function getPlanCounts(): Promise<Record<string, number>> {
+  return fetchJson(`${API_BASE}/plans/counts`)
 }
 
 export async function getPlan(id: string): Promise<Plan> {
@@ -251,9 +258,6 @@ export interface IntegrationsStatus {
     toolCount: number
     tools: string[]
     transport: string
-  }
-  telegram: {
-    configured: boolean
   }
 }
 

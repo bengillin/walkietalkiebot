@@ -1,6 +1,6 @@
 import type Database from 'better-sqlite3'
 
-const SCHEMA_VERSION = 4
+const SCHEMA_VERSION = 5
 
 export function initSchema(db: Database.Database): void {
   // Create schema version table
@@ -25,6 +25,7 @@ function runMigrations(db: Database.Database, fromVersion: number): void {
     migrateV2,
     migrateV3,
     migrateV4,
+    migrateV5,
   ]
 
   for (let i = fromVersion; i < migrations.length; i++) {
@@ -80,13 +81,6 @@ function migrateV1(db: Database.Database): void {
       timestamp INTEGER NOT NULL,
       duration INTEGER,
       error TEXT
-    );
-
-    -- Telegram user state
-    CREATE TABLE telegram_state (
-      user_id INTEGER PRIMARY KEY,
-      current_conversation_id TEXT REFERENCES conversations(id) ON DELETE SET NULL,
-      updated_at INTEGER NOT NULL
     );
 
     -- Full-text search
@@ -173,4 +167,8 @@ function migrateV2(db: Database.Database): void {
     CREATE INDEX idx_jobs_conversation ON jobs(conversation_id);
     CREATE INDEX idx_job_events_job ON job_events(job_id, timestamp);
   `)
+}
+
+function migrateV5(db: Database.Database): void {
+  db.exec(`DROP TABLE IF EXISTS telegram_state;`)
 }

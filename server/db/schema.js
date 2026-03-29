@@ -1,4 +1,4 @@
-const SCHEMA_VERSION = 4;
+const SCHEMA_VERSION = 5;
 function initSchema(db) {
   db.exec(`
     CREATE TABLE IF NOT EXISTS schema_version (
@@ -16,7 +16,8 @@ function runMigrations(db, fromVersion) {
     migrateV1,
     migrateV2,
     migrateV3,
-    migrateV4
+    migrateV4,
+    migrateV5
   ];
   for (let i = fromVersion; i < migrations.length; i++) {
     console.log(`Running migration to version ${i + 1}...`);
@@ -69,13 +70,6 @@ function migrateV1(db) {
       timestamp INTEGER NOT NULL,
       duration INTEGER,
       error TEXT
-    );
-
-    -- Telegram user state
-    CREATE TABLE telegram_state (
-      user_id INTEGER PRIMARY KEY,
-      current_conversation_id TEXT REFERENCES conversations(id) ON DELETE SET NULL,
-      updated_at INTEGER NOT NULL
     );
 
     -- Full-text search
@@ -159,6 +153,9 @@ function migrateV2(db) {
     CREATE INDEX idx_jobs_conversation ON jobs(conversation_id);
     CREATE INDEX idx_job_events_job ON job_events(job_id, timestamp);
   `);
+}
+function migrateV5(db) {
+  db.exec(`DROP TABLE IF EXISTS telegram_state;`);
 }
 export {
   initSchema

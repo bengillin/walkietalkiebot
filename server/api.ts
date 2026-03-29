@@ -256,11 +256,12 @@ api.patch('/images/:id', async (c) => {
 // Plans endpoints
 // ============================================
 
-// GET /api/plans - List all plans
+// GET /api/plans - List all plans (optionally filtered by conversation)
 api.get('/plans', (c) => {
   const limit = parseInt(c.req.query('limit') || '50', 10)
   const offset = parseInt(c.req.query('offset') || '0', 10)
-  const planList = plans.listPlans(limit, offset)
+  const conversationId = c.req.query('conversationId') || undefined
+  const planList = plans.listPlans(limit, offset, conversationId)
 
   return c.json({
     plans: planList.map(p => ({
@@ -269,10 +270,16 @@ api.get('/plans', (c) => {
       content: p.content,
       status: p.status,
       conversationId: p.conversation_id,
+      conversationTitle: p.conversation_title || null,
       createdAt: p.created_at,
       updatedAt: p.updated_at,
     })),
   })
+})
+
+// GET /api/plans/counts - Plan counts per conversation
+api.get('/plans/counts', (c) => {
+  return c.json(plans.countPlansByConversation())
 })
 
 // GET /api/plans/:id - Get single plan
@@ -459,42 +466,27 @@ api.post('/migrate', async (c) => {
   })
 })
 
-// GET /api/integrations - Get status of integrations (MCP, Telegram)
+// GET /api/integrations - Get status of integrations (MCP)
 api.get('/integrations', (c) => {
-  // Check if Telegram token is configured
-  let telegramConfigured = !!process.env.TELEGRAM_BOT_TOKEN
-  if (!telegramConfigured) {
-    try {
-      const { existsSync } = require('fs')
-      const { join } = require('path')
-      const { homedir } = require('os')
-      const tokenPath = join(homedir(), '.wtb', 'telegram.token')
-      telegramConfigured = existsSync(tokenPath)
-    } catch {
-      // ignore
-    }
-  }
+  const mcpTools = [
+    'launch_wtb', 'get_wtb_status', 'get_transcript',
+    'get_conversation_history', 'get_claude_session', 'set_claude_session',
+    'disconnect_claude_session', 'get_pending_message', 'respond_to_wtb',
+    'update_wtb_state', 'analyze_image', 'open_url',
+    'create_wtb_job', 'get_wtb_job', 'list_wtb_jobs',
+    'list_conversations', 'get_conversation', 'create_conversation',
+    'rename_conversation', 'delete_conversation', 'search_conversations',
+    'add_message', 'list_plans', 'get_plan',
+    'create_plan', 'update_plan', 'delete_plan',
+    'get_liner_notes', 'set_liner_notes', 'export_conversation',
+  ]
 
   return c.json({
     mcp: {
       configured: true,
-      toolCount: 30,
-      tools: [
-        'launch_wtb', 'get_wtb_status', 'get_transcript',
-        'get_conversation_history', 'get_claude_session', 'set_claude_session',
-        'disconnect_claude_session', 'get_pending_message', 'respond_to_wtb',
-        'update_wtb_state', 'analyze_image', 'open_url',
-        'create_wtb_job', 'get_wtb_job', 'list_wtb_jobs',
-        'list_conversations', 'get_conversation', 'create_conversation',
-        'rename_conversation', 'delete_conversation', 'search_conversations',
-        'add_message', 'list_plans', 'get_plan',
-        'create_plan', 'update_plan', 'delete_plan',
-        'get_liner_notes', 'set_liner_notes', 'export_conversation',
-      ],
+      toolCount: mcpTools.length,
+      tools: mcpTools,
       transport: 'stdio',
-    },
-    telegram: {
-      configured: telegramConfigured,
     },
   })
 })

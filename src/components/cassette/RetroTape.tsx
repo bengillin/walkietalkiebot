@@ -24,6 +24,7 @@ interface RetroTapeProps {
   isSelected?: boolean
   isEjecting?: boolean
   size?: 'normal' | 'mini'
+  planCount?: number
 }
 
 export function RetroTape({
@@ -35,6 +36,7 @@ export function RetroTape({
   isSelected = false,
   isEjecting = false,
   size = 'normal',
+  planCount = 0,
 }: RetroTapeProps) {
   const { theme } = useTheme()
   const colors = TAPE_COLORS[color]
@@ -83,6 +85,15 @@ export function RetroTape({
         </div>
         <div className="retro-tape__screw" />
       </div>
+
+      {planCount > 0 && (
+        <div className="retro-tape__plan-badge" title={`${planCount} plan${planCount !== 1 ? 's' : ''}`}>
+          <svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10">
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+          </svg>
+          {planCount}
+        </div>
+      )}
     </div>
   )
 }

@@ -81,6 +81,31 @@
   }
 }
 
+/* Plan badge */
+.retro-tape__plan-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 6px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: system-ui, sans-serif;
+  line-height: 1;
+  color: var(--text-primary, #fff);
+  background: var(--accent, #cc0000);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.retro-tape__plan-badge svg {
+  opacity: 0.9;
+}
+
 .retro-tape[role="button"]:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5);

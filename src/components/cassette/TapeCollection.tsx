@@ -51,13 +51,15 @@ export function TapeCollection({
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<Set<string> | null>(null)
   const [isSearching, setIsSearching] = useState(false)
+  const [planCounts, setPlanCounts] = useState<Record<string, number>>({})
   const searchInputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout>>()
 
-  // Focus search input when drawer opens
+  // Focus search input and load plan counts when drawer opens
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => searchInputRef.current?.focus(), 100)
+      api.getPlanCounts().then(setPlanCounts).catch(() => {})
     } else {
       setSearchQuery('')
       setSearchResults(null)
@@ -184,6 +186,7 @@ export function TapeCollection({
                   isSelected={conv.id === currentId}
                   isEjecting={isEjecting && conv.id === currentId}
                   onClick={() => handleTapeClick(conv.id)}
+                  planCount={planCounts[conv.id] || 0}
                 />
                 {/* Context toggle button - not shown on current item */}
                 {conv.id !== currentId && onToggleContext && (
