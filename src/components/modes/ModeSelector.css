@@ -1,0 +1,105 @@
+.mode-selector {
+  position: relative;
+}
+
+.mode-selector__trigger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: var(--bg-tertiary, #252542);
+  border: 1px solid var(--border-light, rgba(255, 255, 255, 0.1));
+  border-radius: 8px;
+  color: var(--text-primary, #f0f0f5);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.mode-selector__trigger:hover {
+  border-color: var(--accent, #00d4ff);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.mode-selector__icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.mode-selector__label {
+  letter-spacing: 0.03em;
+}
+
+.mode-selector__chevron {
+  opacity: 0.5;
+  transition: transform 0.15s ease;
+}
+
+.mode-selector__chevron--open {
+  transform: rotate(180deg);
+}
+
+.mode-selector__dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 220px;
+  background: var(--bg-secondary, #1a1a2e);
+  border: 1px solid var(--border-light, rgba(255, 255, 255, 0.1));
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 100;
+  overflow: hidden;
+  animation: mode-dropdown-in 0.15s ease-out;
+}
+
+@keyframes mode-dropdown-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.mode-selector__option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  background: transparent;
+  border: none;
+  color: var(--text-primary, #f0f0f5);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s ease;
+}
+
+.mode-selector__option:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.mode-selector__option--active {
+  background: var(--accent-soft, rgba(0, 212, 255, 0.1));
+}
+
+.mode-selector__option-icon {
+  font-size: 16px;
+  line-height: 1.3;
+  flex-shrink: 0;
+}
+
+.mode-selector__option-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mode-selector__option-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.mode-selector__option-desc {
+  font-size: 11px;
+  color: var(--text-muted, #55556a);
+  line-height: 1.3;
+}

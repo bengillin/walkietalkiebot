@@ -2,7 +2,7 @@ import { getDb } from "../index.js";
 function listConversations(limit = 50, offset = 0) {
   const db = getDb();
   return db.prepare(`
-    SELECT id, title, created_at, updated_at, project_id, parent_id
+    SELECT id, title, created_at, updated_at, project_id, parent_id, mode
     FROM conversations
     ORDER BY updated_at DESC
     LIMIT ? OFFSET ?
@@ -11,7 +11,7 @@ function listConversations(limit = 50, offset = 0) {
 function getConversation(id) {
   const db = getDb();
   const row = db.prepare(`
-    SELECT id, title, created_at, updated_at, project_id, parent_id
+    SELECT id, title, created_at, updated_at, project_id, parent_id, mode
     FROM conversations
     WHERE id = ?
   `).get(id);
@@ -21,17 +21,19 @@ function createConversation(input) {
   const db = getDb();
   const now = Date.now();
   const title = input.title || "New conversation";
+  const mode = input.mode || "voice";
   db.prepare(`
-    INSERT INTO conversations (id, title, created_at, updated_at, project_id, parent_id)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `).run(input.id, title, now, now, input.projectId || null, input.parentId || null);
+    INSERT INTO conversations (id, title, created_at, updated_at, project_id, parent_id, mode)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `).run(input.id, title, now, now, input.projectId || null, input.parentId || null, mode);
   return {
     id: input.id,
     title,
     created_at: now,
     updated_at: now,
     project_id: input.projectId || null,
-    parent_id: input.parentId || null
+    parent_id: input.parentId || null,
+    mode
   };
 }
 function updateConversation(id, input) {
@@ -75,6 +77,10 @@ function getLinerNotes(id) {
   const row = db.prepare("SELECT liner_notes FROM conversations WHERE id = ?").get(id);
   return row?.liner_notes || null;
 }
+function updateMode(id, mode) {
+  const db = getDb();
+  db.prepare("UPDATE conversations SET mode = ?, updated_at = ? WHERE id = ?").run(mode, Date.now(), id);
+}
 function countConversations() {
   const db = getDb();
   const row = db.prepare("SELECT COUNT(*) as count FROM conversations").get();
@@ -89,5 +95,6 @@ export {
   listConversations,
   touchConversation,
   updateConversation,
-  updateLinerNotes
+  updateLinerNotes,
+  updateMode
 };

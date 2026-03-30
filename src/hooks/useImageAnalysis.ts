@@ -1,12 +1,10 @@
 import { useCallback, useMemo } from 'react'
-import { analyzeImage, analyzeImageViaClaudeCode } from '../lib/claude'
+import { analyzeImageViaClaudeCode } from '../lib/claude'
 import * as api from '../lib/api'
 import type { DroppedFile, ImageAnalysis } from '../types'
 import type { ImageAnalysisStatus } from '../components/dropzone/FileDropZone'
 
 interface UseImageAnalysisParams {
-  useClaudeCode: boolean
-  apiKey: string
   addFiles: (files: DroppedFile[]) => void
   addImageAnalysis: (analysis: Omit<ImageAnalysis, 'id' | 'timestamp'>) => string
   updateImageAnalysis: (id: string, update: Partial<ImageAnalysis>) => void
@@ -15,8 +13,6 @@ interface UseImageAnalysisParams {
 }
 
 export function useImageAnalysis({
-  useClaudeCode,
-  apiKey,
   addFiles,
   addImageAnalysis,
   updateImageAnalysis,
@@ -26,8 +22,6 @@ export function useImageAnalysis({
   const handleFilesAdd = useCallback(async (files: DroppedFile[]) => {
     addFiles(files)
 
-    if (!useClaudeCode && !apiKey) return
-
     for (const file of files) {
       const analysisId = addImageAnalysis({
         fileId: file.id,
@@ -36,11 +30,7 @@ export function useImageAnalysis({
         status: 'analyzing',
       })
 
-      const analyzePromise = useClaudeCode
-        ? analyzeImageViaClaudeCode(file)
-        : analyzeImage(file, apiKey)
-
-      analyzePromise
+      analyzeImageViaClaudeCode(file)
         .then((description) => {
           updateImageAnalysis(analysisId, { description, status: 'complete' })
           updateFile(file.id, { description })
@@ -51,7 +41,7 @@ export function useImageAnalysis({
           updateImageAnalysis(analysisId, { status: 'error', error: err.message })
         })
     }
-  }, [addFiles, addImageAnalysis, updateImageAnalysis, updateFile, apiKey, useClaudeCode])
+  }, [addFiles, addImageAnalysis, updateImageAnalysis, updateFile])
 
   const analysisStatuses: ImageAnalysisStatus[] = useMemo(() =>
     imageAnalyses.map(a => ({

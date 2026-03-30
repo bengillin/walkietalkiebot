@@ -1,4 +1,4 @@
-const SCHEMA_VERSION = 5;
+const SCHEMA_VERSION = 6;
 function initSchema(db) {
   db.exec(`
     CREATE TABLE IF NOT EXISTS schema_version (
@@ -17,7 +17,8 @@ function runMigrations(db, fromVersion) {
     migrateV2,
     migrateV3,
     migrateV4,
-    migrateV5
+    migrateV5,
+    migrateV6
   ];
   for (let i = fromVersion; i < migrations.length; i++) {
     console.log(`Running migration to version ${i + 1}...`);
@@ -156,6 +157,9 @@ function migrateV2(db) {
 }
 function migrateV5(db) {
   db.exec(`DROP TABLE IF EXISTS telegram_state;`);
+}
+function migrateV6(db) {
+  db.exec(`ALTER TABLE conversations ADD COLUMN mode TEXT DEFAULT 'voice';`);
 }
 export {
   initSchema

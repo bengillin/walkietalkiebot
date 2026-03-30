@@ -2,6 +2,8 @@ import { spawn, execSync, type ChildProcess } from 'child_process'
 import { writeFileSync, mkdirSync, unlinkSync } from 'fs'
 import { join } from 'path'
 import { tmpdir } from 'os'
+import { buildPrompt } from '../promptBuilder.js'
+import { getMode } from '../modes.js'
 
 export interface ActivityEvent {
   type: 'tool_start' | 'tool_end' | 'tool_input' | 'all_complete'
@@ -35,6 +37,7 @@ export interface RunnerOptions {
   history?: Array<{ role: string; content: string }>
   images?: ImageAttachment[]
   rawMode?: boolean // Skip voice mode wrapping, send prompt as-is with image paths
+  mode?: string // Mode name for prompt construction (default: 'voice')
   callbacks: RunnerCallbacks
 }
 
@@ -102,16 +105,14 @@ export function isClaudeCliAvailable(): boolean {
 }
 
 export function spawnClaude(options: RunnerOptions): RunnerHandle {
-  const { prompt, history, images, rawMode, callbacks } = options
+  const { prompt, history, images, rawMode, mode: modeName, callbacks } = options
 
   // Pre-flight: check if claude CLI exists before trying to spawn it
   if (!isClaudeCliAvailable()) {
     const promise = Promise.resolve(1)
-    // Use setTimeout to make this async so the caller gets the handle back first
     setTimeout(() => {
       callbacks.onError(
-        'Claude Code CLI not found. Install it with: npm install -g @anthropic-ai/claude-code\n' +
-        'Or switch to Direct API mode in Settings and enter your Anthropic API key.'
+        'Claude Code CLI not found. Install it with: npm install -g @anthropic-ai/claude-code'
       )
       callbacks.onComplete(1)
     }, 0)
@@ -144,29 +145,13 @@ export function spawnClaude(options: RunnerOptions): RunnerHandle {
     }
     fullPrompt = `${imageBlock}${prompt}`
   } else {
-    // Voice mode: wrap prompt with context and voice mode instructions
-    const recentMessages = (history || []).slice(-10)
-    let contextBlock = ''
-    if (recentMessages.length > 0) {
-      contextBlock = '[Recent conversation]\n' +
-        recentMessages.map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n') +
-        '\n[/Recent conversation]\n\n'
-    }
-
-    let imageBlock = ''
-    if (tempImagePaths.length > 0) {
-      imageBlock = '[Attached Images - Use the Read tool to view these image files]\n' +
-        tempImagePaths.map(p => p).join('\n') +
-        '\n[/Attached Images]\n\n'
-    }
-
-    // Detect if user is asking for a plan
-    const isPlanRequest = /\b(?:plan|design|architect|propose|strategy|roadmap|outline)\b/i.test(prompt)
-    const planInstruction = isPlanRequest
-      ? '\n[PLAN MODE - The user is asking you to make a plan. Write the full detailed plan (with markdown headings, numbered steps, etc.) to a file using the Write tool at /tmp/wtb-plan.md. Then give a brief voice summary of what you planned.]'
-      : ''
-
-    fullPrompt = `${contextBlock}${imageBlock}[VOICE MODE - Keep responses to 1-2 sentences, no markdown, speak naturally]${planInstruction}\n\nUser: ${prompt}`
+    const mode = getMode(modeName || 'voice')
+    fullPrompt = buildPrompt({
+      message: prompt,
+      mode,
+      history,
+      imagePaths: tempImagePaths.length > 0 ? tempImagePaths : undefined,
+    })
   }
 
   const args = [

@@ -7,6 +7,14 @@ export interface Conversation {
   updatedAt: number
   projectId?: string
   parentId?: string
+  mode?: string
+}
+
+export interface ModeInfo {
+  name: string
+  label: string
+  description: string
+  icon: string
 }
 
 export interface MessageImage {
@@ -263,6 +271,19 @@ export interface IntegrationsStatus {
 
 export async function getIntegrations(): Promise<IntegrationsStatus> {
   return fetchJson(`${API_BASE}/integrations`)
+}
+
+// Modes
+export async function getModes(): Promise<{ modes: ModeInfo[] }> {
+  return fetchJson(`${API_BASE}/modes`)
+}
+
+export async function updateConversationMode(id: string, mode: string): Promise<void> {
+  await fetchJson(`${API_BASE}/conversations/${id}/mode`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ mode }),
+  })
 }
 
 // Jobs

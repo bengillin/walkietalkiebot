@@ -1,6 +1,6 @@
 import type Database from 'better-sqlite3'
 
-const SCHEMA_VERSION = 5
+const SCHEMA_VERSION = 6
 
 export function initSchema(db: Database.Database): void {
   // Create schema version table
@@ -26,6 +26,7 @@ function runMigrations(db: Database.Database, fromVersion: number): void {
     migrateV3,
     migrateV4,
     migrateV5,
+    migrateV6,
   ]
 
   for (let i = fromVersion; i < migrations.length; i++) {
@@ -171,4 +172,8 @@ function migrateV2(db: Database.Database): void {
 
 function migrateV5(db: Database.Database): void {
   db.exec(`DROP TABLE IF EXISTS telegram_state;`)
+}
+
+function migrateV6(db: Database.Database): void {
+  db.exec(`ALTER TABLE conversations ADD COLUMN mode TEXT DEFAULT 'voice';`)
 }

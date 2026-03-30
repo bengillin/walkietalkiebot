@@ -62,7 +62,7 @@ server/                 Hono HTTP server (HTTPS only with Tailscale certs)
   index.ts              Server startup (HTTP/HTTPS, DB init)
   state.ts              In-memory state for IPC callbacks
   ssl.ts                Tailscale cert detection (no self-signed generation)
-  db/schema.ts          SQLite schema with versioned migrations (v1–v5)
+  db/schema.ts          SQLite schema with versioned migrations (v1–v6)
   db/repositories/      CRUD: conversations, messages, activities, search, plans, jobs
   test/helpers.ts       Test utilities (in-memory SQLite via initDbForTesting)
   jobs/                 Async job execution
@@ -91,7 +91,9 @@ site/                   Marketing site (walkietalkie.bot)
 ## Key Patterns
 
 - **HTTP localhost**: Localhost is a secure context — no HTTPS needed. HTTPS auto-enabled only when Tailscale certs exist at `~/.wtb/`
-- **Two Claude modes**: Direct API (with API key, streaming TTS) or Claude Code CLI (spawns `claude -p`, shows tool activity)
+- **Claude Code only**: All communication through Claude Code CLI (`claude -p`). No Direct API mode.
+- **Configurable modes**: 5 built-in modes (Voice, Pair, Architect, Code Review, Debug) defined in `server/modes.ts`. Modes control prompt instructions and plan detection. Per-conversation mode persisted in DB. Switchable via header dropdown or voice ("switch to architect mode")
+- **Prompt builder**: Pure function in `server/promptBuilder.ts` assembles context, images, mode instruction, and plan detection into the prompt. Tested independently.
 - **Persistence**: localStorage as cache, SQLite (`~/.wtb/wtb.db`) as source of truth. Auto-migration on first server connect.
 - **IPC**: Frontend posts to `/api/send`, MCP tools poll `/api/pending`, respond via `/api/respond`
 - **One-shot processes**: Each `/api/claude-code` call spawns a fresh `claude -p` with `--no-session-persistence --permission-mode bypassPermissions`
@@ -110,8 +112,8 @@ site/                   Marketing site (walkietalkie.bot)
 
 ## Database
 
-SQLite at `~/.wtb/wtb.db`. Schema version tracked in `schema_version` table (currently v5). Tables:
-- `conversations` — id, title, timestamps, project_id, parent_id, liner_notes
+SQLite at `~/.wtb/wtb.db`. Schema version tracked in `schema_version` table (currently v6). Tables:
+- `conversations` — id, title, timestamps, project_id, parent_id, liner_notes, mode
 - `messages` — role, content, position, source
 - `message_images` — base64 data URLs with descriptions
 - `activities` — tool usage (tool, input, status, duration, error)

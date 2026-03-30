@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { RobotAvatarSmall } from './components/avatar/RobotAvatar'
 import { Logo } from './components/Logo'
 import { ChatTimeline } from './components/chat/ChatTimeline'
@@ -15,21 +15,21 @@ import { LinerNotes } from './components/linernotes/LinerNotes'
 import { KeyboardShortcuts } from './components/shortcuts/KeyboardShortcuts'
 import { SearchOverlay } from './components/search/SearchOverlay'
 import { Plans } from './components/plans/Plans'
+import { ModeSelector } from './components/modes/ModeSelector'
 import { useDraggableFab } from './hooks/useDraggableFab'
 import { useServerSync } from './hooks/useServerSync'
 import { useImageAnalysis } from './hooks/useImageAnalysis'
 import { useVoiceIO } from './hooks/useVoiceIO'
 import { useClaudeChat } from './hooks/useClaudeChat'
 import { useKeyboardControl } from './hooks/useKeyboardControl'
+import type { ModeInfo } from './lib/api'
+import * as api from './lib/api'
 import './App.css'
 
 function App() {
   // --- Local UI state ---
   const [hasOnboarded, setHasOnboarded] = useState(() =>
     localStorage.getItem('wtb_onboarded') === 'true'
-  )
-  const [apiKey, setApiKey] = useState(() =>
-    localStorage.getItem('wtb_api_key') || ''
   )
   const [showSettings, setShowSettings] = useState(false)
   const [showMediaLibrary, setShowMediaLibrary] = useState(false)
@@ -40,12 +40,10 @@ function App() {
   const [isTapeEjected, setIsTapeEjected] = useState(false)
   const [showThemePicker, setShowThemePicker] = useState(false)
   const [themeBeforePicker, setThemeBeforePicker] = useState<string | null>(null)
-  const [useClaudeCode, setUseClaudeCode] = useState(() =>
-    localStorage.getItem('wtb_use_claude_code') === 'true'
-  )
-  const [connectedSessionId, setConnectedSessionId] = useState<string | null>(null)
   const [lightboxImage, setLightboxImage] = useState<{ dataUrl: string; description?: string; fileName: string } | null>(null)
   const [lightboxGallery, setLightboxGallery] = useState<{ dataUrl: string; description?: string; fileName: string }[] | undefined>(undefined)
+  const [currentMode, setCurrentMode] = useState('voice')
+  const [availableModes, setAvailableModes] = useState<ModeInfo[]>([])
 
   // --- Theme ---
   const { theme, setTheme, themes: themeList } = useTheme()
@@ -69,9 +67,6 @@ function App() {
     customWakeWord, setCustomWakeWord,
     customTriggerWord, setCustomTriggerWord,
     triggerWordDelay, setTriggerWordDelay,
-    claudeModel, setClaudeModel,
-    claudeMaxTokens, setClaudeMaxTokens,
-    claudeSystemPrompt, setClaudeSystemPrompt,
     linerNotes, saveLinerNotes,
     syncFromServer, migrateToServer,
   } = useStore()
@@ -83,17 +78,25 @@ function App() {
   const { fabRef, fabPosition, fabSize, isDraggingFab, dragStartRef, handleFabDragStart, handleFabResizeStart } = useDraggableFab()
 
   const { handleFilesAdd, analysisStatuses } = useImageAnalysis({
-    useClaudeCode, apiKey,
     addFiles, addImageAnalysis, updateImageAnalysis, updateFile, imageAnalyses,
   })
 
-  const contextMessages = useMemo(() => {
-    if (contextConversationIds.length === 0) return []
-    return conversations
-      .filter(c => contextConversationIds.includes(c.id))
-      .flatMap(c => c.messages)
-      .sort((a, b) => a.timestamp - b.timestamp)
-  }, [contextConversationIds, conversations])
+  // Fetch modes on mount and restore mode when switching conversations
+  useEffect(() => {
+    api.getModes().then(data => setAvailableModes(data.modes)).catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    const conv = conversations.find(c => c.id === currentConversationId)
+    if (conv?.mode) setCurrentMode(conv.mode)
+  }, [currentConversationId, conversations])
+
+  const handleModeChange = useCallback((mode: string) => {
+    setCurrentMode(mode)
+    if (currentConversationId) {
+      api.updateConversationMode(currentConversationId, mode).catch(() => {})
+    }
+  }, [currentConversationId])
 
   // Ref to break circular dependency: voice needs handleSendMessage, chat needs voice methods
   const sendMessageRef = useRef<(text: string) => void>(() => {})
@@ -109,17 +112,18 @@ function App() {
   })
 
   const chat = useClaudeChat({
-    apiKey, useClaudeCode, ttsEnabled,
+    ttsEnabled,
     messages, addMessage,
     setAvatarState, setTranscript,
     speak: voiceIO.speak,
-    speakStreaming: voiceIO.speakStreaming,
     playSound: voiceIO.playSound,
     clearSpeechTranscript: voiceIO.clearSpeechTranscript,
     attachedFiles, clearFiles, clearImageAnalyses, getImageContext,
     addActivity, updateActivity, clearActivities, finalizeActivities,
-    contextMessages, currentConversationId,
-    claudeModel, claudeMaxTokens, claudeSystemPrompt,
+    currentConversationId,
+    mode: currentMode,
+    onModeChange: handleModeChange,
+    availableModes,
   })
 
   // Wire voice → chat: update the ref so voice callbacks invoke the real handleSendMessage
@@ -128,7 +132,7 @@ function App() {
   const { showTapToTalk } = useKeyboardControl({
     isListening: voiceIO.isListening,
     isSpeaking: voiceIO.isSpeaking,
-    avatarState, useClaudeCode, apiKey,
+    avatarState,
     continuousListeningEnabled,
     handleTalkStart: voiceIO.handleTalkStart,
     handleTalkEnd: voiceIO.handleTalkEnd,
@@ -140,25 +144,6 @@ function App() {
     currentConversationId, conversations,
     finalTranscriptRef: voiceIO.finalTranscriptRef,
   })
-
-  // --- Session polling ---
-  useEffect(() => {
-    if (!useClaudeCode) return
-    const checkSession = () => {
-      fetch('/api/session')
-        .then(res => res.json())
-        .then(data => setConnectedSessionId(data.sessionId))
-        .catch(() => setConnectedSessionId(null))
-    }
-    checkSession()
-    const interval = setInterval(checkSession, 3000)
-    return () => clearInterval(interval)
-  }, [useClaudeCode])
-
-  const disconnectSession = async () => {
-    await fetch('/api/session', { method: 'DELETE' })
-    setConnectedSessionId(null)
-  }
 
   // --- Sync messages/transcript to API for MCP ---
   useEffect(() => {
@@ -183,12 +168,6 @@ function App() {
 
   // --- Onboarding ---
   const handleOnboardingComplete = useCallback((settings: OnboardingSettings) => {
-    setUseClaudeCode(settings.useClaudeCode)
-    localStorage.setItem('wtb_use_claude_code', String(settings.useClaudeCode))
-    if (settings.apiKey) {
-      setApiKey(settings.apiKey)
-      localStorage.setItem('wtb_api_key', settings.apiKey)
-    }
     setTtsEnabled(settings.ttsEnabled)
     setSoundEffectsEnabled(settings.soundEffects)
     setWakeWordEnabled(settings.wakeWord)
@@ -196,14 +175,6 @@ function App() {
     setHasOnboarded(true)
     localStorage.setItem('wtb_onboarded', 'true')
   }, [setTtsEnabled, setSoundEffectsEnabled, setWakeWordEnabled, setContinuousListeningEnabled])
-
-  const handleSaveApiKey = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (apiKey.trim()) {
-      localStorage.setItem('wtb_api_key', apiKey.trim())
-      setShowSettings(false)
-    }
-  }
 
   // --- Early returns ---
   if (!voiceIO.sttSupported || !voiceIO.ttsSupported) {
@@ -249,6 +220,13 @@ function App() {
               <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M7 10l5 5 5-5z" /></svg>
             </span>
           </button>
+          {availableModes.length > 0 && (
+            <ModeSelector
+              modes={availableModes}
+              currentMode={currentMode}
+              onSelectMode={handleModeChange}
+            />
+          )}
         </div>
         <div className="app__header-right">
           {voiceIO.isListening && (
@@ -356,8 +334,7 @@ function App() {
         onDeleteConversation={deleteConversation}
         onCloseCollection={() => setIsTapeEjected(false)}
         onFilesAdd={handleFilesAdd}
-        isDisabled={(!useClaudeCode && !apiKey) || voiceIO.isSpeaking || avatarState === 'thinking'}
-        disabledReason={!useClaudeCode && !apiKey ? 'Add an API key in Settings, or switch to Claude Code mode' : undefined}
+        isDisabled={voiceIO.isSpeaking || avatarState === 'thinking'}
         triggerWord={customTriggerWord || 'over'}
         onClearTranscript={() => setTranscript('')}
         isRecording={voiceIO.isListening}
@@ -378,10 +355,6 @@ function App() {
 
       {showSettings && (
         <Settings
-          useClaudeCode={useClaudeCode}
-          setUseClaudeCode={setUseClaudeCode}
-          connectedSessionId={connectedSessionId}
-          onDisconnectSession={disconnectSession}
           ttsEnabled={ttsEnabled} setTtsEnabled={setTtsEnabled}
           ttsVoice={ttsVoice} setTtsVoice={setTtsVoice}
           soundEffectsEnabled={soundEffectsEnabled} setSoundEffectsEnabled={setSoundEffectsEnabled}
@@ -390,11 +363,6 @@ function App() {
           customWakeWord={customWakeWord} setCustomWakeWord={setCustomWakeWord}
           customTriggerWord={customTriggerWord} setCustomTriggerWord={setCustomTriggerWord}
           triggerWordDelay={triggerWordDelay} setTriggerWordDelay={setTriggerWordDelay}
-          claudeModel={claudeModel} setClaudeModel={setClaudeModel}
-          claudeMaxTokens={claudeMaxTokens} setClaudeMaxTokens={setClaudeMaxTokens}
-          claudeSystemPrompt={claudeSystemPrompt} setClaudeSystemPrompt={setClaudeSystemPrompt}
-          apiKey={apiKey} setApiKey={setApiKey}
-          onSaveApiKey={handleSaveApiKey}
           currentConversationTitle={conversations.find(c => c.id === currentConversationId)?.title || 'New conversation'}
           currentConversation={conversations.find(c => c.id === currentConversationId) || null}
           onRenameConversation={(title) => {
@@ -471,7 +439,7 @@ function App() {
           window.addEventListener('touchmove', handleTouchMove)
           window.addEventListener('touchend', handleTouchEnd)
         }}
-        disabled={(!useClaudeCode && !apiKey) || voiceIO.isSpeaking || avatarState === 'thinking' || isTapeEjected}
+        disabled={voiceIO.isSpeaking || avatarState === 'thinking' || isTapeEjected}
         aria-label={voiceIO.isListening ? 'Stop recording' : 'Start recording'}
       >
         <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10" /></svg>

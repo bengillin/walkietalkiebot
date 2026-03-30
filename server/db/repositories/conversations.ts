@@ -7,6 +7,7 @@ export interface ConversationRow {
   updated_at: number
   project_id: string | null
   parent_id: string | null
+  mode: string
 }
 
 export interface CreateConversationInput {
@@ -14,6 +15,7 @@ export interface CreateConversationInput {
   title?: string
   projectId?: string
   parentId?: string
+  mode?: string
 }
 
 export interface UpdateConversationInput {
@@ -25,7 +27,7 @@ export interface UpdateConversationInput {
 export function listConversations(limit = 50, offset = 0): ConversationRow[] {
   const db = getDb()
   return db.prepare(`
-    SELECT id, title, created_at, updated_at, project_id, parent_id
+    SELECT id, title, created_at, updated_at, project_id, parent_id, mode
     FROM conversations
     ORDER BY updated_at DESC
     LIMIT ? OFFSET ?
@@ -35,7 +37,7 @@ export function listConversations(limit = 50, offset = 0): ConversationRow[] {
 export function getConversation(id: string): ConversationRow | null {
   const db = getDb()
   const row = db.prepare(`
-    SELECT id, title, created_at, updated_at, project_id, parent_id
+    SELECT id, title, created_at, updated_at, project_id, parent_id, mode
     FROM conversations
     WHERE id = ?
   `).get(id) as ConversationRow | undefined
@@ -47,10 +49,11 @@ export function createConversation(input: CreateConversationInput): Conversation
   const now = Date.now()
   const title = input.title || 'New conversation'
 
+  const mode = input.mode || 'voice'
   db.prepare(`
-    INSERT INTO conversations (id, title, created_at, updated_at, project_id, parent_id)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `).run(input.id, title, now, now, input.projectId || null, input.parentId || null)
+    INSERT INTO conversations (id, title, created_at, updated_at, project_id, parent_id, mode)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `).run(input.id, title, now, now, input.projectId || null, input.parentId || null, mode)
 
   return {
     id: input.id,
@@ -59,6 +62,7 @@ export function createConversation(input: CreateConversationInput): Conversation
     updated_at: now,
     project_id: input.projectId || null,
     parent_id: input.parentId || null,
+    mode,
   }
 }
 
@@ -110,6 +114,11 @@ export function getLinerNotes(id: string): string | null {
   const db = getDb()
   const row = db.prepare('SELECT liner_notes FROM conversations WHERE id = ?').get(id) as { liner_notes: string | null } | undefined
   return row?.liner_notes || null
+}
+
+export function updateMode(id: string, mode: string): void {
+  const db = getDb()
+  db.prepare('UPDATE conversations SET mode = ?, updated_at = ? WHERE id = ?').run(mode, Date.now(), id)
 }
 
 export function countConversations(): number {

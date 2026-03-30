@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { RobotAvatar } from '../avatar/RobotAvatar'
 import { useTheme, type ThemeName } from '../../contexts/ThemeContext'
-import { getStatus } from '../../lib/api'
 import type { AvatarState } from '../../types'
 import './Onboarding.css'
 
@@ -15,13 +14,11 @@ export interface OnboardingSettings {
   wakeWord: boolean
   continuousListening: boolean
   theme: ThemeName
-  useClaudeCode: boolean
-  apiKey: string
 }
 
-type Step = 'welcome' | 'how-it-works' | 'tts' | 'sound-effects' | 'wake-word' | 'continuous-listening' | 'done'
+type Step = 'welcome' | 'tts' | 'sound-effects' | 'wake-word' | 'continuous-listening' | 'done'
 
-const STEPS: Step[] = ['welcome', 'how-it-works', 'tts', 'sound-effects', 'wake-word', 'continuous-listening', 'done']
+const STEPS: Step[] = ['welcome', 'tts', 'sound-effects', 'wake-word', 'continuous-listening', 'done']
 
 export function Onboarding({ onComplete }: OnboardingProps) {
   const { themes, setTheme } = useTheme()
@@ -32,27 +29,8 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     wakeWord: false,
     continuousListening: false,
     theme: 'apple-1984',
-    useClaudeCode: true,
-    apiKey: '',
   })
   const [robotState, setRobotState] = useState<AvatarState>('idle')
-  const [claudeCliAvailable, setClaudeCliAvailable] = useState<boolean | null>(null)
-
-  // Auto-detect Claude CLI availability on mount
-  useEffect(() => {
-    getStatus()
-      .then((status) => {
-        const available = status.claudeCliAvailable ?? false
-        setClaudeCliAvailable(available)
-        if (!available) {
-          setSettings(prev => ({ ...prev, useClaudeCode: false }))
-        }
-      })
-      .catch(() => {
-        setClaudeCliAvailable(false)
-        setSettings(prev => ({ ...prev, useClaudeCode: false }))
-      })
-  }, [])
 
   const currentIndex = STEPS.indexOf(step)
   const progress = (currentIndex / (STEPS.length - 1)) * 100
@@ -132,63 +110,6 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             <button className="onboarding__button" onClick={nextStep}>
               Get Started
             </button>
-          </div>
-        )}
-
-        {step === 'how-it-works' && (
-          <div className="onboarding__step onboarding__step--setting">
-            <span className="onboarding__step-label">Mode</span>
-            <h2 className="onboarding__setting-title">Choose your mode</h2>
-            <div className="onboarding__modes">
-              <button
-                className={`onboarding__mode onboarding__mode--selectable ${settings.useClaudeCode ? 'onboarding__mode--selected' : ''}`}
-                onClick={() => setSettings(prev => ({ ...prev, useClaudeCode: true }))}
-              >
-                <div className="onboarding__mode-header">
-                  <span className="onboarding__mode-badge">
-                    {claudeCliAvailable ? 'Detected' : 'Not found'}
-                  </span>
-                  <span className={`onboarding__mode-status ${claudeCliAvailable ? 'onboarding__mode-status--ok' : 'onboarding__mode-status--warn'}`}>
-                    {claudeCliAvailable ? '\u2713' : '!'}
-                  </span>
-                </div>
-                <strong className="onboarding__mode-name">Claude Code mode</strong>
-                <p className="onboarding__mode-desc">
-                  {claudeCliAvailable
-                    ? 'Full tool use, file editing, and real-time activity feed. No API key needed.'
-                    : 'Requires Claude Code CLI. Install: npm install -g @anthropic-ai/claude-code'}
-                </p>
-              </button>
-              <button
-                className={`onboarding__mode onboarding__mode--selectable ${!settings.useClaudeCode ? 'onboarding__mode--selected' : ''}`}
-                onClick={() => setSettings(prev => ({ ...prev, useClaudeCode: false }))}
-              >
-                <span className="onboarding__mode-badge onboarding__mode-badge--alt">Alternative</span>
-                <strong className="onboarding__mode-name">Direct API mode</strong>
-                <p className="onboarding__mode-desc">
-                  Uses your Anthropic API key for quick conversations. No tool use.
-                </p>
-              </button>
-            </div>
-            {!settings.useClaudeCode && (
-              <div className="onboarding__api-key">
-                <input
-                  type="password"
-                  className="onboarding__api-key-input"
-                  placeholder="sk-ant-..."
-                  value={settings.apiKey}
-                  onChange={(e) => setSettings(prev => ({ ...prev, apiKey: e.target.value }))}
-                  autoComplete="off"
-                />
-                <p className="onboarding__api-key-hint">
-                  Get a key at <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer">console.anthropic.com</a>. You can also add this later in Settings.
-                </p>
-              </div>
-            )}
-            <div className="onboarding__nav">
-              <button className="onboarding__nav-back" onClick={prevStep}>Back</button>
-              <button className="onboarding__button" onClick={nextStep}>Next</button>
-            </div>
           </div>
         )}
 
@@ -298,10 +219,6 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             <h2 className="onboarding__setting-title">You're all set</h2>
 
             <ul className="onboarding__summary">
-              <li>
-                <span className="onboarding__summary-label">Mode</span>
-                <span className="onboarding__summary-value">{settings.useClaudeCode ? 'Claude Code' : 'Direct API'}</span>
-              </li>
               <li>
                 <span className="onboarding__summary-label">Voice responses</span>
                 <span className="onboarding__summary-value">{settings.ttsEnabled ? 'On' : 'Off'}</span>

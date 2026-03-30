@@ -11,6 +11,7 @@ import * as search from './db/repositories/search.js'
 import * as plans from './db/repositories/plans.js'
 import { spawnClaude, isClaudeCliAvailable } from './jobs/runner.js'
 import { jobRoutes } from './jobs/api.js'
+import { getModeInfoList } from './modes.js'
 
 export const api = new Hono()
 
@@ -50,6 +51,7 @@ api.get('/conversations', (c) => {
       updatedAt: conv.updated_at,
       projectId: conv.project_id,
       parentId: conv.parent_id,
+      mode: conv.mode || 'voice',
     })),
     total,
     limit,
@@ -78,6 +80,7 @@ api.get('/conversations/:id', (c) => {
     updatedAt: conv.updated_at,
     projectId: conv.project_id,
     parentId: conv.parent_id,
+    mode: conv.mode || 'voice',
     messages: msgs.map(m => ({
       id: m.id,
       role: m.role,
@@ -109,13 +112,14 @@ api.post('/conversations', async (c) => {
   const id = body.id || crypto.randomUUID()
   const title = body.title || 'New conversation'
 
-  const conv = conversations.createConversation({ id, title })
+  const conv = conversations.createConversation({ id, title, mode: body.mode })
 
   return c.json({
     id: conv.id,
     title: conv.title,
     createdAt: conv.created_at,
     updatedAt: conv.updated_at,
+    mode: conv.mode || 'voice',
   }, 201)
 })
 
@@ -139,6 +143,7 @@ api.patch('/conversations/:id', async (c) => {
     title: conv.title,
     createdAt: conv.created_at,
     updatedAt: conv.updated_at,
+    mode: conv.mode || 'voice',
   })
 })
 
@@ -466,6 +471,20 @@ api.post('/migrate', async (c) => {
   })
 })
 
+// GET /api/modes - List available modes
+api.get('/modes', (c) => {
+  return c.json({ modes: getModeInfoList() })
+})
+
+// PATCH /api/conversations/:id/mode - Update conversation mode
+api.patch('/conversations/:id/mode', async (c) => {
+  const id = c.req.param('id')
+  const { mode } = await c.req.json()
+  if (!mode) return c.json({ error: 'mode is required' }, 400)
+  conversations.updateMode(id, mode)
+  return c.json({ ok: true })
+})
+
 // GET /api/integrations - Get status of integrations (MCP)
 api.get('/integrations', (c) => {
   const mcpTools = [
@@ -610,75 +629,7 @@ api.post('/send', async (c) => {
   })
 })
 
-// POST /api/analyze-image - Analyze image via Claude API (for Claude Code mode)
-api.post('/analyze-image', async (c) => {
-  const { dataUrl, fileName, type, apiKey: clientApiKey } = await c.req.json()
-  if (!dataUrl) {
-    return c.json({ error: 'Image data required' }, 400)
-  }
-
-  // Get API key from request body or environment
-  const apiKey = clientApiKey || process.env.ANTHROPIC_API_KEY
-  if (!apiKey) {
-    return c.json({ error: 'API key required for image analysis - please add one in Settings even when using Claude Code mode' }, 400)
-  }
-
-  // Extract base64 data
-  const base64Data = dataUrl.split(',')[1]
-  const mediaType = type || 'image/png'
-
-  // Call Claude API to analyze image
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1024,
-      system: `You are analyzing images for a voice assistant app. Describe the image in detail, focusing on:
-- If it's a UI mockup/wireframe: describe the layout, components, navigation, and user flow
-- If it's a screenshot: describe what app/website it is, the state shown, and key elements
-- If it's a hand-drawn sketch: interpret the drawing and describe what it represents
-- For any image: note colors, text visible, key visual elements
-
-Be thorough but concise. This description will be used as context for building or discussing the content.`,
-      messages: [
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'image',
-              source: {
-                type: 'base64',
-                media_type: mediaType,
-                data: base64Data,
-              },
-            },
-            {
-              type: 'text',
-              text: 'Describe this image in detail. If it appears to be a UI design, wireframe, or sketch, focus on the structure and components.',
-            },
-          ],
-        },
-      ],
-    }),
-  })
-
-  if (!response.ok) {
-    const error = await response.text()
-    return c.json({ error: `API error: ${error}` }, response.status)
-  }
-
-  const data = await response.json() as { content: Array<{ text?: string }> }
-  const description = data.content[0]?.text || 'Unable to analyze image.'
-
-  return c.json({ description, fileName })
-})
-
-// POST /api/analyze-image-cc - Analyze image via Claude Code CLI (no API key needed)
+// POST /api/analyze-image-cc - Analyze image via Claude Code CLI
 api.post('/analyze-image-cc', async (c) => {
   const { dataUrl, fileName } = await c.req.json()
   if (!dataUrl) {
@@ -751,7 +702,7 @@ api.post('/open-url', async (c) => {
 
 // POST /api/claude-code - Execute claude CLI and stream response
 api.post('/claude-code', async (c) => {
-  const { message, history, images } = await c.req.json()
+  const { message, history, images, mode } = await c.req.json()
   if (!message) {
     return c.json({ error: 'Message required' }, 400)
   }
@@ -761,6 +712,7 @@ api.post('/claude-code', async (c) => {
       prompt: message,
       history: history || state.messages || [],
       images,
+      mode,
       callbacks: {
         onText: (text) => {
           stream.writeSSE({ data: JSON.stringify({ text }) })

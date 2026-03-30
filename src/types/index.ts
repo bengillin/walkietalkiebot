@@ -72,6 +72,7 @@ export interface Conversation {
   messages: Message[]
   activities?: StoredActivity[]  // Historical tool use, loaded with conversation
   linerNotes?: string | null     // Pinned artifacts/plans/docs
+  mode?: string                  // Active mode for this conversation
   createdAt: number
   updatedAt: number
 }
@@ -153,14 +154,6 @@ export interface AppState {
   // TTS voice selection
   ttsVoice: string
   setTtsVoice: (voice: string) => void
-
-  // Claude settings
-  claudeModel: string
-  setClaudeModel: (model: string) => void
-  claudeMaxTokens: number
-  setClaudeMaxTokens: (tokens: number) => void
-  claudeSystemPrompt: string
-  setClaudeSystemPrompt: (prompt: string) => void
 
   // Liner Notes
   linerNotes: string | null

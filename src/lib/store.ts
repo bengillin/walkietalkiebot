@@ -390,23 +390,6 @@ export const useStore = create<AppState>((set, get) => {
       set({ ttsVoice: voice })
     },
 
-    // Claude settings
-    claudeModel: localStorage.getItem('wtb_claude_model') || 'claude-sonnet-4-20250514',
-    setClaudeModel: (model) => {
-      localStorage.setItem('wtb_claude_model', model)
-      set({ claudeModel: model })
-    },
-    claudeMaxTokens: parseInt(localStorage.getItem('wtb_claude_max_tokens') || '1024', 10),
-    setClaudeMaxTokens: (tokens) => {
-      localStorage.setItem('wtb_claude_max_tokens', String(tokens))
-      set({ claudeMaxTokens: tokens })
-    },
-    claudeSystemPrompt: localStorage.getItem('wtb_claude_system_prompt') || 'You are Walkie Talkie Bot. Be direct and brief - responses are spoken aloud. One to two sentences max unless asked for more. No filler phrases, no "Great question!", no "I\'d be happy to help!". Just answer. Kind but not performative.',
-    setClaudeSystemPrompt: (prompt) => {
-      localStorage.setItem('wtb_claude_system_prompt', prompt)
-      set({ claudeSystemPrompt: prompt })
-    },
-
     transcript: '',
     setTranscript: (transcript) => set({ transcript }),
 

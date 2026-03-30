@@ -6,58 +6,30 @@ import type { Conversation } from '../../types'
 import './Settings.css'
 
 interface SettingsProps {
-  // Claude Code mode
-  useClaudeCode: boolean
-  setUseClaudeCode: (value: boolean) => void
-  connectedSessionId: string | null
-  onDisconnectSession: () => void
-  // TTS
   ttsEnabled: boolean
   setTtsEnabled: (value: boolean) => void
   ttsVoice: string
   setTtsVoice: (value: string) => void
-  // Sound effects
   soundEffectsEnabled: boolean
   setSoundEffectsEnabled: (value: boolean) => void
-  // Continuous listening
   continuousListeningEnabled: boolean
   setContinuousListeningEnabled: (value: boolean) => void
-  // Wake word
   wakeWordEnabled: boolean
   setWakeWordEnabled: (value: boolean) => void
   customWakeWord: string
   setCustomWakeWord: (value: string) => void
-  // Trigger word
   customTriggerWord: string
   setCustomTriggerWord: (value: string) => void
   triggerWordDelay: number
   setTriggerWordDelay: (value: number) => void
-  // Claude settings
-  claudeModel: string
-  setClaudeModel: (value: string) => void
-  claudeMaxTokens: number
-  setClaudeMaxTokens: (value: number) => void
-  claudeSystemPrompt: string
-  setClaudeSystemPrompt: (value: string) => void
-  // API key
-  apiKey: string
-  setApiKey: (value: string) => void
-  onSaveApiKey: (e: React.FormEvent) => void
-  // Conversation rename
   currentConversationTitle: string
   currentConversation: Conversation | null
   onRenameConversation: (title: string) => void
-  // Onboarding
   onResetOnboarding: () => void
-  // Close
   onClose: () => void
 }
 
 export function Settings({
-  useClaudeCode,
-  setUseClaudeCode,
-  connectedSessionId,
-  onDisconnectSession,
   ttsEnabled,
   setTtsEnabled,
   ttsVoice,
@@ -74,15 +46,6 @@ export function Settings({
   setCustomTriggerWord,
   triggerWordDelay,
   setTriggerWordDelay,
-  claudeModel,
-  setClaudeModel,
-  claudeMaxTokens,
-  setClaudeMaxTokens,
-  claudeSystemPrompt,
-  setClaudeSystemPrompt,
-  apiKey,
-  setApiKey,
-  onSaveApiKey,
   currentConversationTitle,
   currentConversation,
   onRenameConversation,
@@ -90,7 +53,6 @@ export function Settings({
   onClose,
 }: SettingsProps) {
   const { theme, setTheme, themes } = useTheme()
-  const canClose = useClaudeCode || apiKey
   const [editingTitle, setEditingTitle] = useState(false)
   const [titleDraft, setTitleDraft] = useState(currentConversationTitle)
   const [integrations, setIntegrations] = useState<IntegrationsStatus | null>(null)
@@ -122,12 +84,12 @@ export function Settings({
 
   return (
     <div className="settings">
-      <div className="settings__backdrop" onClick={() => canClose && onClose()} />
+      <div className="settings__backdrop" onClick={() => onClose()} />
 
       <div className="settings__drawer">
         <div className="settings__header">
           <h3 className="settings__title">Settings</h3>
-          {canClose && (
+          {(
             <button className="settings__close" onClick={onClose}>
               <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
                 <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
@@ -191,71 +153,6 @@ export function Settings({
           </div>
 
           <div className="settings__divider" />
-
-          <label className="settings__toggle">
-            <span className="settings__toggle-label">Claude Code mode</span>
-            <input
-              type="checkbox"
-              checked={useClaudeCode}
-              onChange={(e) => {
-                setUseClaudeCode(e.target.checked)
-                localStorage.setItem('wtb_use_claude_code', String(e.target.checked))
-              }}
-            />
-            <span className="settings__slider" />
-          </label>
-
-          {useClaudeCode && connectedSessionId && (
-            <div className="settings__session">
-              <span className="settings__session-status settings__session-status--connected">
-                Session {connectedSessionId.slice(0, 8)}...
-              </span>
-              <button
-                className="settings__session-disconnect"
-                onClick={onDisconnectSession}
-              >
-                Disconnect
-              </button>
-            </div>
-          )}
-
-          {/* Claude settings (Direct API mode only) */}
-          {!useClaudeCode && (
-            <>
-              <div className="settings__divider" />
-              <label className="settings__input-label">Model</label>
-              <select
-                className="settings__select"
-                value={claudeModel}
-                onChange={(e) => setClaudeModel(e.target.value)}
-              >
-                <option value="claude-sonnet-4-20250514">Claude Sonnet 4</option>
-                <option value="claude-opus-4-20250514">Claude Opus 4</option>
-                <option value="claude-haiku-4-20250514">Claude Haiku 4</option>
-              </select>
-
-              <label className="settings__input-label">Max tokens</label>
-              <div className="settings__range-row">
-                <input
-                  type="range"
-                  min="256"
-                  max="8192"
-                  step="256"
-                  value={claudeMaxTokens}
-                  onChange={(e) => setClaudeMaxTokens(Number(e.target.value))}
-                />
-                <span className="settings__range-value">{claudeMaxTokens}</span>
-              </div>
-
-              <label className="settings__input-label">System prompt</label>
-              <textarea
-                className="settings__textarea"
-                value={claudeSystemPrompt}
-                onChange={(e) => setClaudeSystemPrompt(e.target.value)}
-                rows={3}
-              />
-            </>
-          )}
 
           <div className="settings__divider" />
 
@@ -361,31 +258,6 @@ export function Settings({
               </p>
             </div>
           )}
-
-          <div className="settings__divider" />
-
-          <label className="settings__input-label">
-            API Key {useClaudeCode && <span className="settings__optional">(optional)</span>}
-          </label>
-          <form className="settings__api-form" onSubmit={onSaveApiKey}>
-            <input
-              type="password"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              placeholder="sk-ant-..."
-            />
-            <button type="submit" disabled={!apiKey.trim()}>
-              Save
-            </button>
-          </form>
-          <a
-            className="settings__api-link"
-            href="https://console.anthropic.com/settings/keys"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Get an API key
-          </a>
 
           {/* Export */}
           {currentConversation && currentConversation.messages.length > 0 && (

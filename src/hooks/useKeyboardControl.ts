@@ -8,8 +8,6 @@ interface UseKeyboardControlParams {
   isListening: boolean
   isSpeaking: boolean
   avatarState: AvatarState
-  useClaudeCode: boolean
-  apiKey: string
   continuousListeningEnabled: boolean
   handleTalkStart: () => void
   handleTalkEnd: () => void
@@ -29,8 +27,6 @@ export function useKeyboardControl({
   isListening,
   isSpeaking,
   avatarState,
-  useClaudeCode,
-  apiKey,
   continuousListeningEnabled,
   handleTalkStart,
   handleTalkEnd,
@@ -93,8 +89,7 @@ export function useKeyboardControl({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.code === 'Space' && !e.repeat && !isInputFocused()) {
         e.preventDefault()
-        const canTalk = useClaudeCode || apiKey
-        if (!isListening && !isSpeaking && avatarState !== 'thinking' && canTalk) {
+        if (!isListening && !isSpeaking && avatarState !== 'thinking') {
           handleTalkStart()
         }
       }
@@ -115,34 +110,28 @@ export function useKeyboardControl({
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
     }
-  }, [isListening, isSpeaking, avatarState, apiKey, handleTalkStart, handleTalkEnd, useClaudeCode, continuousListeningEnabled])
+  }, [isListening, isSpeaking, avatarState, handleTalkStart, handleTalkEnd, continuousListeningEnabled])
 
   // Detect mobile
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 
   // Auto-start listening when continuous mode is enabled
   useEffect(() => {
-    if (continuousListeningEnabled && !isListening && avatarState === 'idle') {
-      const canTalk = useClaudeCode || apiKey
-      if (canTalk && !isSpeaking) {
-        handleTalkStart()
-      }
+    if (continuousListeningEnabled && !isListening && avatarState === 'idle' && !isSpeaking) {
+      handleTalkStart()
     }
-  }, [continuousListeningEnabled, isListening, avatarState, useClaudeCode, apiKey, isSpeaking, handleTalkStart])
+  }, [continuousListeningEnabled, isListening, avatarState, isSpeaking, handleTalkStart])
 
   // Restart listening after response in continuous mode (desktop only)
   useEffect(() => {
     if (isMobile) return
     if (continuousListeningEnabled && avatarState === 'idle' && !isListening && !isSpeaking) {
-      const canTalk = useClaudeCode || apiKey
-      if (canTalk) {
-        const timer = setTimeout(() => {
-          startListening()
-        }, 500)
-        return () => clearTimeout(timer)
-      }
+      const timer = setTimeout(() => {
+        startListening()
+      }, 500)
+      return () => clearTimeout(timer)
     }
-  }, [continuousListeningEnabled, avatarState, isListening, isSpeaking, useClaudeCode, apiKey, startListening, isMobile])
+  }, [continuousListeningEnabled, avatarState, isListening, isSpeaking, startListening, isMobile])
 
   // On mobile, show visual prompt to tap when ready
   const showTapToTalk = isMobile && continuousListeningEnabled && avatarState === 'idle' && !isListening && !isSpeaking

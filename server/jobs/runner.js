@@ -2,6 +2,8 @@ import { spawn, execSync } from "child_process";
 import { writeFileSync, mkdirSync, unlinkSync } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
+import { buildPrompt } from "../promptBuilder.js";
+import { getMode } from "../modes.js";
 function detectPlanFromTool(toolName, input) {
   if (toolName !== "Write" && toolName !== "Edit") return null;
   const filePath = input.file_path || "";
@@ -42,12 +44,12 @@ function isClaudeCliAvailable() {
   }
 }
 function spawnClaude(options) {
-  const { prompt, history, images, rawMode, callbacks } = options;
+  const { prompt, history, images, rawMode, mode: modeName, callbacks } = options;
   if (!isClaudeCliAvailable()) {
     const promise2 = Promise.resolve(1);
     setTimeout(() => {
       callbacks.onError(
-        "Claude Code CLI not found. Install it with: npm install -g @anthropic-ai/claude-code\nOr switch to Direct API mode in Settings and enter your Anthropic API key."
+        "Claude Code CLI not found. Install it with: npm install -g @anthropic-ai/claude-code"
       );
       callbacks.onComplete(1);
     }, 0);
@@ -75,20 +77,13 @@ function spawnClaude(options) {
     }
     fullPrompt = `${imageBlock}${prompt}`;
   } else {
-    const recentMessages = (history || []).slice(-10);
-    let contextBlock = "";
-    if (recentMessages.length > 0) {
-      contextBlock = "[Recent conversation]\n" + recentMessages.map((m) => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`).join("\n") + "\n[/Recent conversation]\n\n";
-    }
-    let imageBlock = "";
-    if (tempImagePaths.length > 0) {
-      imageBlock = "[Attached Images - Use the Read tool to view these image files]\n" + tempImagePaths.map((p) => p).join("\n") + "\n[/Attached Images]\n\n";
-    }
-    const isPlanRequest = /\b(?:plan|design|architect|propose|strategy|roadmap|outline)\b/i.test(prompt);
-    const planInstruction = isPlanRequest ? "\n[PLAN MODE - The user is asking you to make a plan. Write the full detailed plan (with markdown headings, numbered steps, etc.) to a file using the Write tool at /tmp/wtb-plan.md. Then give a brief voice summary of what you planned.]" : "";
-    fullPrompt = `${contextBlock}${imageBlock}[VOICE MODE - Keep responses to 1-2 sentences, no markdown, speak naturally]${planInstruction}
-
-User: ${prompt}`;
+    const mode = getMode(modeName || "voice");
+    fullPrompt = buildPrompt({
+      message: prompt,
+      mode,
+      history,
+      imagePaths: tempImagePaths.length > 0 ? tempImagePaths : void 0
+    });
   }
   const args = [
     "-p",

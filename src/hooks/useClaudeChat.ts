@@ -1,6 +1,5 @@
 import { useState, useCallback, useRef } from 'react'
 import {
-  sendMessageStreaming,
   sendMessageViaClaudeCode,
   type ActivityEvent,
   type PlanEvent,
@@ -11,15 +10,12 @@ import type { AvatarState, DroppedFile, Message, MessageImage, Activity } from '
 import type { SoundType } from './useSoundEffects'
 
 interface UseClaudeChatParams {
-  apiKey: string
-  useClaudeCode: boolean
   ttsEnabled: boolean
   messages: Message[]
   addMessage: (message: Omit<Message, 'id' | 'timestamp' | 'images'>, images?: MessageImage[]) => void
   setAvatarState: (state: AvatarState) => void
   setTranscript: (text: string) => void
   speak: (text: string) => void
-  speakStreaming: (chunk: string, flush: boolean) => void
   playSound: (sound: SoundType) => void
   clearSpeechTranscript: () => void
   attachedFiles: DroppedFile[]
@@ -30,23 +26,22 @@ interface UseClaudeChatParams {
   updateActivity: (id: string, updates: Partial<Activity>) => void
   clearActivities: () => void
   finalizeActivities: () => void
-  contextMessages: Message[]
   currentConversationId: string | null
-  claudeModel: string
-  claudeMaxTokens: number
-  claudeSystemPrompt: string
+  mode: string
+  onModeChange?: (mode: string) => void
+  availableModes?: api.ModeInfo[]
 }
 
+// Matches: "switch to X mode", "use X mode", "X mode"
+const MODE_SWITCH_PATTERN = /(?:switch to|use|change to|set)\s+(\w[\w-]*)\s+mode/i
+
 export function useClaudeChat({
-  apiKey,
-  useClaudeCode,
   ttsEnabled,
   messages,
   addMessage,
   setAvatarState,
   setTranscript,
   speak,
-  speakStreaming,
   playSound,
   clearSpeechTranscript,
   attachedFiles,
@@ -57,11 +52,10 @@ export function useClaudeChat({
   updateActivity,
   clearActivities,
   finalizeActivities,
-  contextMessages,
   currentConversationId,
-  claudeModel,
-  claudeMaxTokens,
-  claudeSystemPrompt,
+  mode,
+  onModeChange,
+  availableModes,
 }: UseClaudeChatParams) {
   const [responseText, setResponseText] = useState('')
   const [error, setError] = useState('')
@@ -102,7 +96,20 @@ export function useClaudeChat({
 
   const handleSendMessage = useCallback(async (text: string) => {
     if (!text.trim()) return
-    if (!useClaudeCode && !apiKey) return
+
+    // Detect voice mode switching
+    let activeMode = mode
+    if (onModeChange && availableModes) {
+      const match = text.match(MODE_SWITCH_PATTERN)
+      if (match) {
+        const requested = match[1].toLowerCase()
+        const found = availableModes.find(m => m.name === requested || m.label.toLowerCase() === requested)
+        if (found) {
+          activeMode = found.name
+          onModeChange(found.name)
+        }
+      }
+    }
 
     setTranscript('')
     clearSpeechTranscript()
@@ -118,62 +125,40 @@ export function useClaudeChat({
       : undefined
 
     addMessage({ role: 'user', content: text }, messageImages)
-    const updatedMessages = [...messages, { id: 'temp', role: 'user' as const, content: text, timestamp: Date.now() }]
 
     let fullResponse = ''
     const planRef: { current: PlanEvent | null } = { current: null }
 
     try {
-      if (useClaudeCode) {
-        const imageAttachments = attachedFiles.length > 0
-          ? attachedFiles.map(f => ({ dataUrl: f.dataUrl, fileName: f.name }))
-          : undefined
+      const imageAttachments = attachedFiles.length > 0
+        ? attachedFiles.map(f => ({ dataUrl: f.dataUrl, fileName: f.name }))
+        : undefined
 
-        const imageContext = !imageAttachments ? getImageContext() : null
-        const messageWithContext = imageContext
-          ? `[Image Context]\n${imageContext}\n\n[User Message]\n${text}`
-          : text
+      const imageContext = !imageAttachments ? getImageContext() : null
+      const messageWithContext = imageContext
+        ? `[Image Context]\n${imageContext}\n\n[User Message]\n${text}`
+        : text
 
-        await sendMessageViaClaudeCode(
-          messageWithContext,
-          (chunk) => { fullResponse += chunk; setResponseText(fullResponse) },
-          messages.map(m => ({ role: m.role, content: m.content })),
-          handleActivity,
-          imageAttachments,
-          (plan) => { planRef.current = plan }
-        )
+      await sendMessageViaClaudeCode(
+        messageWithContext,
+        (chunk) => { fullResponse += chunk; setResponseText(fullResponse) },
+        messages.map(m => ({ role: m.role, content: m.content })),
+        handleActivity,
+        imageAttachments,
+        (plan) => { planRef.current = plan },
+        activeMode
+      )
 
-        if (fullResponse.trim() && ttsEnabled) {
-          speak(fullResponse)
-        } else if (fullResponse.trim()) {
-          setAvatarState('happy')
-          setTimeout(() => setAvatarState('idle'), 1500)
-        }
-      } else {
-        await sendMessageStreaming(
-          updatedMessages,
-          apiKey,
-          (chunk) => {
-            fullResponse += chunk
-            setResponseText(fullResponse)
-            if (ttsEnabled) speakStreaming(chunk, false)
-          },
-          contextMessages,
-          attachedFiles,
-          { model: claudeModel, maxTokens: claudeMaxTokens, systemPrompt: claudeSystemPrompt }
-        )
+      if (fullResponse.trim() && ttsEnabled) {
+        speak(fullResponse)
+      } else if (fullResponse.trim()) {
+        setAvatarState('happy')
+        setTimeout(() => setAvatarState('idle'), 1500)
       }
 
       if (attachedFiles.length > 0) {
         clearFiles()
         clearImageAnalyses()
-      }
-
-      if (!useClaudeCode && ttsEnabled) {
-        speakStreaming('', true)
-      } else if (!useClaudeCode && !ttsEnabled) {
-        setAvatarState('happy')
-        setTimeout(() => setAvatarState('idle'), 1500)
       }
 
       setResponseText('')
@@ -212,7 +197,7 @@ export function useClaudeChat({
     }
 
     setTranscript('')
-  }, [apiKey, messages, addMessage, setAvatarState, setTranscript, clearSpeechTranscript, speak, speakStreaming, playSound, contextMessages, useClaudeCode, clearActivities, handleActivity, attachedFiles, clearFiles, clearImageAnalyses, getImageContext, ttsEnabled, finalizeActivities, currentConversationId, claudeModel, claudeMaxTokens, claudeSystemPrompt])
+  }, [messages, addMessage, setAvatarState, setTranscript, clearSpeechTranscript, speak, playSound, clearActivities, handleActivity, attachedFiles, clearFiles, clearImageAnalyses, getImageContext, ttsEnabled, finalizeActivities, currentConversationId, mode, onModeChange, availableModes])
 
   return { handleSendMessage, responseText, error, setError, planNotification, setPlanNotification }
 }
