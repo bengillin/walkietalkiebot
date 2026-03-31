@@ -332,6 +332,7 @@ function App() {
         onSelectConversation={(id) => { loadConversation(id); setIsTapeEjected(false) }}
         onNewConversation={() => { createConversation(); setIsTapeEjected(false) }}
         onDeleteConversation={deleteConversation}
+        onBranchConversation={(id) => { createConversation(id); setIsTapeEjected(false) }}
         onCloseCollection={() => setIsTapeEjected(false)}
         onFilesAdd={handleFilesAdd}
         isDisabled={voiceIO.isSpeaking || avatarState === 'thinking'}

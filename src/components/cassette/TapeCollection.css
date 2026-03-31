@@ -61,6 +61,31 @@
   margin: 0;
 }
 
+.tape-collection__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tape-collection__import-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: var(--bg-tertiary, #252542);
+  border: 1px solid var(--border-light, rgba(255, 255, 255, 0.15));
+  border-radius: 6px;
+  color: var(--text-secondary, #8888a0);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tape-collection__import-btn:hover {
+  color: var(--text-primary, #f0f0f5);
+  border-color: var(--accent, #00d4ff);
+}
+
 .tape-collection__new-btn {
   display: flex;
   align-items: center;
@@ -234,6 +259,33 @@
 
 .tape-collection__delete-btn:hover {
   background: linear-gradient(180deg, #ff1a1a 0%, #cc0000 100%);
+  transform: scale(1.1);
+}
+
+/* Branch button */
+.tape-collection__branch-btn {
+  position: absolute;
+  top: -8px;
+  right: 24px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent, #00d4ff);
+  border: 2px solid var(--accent-hover, #00b8e0);
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.15s ease;
+}
+
+.tape-collection__item:hover .tape-collection__branch-btn {
+  opacity: 1;
+}
+
+.tape-collection__branch-btn:hover {
   transform: scale(1.1);
 }
 

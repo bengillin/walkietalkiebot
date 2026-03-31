@@ -83,6 +83,7 @@ function createNewConversation(): Conversation {
 
 // Server sync state
 let serverSyncEnabled = false
+let serverProjectId: string | null = null
 
 export const useStore = create<AppState>((set, get) => {
   // Initialize with saved conversations from localStorage
@@ -164,25 +165,38 @@ export const useStore = create<AppState>((set, get) => {
     // All conversations
     conversations: savedConversations,
 
-    createConversation: () => {
+    createConversation: (parentId?: string) => {
       const newConv = createNewConversation()
+      if (serverProjectId) newConv.projectId = serverProjectId
+      if (parentId) newConv.parentId = parentId
 
       set((state) => {
+        // If branching, copy messages from parent
+        let initialMessages: Message[] = []
+        if (parentId) {
+          const parent = state.conversations.find(c => c.id === parentId)
+          if (parent) {
+            initialMessages = [...parent.messages]
+            newConv.messages = initialMessages
+            newConv.title = `Branch of ${parent.title}`
+          }
+        }
+
         const conversations = [newConv, ...state.conversations]
         saveConversationsToStorage(conversations)
 
         return {
           currentConversationId: newConv.id,
-          messages: [],
+          messages: initialMessages,
           storedActivities: [],
           conversations,
-          contextConversationIds: [], // Clear context on new conversation
+          contextConversationIds: [],
         }
       })
 
       // Sync to server
       if (serverSyncEnabled) {
-        api.createConversation(newConv.title)
+        api.createConversation(newConv.title, newConv.projectId || undefined, newConv.parentId || undefined)
           .then(serverConv => {
             // Update local ID to match server if different
             if (serverConv.id !== newConv.id) {
@@ -572,6 +586,9 @@ export const useStore = create<AppState>((set, get) => {
             })),
             createdAt: fullConv.createdAt,
             updatedAt: fullConv.updatedAt,
+            mode: fullConv.mode,
+            projectId: fullConv.projectId,
+            parentId: fullConv.parentId,
           })
         }
 
@@ -632,5 +649,9 @@ export const useStore = create<AppState>((set, get) => {
 export function enableServerSync() {
   serverSyncEnabled = true
   useStore.getState().setServerSyncEnabled(true)
+}
+
+export function setProjectId(projectId: string) {
+  serverProjectId = projectId
 }
 

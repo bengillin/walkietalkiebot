@@ -13,6 +13,7 @@ interface TapeDeckProps {
   onSelectConversation: (id: string) => void
   onNewConversation: () => void
   onDeleteConversation: (id: string) => void
+  onBranchConversation?: (id: string) => void
   onCloseCollection: () => void
   onClearTranscript?: () => void
   onFilesAdd?: (files: import('../../types').DroppedFile[]) => void
@@ -37,6 +38,7 @@ export function TapeDeck({
   onSelectConversation,
   onNewConversation,
   onDeleteConversation,
+  onBranchConversation,
   onCloseCollection,
   onClearTranscript,
   onFilesAdd,
@@ -200,6 +202,7 @@ export function TapeDeck({
         onSelect={handleSelectTape}
         onNew={handleNewTape}
         onDelete={onDeleteConversation}
+        onBranch={onBranchConversation}
         onClose={onCloseCollection}
         contextIds={contextIds}
         onToggleContext={onToggleContext}

@@ -28,6 +28,7 @@ api.get('/status', (c) => {
     avatarState: state.avatarState,
     dbStatus: isDbConnected() ? 'connected' : 'unavailable',
     claudeCliAvailable: isClaudeCliAvailable(),
+    cwd: process.cwd(),
   })
 })
 
@@ -378,6 +379,34 @@ api.get('/search', (c) => {
       snippet: r.snippet,
     })),
   })
+})
+
+// POST /api/import - Import a conversation from JSON export
+api.post('/import', async (c) => {
+  const { title, messages: importMessages, mode, linerNotes } = await c.req.json()
+  if (!title || !Array.isArray(importMessages)) {
+    return c.json({ error: 'title and messages array required' }, 400)
+  }
+
+  const id = crypto.randomUUID()
+  const conv = conversations.createConversation({ id, title, mode })
+
+  for (const msg of importMessages) {
+    messages.createMessage({
+      id: crypto.randomUUID(),
+      conversationId: id,
+      role: msg.role,
+      content: msg.content,
+      timestamp: msg.timestamp || Date.now(),
+      source: 'import',
+    })
+  }
+
+  if (linerNotes) {
+    conversations.updateLinerNotes(id, linerNotes)
+  }
+
+  return c.json({ id: conv.id, title: conv.title, messageCount: importMessages.length }, 201)
 })
 
 // POST /api/migrate - Import from localStorage

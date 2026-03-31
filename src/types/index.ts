@@ -73,6 +73,8 @@ export interface Conversation {
   activities?: StoredActivity[]  // Historical tool use, loaded with conversation
   linerNotes?: string | null     // Pinned artifacts/plans/docs
   mode?: string                  // Active mode for this conversation
+  projectId?: string | null      // Project/directory grouping
+  parentId?: string | null       // Parent conversation (branching)
   createdAt: number
   updatedAt: number
 }
@@ -88,7 +90,7 @@ export interface AppState {
 
   // All conversations
   conversations: Conversation[]
-  createConversation: () => void
+  createConversation: (parentId?: string) => void
   loadConversation: (id: string) => void
   deleteConversation: (id: string) => void
   renameConversation: (id: string, title: string) => void

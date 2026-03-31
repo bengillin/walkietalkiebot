@@ -3,6 +3,7 @@ import { ConversationItem } from './ConversationItem'
 import { useTheme, type ThemeName } from '../../contexts/ThemeContext'
 import type { Conversation } from '../../types'
 import * as api from '../../lib/api'
+import { parseImportJson } from '../../lib/export'
 import './TapeCollection.css'
 
 // Summarize title to 5 words or less
@@ -29,6 +30,7 @@ interface TapeCollectionProps {
   onNew: () => void
   onDelete: (id: string) => void
   onClose: () => void
+  onBranch?: (id: string) => void
   contextIds?: string[]
   onToggleContext?: (id: string) => void
 }
@@ -41,6 +43,7 @@ export function TapeCollection({
   onNew,
   onDelete,
   onClose,
+  onBranch,
   contextIds = [],
   onToggleContext,
 }: TapeCollectionProps) {
@@ -53,7 +56,23 @@ export function TapeCollection({
   const [isSearching, setIsSearching] = useState(false)
   const [planCounts, setPlanCounts] = useState<Record<string, number>>({})
   const searchInputRef = useRef<HTMLInputElement>(null)
+  const importInputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout>>()
+
+  const handleImportFile = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    try {
+      const content = await file.text()
+      const imported = parseImportJson(content)
+      const result = await api.importConversation(imported)
+      onSelect(result.id) // Switch to imported conversation
+      onClose()
+    } catch (err) {
+      console.warn('Import failed:', err)
+    }
+    if (importInputRef.current) importInputRef.current.value = ''
+  }, [onSelect, onClose])
 
   // Focus search input and load plan counts when drawer opens
   useEffect(() => {
@@ -133,12 +152,20 @@ export function TapeCollection({
       <div className="tape-collection__drawer">
         <div className="tape-collection__header">
           <h3 className="tape-collection__title">{labels.title}</h3>
-          <button className="tape-collection__new-btn" onClick={onNew}>
-            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-            </svg>
-            {labels.newBtn}
-          </button>
+          <div className="tape-collection__header-actions">
+            <button className="tape-collection__import-btn" onClick={() => importInputRef.current?.click()} title="Import tape">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
+              </svg>
+            </button>
+            <input ref={importInputRef} type="file" accept=".json" onChange={handleImportFile} style={{ display: 'none' }} />
+            <button className="tape-collection__new-btn" onClick={onNew}>
+              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+              </svg>
+              {labels.newBtn}
+            </button>
+          </div>
         </div>
 
         {/* Search bar */}
@@ -200,6 +227,20 @@ export function TapeCollection({
                   >
                     <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
                       <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+                    </svg>
+                  </button>
+                )}
+                {onBranch && conv.messages.length > 0 && (
+                  <button
+                    className="tape-collection__branch-btn"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onBranch(conv.id)
+                    }}
+                    title="Branch conversation"
+                  >
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
+                      <path d="M6 3v6c0 2.97 2.16 5.43 5 5.91V18H8v3h8v-3h-3v-3.09c2.84-.48 5-2.94 5-5.91V3h-4v6c0 1.66 1.34 3 3 3-.77 1.78-2.54 3-4.59 3h-.82C9.54 12 7.77 10.78 7 9c1.66 0 3-1.34 3-3V3H6z"/>
                     </svg>
                   </button>
                 )}

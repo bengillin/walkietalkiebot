@@ -63,6 +63,7 @@ export interface ServerStatus {
   avatarState: string
   dbStatus: 'connected' | 'unavailable'
   claudeCliAvailable?: boolean
+  cwd?: string
 }
 
 export interface MigrationResult {
@@ -105,14 +106,14 @@ export async function getConversation(id: string): Promise<ConversationWithMessa
   return fetchJson(`${API_BASE}/conversations/${id}`)
 }
 
-export async function createConversation(title?: string): Promise<Conversation> {
+export async function createConversation(title?: string, projectId?: string, parentId?: string): Promise<Conversation> {
   return fetchJson(`${API_BASE}/conversations`, {
     method: 'POST',
-    body: JSON.stringify({ title }),
+    body: JSON.stringify({ title, projectId, parentId }),
   })
 }
 
-export async function updateConversation(id: string, updates: { title?: string }): Promise<Conversation> {
+export async function updateConversation(id: string, updates: { title?: string; projectId?: string; parentId?: string }): Promise<Conversation> {
   return fetchJson(`${API_BASE}/conversations/${id}`, {
     method: 'PATCH',
     body: JSON.stringify(updates),
@@ -122,6 +123,18 @@ export async function updateConversation(id: string, updates: { title?: string }
 export async function deleteConversation(id: string): Promise<{ success: boolean }> {
   return fetchJson(`${API_BASE}/conversations/${id}`, {
     method: 'DELETE',
+  })
+}
+
+export async function importConversation(data: {
+  title: string
+  messages: Array<{ role: string; content: string; timestamp?: number }>
+  mode?: string
+  linerNotes?: string | null
+}): Promise<{ id: string; title: string; messageCount: number }> {
+  return fetchJson(`${API_BASE}/import`, {
+    method: 'POST',
+    body: JSON.stringify(data),
   })
 }
 

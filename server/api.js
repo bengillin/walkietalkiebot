@@ -20,7 +20,8 @@ api.get("/status", (c) => {
     running: true,
     avatarState: state.avatarState,
     dbStatus: isDbConnected() ? "connected" : "unavailable",
-    claudeCliAvailable: isClaudeCliAvailable()
+    claudeCliAvailable: isClaudeCliAvailable(),
+    cwd: process.cwd()
   });
 });
 api.get("/conversations", (c) => {
@@ -294,6 +295,28 @@ api.get("/search", (c) => {
       snippet: r.snippet
     }))
   });
+});
+api.post("/import", async (c) => {
+  const { title, messages: importMessages, mode, linerNotes } = await c.req.json();
+  if (!title || !Array.isArray(importMessages)) {
+    return c.json({ error: "title and messages array required" }, 400);
+  }
+  const id = crypto.randomUUID();
+  const conv = conversations.createConversation({ id, title, mode });
+  for (const msg of importMessages) {
+    messages.createMessage({
+      id: crypto.randomUUID(),
+      conversationId: id,
+      role: msg.role,
+      content: msg.content,
+      timestamp: msg.timestamp || Date.now(),
+      source: "import"
+    });
+  }
+  if (linerNotes) {
+    conversations.updateLinerNotes(id, linerNotes);
+  }
+  return c.json({ id: conv.id, title: conv.title, messageCount: importMessages.length }, 201);
 });
 api.post("/migrate", async (c) => {
   const body = await c.req.json();
