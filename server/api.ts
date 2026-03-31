@@ -11,7 +11,7 @@ import * as search from './db/repositories/search.js'
 import * as plans from './db/repositories/plans.js'
 import { spawnClaude, isClaudeCliAvailable } from './jobs/runner.js'
 import { jobRoutes } from './jobs/api.js'
-import { getModeInfoList } from './modes.js'
+import { getModeInfoList, reloadModes } from './modes.js'
 
 export const api = new Hono()
 
@@ -473,6 +473,12 @@ api.post('/migrate', async (c) => {
 
 // GET /api/modes - List available modes
 api.get('/modes', (c) => {
+  return c.json({ modes: getModeInfoList() })
+})
+
+// POST /api/modes/reload - Reload custom modes from disk
+api.post('/modes/reload', (c) => {
+  reloadModes()
   return c.json({ modes: getModeInfoList() })
 })
 

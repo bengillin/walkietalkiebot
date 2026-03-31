@@ -32,8 +32,11 @@ interface UseClaudeChatParams {
   availableModes?: api.ModeInfo[]
 }
 
-// Matches: "switch to X mode", "use X mode", "X mode"
+// Matches: "switch to X mode", "use X mode", "change to X mode"
 const MODE_SWITCH_PATTERN = /(?:switch to|use|change to|set)\s+(\w[\w-]*)\s+mode/i
+
+// Matches: "run X and Y mode on this", "use X and Y on this"
+const MULTI_MODE_PATTERN = /(?:run|use)\s+(.+?)\s+(?:on|for|against)\s+/i
 
 export function useClaudeChat({
   ttsEnabled,
@@ -97,7 +100,38 @@ export function useClaudeChat({
   const handleSendMessage = useCallback(async (text: string) => {
     if (!text.trim()) return
 
-    // Detect voice mode switching
+    // Detect multi-mode orchestration: "run code-review and architect on this"
+    if (availableModes && availableModes.length > 0 && currentConversationId) {
+      const multiMatch = text.match(MULTI_MODE_PATTERN)
+      if (multiMatch) {
+        const modesPart = multiMatch[1]
+        const modeNames = modesPart.split(/\s+and\s+|\s*,\s*/).map(s => s.replace(/\s*mode\s*/gi, '').trim().toLowerCase())
+        const matchedModes = modeNames
+          .map(name => availableModes.find(m => m.name === name || m.label.toLowerCase() === name))
+          .filter((m): m is api.ModeInfo => m !== undefined)
+
+        if (matchedModes.length >= 2) {
+          // Extract the actual prompt (everything after "on/for/against")
+          const promptMatch = text.match(/(?:on|for|against)\s+(.+)/i)
+          const orchestratePrompt = promptMatch ? promptMatch[1] : text
+
+          api.orchestrateJobs({
+            conversationId: currentConversationId,
+            tasks: matchedModes.map(m => ({ prompt: orchestratePrompt, mode: m.name })),
+            history: messages.map(m => ({ role: m.role, content: m.content })),
+          }).then(result => {
+            setPlanNotification(`${result.jobs.length} jobs dispatched: ${matchedModes.map(m => m.label).join(', ')}`)
+            setTimeout(() => setPlanNotification(null), 5000)
+          }).catch(err => console.warn('Orchestration failed:', err))
+
+          addMessage({ role: 'user', content: text })
+          addMessage({ role: 'assistant', content: `Dispatching ${matchedModes.length} parallel jobs: ${matchedModes.map(m => `${m.icon} ${m.label}`).join(', ')}. Check the job status bar for progress.` })
+          return
+        }
+      }
+    }
+
+    // Detect single mode switching
     let activeMode = mode
     if (onModeChange && availableModes) {
       const match = text.match(MODE_SWITCH_PATTERN)

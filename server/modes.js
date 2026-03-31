@@ -1,3 +1,6 @@
+import { existsSync, readdirSync, readFileSync } from "fs";
+import { homedir } from "os";
+import { join } from "path";
 const BUILT_IN_MODES = [
   {
     name: "voice",
@@ -40,17 +43,65 @@ const BUILT_IN_MODES = [
     planDetection: false
   }
 ];
+const MODES_DIR = join(homedir(), ".wtb", "modes");
+function loadCustomModes() {
+  if (!existsSync(MODES_DIR)) return [];
+  const modes = [];
+  let files;
+  try {
+    files = readdirSync(MODES_DIR).filter((f) => f.endsWith(".json"));
+  } catch {
+    return [];
+  }
+  for (const file of files) {
+    try {
+      const content = readFileSync(join(MODES_DIR, file), "utf-8");
+      const mode = JSON.parse(content);
+      if (mode.name && mode.label && mode.instruction) {
+        modes.push({
+          name: mode.name,
+          label: mode.label,
+          description: mode.description || "",
+          icon: mode.icon || "\u2699\uFE0F",
+          instruction: mode.instruction,
+          planDetection: mode.planDetection ?? false
+        });
+      } else {
+        console.warn(`Skipping mode ${file}: missing required fields (name, label, instruction)`);
+      }
+    } catch (err) {
+      console.warn(`Failed to load mode ${file}:`, err);
+    }
+  }
+  return modes;
+}
+let cachedModes = null;
+function getAllModes() {
+  if (!cachedModes) {
+    const custom = loadCustomModes();
+    const customNames = new Set(custom.map((m) => m.name));
+    cachedModes = [
+      ...BUILT_IN_MODES.filter((m) => !customNames.has(m.name)),
+      ...custom
+    ];
+  }
+  return cachedModes;
+}
 function getModes() {
-  return BUILT_IN_MODES;
+  return getAllModes();
 }
 function getMode(name) {
-  return BUILT_IN_MODES.find((m) => m.name === name) || BUILT_IN_MODES[0];
+  return getAllModes().find((m) => m.name === name) || BUILT_IN_MODES[0];
 }
 function getModeInfoList() {
-  return BUILT_IN_MODES.map(({ name, label, description, icon }) => ({ name, label, description, icon }));
+  return getAllModes().map(({ name, label, description, icon }) => ({ name, label, description, icon }));
+}
+function reloadModes() {
+  cachedModes = null;
 }
 export {
   getMode,
   getModeInfoList,
-  getModes
+  getModes,
+  reloadModes
 };

@@ -7,8 +7,11 @@ function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 }
 class JobManager {
-  currentHandle = null;
-  currentJobId = null;
+  static MAX_CONCURRENT_JOBS = 3;
+  static JOB_TIMEOUT_MS = 10 * 60 * 1e3;
+  // 10 minutes
+  activeHandles = /* @__PURE__ */ new Map();
+  activeTimeouts = /* @__PURE__ */ new Map();
   subscribers = /* @__PURE__ */ new Map();
   init() {
     const cleaned = jobsRepo.cleanupStaleJobs();
@@ -29,6 +32,13 @@ class JobManager {
         jobId: id,
         eventType: "context",
         data: JSON.stringify(params.history)
+      });
+    }
+    if (params.mode) {
+      jobsRepo.createJobEvent({
+        jobId: id,
+        eventType: "mode",
+        data: params.mode
       });
     }
     this.emitEvent(id, {
@@ -58,15 +68,22 @@ class JobManager {
       });
       return true;
     }
-    if (job.status === "running" && this.currentJobId === id && this.currentHandle) {
-      this.currentHandle.kill();
+    if (job.status === "running") {
+      const handle = this.activeHandles.get(id);
+      if (handle) {
+        handle.kill();
+        this.activeHandles.delete(id);
+        const timeout = this.activeTimeouts.get(id);
+        if (timeout) {
+          clearTimeout(timeout);
+          this.activeTimeouts.delete(id);
+        }
+      }
       jobsRepo.updateJob(id, { status: "cancelled", completed_at: Date.now() });
       this.emitEvent(id, {
         type: "status_change",
         data: JSON.stringify({ status: "cancelled" })
       });
-      this.currentHandle = null;
-      this.currentJobId = null;
       this.processNext();
       return true;
     }
@@ -100,24 +117,25 @@ class JobManager {
     }
   }
   processNext() {
-    if (this.currentHandle) return;
+    if (this.activeHandles.size >= JobManager.MAX_CONCURRENT_JOBS) return;
     const queued = jobsRepo.listJobs({ status: "queued" });
     if (queued.length === 0) return;
     queued.sort((a, b) => a.created_at - b.created_at);
-    const job = queued[0];
-    this.runJob(job);
+    const capacity = JobManager.MAX_CONCURRENT_JOBS - this.activeHandles.size;
+    const toStart = queued.slice(0, capacity);
+    for (const job of toStart) {
+      this.runJob(job);
+    }
   }
-  static JOB_TIMEOUT_MS = 10 * 60 * 1e3;
-  // 10 minutes
   async runJob(job) {
     const jobId = job.id;
-    this.currentJobId = jobId;
     jobsRepo.updateJob(jobId, { status: "running", started_at: Date.now() });
     this.emitEvent(jobId, {
       type: "status_change",
       data: JSON.stringify({ status: "running" })
     });
     let history = [];
+    let mode;
     const events = jobsRepo.getJobEvents(jobId);
     const contextEvent = events.find((e) => e.event_type === "context");
     if (contextEvent?.data) {
@@ -126,44 +144,28 @@ class JobManager {
       } catch {
       }
     }
+    const modeEvent = events.find((e) => e.event_type === "mode");
+    if (modeEvent?.data) {
+      mode = modeEvent.data;
+    }
     let fullResponse = "";
     const handle = spawnClaude({
       prompt: job.prompt,
       history,
+      mode,
       callbacks: {
         onText: (text) => {
           fullResponse += text;
-          jobsRepo.createJobEvent({
-            jobId,
-            eventType: "text",
-            data: text
-          });
-          this.emitEvent(jobId, {
-            type: "text",
-            data: JSON.stringify({ text })
-          });
+          jobsRepo.createJobEvent({ jobId, eventType: "text", data: text });
+          this.emitEvent(jobId, { type: "text", data: JSON.stringify({ text }) });
         },
         onActivity: (event) => {
-          jobsRepo.createJobEvent({
-            jobId,
-            eventType: event.type,
-            data: JSON.stringify(event)
-          });
-          this.emitEvent(jobId, {
-            type: "activity",
-            data: JSON.stringify(event)
-          });
+          jobsRepo.createJobEvent({ jobId, eventType: event.type, data: JSON.stringify(event) });
+          this.emitEvent(jobId, { type: "activity", data: JSON.stringify(event) });
         },
         onError: (error) => {
-          jobsRepo.createJobEvent({
-            jobId,
-            eventType: "error",
-            data: error
-          });
-          this.emitEvent(jobId, {
-            type: "error",
-            data: JSON.stringify({ error })
-          });
+          jobsRepo.createJobEvent({ jobId, eventType: "error", data: error });
+          this.emitEvent(jobId, { type: "error", data: JSON.stringify({ error }) });
         },
         onComplete: (code) => {
           const currentJob = jobsRepo.getJob(jobId);
@@ -179,9 +181,8 @@ class JobManager {
           });
           if (fullResponse.trim()) {
             try {
-              const msgId = generateId();
               messagesRepo.createMessage({
-                id: msgId,
+                id: generateId(),
                 conversationId: job.conversation_id,
                 role: "assistant",
                 content: fullResponse,
@@ -197,27 +198,19 @@ class JobManager {
             data: JSON.stringify({ status, result: fullResponse, error })
           });
           const dispatcher = getNotificationDispatcher();
-          const notification = status === "completed" ? {
-            type: "job_completed",
-            jobId,
-            title: "Talkie: Task complete",
-            body: fullResponse.slice(0, 80) || "Done."
-          } : {
-            type: "job_failed",
-            jobId,
-            title: "Talkie: Task failed",
-            body: error || "Unknown error"
-          };
-          dispatcher.dispatch(notification).catch((e) => {
-            console.error("Notification dispatch failed:", e);
-          });
-          this.currentHandle = null;
-          this.currentJobId = null;
+          const notification = status === "completed" ? { type: "job_completed", jobId, title: "Talkie: Task complete", body: fullResponse.slice(0, 80) || "Done." } : { type: "job_failed", jobId, title: "Talkie: Task failed", body: error || "Unknown error" };
+          dispatcher.dispatch(notification).catch((e) => console.error("Notification dispatch failed:", e));
+          this.activeHandles.delete(jobId);
+          const timeout2 = this.activeTimeouts.get(jobId);
+          if (timeout2) {
+            clearTimeout(timeout2);
+            this.activeTimeouts.delete(jobId);
+          }
           this.processNext();
         }
       }
     });
-    this.currentHandle = handle;
+    this.activeHandles.set(jobId, handle);
     jobsRepo.updateJob(jobId, { pid: handle.pid });
     const timeout = setTimeout(() => {
       const currentJob = jobsRepo.getJob(jobId);
@@ -233,12 +226,19 @@ class JobManager {
           type: "status_change",
           data: JSON.stringify({ status: "failed", error: "Job timed out" })
         });
-        this.currentHandle = null;
-        this.currentJobId = null;
+        this.activeHandles.delete(jobId);
+        this.activeTimeouts.delete(jobId);
         this.processNext();
       }
     }, JobManager.JOB_TIMEOUT_MS);
-    handle.promise.then(() => clearTimeout(timeout));
+    this.activeTimeouts.set(jobId, timeout);
+    handle.promise.then(() => {
+      const t = this.activeTimeouts.get(jobId);
+      if (t) {
+        clearTimeout(t);
+        this.activeTimeouts.delete(jobId);
+      }
+    });
   }
 }
 let manager = null;

@@ -6,15 +6,36 @@ export const jobRoutes = new Hono()
 
 // POST /api/jobs - Create a new background job
 jobRoutes.post('/', async (c) => {
-  const { conversationId, prompt, source, history } = await c.req.json()
+  const { conversationId, prompt, source, history, mode } = await c.req.json()
   if (!conversationId || !prompt) {
     return c.json({ error: 'conversationId and prompt are required' }, 400)
   }
 
   const manager = getJobManager()
-  const job = manager.createJob({ conversationId, prompt, source, history })
+  const job = manager.createJob({ conversationId, prompt, source, history, mode })
 
   return c.json({ id: job.id, status: job.status })
+})
+
+// POST /api/jobs/orchestrate - Create multiple jobs with different modes
+jobRoutes.post('/orchestrate', async (c) => {
+  const { conversationId, tasks, history } = await c.req.json()
+  if (!conversationId || !tasks || !Array.isArray(tasks) || tasks.length === 0) {
+    return c.json({ error: 'conversationId and tasks array are required' }, 400)
+  }
+
+  const manager = getJobManager()
+  const jobs = tasks.map((task: { prompt: string; mode?: string }) => {
+    return manager.createJob({
+      conversationId,
+      prompt: task.prompt,
+      mode: task.mode,
+      source: 'orchestrate',
+      history,
+    })
+  })
+
+  return c.json({ jobs: jobs.map(j => ({ id: j.id, status: j.status })) })
 })
 
 // GET /api/jobs - List jobs

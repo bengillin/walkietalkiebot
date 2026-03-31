@@ -11,7 +11,7 @@ import * as search from "./db/repositories/search.js";
 import * as plans from "./db/repositories/plans.js";
 import { spawnClaude, isClaudeCliAvailable } from "./jobs/runner.js";
 import { jobRoutes } from "./jobs/api.js";
-import { getModeInfoList } from "./modes.js";
+import { getModeInfoList, reloadModes } from "./modes.js";
 const api = new Hono();
 api.use("*", cors());
 api.route("/jobs", jobRoutes);
@@ -347,6 +347,10 @@ api.post("/migrate", async (c) => {
   });
 });
 api.get("/modes", (c) => {
+  return c.json({ modes: getModeInfoList() });
+});
+api.post("/modes/reload", (c) => {
+  reloadModes();
   return c.json({ modes: getModeInfoList() });
 });
 api.patch("/conversations/:id/mode", async (c) => {

@@ -17,8 +17,11 @@ function generateId(): string {
 }
 
 class JobManager {
-  private currentHandle: RunnerHandle | null = null
-  private currentJobId: string | null = null
+  private static readonly MAX_CONCURRENT_JOBS = 3
+  private static readonly JOB_TIMEOUT_MS = 10 * 60 * 1000 // 10 minutes
+
+  private activeHandles: Map<string, RunnerHandle> = new Map()
+  private activeTimeouts: Map<string, ReturnType<typeof setTimeout>> = new Map()
   private subscribers: Map<string, Set<JobEventCallback>> = new Map()
 
   init(): void {
@@ -32,6 +35,7 @@ class JobManager {
     conversationId: string
     prompt: string
     source?: string
+    mode?: string
     history?: Array<{ role: string; content: string }>
   }): jobsRepo.JobRow {
     const id = generateId()
@@ -42,12 +46,19 @@ class JobManager {
       source: params.source || 'web',
     })
 
-    // Store history in the event log for the runner to use
+    // Store history and mode in the event log for the runner to use
     if (params.history && params.history.length > 0) {
       jobsRepo.createJobEvent({
         jobId: id,
         eventType: 'context',
         data: JSON.stringify(params.history),
+      })
+    }
+    if (params.mode) {
+      jobsRepo.createJobEvent({
+        jobId: id,
+        eventType: 'mode',
+        data: params.mode,
       })
     }
 
@@ -87,16 +98,19 @@ class JobManager {
       return true
     }
 
-    if (job.status === 'running' && this.currentJobId === id && this.currentHandle) {
-      this.currentHandle.kill()
+    if (job.status === 'running') {
+      const handle = this.activeHandles.get(id)
+      if (handle) {
+        handle.kill()
+        this.activeHandles.delete(id)
+        const timeout = this.activeTimeouts.get(id)
+        if (timeout) { clearTimeout(timeout); this.activeTimeouts.delete(id) }
+      }
       jobsRepo.updateJob(id, { status: 'cancelled', completed_at: Date.now() })
       this.emitEvent(id, {
         type: 'status_change',
         data: JSON.stringify({ status: 'cancelled' }),
       })
-      this.currentHandle = null
-      this.currentJobId = null
-      // Process next queued job
       this.processNext()
       return true
     }
@@ -135,25 +149,22 @@ class JobManager {
   }
 
   private processNext(): void {
-    // Don't start a new job if one is already running
-    if (this.currentHandle) return
+    if (this.activeHandles.size >= JobManager.MAX_CONCURRENT_JOBS) return
 
-    // Find the oldest queued job
     const queued = jobsRepo.listJobs({ status: 'queued' })
     if (queued.length === 0) return
 
-    // Sort by created_at ascending (oldest first)
     queued.sort((a, b) => a.created_at - b.created_at)
-    const job = queued[0]
+    const capacity = JobManager.MAX_CONCURRENT_JOBS - this.activeHandles.size
+    const toStart = queued.slice(0, capacity)
 
-    this.runJob(job)
+    for (const job of toStart) {
+      this.runJob(job)
+    }
   }
-
-  private static readonly JOB_TIMEOUT_MS = 10 * 60 * 1000 // 10 minutes
 
   private async runJob(job: jobsRepo.JobRow): Promise<void> {
     const jobId = job.id
-    this.currentJobId = jobId
 
     // Mark as running
     jobsRepo.updateJob(jobId, { status: 'running', started_at: Date.now() })
@@ -162,16 +173,17 @@ class JobManager {
       data: JSON.stringify({ status: 'running' }),
     })
 
-    // Retrieve history from context event if available
+    // Retrieve history and mode from context events
     let history: Array<{ role: string; content: string }> = []
+    let mode: string | undefined
     const events = jobsRepo.getJobEvents(jobId)
     const contextEvent = events.find(e => e.event_type === 'context')
     if (contextEvent?.data) {
-      try {
-        history = JSON.parse(contextEvent.data)
-      } catch {
-        // Ignore
-      }
+      try { history = JSON.parse(contextEvent.data) } catch { /* ignore */ }
+    }
+    const modeEvent = events.find(e => e.event_type === 'mode')
+    if (modeEvent?.data) {
+      mode = modeEvent.data
     }
 
     let fullResponse = ''
@@ -179,43 +191,22 @@ class JobManager {
     const handle = spawnClaude({
       prompt: job.prompt,
       history,
+      mode,
       callbacks: {
         onText: (text) => {
           fullResponse += text
-          jobsRepo.createJobEvent({
-            jobId,
-            eventType: 'text',
-            data: text,
-          })
-          this.emitEvent(jobId, {
-            type: 'text',
-            data: JSON.stringify({ text }),
-          })
+          jobsRepo.createJobEvent({ jobId, eventType: 'text', data: text })
+          this.emitEvent(jobId, { type: 'text', data: JSON.stringify({ text }) })
         },
         onActivity: (event: ActivityEvent) => {
-          jobsRepo.createJobEvent({
-            jobId,
-            eventType: event.type,
-            data: JSON.stringify(event),
-          })
-          this.emitEvent(jobId, {
-            type: 'activity',
-            data: JSON.stringify(event),
-          })
+          jobsRepo.createJobEvent({ jobId, eventType: event.type, data: JSON.stringify(event) })
+          this.emitEvent(jobId, { type: 'activity', data: JSON.stringify(event) })
         },
         onError: (error) => {
-          jobsRepo.createJobEvent({
-            jobId,
-            eventType: 'error',
-            data: error,
-          })
-          this.emitEvent(jobId, {
-            type: 'error',
-            data: JSON.stringify({ error }),
-          })
+          jobsRepo.createJobEvent({ jobId, eventType: 'error', data: error })
+          this.emitEvent(jobId, { type: 'error', data: JSON.stringify({ error }) })
         },
         onComplete: (code) => {
-          // If already cancelled, don't overwrite the status
           const currentJob = jobsRepo.getJob(jobId)
           if (currentJob?.status === 'cancelled') return
 
@@ -230,12 +221,10 @@ class JobManager {
             completed_at: now,
           })
 
-          // Save the assistant response as a message in the conversation
           if (fullResponse.trim()) {
             try {
-              const msgId = generateId()
               messagesRepo.createMessage({
-                id: msgId,
+                id: generateId(),
                 conversationId: job.conversation_id,
                 role: 'assistant',
                 content: fullResponse,
@@ -252,34 +241,22 @@ class JobManager {
             data: JSON.stringify({ status, result: fullResponse, error }),
           })
 
-          // Fire notification
           const dispatcher = getNotificationDispatcher()
           const notification: Notification = status === 'completed'
-            ? {
-                type: 'job_completed',
-                jobId,
-                title: 'Talkie: Task complete',
-                body: fullResponse.slice(0, 80) || 'Done.',
-              }
-            : {
-                type: 'job_failed',
-                jobId,
-                title: 'Talkie: Task failed',
-                body: error || 'Unknown error',
-              }
-          dispatcher.dispatch(notification).catch(e => {
-            console.error('Notification dispatch failed:', e)
-          })
+            ? { type: 'job_completed', jobId, title: 'Talkie: Task complete', body: fullResponse.slice(0, 80) || 'Done.' }
+            : { type: 'job_failed', jobId, title: 'Talkie: Task failed', body: error || 'Unknown error' }
+          dispatcher.dispatch(notification).catch(e => console.error('Notification dispatch failed:', e))
 
-          // Clean up and process next
-          this.currentHandle = null
-          this.currentJobId = null
+          // Clean up and process next queued jobs
+          this.activeHandles.delete(jobId)
+          const timeout = this.activeTimeouts.get(jobId)
+          if (timeout) { clearTimeout(timeout); this.activeTimeouts.delete(jobId) }
           this.processNext()
         },
       },
     })
 
-    this.currentHandle = handle
+    this.activeHandles.set(jobId, handle)
     jobsRepo.updateJob(jobId, { pid: handle.pid })
 
     // Set a timeout to kill hung jobs
@@ -297,14 +274,18 @@ class JobManager {
           type: 'status_change',
           data: JSON.stringify({ status: 'failed', error: 'Job timed out' }),
         })
-        this.currentHandle = null
-        this.currentJobId = null
+        this.activeHandles.delete(jobId)
+        this.activeTimeouts.delete(jobId)
         this.processNext()
       }
     }, JobManager.JOB_TIMEOUT_MS)
+    this.activeTimeouts.set(jobId, timeout)
 
     // Clear timeout when job completes naturally
-    handle.promise.then(() => clearTimeout(timeout))
+    handle.promise.then(() => {
+      const t = this.activeTimeouts.get(jobId)
+      if (t) { clearTimeout(t); this.activeTimeouts.delete(jobId) }
+    })
   }
 }
 

@@ -92,7 +92,8 @@ site/                   Marketing site (walkietalkie.bot)
 
 - **HTTP localhost**: Localhost is a secure context — no HTTPS needed. HTTPS auto-enabled only when Tailscale certs exist at `~/.wtb/`
 - **Claude Code only**: All communication through Claude Code CLI (`claude -p`). No Direct API mode.
-- **Configurable modes**: 5 built-in modes (Voice, Pair, Architect, Code Review, Debug) defined in `server/modes.ts`. Modes control prompt instructions and plan detection. Per-conversation mode persisted in DB. Switchable via header dropdown or voice ("switch to architect mode")
+- **Configurable modes**: 5 built-in modes (Voice, Pair, Architect, Code Review, Debug) defined in `server/modes.ts`. Custom modes loaded from `~/.wtb/modes/*.json`. Modes control prompt instructions and plan detection. Per-conversation mode persisted in DB. Switchable via header dropdown or voice ("switch to architect mode")
+- **Parallel job orchestration**: Up to 3 concurrent background jobs. `POST /api/jobs/orchestrate` dispatches multiple jobs with different modes. Voice command: "run code-review and architect on this" spawns parallel agents. Each job streams independently via SSE.
 - **Prompt builder**: Pure function in `server/promptBuilder.ts` assembles context, images, mode instruction, and plan detection into the prompt. Tested independently.
 - **Persistence**: localStorage as cache, SQLite (`~/.wtb/wtb.db`) as source of truth. Auto-migration on first server connect.
 - **IPC**: Frontend posts to `/api/send`, MCP tools poll `/api/pending`, respond via `/api/respond`

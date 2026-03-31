@@ -46,6 +46,9 @@ export function JobStatusBar() {
             {job.status === 'queued' && (
               <span className="job-status-bar__badge">queued</span>
             )}
+            {job.source === 'orchestrate' && (
+              <span className="job-status-bar__badge job-status-bar__badge--orchestrate">parallel</span>
+            )}
           </div>
         ))}
         {recentCompleted.map(job => (

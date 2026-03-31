@@ -17,6 +17,10 @@ function ensureWtbDir() {
   if (!existsSync(WTB_DIR)) {
     mkdirSync(WTB_DIR, { recursive: true });
   }
+  const modesDir = join(WTB_DIR, "modes");
+  if (!existsSync(modesDir)) {
+    mkdirSync(modesDir, { recursive: true });
+  }
 }
 function getSSLCerts() {
   ensureWtbDir();

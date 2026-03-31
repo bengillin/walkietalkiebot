@@ -1,3 +1,7 @@
+import { existsSync, readdirSync, readFileSync } from 'fs'
+import { homedir } from 'os'
+import { join } from 'path'
+
 export interface Mode {
   name: string
   label: string
@@ -57,14 +61,69 @@ const BUILT_IN_MODES: Mode[] = [
   },
 ]
 
+const MODES_DIR = join(homedir(), '.wtb', 'modes')
+
+function loadCustomModes(): Mode[] {
+  if (!existsSync(MODES_DIR)) return []
+
+  const modes: Mode[] = []
+  let files: string[]
+  try {
+    files = readdirSync(MODES_DIR).filter(f => f.endsWith('.json'))
+  } catch {
+    return []
+  }
+
+  for (const file of files) {
+    try {
+      const content = readFileSync(join(MODES_DIR, file), 'utf-8')
+      const mode = JSON.parse(content) as Partial<Mode>
+      if (mode.name && mode.label && mode.instruction) {
+        modes.push({
+          name: mode.name,
+          label: mode.label,
+          description: mode.description || '',
+          icon: mode.icon || '⚙️',
+          instruction: mode.instruction,
+          planDetection: mode.planDetection ?? false,
+        })
+      } else {
+        console.warn(`Skipping mode ${file}: missing required fields (name, label, instruction)`)
+      }
+    } catch (err) {
+      console.warn(`Failed to load mode ${file}:`, err)
+    }
+  }
+  return modes
+}
+
+let cachedModes: Mode[] | null = null
+
+function getAllModes(): Mode[] {
+  if (!cachedModes) {
+    const custom = loadCustomModes()
+    const customNames = new Set(custom.map(m => m.name))
+    // Custom modes override built-ins with the same name
+    cachedModes = [
+      ...BUILT_IN_MODES.filter(m => !customNames.has(m.name)),
+      ...custom,
+    ]
+  }
+  return cachedModes
+}
+
 export function getModes(): Mode[] {
-  return BUILT_IN_MODES
+  return getAllModes()
 }
 
 export function getMode(name: string): Mode {
-  return BUILT_IN_MODES.find(m => m.name === name) || BUILT_IN_MODES[0]
+  return getAllModes().find(m => m.name === name) || BUILT_IN_MODES[0]
 }
 
 export function getModeInfoList(): ModeInfo[] {
-  return BUILT_IN_MODES.map(({ name, label, description, icon }) => ({ name, label, description, icon }))
+  return getAllModes().map(({ name, label, description, icon }) => ({ name, label, description, icon }))
+}
+
+export function reloadModes(): void {
+  cachedModes = null
 }

@@ -27,6 +27,11 @@ export function ensureWtbDir(): void {
   if (!existsSync(WTB_DIR)) {
     mkdirSync(WTB_DIR, { recursive: true })
   }
+  // Ensure modes directory exists for custom mode definitions
+  const modesDir = join(WTB_DIR, 'modes')
+  if (!existsSync(modesDir)) {
+    mkdirSync(modesDir, { recursive: true })
+  }
 }
 
 /**

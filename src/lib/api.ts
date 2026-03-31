@@ -306,9 +306,21 @@ export async function createJob(params: {
   conversationId: string
   prompt: string
   source?: string
+  mode?: string
   history?: Array<{ role: string; content: string }>
 }): Promise<{ id: string; status: string }> {
   return fetchJson(`${API_BASE}/jobs`, {
+    method: 'POST',
+    body: JSON.stringify(params),
+  })
+}
+
+export async function orchestrateJobs(params: {
+  conversationId: string
+  tasks: Array<{ prompt: string; mode?: string }>
+  history?: Array<{ role: string; content: string }>
+}): Promise<{ jobs: Array<{ id: string; status: string }> }> {
+  return fetchJson(`${API_BASE}/jobs/orchestrate`, {
     method: 'POST',
     body: JSON.stringify(params),
   })
