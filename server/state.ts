@@ -1,4 +1,13 @@
 // In-memory state store for API
+// Hydrated from DB on startup, updated by frontend via POST /api/state
+
+export interface PendingRequest {
+  content: string
+  timestamp: number
+  callback: (response: string) => void
+  timeoutId: ReturnType<typeof setTimeout>
+}
+
 export interface WtbState {
   avatarState: string
   transcript: string
@@ -6,8 +15,8 @@ export interface WtbState {
   lastAssistantMessage: string
   messages: Array<{ role: string; content: string; timestamp: number }>
   claudeSessionId: string | null
-  pendingMessage: { content: string; timestamp: number } | null
-  responseCallbacks: Array<(response: string) => void>
+  // IPC: per-request queue keyed by request ID
+  pendingRequests: Map<string, PendingRequest>
 }
 
 export let state: WtbState = {
@@ -17,15 +26,18 @@ export let state: WtbState = {
   lastAssistantMessage: '',
   messages: [],
   claudeSessionId: null,
-  pendingMessage: null,
-  responseCallbacks: [],
+  pendingRequests: new Map(),
 }
 
-export function updateState(update: Partial<WtbState>) {
+export function updateState(update: Partial<Omit<WtbState, 'pendingRequests'>>) {
   state = { ...state, ...update }
 }
 
 export function resetState() {
+  // Clean up pending request timeouts
+  for (const req of state.pendingRequests.values()) {
+    clearTimeout(req.timeoutId)
+  }
   state = {
     avatarState: 'idle',
     transcript: '',
@@ -33,7 +45,11 @@ export function resetState() {
     lastAssistantMessage: '',
     messages: [],
     claudeSessionId: null,
-    pendingMessage: null,
-    responseCallbacks: [],
+    pendingRequests: new Map(),
   }
+}
+
+// Generate a unique request ID
+export function generateRequestId(): string {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
 }

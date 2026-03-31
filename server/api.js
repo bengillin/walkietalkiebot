@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { streamSSE } from "hono/streaming";
 import { spawn } from "child_process";
-import { state, updateState } from "./state.js";
+import { state, updateState, generateRequestId } from "./state.js";
 import { isDbConnected } from "./db/index.js";
 import * as conversations from "./db/repositories/conversations.js";
 import * as messages from "./db/repositories/messages.js";
@@ -434,22 +434,41 @@ api.delete("/session", (c) => {
   return c.json({ success: true });
 });
 api.get("/pending", (c) => {
+  let oldest = null;
+  for (const [id, req] of state.pendingRequests) {
+    if (!oldest || req.timestamp < oldest.timestamp) {
+      oldest = { id, content: req.content, timestamp: req.timestamp };
+    }
+  }
   return c.json({
-    pending: state.pendingMessage,
+    pending: oldest,
     sessionConnected: !!state.claudeSessionId
   });
 });
 api.post("/respond", async (c) => {
-  const { content } = await c.req.json();
+  const { content, requestId } = await c.req.json();
   if (!content) {
     return c.json({ error: "Content required" }, 400);
   }
   console.log("IPC response received:", content.slice(0, 100) + "...");
-  updateState({ pendingMessage: null });
-  for (const callback of state.responseCallbacks) {
-    callback(content);
+  let targetId = requestId;
+  if (!targetId) {
+    let oldestTime = Infinity;
+    for (const [id, req] of state.pendingRequests) {
+      if (req.timestamp < oldestTime) {
+        oldestTime = req.timestamp;
+        targetId = id;
+      }
+    }
   }
-  updateState({ responseCallbacks: [] });
+  if (targetId) {
+    const req = state.pendingRequests.get(targetId);
+    if (req) {
+      clearTimeout(req.timeoutId);
+      req.callback(content);
+      state.pendingRequests.delete(targetId);
+    }
+  }
   return c.json({ success: true });
 });
 api.post("/send", async (c) => {
@@ -457,30 +476,38 @@ api.post("/send", async (c) => {
   if (!message) {
     return c.json({ error: "Message required" }, 400);
   }
-  console.log("IPC message received from frontend:", message.slice(0, 100));
-  updateState({
-    pendingMessage: {
-      content: message,
-      timestamp: Date.now()
-    }
-  });
+  const requestId = generateRequestId();
+  console.log("IPC message received from frontend:", message.slice(0, 100), `[${requestId}]`);
   return streamSSE(c, async (stream) => {
-    const timeout = setTimeout(() => {
-      const callbacks = state.responseCallbacks.filter((cb) => cb !== callback);
-      updateState({ responseCallbacks: callbacks });
+    let resolved = false;
+    const cleanup = () => {
+      if (!resolved) {
+        resolved = true;
+        state.pendingRequests.delete(requestId);
+      }
+    };
+    const timeoutId = setTimeout(() => {
+      cleanup();
       stream.writeSSE({ data: JSON.stringify({ error: "Timeout waiting for response" }) });
       stream.close();
     }, 12e4);
     const callback = (response) => {
-      clearTimeout(timeout);
+      resolved = true;
+      clearTimeout(timeoutId);
+      state.pendingRequests.delete(requestId);
       stream.writeSSE({ data: JSON.stringify({ text: response }) });
       stream.writeSSE({ data: JSON.stringify({ done: true }) });
       stream.close();
     };
-    state.responseCallbacks.push(callback);
+    state.pendingRequests.set(requestId, {
+      content: message,
+      timestamp: Date.now(),
+      callback,
+      timeoutId
+    });
     await new Promise((resolve) => {
       const checkClosed = setInterval(() => {
-        if (!state.responseCallbacks.includes(callback)) {
+        if (resolved || !state.pendingRequests.has(requestId)) {
           clearInterval(checkClosed);
           resolve();
         }

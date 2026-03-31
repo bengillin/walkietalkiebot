@@ -8,6 +8,9 @@ import { dirname, join } from 'path'
 import { getSSLCerts, ensureWtbDir } from './ssl.js'
 import { api } from './api.js'
 import { initDb, closeDb } from './db/index.js'
+import * as conversationsRepo from './db/repositories/conversations.js'
+import * as messagesRepo from './db/repositories/messages.js'
+import { updateState } from './state.js'
 import { getNotificationDispatcher } from './notifications/dispatcher.js'
 import { MacOSNotificationChannel } from './notifications/macos.js'
 import { getJobManager } from './jobs/manager.js'
@@ -32,6 +35,24 @@ export function startServer(port: number = 5173): Promise<void> {
       console.error('Failed to initialize database:', err)
       reject(err)
       return
+    }
+
+    // Hydrate in-memory state from most recent conversation
+    try {
+      const convos = conversationsRepo.listConversations(1, 0)
+      if (convos.length > 0) {
+        const msgs = messagesRepo.getMessagesForConversation(convos[0].id)
+        const stateMessages = msgs.map(m => ({ role: m.role, content: m.content, timestamp: m.timestamp }))
+        const lastUser = msgs.filter(m => m.role === 'user').pop()
+        const lastAssistant = msgs.filter(m => m.role === 'assistant').pop()
+        updateState({
+          messages: stateMessages,
+          lastUserMessage: lastUser?.content || '',
+          lastAssistantMessage: lastAssistant?.content || '',
+        })
+      }
+    } catch {
+      // Non-critical — state will be updated on first frontend connect
     }
 
     // Initialize notification system
