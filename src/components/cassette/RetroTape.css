@@ -5,11 +5,7 @@
   --tape-body-color: #333;
   --tape-label-bg: #fff;
   --tape-label-accent: #ca5840;
-  --tape-texture: repeating-linear-gradient(
-    to bottom,
-    #252525 0 2px,
-    transparent 2px 5px
-  );
+  --tape-texture: repeating-linear-gradient(to bottom, #252525 0 2px, transparent 2px 5px);
 
   position: relative;
   width: var(--tape-width);
@@ -17,17 +13,30 @@
   padding: 6% 5% 0 5%;
   background-color: var(--tape-body-color);
   background-image:
-    linear-gradient(120deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.05)),
-    var(--tape-texture);
+    linear-gradient(120deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.05)), var(--tape-texture);
   clip-path: polygon(
-    1% 6%, 5% 0, 95% 0, 99% 6%, 99% 78%,
-    100% 80%, 100% 94%, 97% 100%, 4% 100%, 0 94%,
-    0 80%, 1% 78%, 1% 6%, 0 0, 1% 6%
+    1% 6%,
+    5% 0,
+    95% 0,
+    99% 6%,
+    99% 78%,
+    100% 80%,
+    100% 94%,
+    97% 100%,
+    4% 100%,
+    0 94%,
+    0 80%,
+    1% 78%,
+    1% 6%,
+    0 0,
+    1% 6%
   );
   display: flex;
   flex-direction: column;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .retro-tape:hover {
@@ -36,12 +45,14 @@
 }
 
 .retro-tape--selected {
-  box-shadow: 0 0 0 4px #00ff88, 0 8px 24px rgba(0, 255, 136, 0.4);
+  box-shadow:
+    0 0 0 4px #00ff88,
+    0 8px 24px rgba(0, 255, 136, 0.4);
   transform: scale(1.05);
 }
 
 .retro-tape--selected::before {
-  content: "NOW PLAYING";
+  content: 'NOW PLAYING';
   position: absolute;
   top: -24px;
   left: 50%;
@@ -106,7 +117,7 @@
   opacity: 0.9;
 }
 
-.retro-tape[role="button"]:focus {
+.retro-tape[role='button']:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5);
 }
@@ -115,23 +126,29 @@
 .retro-tape__label {
   background-color: var(--tape-label-bg);
   background-image:
-    linear-gradient(transparent 45%,
-      var(--tape-label-accent) 45% 46%, transparent 46% 52%,
-      var(--tape-label-accent) 52% 53%, transparent 54% 58%,
-      var(--tape-label-accent) 58% 59%, transparent 60% 64%,
-      var(--tape-label-accent) 64% 67%, transparent 67% 70%,
-      var(--tape-label-accent) 70% 74%, transparent 74% 76%,
-      var(--tape-label-accent) 76% 80%, transparent 80% 83%,
-      var(--tape-label-accent) 83% 89%, transparent 89% 91%,
+    linear-gradient(
+      transparent 45%,
+      var(--tape-label-accent) 45% 46%,
+      transparent 46% 52%,
+      var(--tape-label-accent) 52% 53%,
+      transparent 54% 58%,
+      var(--tape-label-accent) 58% 59%,
+      transparent 60% 64%,
+      var(--tape-label-accent) 64% 67%,
+      transparent 67% 70%,
+      var(--tape-label-accent) 70% 74%,
+      transparent 74% 76%,
+      var(--tape-label-accent) 76% 80%,
+      transparent 80% 83%,
+      var(--tape-label-accent) 83% 89%,
+      transparent 89% 91%,
       var(--tape-label-accent) 91% 100%
     ),
     linear-gradient(130deg, #bbb, #fff);
   border-radius: 8% / 12%;
   height: 72%;
   box-shadow: 0 0 8px 1px rgba(0, 0, 0, 0.5) inset;
-  clip-path: polygon(
-    0 100%, 0 17%, 6% 0, 94% 0, 100% 17%, 100% 100%
-  );
+  clip-path: polygon(0 100%, 0 17%, 6% 0, 94% 0, 100% 17%, 100% 100%);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -172,7 +189,7 @@
 }
 
 .retro-tape__central::after {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
   background-image: linear-gradient(
@@ -217,14 +234,10 @@
 .retro-tape__arc::before,
 .retro-tape__arc::after {
   position: absolute;
-  content: "";
+  content: '';
   width: 14%;
   height: 100%;
-  background: linear-gradient(
-    #aaa 28%,
-    transparent 28% 72%,
-    #aaa 72%
-  );
+  background: linear-gradient(#aaa 28%, transparent 28% 72%, #aaa 72%);
 }
 
 .retro-tape__arc::after {
@@ -243,7 +256,7 @@
 }
 
 .retro-tape__axis::after {
-  content: "";
+  content: '';
   width: 35%;
   aspect-ratio: 1;
   border: 3px solid #292929;
@@ -342,10 +355,11 @@
   border-radius: 8px;
   margin: 4% 4% 0;
   height: 68%;
-  background-image:
-    linear-gradient(transparent 45%,
-      var(--tape-label-accent) 45% 46%, transparent 46% 100%
-    );
+  background-image: linear-gradient(
+    transparent 45%,
+    var(--tape-label-accent) 45% 46%,
+    transparent 46% 100%
+  );
 }
 
 .retro-tape--imessage .retro-tape__text {
@@ -406,7 +420,9 @@
 }
 
 .retro-tape--imessage.retro-tape--selected {
-  box-shadow: 0 0 0 3px #007aff, 0 4px 16px rgba(0, 122, 255, 0.3);
+  box-shadow:
+    0 0 0 3px #007aff,
+    0 4px 16px rgba(0, 122, 255, 0.3);
 }
 
 .retro-tape--imessage.retro-tape--selected::before {
@@ -435,7 +451,9 @@
 }
 
 .retro-tape--aol .retro-tape__label {
-  box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #ffffff;
+  box-shadow:
+    inset 1px 1px 0 #808080,
+    inset -1px -1px 0 #ffffff;
   clip-path: none;
   border-radius: 0;
   margin: 4% 4% 0;
@@ -500,7 +518,9 @@
 }
 
 .retro-tape--aol.retro-tape--selected {
-  box-shadow: 0 0 0 3px #000080, 2px 2px 0 #000;
+  box-shadow:
+    0 0 0 3px #000080,
+    2px 2px 0 #000;
   border-color: #000080 #000080 #000080 #000080;
 }
 
@@ -525,7 +545,9 @@
 
 .retro-tape--classic-mac:hover {
   transform: translateY(-3px) scale(1.02);
-  box-shadow: 2px 2px 0 #000, 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow:
+    2px 2px 0 #000,
+    0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .retro-tape--classic-mac .retro-tape__label {
@@ -594,7 +616,9 @@
 }
 
 .retro-tape--classic-mac.retro-tape--selected {
-  box-shadow: 0 0 0 3px #3366cc, 1px 1px 0 #000;
+  box-shadow:
+    0 0 0 3px #3366cc,
+    1px 1px 0 #000;
 }
 
 .retro-tape--classic-mac.retro-tape--selected::before {
@@ -618,7 +642,9 @@
 
 .retro-tape--geocities:hover {
   transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 0 16px rgba(255, 0, 255, 0.5), 0 0 32px rgba(0, 255, 255, 0.2);
+  box-shadow:
+    0 0 16px rgba(255, 0, 255, 0.5),
+    0 0 32px rgba(0, 255, 255, 0.2);
 }
 
 .retro-tape--geocities .retro-tape__label {
@@ -694,12 +720,15 @@
 }
 
 .retro-tape--geocities.retro-tape--selected {
-  box-shadow: 0 0 0 3px #00ffff, 0 0 16px rgba(0, 255, 255, 0.5), 0 0 32px rgba(255, 0, 255, 0.3);
+  box-shadow:
+    0 0 0 3px #00ffff,
+    0 0 16px rgba(0, 255, 255, 0.5),
+    0 0 32px rgba(255, 0, 255, 0.3);
   border-color: #00ffff;
 }
 
 .retro-tape--geocities.retro-tape--selected::before {
-  content: "~* NOW PLAYING *~";
+  content: '~* NOW PLAYING *~';
   background: #ff00ff;
   color: #fff;
   border-radius: 0;
@@ -709,7 +738,9 @@
 }
 
 /* Neon label colors for geocities */
-.retro-tape--geocities { --tape-label-accent: #00ff00; }
+.retro-tape--geocities {
+  --tape-label-accent: #00ff00;
+}
 
 /* ── 1984 (Apple) ── */
 .retro-tape--apple-1984 {
@@ -734,13 +765,21 @@
   right: 0;
   height: 4px;
   border-radius: 6px 6px 0 0;
-  background: linear-gradient(to right,
-    #61BB46 0%, #61BB46 16.66%,
-    #FDB827 16.66%, #FDB827 33.33%,
-    #F5821F 33.33%, #F5821F 50%,
-    #E03A3E 50%, #E03A3E 66.66%,
-    #963D97 66.66%, #963D97 83.33%,
-    #009DDC 83.33%, #009DDC 100%);
+  background: linear-gradient(
+    to right,
+    #61bb46 0%,
+    #61bb46 16.66%,
+    #fdb827 16.66%,
+    #fdb827 33.33%,
+    #f5821f 33.33%,
+    #f5821f 50%,
+    #e03a3e 50%,
+    #e03a3e 66.66%,
+    #963d97 66.66%,
+    #963d97 83.33%,
+    #009ddc 83.33%,
+    #009ddc 100%
+  );
   z-index: 1;
 }
 
@@ -818,11 +857,13 @@
 }
 
 .retro-tape--apple-1984.retro-tape--selected {
-  box-shadow: 0 0 0 3px #E03A3E, 0 4px 16px rgba(224, 58, 62, 0.3);
+  box-shadow:
+    0 0 0 3px #e03a3e,
+    0 4px 16px rgba(224, 58, 62, 0.3);
 }
 
 .retro-tape--apple-1984.retro-tape--selected::before {
-  background: #E03A3E;
+  background: #e03a3e;
   color: #f5e6c8;
   border-radius: 6px;
   font-family: 'Futura', 'Century Gothic', sans-serif;

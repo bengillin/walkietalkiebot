@@ -4,7 +4,7 @@ import { enableServerSync, setProjectId } from '../lib/store'
 
 export function useServerSync(
   migrateToServer: () => Promise<boolean>,
-  syncFromServer: () => Promise<void>
+  syncFromServer: () => Promise<void>,
 ) {
   useEffect(() => {
     const initServerSync = async () => {
@@ -17,7 +17,9 @@ export function useServerSync(
           try {
             const status = await api.getStatus()
             if (status.cwd) setProjectId(status.cwd)
-          } catch { /* non-critical */ }
+          } catch {
+            /* non-critical */
+          }
 
           if (api.needsMigration()) {
             console.log('Migrating localStorage data to server...')

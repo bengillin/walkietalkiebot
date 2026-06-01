@@ -9,7 +9,9 @@ export function exportAsMarkdown(conversation: Conversation): string {
 
   lines.push(`# ${conversation.title}`)
   lines.push(``)
-  lines.push(`*Exported ${formatTimestamp(Date.now())} | Created ${formatTimestamp(conversation.createdAt)}*`)
+  lines.push(
+    `*Exported ${formatTimestamp(Date.now())} | Created ${formatTimestamp(conversation.createdAt)}*`,
+  )
   lines.push(``)
   lines.push(`---`)
   lines.push(``)
@@ -60,32 +62,37 @@ export function exportAsMarkdown(conversation: Conversation): string {
 }
 
 export function exportAsJson(conversation: Conversation): string {
-  return JSON.stringify({
-    version: 1,
-    id: conversation.id,
-    title: conversation.title,
-    createdAt: conversation.createdAt,
-    updatedAt: conversation.updatedAt,
-    mode: conversation.mode || 'voice',
-    messages: conversation.messages.map(m => ({
-      role: m.role,
-      content: m.content,
-      timestamp: m.timestamp,
-      images: m.images?.map(img => ({
-        fileName: img.fileName,
-        description: img.description,
+  return JSON.stringify(
+    {
+      version: 1,
+      id: conversation.id,
+      title: conversation.title,
+      createdAt: conversation.createdAt,
+      updatedAt: conversation.updatedAt,
+      mode: conversation.mode || 'voice',
+      messages: conversation.messages.map((m) => ({
+        role: m.role,
+        content: m.content,
+        timestamp: m.timestamp,
+        images: m.images?.map((img) => ({
+          fileName: img.fileName,
+          description: img.description,
+        })),
       })),
-    })),
-    activities: conversation.activities?.map(a => ({
-      tool: a.tool,
-      input: a.input,
-      status: a.status,
-      timestamp: a.timestamp,
-      duration: a.duration,
-      error: a.error,
-    })) || [],
-    linerNotes: conversation.linerNotes || null,
-  }, null, 2)
+      activities:
+        conversation.activities?.map((a) => ({
+          tool: a.tool,
+          input: a.input,
+          status: a.status,
+          timestamp: a.timestamp,
+          duration: a.duration,
+          error: a.error,
+        })) || [],
+      linerNotes: conversation.linerNotes || null,
+    },
+    null,
+    2,
+  )
 }
 
 // Import a conversation from JSON export

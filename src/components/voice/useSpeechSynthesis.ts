@@ -35,8 +35,7 @@ export function useSpeechSynthesis({
   const isProcessingQueueRef = useRef(false)
   const hasStartedRef = useRef(false)
 
-  const isSupported =
-    typeof window !== 'undefined' && 'speechSynthesis' in window
+  const isSupported = typeof window !== 'undefined' && 'speechSynthesis' in window
 
   // Refs for callbacks to avoid recreating effects
   const onStartRef = useRef(onStart)
@@ -67,15 +66,15 @@ export function useSpeechSynthesis({
 
   const getVoice = useCallback(() => {
     if (voice && voices.length > 0) {
-      const selectedVoice = voices.find(
-        (v) => v.name === voice || v.voiceURI === voice
-      )
+      const selectedVoice = voices.find((v) => v.name === voice || v.voiceURI === voice)
       if (selectedVoice) return selectedVoice
     }
     if (voices.length > 0) {
-      return voices.find(
-        (v) => v.lang.startsWith('en') && v.name.includes('Google')
-      ) || voices.find((v) => v.lang.startsWith('en')) || null
+      return (
+        voices.find((v) => v.lang.startsWith('en') && v.name.includes('Google')) ||
+        voices.find((v) => v.lang.startsWith('en')) ||
+        null
+      )
     }
     return null
   }, [voice, voices])
@@ -132,7 +131,7 @@ export function useSpeechSynthesis({
   }, [isSupported, getVoice, pitch, rate])
 
   // Extract complete sentences from buffer
-  const extractSentences = (text: string): { sentences: string[], remaining: string } => {
+  const extractSentences = (text: string): { sentences: string[]; remaining: string } => {
     // Match sentence endings followed by space, or at end of text
     const sentences: string[] = []
     let remaining = text
@@ -152,28 +151,31 @@ export function useSpeechSynthesis({
   }
 
   // Streaming speech: add text chunk, speak complete sentences
-  const speakStreaming = useCallback((chunk: string, isComplete: boolean) => {
-    if (!isSupported) return
+  const speakStreaming = useCallback(
+    (chunk: string, isComplete: boolean) => {
+      if (!isSupported) return
 
-    bufferRef.current += chunk
+      bufferRef.current += chunk
 
-    const { sentences, remaining } = extractSentences(bufferRef.current)
-    bufferRef.current = remaining
+      const { sentences, remaining } = extractSentences(bufferRef.current)
+      bufferRef.current = remaining
 
-    // Queue complete sentences
-    for (const sentence of sentences) {
-      queueRef.current.push(sentence)
-    }
+      // Queue complete sentences
+      for (const sentence of sentences) {
+        queueRef.current.push(sentence)
+      }
 
-    // If complete, queue any remaining text
-    if (isComplete && bufferRef.current.trim()) {
-      queueRef.current.push(bufferRef.current.trim())
-      bufferRef.current = ''
-    }
+      // If complete, queue any remaining text
+      if (isComplete && bufferRef.current.trim()) {
+        queueRef.current.push(bufferRef.current.trim())
+        bufferRef.current = ''
+      }
 
-    // Start processing queue if not already
-    processQueue()
-  }, [isSupported, processQueue])
+      // Start processing queue if not already
+      processQueue()
+    },
+    [isSupported, processQueue],
+  )
 
   // Regular speak: cancel and speak full text
   const speak = useCallback(
@@ -212,7 +214,7 @@ export function useSpeechSynthesis({
 
       window.speechSynthesis.speak(utterance)
     },
-    [isSupported, getVoice, pitch, rate]
+    [isSupported, getVoice, pitch, rate],
   )
 
   const cancel = useCallback(() => {

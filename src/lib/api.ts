@@ -98,7 +98,10 @@ export async function getStatus(): Promise<ServerStatus> {
 }
 
 // Conversations
-export async function listConversations(limit = 50, offset = 0): Promise<{ conversations: Conversation[]; total: number }> {
+export async function listConversations(
+  limit = 50,
+  offset = 0,
+): Promise<{ conversations: Conversation[]; total: number }> {
   return fetchJson(`${API_BASE}/conversations?limit=${limit}&offset=${offset}`)
 }
 
@@ -106,14 +109,21 @@ export async function getConversation(id: string): Promise<ConversationWithMessa
   return fetchJson(`${API_BASE}/conversations/${id}`)
 }
 
-export async function createConversation(title?: string, projectId?: string, parentId?: string): Promise<Conversation> {
+export async function createConversation(
+  title?: string,
+  projectId?: string,
+  parentId?: string,
+): Promise<Conversation> {
   return fetchJson(`${API_BASE}/conversations`, {
     method: 'POST',
     body: JSON.stringify({ title, projectId, parentId }),
   })
 }
 
-export async function updateConversation(id: string, updates: { title?: string; projectId?: string; parentId?: string }): Promise<Conversation> {
+export async function updateConversation(
+  id: string,
+  updates: { title?: string; projectId?: string; parentId?: string },
+): Promise<Conversation> {
   return fetchJson(`${API_BASE}/conversations/${id}`, {
     method: 'PATCH',
     body: JSON.stringify(updates),
@@ -147,7 +157,7 @@ export async function addMessage(
     source?: string
     images?: Array<{ id: string; dataUrl: string; fileName: string; description?: string }>
     activities?: Activity[]
-  }
+  },
 ): Promise<Message> {
   return fetchJson(`${API_BASE}/conversations/${conversationId}/messages`, {
     method: 'POST',
@@ -156,7 +166,10 @@ export async function addMessage(
 }
 
 // Images
-export async function updateImageDescription(imageId: string, description: string): Promise<{ success: boolean }> {
+export async function updateImageDescription(
+  imageId: string,
+  description: string,
+): Promise<{ success: boolean }> {
   return fetchJson(`${API_BASE}/images/${imageId}`, {
     method: 'PATCH',
     body: JSON.stringify({ description }),
@@ -164,25 +177,30 @@ export async function updateImageDescription(imageId: string, description: strin
 }
 
 // Search
-export async function searchMessages(query: string, limit = 50): Promise<{ results: SearchResult[] }> {
+export async function searchMessages(
+  query: string,
+  limit = 50,
+): Promise<{ results: SearchResult[] }> {
   return fetchJson(`${API_BASE}/search?q=${encodeURIComponent(query)}&limit=${limit}`)
 }
 
 // Migration
-export async function migrateFromLocalStorage(conversations: Array<{
-  id: string
-  title: string
-  messages: Array<{
+export async function migrateFromLocalStorage(
+  conversations: Array<{
     id: string
-    role: 'user' | 'assistant'
-    content: string
-    timestamp: number
-    images?: MessageImage[]
-  }>
-  activities?: Activity[]
-  createdAt: number
-  updatedAt: number
-}>): Promise<MigrationResult> {
+    title: string
+    messages: Array<{
+      id: string
+      role: 'user' | 'assistant'
+      content: string
+      timestamp: number
+      images?: MessageImage[]
+    }>
+    activities?: Activity[]
+    createdAt: number
+    updatedAt: number
+  }>,
+): Promise<MigrationResult> {
   return fetchJson(`${API_BASE}/migrate`, {
     method: 'POST',
     body: JSON.stringify({ conversations }),
@@ -210,7 +228,10 @@ export async function isDatabaseAvailable(): Promise<boolean> {
 }
 
 // Liner Notes
-export async function saveLinerNotes(conversationId: string, linerNotes: string | null): Promise<{ success: boolean }> {
+export async function saveLinerNotes(
+  conversationId: string,
+  linerNotes: string | null,
+): Promise<{ success: boolean }> {
   return fetchJson(`${API_BASE}/conversations/${conversationId}/liner-notes`, {
     method: 'PUT',
     body: JSON.stringify({ linerNotes }),
@@ -255,11 +276,14 @@ export async function createPlan(plan: {
   })
 }
 
-export async function updatePlan(id: string, updates: {
-  title?: string
-  content?: string
-  status?: string
-}): Promise<{ success: boolean }> {
+export async function updatePlan(
+  id: string,
+  updates: {
+    title?: string
+    content?: string
+    status?: string
+  },
+): Promise<{ success: boolean }> {
   return fetchJson(`${API_BASE}/plans/${id}`, {
     method: 'PUT',
     body: JSON.stringify(updates),
@@ -361,7 +385,7 @@ export async function cancelJob(id: string): Promise<{ success: boolean }> {
 export function subscribeToJobEvents(
   jobId: string,
   onEvent: (event: { type: string; data: string }) => void,
-  onDone?: () => void
+  onDone?: () => void,
 ): () => void {
   const eventSource = new EventSource(`${API_BASE}/jobs/${jobId}/events`)
 

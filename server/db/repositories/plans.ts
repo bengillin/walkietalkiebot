@@ -25,9 +25,11 @@ export function listPlans(limit = 50, offset = 0, conversationId?: string): Plan
 
 export function countPlansByConversation(): Record<string, number> {
   const db = getDb()
-  const rows = db.prepare(
-    "SELECT conversation_id, COUNT(*) as count FROM plans WHERE conversation_id IS NOT NULL AND status != 'archived' GROUP BY conversation_id"
-  ).all() as Array<{ conversation_id: string; count: number }>
+  const rows = db
+    .prepare(
+      "SELECT conversation_id, COUNT(*) as count FROM plans WHERE conversation_id IS NOT NULL AND status != 'archived' GROUP BY conversation_id",
+    )
+    .all() as Array<{ conversation_id: string; count: number }>
   const result: Record<string, number> = {}
   for (const row of rows) {
     result[row.conversation_id] = row.count
@@ -50,7 +52,7 @@ export function createPlan(plan: {
   const db = getDb()
   const now = Date.now()
   db.prepare(
-    'INSERT INTO plans (id, title, content, status, conversation_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
+    'INSERT INTO plans (id, title, content, status, conversation_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
   ).run(
     plan.id,
     plan.title,
@@ -58,16 +60,19 @@ export function createPlan(plan: {
     plan.status || 'draft',
     plan.conversationId || null,
     now,
-    now
+    now,
   )
   return getPlan(plan.id)!
 }
 
-export function updatePlan(id: string, updates: {
-  title?: string
-  content?: string
-  status?: string
-}): void {
+export function updatePlan(
+  id: string,
+  updates: {
+    title?: string
+    content?: string
+    status?: string
+  },
+): void {
   const db = getDb()
   const sets: string[] = ['updated_at = ?']
   const values: unknown[] = [Date.now()]

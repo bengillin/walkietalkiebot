@@ -54,22 +54,30 @@ export function RetroTape({
       onClick={onClick}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
-      style={{
-        '--tape-body-color': colors.body,
-        '--tape-label-bg': colors.label,
-        '--tape-label-accent': colors.labelAccent,
-      } as React.CSSProperties}
+      style={
+        {
+          '--tape-body-color': colors.body,
+          '--tape-label-bg': colors.label,
+          '--tape-label-accent': colors.labelAccent,
+        } as React.CSSProperties
+      }
     >
       <div className="retro-tape__label">
         <div className="retro-tape__text">{title}</div>
 
         <div className="retro-tape__central">
-          <div className="retro-tape__reel retro-tape__reel--left" style={{ '--reel-size': `${leftSize}%` } as React.CSSProperties}>
+          <div
+            className="retro-tape__reel retro-tape__reel--left"
+            style={{ '--reel-size': `${leftSize}%` } as React.CSSProperties}
+          >
             <div className="retro-tape__arc">
               <div className="retro-tape__axis" />
             </div>
           </div>
-          <div className="retro-tape__reel retro-tape__reel--right" style={{ '--reel-size': `${rightSize}%` } as React.CSSProperties}>
+          <div
+            className="retro-tape__reel retro-tape__reel--right"
+            style={{ '--reel-size': `${rightSize}%` } as React.CSSProperties}
+          >
             <div className="retro-tape__arc">
               <div className="retro-tape__axis" />
             </div>
@@ -87,9 +95,12 @@ export function RetroTape({
       </div>
 
       {planCount > 0 && (
-        <div className="retro-tape__plan-badge" title={`${planCount} plan${planCount !== 1 ? 's' : ''}`}>
+        <div
+          className="retro-tape__plan-badge"
+          title={`${planCount} plan${planCount !== 1 ? 's' : ''}`}
+        >
           <svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10">
-            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
           </svg>
           {planCount}
         </div>

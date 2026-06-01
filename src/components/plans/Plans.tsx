@@ -63,7 +63,7 @@ export function Plans({ isOpen, onClose, conversationId, onNavigateToConversatio
         content: '',
         conversationId: conversationId || null,
       })
-      setPlans(prev => [plan, ...prev])
+      setPlans((prev) => [plan, ...prev])
       setSelectedPlan(plan)
     } catch (err) {
       console.warn('Failed to create plan:', err)
@@ -73,9 +73,15 @@ export function Plans({ isOpen, onClose, conversationId, onNavigateToConversatio
   const handleUpdateStatus = async (plan: api.Plan, status: string) => {
     try {
       await api.updatePlan(plan.id, { status })
-      setPlans(prev => prev.map(p => p.id === plan.id ? { ...p, status: status as api.Plan['status'], updatedAt: Date.now() } : p))
+      setPlans((prev) =>
+        prev.map((p) =>
+          p.id === plan.id
+            ? { ...p, status: status as api.Plan['status'], updatedAt: Date.now() }
+            : p,
+        ),
+      )
       if (selectedPlan?.id === plan.id) {
-        setSelectedPlan(prev => prev ? { ...prev, status: status as api.Plan['status'] } : null)
+        setSelectedPlan((prev) => (prev ? { ...prev, status: status as api.Plan['status'] } : null))
       }
     } catch (err) {
       console.warn('Failed to update plan status:', err)
@@ -85,7 +91,7 @@ export function Plans({ isOpen, onClose, conversationId, onNavigateToConversatio
   const handleDeletePlan = async (id: string) => {
     try {
       await api.deletePlan(id)
-      setPlans(prev => prev.filter(p => p.id !== id))
+      setPlans((prev) => prev.filter((p) => p.id !== id))
       if (selectedPlan?.id === id) {
         setSelectedPlan(null)
       }
@@ -112,14 +118,20 @@ export function Plans({ isOpen, onClose, conversationId, onNavigateToConversatio
       <div className="plans__panel">
         <div className="plans__header">
           <div className="plans__header-left">
-            <svg className="plans__icon" viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
-              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+            <svg
+              className="plans__icon"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              width="18"
+              height="18"
+            >
+              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
             </svg>
             <h3 className="plans__title">Plans</h3>
           </div>
           <button className="plans__close" onClick={onClose}>
             <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
-              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
             </svg>
           </button>
         </div>
@@ -131,8 +143,14 @@ export function Plans({ isOpen, onClose, conversationId, onNavigateToConversatio
             onUpdateStatus={handleUpdateStatus}
             onDelete={() => handleDeletePlan(selectedPlan.id)}
             onUpdate={(updates) => {
-              setSelectedPlan(prev => prev ? { ...prev, ...updates, updatedAt: Date.now() } : null)
-              setPlans(prev => prev.map(p => p.id === selectedPlan.id ? { ...p, ...updates, updatedAt: Date.now() } : p))
+              setSelectedPlan((prev) =>
+                prev ? { ...prev, ...updates, updatedAt: Date.now() } : null,
+              )
+              setPlans((prev) =>
+                prev.map((p) =>
+                  p.id === selectedPlan.id ? { ...p, ...updates, updatedAt: Date.now() } : p,
+                ),
+              )
             }}
             onNavigateToConversation={onNavigateToConversation}
           />
@@ -167,19 +185,15 @@ export function Plans({ isOpen, onClose, conversationId, onNavigateToConversatio
               {!loading && !error && plans.length === 0 && (
                 <div className="plans__empty">
                   <svg viewBox="0 0 24 24" fill="currentColor" width="40" height="40" opacity={0.3}>
-                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
                   </svg>
                   <p>No plans yet</p>
                   <span>Plans created during Claude Code sessions will appear here.</span>
                 </div>
               )}
 
-              {plans.map(plan => (
-                <button
-                  key={plan.id}
-                  className="plans__item"
-                  onClick={() => setSelectedPlan(plan)}
-                >
+              {plans.map((plan) => (
+                <button key={plan.id} className="plans__item" onClick={() => setSelectedPlan(plan)}>
                   <div className="plans__item-header">
                     <span className={`plans__status-dot plans__status-dot--${plan.status}`} />
                     <span className="plans__item-title">{plan.title}</span>
@@ -195,7 +209,8 @@ export function Plans({ isOpen, onClose, conversationId, onNavigateToConversatio
                   </div>
                   {plan.content && (
                     <div className="plans__item-preview">
-                      {plan.content.slice(0, 120)}{plan.content.length > 120 ? '...' : ''}
+                      {plan.content.slice(0, 120)}
+                      {plan.content.length > 120 ? '...' : ''}
                     </div>
                   )}
                 </button>
@@ -245,7 +260,7 @@ function PlanDetail({
       <div className="plans__detail-nav">
         <button className="plans__back-btn" onClick={onBack}>
           <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
           </svg>
           All Plans
         </button>
@@ -266,13 +281,13 @@ function PlanDetail({
           <input
             className="plans__editor-title"
             value={editTitle}
-            onChange={e => setEditTitle(e.target.value)}
+            onChange={(e) => setEditTitle(e.target.value)}
             placeholder="Plan title"
           />
           <textarea
             className="plans__editor-content"
             value={editContent}
-            onChange={e => setEditContent(e.target.value)}
+            onChange={(e) => setEditContent(e.target.value)}
             placeholder="Write your plan here... Supports markdown."
           />
           <div className="plans__editor-actions">
@@ -300,10 +315,12 @@ function PlanDetail({
             <select
               className="plans__status-select"
               value={plan.status}
-              onChange={e => onUpdateStatus(plan, e.target.value)}
+              onChange={(e) => onUpdateStatus(plan, e.target.value)}
             >
               {Object.entries(STATUS_LABELS).map(([key, label]) => (
-                <option key={key} value={key}>{label}</option>
+                <option key={key} value={key}>
+                  {label}
+                </option>
               ))}
             </select>
             {plan.conversationId && plan.conversationTitle && onNavigateToConversation && (
@@ -312,7 +329,7 @@ function PlanDetail({
                 onClick={() => onNavigateToConversation(plan.conversationId!)}
               >
                 <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                 </svg>
                 {plan.conversationTitle.split(/\s+/).slice(0, 4).join(' ')}
               </button>

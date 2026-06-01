@@ -24,7 +24,8 @@ const BUILT_IN_MODES: Mode[] = [
     label: 'Voice',
     description: 'Brief, spoken responses',
     icon: '🎙️',
-    instruction: 'Keep responses to 1-2 sentences, no markdown, speak naturally. Be direct and concise — your responses are spoken aloud.',
+    instruction:
+      'Keep responses to 1-2 sentences, no markdown, speak naturally. Be direct and concise — your responses are spoken aloud.',
     planDetection: false,
   },
   {
@@ -32,7 +33,8 @@ const BUILT_IN_MODES: Mode[] = [
     label: 'Pair',
     description: 'Collaborative coding partner',
     icon: '👥',
-    instruction: 'You are a pair programming partner. Think out loud about your approach. Ask clarifying questions before making big changes. Explain your reasoning as you go. Use markdown for code blocks.',
+    instruction:
+      'You are a pair programming partner. Think out loud about your approach. Ask clarifying questions before making big changes. Explain your reasoning as you go. Use markdown for code blocks.',
     planDetection: false,
   },
   {
@@ -40,7 +42,8 @@ const BUILT_IN_MODES: Mode[] = [
     label: 'Architect',
     description: 'Systems thinking and trade-offs',
     icon: '🏗️',
-    instruction: 'Think in systems. Consider trade-offs, scalability, and maintainability. Ask clarifying questions before proposing solutions. Use structured output with headers and lists. Be thorough — detail matters more than brevity.',
+    instruction:
+      'Think in systems. Consider trade-offs, scalability, and maintainability. Ask clarifying questions before proposing solutions. Use structured output with headers and lists. Be thorough — detail matters more than brevity.',
     planDetection: true,
   },
   {
@@ -48,7 +51,8 @@ const BUILT_IN_MODES: Mode[] = [
     label: 'Code Review',
     description: 'Thorough code analysis',
     icon: '🔍',
-    instruction: 'Review code for bugs, security issues, performance problems, and style. Be specific — reference file paths and line numbers. Categorize findings by severity. Suggest concrete fixes, not vague improvements.',
+    instruction:
+      'Review code for bugs, security issues, performance problems, and style. Be specific — reference file paths and line numbers. Categorize findings by severity. Suggest concrete fixes, not vague improvements.',
     planDetection: false,
   },
   {
@@ -56,7 +60,8 @@ const BUILT_IN_MODES: Mode[] = [
     label: 'Debug',
     description: 'Systematic problem diagnosis',
     icon: '🐛',
-    instruction: 'Diagnose problems step by step. Read error messages and logs carefully. Form hypotheses and test them. Don\'t guess — verify. Ask for specific information when needed. Suggest targeted fixes with clear reasoning.',
+    instruction:
+      "Diagnose problems step by step. Read error messages and logs carefully. Form hypotheses and test them. Don't guess — verify. Ask for specific information when needed. Suggest targeted fixes with clear reasoning.",
     planDetection: false,
   },
 ]
@@ -69,7 +74,7 @@ function loadCustomModes(): Mode[] {
   const modes: Mode[] = []
   let files: string[]
   try {
-    files = readdirSync(MODES_DIR).filter(f => f.endsWith('.json'))
+    files = readdirSync(MODES_DIR).filter((f) => f.endsWith('.json'))
   } catch {
     return []
   }
@@ -102,12 +107,9 @@ let cachedModes: Mode[] | null = null
 function getAllModes(): Mode[] {
   if (!cachedModes) {
     const custom = loadCustomModes()
-    const customNames = new Set(custom.map(m => m.name))
+    const customNames = new Set(custom.map((m) => m.name))
     // Custom modes override built-ins with the same name
-    cachedModes = [
-      ...BUILT_IN_MODES.filter(m => !customNames.has(m.name)),
-      ...custom,
-    ]
+    cachedModes = [...BUILT_IN_MODES.filter((m) => !customNames.has(m.name)), ...custom]
   }
   return cachedModes
 }
@@ -117,11 +119,16 @@ export function getModes(): Mode[] {
 }
 
 export function getMode(name: string): Mode {
-  return getAllModes().find(m => m.name === name) || BUILT_IN_MODES[0]
+  return getAllModes().find((m) => m.name === name) || BUILT_IN_MODES[0]
 }
 
 export function getModeInfoList(): ModeInfo[] {
-  return getAllModes().map(({ name, label, description, icon }) => ({ name, label, description, icon }))
+  return getAllModes().map(({ name, label, description, icon }) => ({
+    name,
+    label,
+    description,
+    icon,
+  }))
 }
 
 export function reloadModes(): void {

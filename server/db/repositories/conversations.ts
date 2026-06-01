@@ -26,21 +26,29 @@ export interface UpdateConversationInput {
 
 export function listConversations(limit = 50, offset = 0): ConversationRow[] {
   const db = getDb()
-  return db.prepare(`
+  return db
+    .prepare(
+      `
     SELECT id, title, created_at, updated_at, project_id, parent_id, mode
     FROM conversations
     ORDER BY updated_at DESC
     LIMIT ? OFFSET ?
-  `).all(limit, offset) as ConversationRow[]
+  `,
+    )
+    .all(limit, offset) as ConversationRow[]
 }
 
 export function getConversation(id: string): ConversationRow | null {
   const db = getDb()
-  const row = db.prepare(`
+  const row = db
+    .prepare(
+      `
     SELECT id, title, created_at, updated_at, project_id, parent_id, mode
     FROM conversations
     WHERE id = ?
-  `).get(id) as ConversationRow | undefined
+  `,
+    )
+    .get(id) as ConversationRow | undefined
   return row || null
 }
 
@@ -50,10 +58,12 @@ export function createConversation(input: CreateConversationInput): Conversation
   const title = input.title || 'New conversation'
 
   const mode = input.mode || 'voice'
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO conversations (id, title, created_at, updated_at, project_id, parent_id, mode)
     VALUES (?, ?, ?, ?, ?, ?, ?)
-  `).run(input.id, title, now, now, input.projectId || null, input.parentId || null, mode)
+  `,
+  ).run(input.id, title, now, now, input.projectId || null, input.parentId || null, mode)
 
   return {
     id: input.id,
@@ -66,7 +76,10 @@ export function createConversation(input: CreateConversationInput): Conversation
   }
 }
 
-export function updateConversation(id: string, input: UpdateConversationInput): ConversationRow | null {
+export function updateConversation(
+  id: string,
+  input: UpdateConversationInput,
+): ConversationRow | null {
   const db = getDb()
   const existing = getConversation(id)
   if (!existing) return null
@@ -107,18 +120,28 @@ export function touchConversation(id: string): void {
 
 export function updateLinerNotes(id: string, linerNotes: string | null): void {
   const db = getDb()
-  db.prepare('UPDATE conversations SET liner_notes = ?, updated_at = ? WHERE id = ?').run(linerNotes, Date.now(), id)
+  db.prepare('UPDATE conversations SET liner_notes = ?, updated_at = ? WHERE id = ?').run(
+    linerNotes,
+    Date.now(),
+    id,
+  )
 }
 
 export function getLinerNotes(id: string): string | null {
   const db = getDb()
-  const row = db.prepare('SELECT liner_notes FROM conversations WHERE id = ?').get(id) as { liner_notes: string | null } | undefined
+  const row = db.prepare('SELECT liner_notes FROM conversations WHERE id = ?').get(id) as
+    | { liner_notes: string | null }
+    | undefined
   return row?.liner_notes || null
 }
 
 export function updateMode(id: string, mode: string): void {
   const db = getDb()
-  db.prepare('UPDATE conversations SET mode = ?, updated_at = ? WHERE id = ?').run(mode, Date.now(), id)
+  db.prepare('UPDATE conversations SET mode = ?, updated_at = ? WHERE id = ?').run(
+    mode,
+    Date.now(),
+    id,
+  )
 }
 
 export function countConversations(): number {

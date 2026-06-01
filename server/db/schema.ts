@@ -11,7 +11,9 @@ export function initSchema(db: Database.Database): void {
   `)
 
   // Check current version
-  const row = db.prepare('SELECT version FROM schema_version ORDER BY version DESC LIMIT 1').get() as { version: number } | undefined
+  const row = db
+    .prepare('SELECT version FROM schema_version ORDER BY version DESC LIMIT 1')
+    .get() as { version: number } | undefined
   const currentVersion = row?.version || 0
 
   if (currentVersion < SCHEMA_VERSION) {

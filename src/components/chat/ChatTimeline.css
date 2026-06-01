@@ -31,7 +31,6 @@
   align-self: flex-end;
 }
 
-
 /* Message wrapper - contains bubble + footer */
 .message-wrapper {
   display: flex;
@@ -82,7 +81,9 @@
   flex-shrink: 0;
   overflow: visible;
   position: relative;
-  transition: width 0.2s, height 0.2s;
+  transition:
+    width 0.2s,
+    height 0.2s;
 }
 
 /* Active avatar - full size */
@@ -236,7 +237,9 @@
   object-fit: cover;
   border-radius: 12px;
   cursor: pointer;
-  transition: transform 0.15s ease, filter 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    filter 0.15s ease;
 }
 
 .message-images--grid .message-image-thumb {
@@ -292,7 +295,9 @@
   border-radius: 8px;
   cursor: pointer;
   opacity: 0.85;
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
 }
 
 .message-ref-image:hover {
@@ -332,7 +337,9 @@
 }
 
 @keyframes typingBounce {
-  0%, 60%, 100% {
+  0%,
+  60%,
+  100% {
     transform: translateY(0);
   }
   30% {
@@ -383,12 +390,24 @@
 }
 
 /* Tool category color accents */
-.tool-badge.tool-cat--fs    { border-left: 2px solid rgba(59, 130, 246, 0.4); }
-.tool-badge.tool-cat--exec  { border-left: 2px solid rgba(245, 158, 11, 0.4); }
-.tool-badge.tool-cat--voice { border-left: 2px solid rgba(139, 92, 246, 0.4); }
-.tool-badge.tool-cat--data  { border-left: 2px solid rgba(16, 185, 129, 0.4); }
-.tool-badge.tool-cat--plan  { border-left: 2px solid rgba(236, 72, 153, 0.4); }
-.tool-badge.tool-cat--media { border-left: 2px solid rgba(244, 63, 94, 0.4); }
+.tool-badge.tool-cat--fs {
+  border-left: 2px solid rgba(59, 130, 246, 0.4);
+}
+.tool-badge.tool-cat--exec {
+  border-left: 2px solid rgba(245, 158, 11, 0.4);
+}
+.tool-badge.tool-cat--voice {
+  border-left: 2px solid rgba(139, 92, 246, 0.4);
+}
+.tool-badge.tool-cat--data {
+  border-left: 2px solid rgba(16, 185, 129, 0.4);
+}
+.tool-badge.tool-cat--plan {
+  border-left: 2px solid rgba(236, 72, 153, 0.4);
+}
+.tool-badge.tool-cat--media {
+  border-left: 2px solid rgba(244, 63, 94, 0.4);
+}
 
 .tool-icon {
   font-size: 0.8rem;
@@ -483,7 +502,8 @@
 }
 
 @keyframes recordingPulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -545,7 +565,8 @@
 }
 
 @keyframes indicatorPulse {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 0 0 rgba(0, 122, 255, 0.3);
   }
   50% {
@@ -851,4 +872,3 @@ ol.msg-list {
     font-size: 0.8em;
   }
 }
-

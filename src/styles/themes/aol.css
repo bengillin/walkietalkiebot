@@ -1,5 +1,5 @@
 /* AOL 90s Theme - Windows 95 / AOL Instant Messenger aesthetic */
-[data-theme="aol"] {
+[data-theme='aol'] {
   /* Background Colors - Win95 gray */
   --bg-primary: #c0c0c0;
   --bg-secondary: #d4d0c8;
@@ -86,8 +86,8 @@
 /* ============================================
    Body & Root
    ============================================ */
-[data-theme="aol"] html,
-[data-theme="aol"] body {
+[data-theme='aol'] html,
+[data-theme='aol'] body {
   background: #008080;
   background-image: none;
   font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Arial, sans-serif;
@@ -98,13 +98,13 @@
 /* ============================================
    Header - Win95 title bar gradient
    ============================================ */
-[data-theme="aol"] .app__header {
+[data-theme='aol'] .app__header {
   background: linear-gradient(180deg, #000080, #1084d0);
   border-bottom: 2px solid #808080;
   box-shadow: none;
 }
 
-[data-theme="aol"] .app__title {
+[data-theme='aol'] .app__title {
   font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Arial, sans-serif;
   font-weight: 700;
   font-size: 14px;
@@ -120,98 +120,132 @@
 }
 
 /* Header buttons - Win95 3D raised buttons */
-[data-theme="aol"] .app__header-btn {
+[data-theme='aol'] .app__header-btn {
   background: #c0c0c0;
   border: none;
   border-radius: 0;
   color: #000000;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff, inset -2px -2px 0 #404040, inset 2px 2px 0 #dfdfdf;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff,
+    inset -2px -2px 0 #404040,
+    inset 2px 2px 0 #dfdfdf;
 }
 
-[data-theme="aol"] .app__header-btn:hover {
+[data-theme='aol'] .app__header-btn:hover {
   background: #d4d0c8;
   color: #000000;
   border: none;
 }
 
-[data-theme="aol"] .app__header-btn:active {
-  box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #ffffff, inset 2px 2px 0 #404040, inset -2px -2px 0 #dfdfdf;
+[data-theme='aol'] .app__header-btn:active {
+  box-shadow:
+    inset 1px 1px 0 #808080,
+    inset -1px -1px 0 #ffffff,
+    inset 2px 2px 0 #404040,
+    inset -2px -2px 0 #dfdfdf;
   transform: none;
 }
 
-[data-theme="aol"] .app__header-btn:disabled {
+[data-theme='aol'] .app__header-btn:disabled {
   color: #808080;
   text-shadow: 1px 1px 0 #ffffff;
 }
 
 /* Eject button active */
-[data-theme="aol"] .app__header-btn--eject.app__header-btn--active {
+[data-theme='aol'] .app__header-btn--eject.app__header-btn--active {
   background: #d4d0c8;
   border: none;
   color: #000080;
-  box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #ffffff;
+  box-shadow:
+    inset 1px 1px 0 #808080,
+    inset -1px -1px 0 #ffffff;
 }
 
 /* Record button - Red square like Win95 media player */
-[data-theme="aol"] .app__header-btn--record {
+[data-theme='aol'] .app__header-btn--record {
   background: #ff0000;
   border: none;
   color: #ffffff;
   border-radius: 0;
-  box-shadow: inset -1px -1px 0 #800000, inset 1px 1px 0 #ff6666, inset -2px -2px 0 #400000, inset 2px 2px 0 #ff9999;
+  box-shadow:
+    inset -1px -1px 0 #800000,
+    inset 1px 1px 0 #ff6666,
+    inset -2px -2px 0 #400000,
+    inset 2px 2px 0 #ff9999;
 }
 
-[data-theme="aol"] .app__header-btn--record::before {
+[data-theme='aol'] .app__header-btn--record::before {
   display: none;
 }
 
-[data-theme="aol"] .app__header-btn--record:hover:not(:disabled) {
+[data-theme='aol'] .app__header-btn--record:hover:not(:disabled) {
   background: #ff3333;
-  box-shadow: inset -1px -1px 0 #800000, inset 1px 1px 0 #ff6666, inset -2px -2px 0 #400000, inset 2px 2px 0 #ff9999;
+  box-shadow:
+    inset -1px -1px 0 #800000,
+    inset 1px 1px 0 #ff6666,
+    inset -2px -2px 0 #400000,
+    inset 2px 2px 0 #ff9999;
 }
 
-[data-theme="aol"] .app__header-btn--record:active:not(:disabled) {
-  box-shadow: inset 1px 1px 0 #800000, inset -1px -1px 0 #ff6666;
+[data-theme='aol'] .app__header-btn--record:active:not(:disabled) {
+  box-shadow:
+    inset 1px 1px 0 #800000,
+    inset -1px -1px 0 #ff6666;
   transform: none;
 }
 
-[data-theme="aol"] .app__header-btn--record.app__header-btn--recording {
+[data-theme='aol'] .app__header-btn--record.app__header-btn--recording {
   background: #ff0000;
-  box-shadow: inset 1px 1px 0 #800000, inset -1px -1px 0 #ff6666;
+  box-shadow:
+    inset 1px 1px 0 #800000,
+    inset -1px -1px 0 #ff6666;
   animation: aol-record-blink 0.5s steps(1) infinite;
 }
 
-[data-theme="aol"] .app__header-btn--record.app__header-btn--recording::before {
+[data-theme='aol'] .app__header-btn--record.app__header-btn--recording::before {
   display: none;
 }
 
 @keyframes aol-record-blink {
-  0%, 49% { background: #ff0000; }
-  50%, 100% { background: #cc0000; }
+  0%,
+  49% {
+    background: #ff0000;
+  }
+  50%,
+  100% {
+    background: #cc0000;
+  }
 }
 
 /* Tap to talk pulse */
-[data-theme="aol"] .app__header-btn--record.app__header-btn--tap-to-talk {
+[data-theme='aol'] .app__header-btn--record.app__header-btn--tap-to-talk {
   animation: aol-tap-blink 1s steps(1) infinite;
 }
 
 @keyframes aol-tap-blink {
-  0%, 49% { background: #ff0000; }
-  50%, 100% { background: #ff6666; }
+  0%,
+  49% {
+    background: #ff0000;
+  }
+  50%,
+  100% {
+    background: #ff6666;
+  }
 }
 
 /* Recording indicator */
-[data-theme="aol"] .app__recording-indicator {
+[data-theme='aol'] .app__recording-indicator {
   background: #c0c0c0;
   border-radius: 0;
 }
 
-[data-theme="aol"] .app__recording-dot {
+[data-theme='aol'] .app__recording-dot {
   background: #ff0000;
   border-radius: 0;
 }
 
-[data-theme="aol"] .app__recording-label {
+[data-theme='aol'] .app__recording-label {
   color: #ff0000;
   font-weight: 700;
   letter-spacing: 0;
@@ -221,25 +255,29 @@
 }
 
 /* Liner notes indicator */
-[data-theme="aol"] .app__header-btn--has-notes::after {
+[data-theme='aol'] .app__header-btn--has-notes::after {
   background: #ffcc00;
   border-color: #000080;
   border-radius: 0;
 }
 
 /* Conversation dropdown - Win95 combobox */
-[data-theme="aol"] .app__conversation-dropdown {
+[data-theme='aol'] .app__conversation-dropdown {
   background: #ffffff;
   border-radius: 0;
   padding: 2px 6px;
-  box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #ffffff, inset 2px 2px 0 #404040, inset -2px -2px 0 #dfdfdf;
+  box-shadow:
+    inset 1px 1px 0 #808080,
+    inset -1px -1px 0 #ffffff,
+    inset 2px 2px 0 #404040,
+    inset -2px -2px 0 #dfdfdf;
 }
 
-[data-theme="aol"] .app__conversation-dropdown:hover {
+[data-theme='aol'] .app__conversation-dropdown:hover {
   background: #ffffff;
 }
 
-[data-theme="aol"] .app__conversation-title {
+[data-theme='aol'] .app__conversation-title {
   color: #000000;
   font-weight: 400;
   font-size: 13px;
@@ -247,34 +285,38 @@
 }
 
 /* Avatar */
-[data-theme="aol"] .app__avatar-mini {
+[data-theme='aol'] .app__avatar-mini {
   width: 32px;
   height: 32px;
 }
 
 /* Theme button */
-[data-theme="aol"] .app__theme-btn {
+[data-theme='aol'] .app__theme-btn {
   background: #ffffff;
   border: none;
   border-radius: 0;
   color: #000000;
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff;
 }
 
-[data-theme="aol"] .app__theme-btn:hover {
+[data-theme='aol'] .app__theme-btn:hover {
   background: #ffffff;
 }
 
 /* Mobile menu */
-[data-theme="aol"] .app__mobile-menu-btn {
+[data-theme='aol'] .app__mobile-menu-btn {
   background: #c0c0c0;
   border: none;
   color: #000000;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff;
 }
 
-[data-theme="aol"] .app__mobile-menu {
+[data-theme='aol'] .app__mobile-menu {
   background: #c0c0c0;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
@@ -284,28 +326,28 @@
   box-shadow: 2px 2px 0 #000000;
 }
 
-[data-theme="aol"] .app__mobile-menu-item {
+[data-theme='aol'] .app__mobile-menu-item {
   color: #000000;
   font-size: 13px;
   padding: 4px 16px;
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
 }
 
-[data-theme="aol"] .app__mobile-menu-item:hover {
+[data-theme='aol'] .app__mobile-menu-item:hover {
   background: #000080;
   color: #ffffff;
 }
 
-[data-theme="aol"] .app__mobile-menu-item:active {
+[data-theme='aol'] .app__mobile-menu-item:active {
   background: #000080;
   color: #ffffff;
 }
 
-[data-theme="aol"] .app__mobile-menu-item--danger {
+[data-theme='aol'] .app__mobile-menu-item--danger {
   color: #ff0000;
 }
 
-[data-theme="aol"] .app__mobile-menu-item--danger:hover {
+[data-theme='aol'] .app__mobile-menu-item--danger:hover {
   background: #ff0000;
   color: #ffffff;
 }
@@ -313,17 +355,17 @@
 /* ============================================
    Main Content Area
    ============================================ */
-[data-theme="aol"] .app__main {
+[data-theme='aol'] .app__main {
   background: #c0c0c0;
 }
 
-[data-theme="aol"] .app__avatar-section {
+[data-theme='aol'] .app__avatar-section {
   background: #c0c0c0;
   border-bottom: 2px solid;
   border-bottom-color: #808080;
 }
 
-[data-theme="aol"] .app__error {
+[data-theme='aol'] .app__error {
   color: #ff0000;
   background: #ffffe0;
   border: 2px solid;
@@ -332,7 +374,7 @@
 }
 
 /* Plan notification */
-[data-theme="aol"] .app__plan-notification {
+[data-theme='aol'] .app__plan-notification {
   background: #ffffe0;
   border: 2px solid;
   border-color: #ffffff #808080 #808080 #ffffff;
@@ -342,12 +384,12 @@
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
 }
 
-[data-theme="aol"] .app__plan-notification:hover {
+[data-theme='aol'] .app__plan-notification:hover {
   background: #fffff0;
 }
 
 /* Input bar */
-[data-theme="aol"] .app__input-bar {
+[data-theme='aol'] .app__input-bar {
   background: #c0c0c0;
   border-top: 2px solid;
   border-top-color: #ffffff;
@@ -356,13 +398,17 @@
 /* ============================================
    Chat Timeline - AIM conversation window
    ============================================ */
-[data-theme="aol"] .chat-timeline {
+[data-theme='aol'] .chat-timeline {
   background: #ffffff;
-  box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #ffffff, inset 2px 2px 0 #404040, inset -2px -2px 0 #dfdfdf;
+  box-shadow:
+    inset 1px 1px 0 #808080,
+    inset -1px -1px 0 #ffffff,
+    inset 2px 2px 0 #404040,
+    inset -2px -2px 0 #dfdfdf;
 }
 
 /* Message bubbles - AIM style (no bubbles, just colored text) */
-[data-theme="aol"] .message-bubble {
+[data-theme='aol'] .message-bubble {
   border-radius: 0;
   font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Arial, sans-serif;
   font-weight: 400;
@@ -372,7 +418,7 @@
   font-size: 14px;
 }
 
-[data-theme="aol"] .message-bubble.user {
+[data-theme='aol'] .message-bubble.user {
   background: transparent;
   color: #ff0000;
   border: none;
@@ -380,7 +426,7 @@
   box-shadow: none;
 }
 
-[data-theme="aol"] .message-bubble.assistant {
+[data-theme='aol'] .message-bubble.assistant {
   background: transparent;
   color: #0000ff;
   border: none;
@@ -389,17 +435,17 @@
 }
 
 /* Hide the default tail */
-[data-theme="aol"] .message-bubble.assistant::after {
+[data-theme='aol'] .message-bubble.assistant::after {
   display: none;
 }
 
-[data-theme="aol"] .message-bubble.listening {
+[data-theme='aol'] .message-bubble.listening {
   background: #ffffcc;
   border: 1px dashed #808080;
   box-shadow: none;
 }
 
-[data-theme="aol"] .message-bubble.thinking {
+[data-theme='aol'] .message-bubble.thinking {
   background: transparent;
   color: #808080;
   border: none;
@@ -407,7 +453,7 @@
   box-shadow: none;
 }
 
-[data-theme="aol"] .message-bubble.streaming {
+[data-theme='aol'] .message-bubble.streaming {
   background: transparent;
   color: #0000ff;
   border: none;
@@ -416,18 +462,18 @@
 }
 
 /* Links in messages */
-[data-theme="aol"] .message-link {
+[data-theme='aol'] .message-link {
   color: #0000ff;
   text-decoration: underline;
 }
 
-[data-theme="aol"] .message-bubble.user .message-link {
+[data-theme='aol'] .message-bubble.user .message-link {
   color: #cc0000;
   text-decoration: underline;
 }
 
 /* Message status */
-[data-theme="aol"] .message-status {
+[data-theme='aol'] .message-status {
   background: transparent;
   border: none;
   box-shadow: none;
@@ -439,36 +485,36 @@
 }
 
 /* Message meta */
-[data-theme="aol"] .message-meta {
+[data-theme='aol'] .message-meta {
   color: #808080;
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
 }
 
-[data-theme="aol"] .message-meta__name--recording {
+[data-theme='aol'] .message-meta__name--recording {
   color: #ff0000;
 }
 
 /* Message images */
-[data-theme="aol"] .message-image-thumb {
+[data-theme='aol'] .message-image-thumb {
   border-radius: 0;
   border: 2px solid;
   border-color: #808080 #ffffff #ffffff #808080;
   box-shadow: none;
 }
 
-[data-theme="aol"] .message-image-thumb:hover {
+[data-theme='aol'] .message-image-thumb:hover {
   transform: none;
   box-shadow: none;
   border-color: #000080 #c0c0c0 #c0c0c0 #000080;
 }
 
-[data-theme="aol"] .message-image-analyzed {
+[data-theme='aol'] .message-image-analyzed {
   background: #00cc00;
   border-radius: 0;
 }
 
 /* Typing indicator - 90s loading dots */
-[data-theme="aol"] .typing-indicator span {
+[data-theme='aol'] .typing-indicator span {
   width: 6px;
   height: 6px;
   background: #000080;
@@ -478,7 +524,7 @@
 }
 
 /* Code blocks in messages */
-[data-theme="aol"] .msg-code-block {
+[data-theme='aol'] .msg-code-block {
   background: #000000;
   color: #00ff00;
   border: 2px solid;
@@ -487,13 +533,13 @@
   font-family: 'Courier New', 'Fixedsys', monospace;
 }
 
-[data-theme="aol"] .message-bubble.user .msg-code-block {
+[data-theme='aol'] .message-bubble.user .msg-code-block {
   background: #000000;
   color: #00ff00;
   border-color: #808080 #ffffff #ffffff #808080;
 }
 
-[data-theme="aol"] .msg-inline-code {
+[data-theme='aol'] .msg-inline-code {
   background: #000000;
   color: #00ff00;
   border-radius: 0;
@@ -501,49 +547,53 @@
   padding: 1px 4px;
 }
 
-[data-theme="aol"] .message-bubble.user .msg-inline-code {
+[data-theme='aol'] .message-bubble.user .msg-inline-code {
   background: #000000;
   color: #00ff00;
 }
 
 /* Headings in messages */
-[data-theme="aol"] .msg-heading--1 {
+[data-theme='aol'] .msg-heading--1 {
   color: #000080;
   font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Arial, sans-serif;
 }
 
 /* Scrollbar - Win95 style */
-[data-theme="aol"] .chat-timeline::-webkit-scrollbar {
+[data-theme='aol'] .chat-timeline::-webkit-scrollbar {
   width: 16px;
 }
 
-[data-theme="aol"] .chat-timeline::-webkit-scrollbar-track {
+[data-theme='aol'] .chat-timeline::-webkit-scrollbar-track {
   background: repeating-conic-gradient(#c0c0c0 0% 25%, #ffffff 0% 50%) 50% / 2px 2px;
 }
 
-[data-theme="aol"] .chat-timeline::-webkit-scrollbar-thumb {
+[data-theme='aol'] .chat-timeline::-webkit-scrollbar-thumb {
   background: #c0c0c0;
   border: none;
   border-radius: 0;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff;
 }
 
-[data-theme="aol"] .chat-timeline::-webkit-scrollbar-thumb:hover {
+[data-theme='aol'] .chat-timeline::-webkit-scrollbar-thumb:hover {
   background: #d4d0c8;
 }
 
-[data-theme="aol"] .chat-timeline::-webkit-scrollbar-button:vertical:start:decrement,
-[data-theme="aol"] .chat-timeline::-webkit-scrollbar-button:vertical:end:increment {
+[data-theme='aol'] .chat-timeline::-webkit-scrollbar-button:vertical:start:decrement,
+[data-theme='aol'] .chat-timeline::-webkit-scrollbar-button:vertical:end:increment {
   display: block;
   height: 16px;
   background: #c0c0c0;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff;
 }
 
 /* ============================================
    Tool Badges - Win95 status bar segments
    ============================================ */
-[data-theme="aol"] .tool-badge {
+[data-theme='aol'] .tool-badge {
   background: #c0c0c0;
   border: 2px solid;
   border-color: #808080 #ffffff #ffffff #808080;
@@ -558,55 +608,55 @@
   color: #000000;
 }
 
-[data-theme="aol"] .tool-badge .tool-name {
+[data-theme='aol'] .tool-badge .tool-name {
   color: #000000;
   font-weight: 700;
 }
 
-[data-theme="aol"] .tool-badge .tool-input {
+[data-theme='aol'] .tool-badge .tool-input {
   color: #808080;
 }
 
-[data-theme="aol"] .tool-badge.running {
+[data-theme='aol'] .tool-badge.running {
   border-color: #808080 #ffffff #ffffff #808080;
   background: #c0c0c0;
   color: #000080;
   box-shadow: none;
 }
 
-[data-theme="aol"] .tool-badge.running .tool-name,
-[data-theme="aol"] .tool-badge.running .tool-input {
+[data-theme='aol'] .tool-badge.running .tool-name,
+[data-theme='aol'] .tool-badge.running .tool-input {
   color: #000080;
 }
 
-[data-theme="aol"] .tool-badge.error {
+[data-theme='aol'] .tool-badge.error {
   border-color: #808080 #ffffff #ffffff #808080;
   background: #c0c0c0;
   color: #ff0000;
   box-shadow: none;
 }
 
-[data-theme="aol"] .tool-badge.error .tool-name,
-[data-theme="aol"] .tool-badge.error .tool-input {
+[data-theme='aol'] .tool-badge.error .tool-name,
+[data-theme='aol'] .tool-badge.error .tool-input {
   color: #ff0000;
 }
 
-[data-theme="aol"] .tool-spinner {
+[data-theme='aol'] .tool-spinner {
   border-top-color: #000080;
 }
 
-[data-theme="aol"] .tool-complete {
+[data-theme='aol'] .tool-complete {
   color: #008000;
   font-weight: 700;
 }
 
-[data-theme="aol"] .tool-error {
+[data-theme='aol'] .tool-error {
   color: #ff0000;
   font-weight: 700;
 }
 
 /* Collapsible tools indicator */
-[data-theme="aol"] .collapsible-tools__indicator {
+[data-theme='aol'] .collapsible-tools__indicator {
   background: #c0c0c0;
   border: 2px solid;
   border-color: #ffffff #808080 #808080 #ffffff;
@@ -621,14 +671,14 @@
   padding: 3px 8px;
 }
 
-[data-theme="aol"] .collapsible-tools__indicator:hover {
+[data-theme='aol'] .collapsible-tools__indicator:hover {
   background: #d4d0c8;
   border-color: #ffffff #808080 #808080 #ffffff;
   transform: none;
   box-shadow: none;
 }
 
-[data-theme="aol"] .collapsible-tools__indicator.running {
+[data-theme='aol'] .collapsible-tools__indicator.running {
   border-color: #ffffff #808080 #808080 #ffffff;
   background: #c0c0c0;
   color: #000080;
@@ -637,24 +687,30 @@
 }
 
 @keyframes aol-tool-blink {
-  0%, 49% { color: #000080; }
-  50%, 100% { color: #c0c0c0; }
+  0%,
+  49% {
+    color: #000080;
+  }
+  50%,
+  100% {
+    color: #c0c0c0;
+  }
 }
 
-[data-theme="aol"] .collapsible-tools__indicator.error {
+[data-theme='aol'] .collapsible-tools__indicator.error {
   border-color: #ffffff #808080 #808080 #ffffff;
   background: #c0c0c0;
   color: #ff0000;
   box-shadow: none;
 }
 
-[data-theme="aol"] .collapsible-tools__count {
+[data-theme='aol'] .collapsible-tools__count {
   color: inherit;
   font-weight: 700;
 }
 
 /* Avatar container */
-[data-theme="aol"] .chat-timeline__avatar-container {
+[data-theme='aol'] .chat-timeline__avatar-container {
   background: #c0c0c0;
   border: 2px solid;
   border-color: #ffffff #808080 #808080 #ffffff;
@@ -666,7 +722,7 @@
 /* ============================================
    Unified Input Bar - AIM message input
    ============================================ */
-[data-theme="aol"] .unified-input-bar {
+[data-theme='aol'] .unified-input-bar {
   background: #c0c0c0;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
@@ -676,13 +732,13 @@
   padding: 4px 8px;
 }
 
-[data-theme="aol"] .unified-input-bar.listening {
+[data-theme='aol'] .unified-input-bar.listening {
   background: #c0c0c0;
   border-top-color: #ff0000;
   box-shadow: none;
 }
 
-[data-theme="aol"] .unified-input-bar__field {
+[data-theme='aol'] .unified-input-bar__field {
   background: #ffffff;
   border: 2px solid;
   border-color: #808080 #ffffff #ffffff #808080;
@@ -696,65 +752,81 @@
   font-size: 14px;
 }
 
-[data-theme="aol"] .unified-input-bar__field:focus {
+[data-theme='aol'] .unified-input-bar__field:focus {
   border-color: #808080 #ffffff #ffffff #808080;
   box-shadow: inset 1px 1px 0 #404040;
 }
 
-[data-theme="aol"] .unified-input-bar__field::placeholder {
+[data-theme='aol'] .unified-input-bar__field::placeholder {
   color: #808080;
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
 }
 
-[data-theme="aol"] .unified-input-bar__icon-btn {
+[data-theme='aol'] .unified-input-bar__icon-btn {
   background: #c0c0c0;
   border: none;
   border-radius: 0;
   color: #000000;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff;
 }
 
-[data-theme="aol"] .unified-input-bar__icon-btn:hover:not(:disabled) {
+[data-theme='aol'] .unified-input-bar__icon-btn:hover:not(:disabled) {
   background: #d4d0c8;
   transform: none;
   color: #000000;
   border: none;
 }
 
-[data-theme="aol"] .unified-input-bar__icon-btn.mic-active {
+[data-theme='aol'] .unified-input-bar__icon-btn.mic-active {
   background: #ff0000;
   border: none;
-  box-shadow: inset 1px 1px 0 #800000, inset -1px -1px 0 #ff6666;
+  box-shadow:
+    inset 1px 1px 0 #800000,
+    inset -1px -1px 0 #ff6666;
   color: white;
   animation: aol-record-blink 0.5s steps(1) infinite;
 }
 
 /* Send button - Win95 raised button with bold text */
-[data-theme="aol"] .unified-input-bar__send {
+[data-theme='aol'] .unified-input-bar__send {
   background: #c0c0c0;
   border: none;
   border-radius: 0;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff, inset -2px -2px 0 #404040, inset 2px 2px 0 #dfdfdf;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff,
+    inset -2px -2px 0 #404040,
+    inset 2px 2px 0 #dfdfdf;
   color: #000000;
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   font-weight: 700;
 }
 
-[data-theme="aol"] .unified-input-bar__send:hover:not(:disabled) {
+[data-theme='aol'] .unified-input-bar__send:hover:not(:disabled) {
   background: #d4d0c8;
   transform: none;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff, inset -2px -2px 0 #404040, inset 2px 2px 0 #dfdfdf;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff,
+    inset -2px -2px 0 #404040,
+    inset 2px 2px 0 #dfdfdf;
 }
 
-[data-theme="aol"] .unified-input-bar__send:active:not(:disabled) {
-  box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #ffffff, inset 2px 2px 0 #404040, inset -2px -2px 0 #dfdfdf;
+[data-theme='aol'] .unified-input-bar__send:active:not(:disabled) {
+  box-shadow:
+    inset 1px 1px 0 #808080,
+    inset -1px -1px 0 #ffffff,
+    inset 2px 2px 0 #404040,
+    inset -2px -2px 0 #dfdfdf;
   transform: none;
 }
 
 /* ============================================
    Conversation Dropdown Sidebar
    ============================================ */
-[data-theme="aol"] .conversation-dropdown-panel {
+[data-theme='aol'] .conversation-dropdown-panel {
   background: #c0c0c0;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
@@ -764,69 +836,81 @@
   box-shadow: 2px 2px 0 #000000;
 }
 
-[data-theme="aol"] .dropdown-new-btn {
+[data-theme='aol'] .dropdown-new-btn {
   background: #c0c0c0;
   border: none;
   border-radius: 0;
   color: #000000;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff, inset -2px -2px 0 #404040, inset 2px 2px 0 #dfdfdf;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff,
+    inset -2px -2px 0 #404040,
+    inset 2px 2px 0 #dfdfdf;
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   font-weight: 700;
   text-transform: none;
   letter-spacing: 0;
 }
 
-[data-theme="aol"] .dropdown-new-btn:hover {
+[data-theme='aol'] .dropdown-new-btn:hover {
   background: #d4d0c8;
   border: none;
   color: #000000;
   transform: none;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff, inset -2px -2px 0 #404040, inset 2px 2px 0 #dfdfdf;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff,
+    inset -2px -2px 0 #404040,
+    inset 2px 2px 0 #dfdfdf;
 }
 
-[data-theme="aol"] .dropdown-new-btn:active {
-  box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #ffffff, inset 2px 2px 0 #404040, inset -2px -2px 0 #dfdfdf;
+[data-theme='aol'] .dropdown-new-btn:active {
+  box-shadow:
+    inset 1px 1px 0 #808080,
+    inset -1px -1px 0 #ffffff,
+    inset 2px 2px 0 #404040,
+    inset -2px -2px 0 #dfdfdf;
   transform: none;
 }
 
-[data-theme="aol"] .dropdown-item {
+[data-theme='aol'] .dropdown-item {
   border-radius: 0;
   border: none;
   margin-bottom: 0;
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
 }
 
-[data-theme="aol"] .dropdown-item:hover {
+[data-theme='aol'] .dropdown-item:hover {
   background: #000080;
   color: #ffffff;
   border: none;
   box-shadow: none;
 }
 
-[data-theme="aol"] .dropdown-item.active {
+[data-theme='aol'] .dropdown-item.active {
   background: #000080;
   border: none;
   box-shadow: none;
   color: #ffffff;
 }
 
-[data-theme="aol"] .dropdown-item.active .dropdown-item-title,
-[data-theme="aol"] .dropdown-item.active .dropdown-item-meta {
+[data-theme='aol'] .dropdown-item.active .dropdown-item-title,
+[data-theme='aol'] .dropdown-item.active .dropdown-item-meta {
   color: #ffffff;
 }
 
-[data-theme="aol"] .dropdown-item:hover .dropdown-item-title,
-[data-theme="aol"] .dropdown-item:hover .dropdown-item-meta {
+[data-theme='aol'] .dropdown-item:hover .dropdown-item-title,
+[data-theme='aol'] .dropdown-item:hover .dropdown-item-meta {
   color: #ffffff;
 }
 
-[data-theme="aol"] .dropdown-item-title {
+[data-theme='aol'] .dropdown-item-title {
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   font-weight: 700;
   color: #000000;
 }
 
-[data-theme="aol"] .dropdown-item-meta {
+[data-theme='aol'] .dropdown-item-meta {
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   text-transform: none;
   font-size: 11px;
@@ -834,28 +918,30 @@
   color: #808080;
 }
 
-[data-theme="aol"] .dropdown-item-context,
-[data-theme="aol"] .dropdown-item-delete {
+[data-theme='aol'] .dropdown-item-context,
+[data-theme='aol'] .dropdown-item-delete {
   background: #c0c0c0;
   border: none;
   border-radius: 0;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff;
   color: #000000;
 }
 
-[data-theme="aol"] .dropdown-item-context:hover {
+[data-theme='aol'] .dropdown-item-context:hover {
   background: #d4d0c8;
   border: none;
   color: #000000;
 }
 
-[data-theme="aol"] .dropdown-item-delete:hover {
+[data-theme='aol'] .dropdown-item-delete:hover {
   background: #ff0000;
   border: none;
   color: #ffffff;
 }
 
-[data-theme="aol"] .dropdown-context-info {
+[data-theme='aol'] .dropdown-context-info {
   background: #ffffe0;
   border-top: 2px solid;
   border-top-color: #808080;
@@ -867,7 +953,7 @@
 /* ============================================
    Speaker Avatar
    ============================================ */
-[data-theme="aol"] .speaker-avatar__grille {
+[data-theme='aol'] .speaker-avatar__grille {
   background: #c0c0c0;
   border: 2px solid;
   border-color: #ffffff #808080 #808080 #ffffff;
@@ -875,95 +961,101 @@
   border-radius: 0;
 }
 
-[data-theme="aol"] .speaker-avatar--listening .speaker-avatar__grille {
+[data-theme='aol'] .speaker-avatar--listening .speaker-avatar__grille {
   box-shadow: none;
   border-color: #00ff00 #008000 #008000 #00ff00;
 }
 
-[data-theme="aol"] .speaker-avatar--listening .speaker-avatar__hole {
+[data-theme='aol'] .speaker-avatar--listening .speaker-avatar__hole {
   background: #00ff00;
   box-shadow: none;
 }
 
-[data-theme="aol"] .speaker-avatar--speaking .speaker-avatar__grille {
+[data-theme='aol'] .speaker-avatar--speaking .speaker-avatar__grille {
   border-color: #0000ff #000080 #000080 #0000ff;
 }
 
-[data-theme="aol"] .speaker-avatar--speaking .speaker-avatar__hole {
+[data-theme='aol'] .speaker-avatar--speaking .speaker-avatar__hole {
   background: #0000ff;
 }
 
-[data-theme="aol"] .speaker-avatar--happy .speaker-avatar__grille {
+[data-theme='aol'] .speaker-avatar--happy .speaker-avatar__grille {
   border-color: #ffff00 #808000 #808000 #ffff00;
 }
 
 /* ============================================
    Robot Avatar - Pixel art / retro style
    ============================================ */
-[data-theme="aol"] .robot__body {
+[data-theme='aol'] .robot__body {
   background: #c0c0c0;
   border-color: #808080;
   border-radius: 0;
 }
 
-[data-theme="aol"] .robot__screen {
+[data-theme='aol'] .robot__screen {
   background: #000080;
   border-radius: 0;
 }
 
-[data-theme="aol"] .robot__antenna-tip {
+[data-theme='aol'] .robot__antenna-tip {
   background: #ffcc00;
   box-shadow: none;
   border-radius: 0;
 }
 
-[data-theme="aol"] .robot__led {
+[data-theme='aol'] .robot__led {
   background: #00ff00;
   box-shadow: none;
   border-radius: 0;
 }
 
-[data-theme="aol"] .robot__base {
+[data-theme='aol'] .robot__base {
   background: #808080;
   border-radius: 0;
 }
 
-[data-theme="aol"] .robot--listening .robot__screen {
+[data-theme='aol'] .robot--listening .robot__screen {
   background: #008000;
 }
 
-[data-theme="aol"] .robot--listening .robot__antenna-tip {
+[data-theme='aol'] .robot--listening .robot__antenna-tip {
   background: #00ff00;
   box-shadow: none;
 }
 
-[data-theme="aol"] .robot--thinking .robot__screen {
+[data-theme='aol'] .robot--thinking .robot__screen {
   background: #000080;
   animation: aol-think-blink 0.8s steps(1) infinite;
 }
 
 @keyframes aol-think-blink {
-  0%, 49% { background: #000080; }
-  50%, 100% { background: #0000ff; }
+  0%,
+  49% {
+    background: #000080;
+  }
+  50%,
+  100% {
+    background: #0000ff;
+  }
 }
 
-[data-theme="aol"] .robot--thinking .robot__antenna-tip {
+[data-theme='aol'] .robot--thinking .robot__antenna-tip {
   background: #ffcc00;
   box-shadow: none;
 }
 
-[data-theme="aol"] .robot--happy .robot__screen {
+[data-theme='aol'] .robot--happy .robot__screen {
   background: #ffcc00;
 }
 
-[data-theme="aol"] .robot--confused .robot__screen {
+[data-theme='aol'] .robot--confused .robot__screen {
   background: #ff0000;
 }
 
 /* ============================================
    Settings Drawer - Win95 Control Panel
    ============================================ */
-[data-theme="aol"] .settings__drawer {
+[data-theme='aol'] .settings__drawer {
   background: #c0c0c0;
   border-top: 2px solid;
   border-top-color: #ffffff;
@@ -971,7 +1063,7 @@
   box-shadow: -2px 0 0 #808080;
 }
 
-[data-theme="aol"] .settings__header {
+[data-theme='aol'] .settings__header {
   background: linear-gradient(180deg, #000080, #1084d0);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
@@ -979,7 +1071,7 @@
   padding: 2px 4px;
 }
 
-[data-theme="aol"] .settings__title {
+[data-theme='aol'] .settings__title {
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   font-weight: 700;
   font-style: normal;
@@ -990,24 +1082,28 @@
   text-shadow: 1px 1px 0 #000000;
 }
 
-[data-theme="aol"] .settings__close {
+[data-theme='aol'] .settings__close {
   background: #c0c0c0;
   border: none;
   border-radius: 0;
   color: #000000;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff, inset -2px -2px 0 #404040, inset 2px 2px 0 #dfdfdf;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff,
+    inset -2px -2px 0 #404040,
+    inset 2px 2px 0 #dfdfdf;
   width: 20px;
   height: 20px;
 }
 
-[data-theme="aol"] .settings__close:hover {
+[data-theme='aol'] .settings__close:hover {
   background: #d4d0c8;
   border: none;
   color: #000000;
 }
 
 /* Settings section titles - Win95 group box label */
-[data-theme="aol"] .settings__section-title {
+[data-theme='aol'] .settings__section-title {
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   font-weight: 700;
   text-transform: none;
@@ -1019,7 +1115,7 @@
   padding-left: 4px;
 }
 
-[data-theme="aol"] .settings__section-desc {
+[data-theme='aol'] .settings__section-desc {
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   color: #808080;
   font-size: 11px;
@@ -1027,7 +1123,7 @@
 }
 
 /* Toggle rows - Win95 checkbox rows */
-[data-theme="aol"] .settings__toggle {
+[data-theme='aol'] .settings__toggle {
   background: #c0c0c0;
   border: none;
   border-radius: 0;
@@ -1035,12 +1131,12 @@
   box-shadow: none;
 }
 
-[data-theme="aol"] .settings__toggle:hover {
+[data-theme='aol'] .settings__toggle:hover {
   background: #c0c0c0;
   border: none;
 }
 
-[data-theme="aol"] .settings__toggle-label {
+[data-theme='aol'] .settings__toggle-label {
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   font-weight: 400;
   color: #000000;
@@ -1048,7 +1144,7 @@
 }
 
 /* Toggle switch - Win95 checkbox style */
-[data-theme="aol"] .settings__slider {
+[data-theme='aol'] .settings__slider {
   width: 40px;
   height: 20px;
   background: #ffffff;
@@ -1058,7 +1154,7 @@
   box-shadow: inset 1px 1px 0 #404040;
 }
 
-[data-theme="aol"] .settings__slider::before {
+[data-theme='aol'] .settings__slider::before {
   width: 12px;
   height: 12px;
   top: 2px;
@@ -1066,26 +1162,28 @@
   background: #c0c0c0;
   border: none;
   border-radius: 0;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff;
 }
 
-[data-theme="aol"] .settings__slider::after {
+[data-theme='aol'] .settings__slider::after {
   display: none;
 }
 
-[data-theme="aol"] .settings__toggle input:checked + .settings__slider {
+[data-theme='aol'] .settings__toggle input:checked + .settings__slider {
   background: #000080;
   border-color: #808080 #ffffff #ffffff #808080;
 }
 
-[data-theme="aol"] .settings__toggle input:checked + .settings__slider::before {
+[data-theme='aol'] .settings__toggle input:checked + .settings__slider::before {
   transform: translateX(20px);
   background: #c0c0c0;
   border: none;
 }
 
 /* Text inputs - Win95 sunken edit control */
-[data-theme="aol"] .settings__text-input {
+[data-theme='aol'] .settings__text-input {
   background: #ffffff;
   border: 2px solid;
   border-color: #808080 #ffffff #ffffff #808080;
@@ -1096,16 +1194,16 @@
   box-shadow: inset 1px 1px 0 #404040;
 }
 
-[data-theme="aol"] .settings__text-input:focus {
+[data-theme='aol'] .settings__text-input:focus {
   border-color: #808080 #ffffff #ffffff #808080;
   box-shadow: inset 1px 1px 0 #404040;
 }
 
-[data-theme="aol"] .settings__text-input::placeholder {
+[data-theme='aol'] .settings__text-input::placeholder {
   color: #808080;
 }
 
-[data-theme="aol"] .settings__input-label {
+[data-theme='aol'] .settings__input-label {
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   font-weight: 400;
   color: #000000;
@@ -1114,18 +1212,18 @@
   font-size: 11px;
 }
 
-[data-theme="aol"] .settings__optional {
+[data-theme='aol'] .settings__optional {
   color: #808080;
 }
 
-[data-theme="aol"] .settings__hint {
+[data-theme='aol'] .settings__hint {
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   color: #808080;
   font-size: 11px;
 }
 
 /* Range slider */
-[data-theme="aol"] .settings__range-row input[type="range"] {
+[data-theme='aol'] .settings__range-row input[type='range'] {
   height: 6px;
   background: #ffffff;
   border: 2px solid;
@@ -1134,16 +1232,18 @@
   box-shadow: inset 1px 1px 0 #404040;
 }
 
-[data-theme="aol"] .settings__range-row input[type="range"]::-webkit-slider-thumb {
+[data-theme='aol'] .settings__range-row input[type='range']::-webkit-slider-thumb {
   width: 12px;
   height: 20px;
   background: #c0c0c0;
   border: none;
   border-radius: 0;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff;
 }
 
-[data-theme="aol"] .settings__range-value {
+[data-theme='aol'] .settings__range-value {
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   font-weight: 400;
   background: transparent;
@@ -1155,7 +1255,7 @@
 }
 
 /* Session status */
-[data-theme="aol"] .settings__session {
+[data-theme='aol'] .settings__session {
   background: #c0c0c0;
   border: 2px solid;
   border-color: #808080 #ffffff #ffffff #808080;
@@ -1163,7 +1263,7 @@
   box-shadow: none;
 }
 
-[data-theme="aol"] .settings__session-status {
+[data-theme='aol'] .settings__session-status {
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   font-weight: 400;
   text-transform: none;
@@ -1171,12 +1271,12 @@
   color: #808080;
 }
 
-[data-theme="aol"] .settings__session-status--connected {
+[data-theme='aol'] .settings__session-status--connected {
   color: #008000;
   text-shadow: none;
 }
 
-[data-theme="aol"] .settings__session-disconnect {
+[data-theme='aol'] .settings__session-disconnect {
   background: #c0c0c0;
   border: none;
   border-radius: 0;
@@ -1185,17 +1285,19 @@
   font-weight: 400;
   text-transform: none;
   letter-spacing: 0;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff;
 }
 
-[data-theme="aol"] .settings__session-disconnect:hover {
+[data-theme='aol'] .settings__session-disconnect:hover {
   background: #d4d0c8;
   border: none;
   color: #000000;
 }
 
 /* Divider */
-[data-theme="aol"] .settings__divider {
+[data-theme='aol'] .settings__divider {
   height: 2px;
   background: none;
   border-top: 1px solid #808080;
@@ -1204,7 +1306,7 @@
 }
 
 /* Subsection */
-[data-theme="aol"] .settings__subsection {
+[data-theme='aol'] .settings__subsection {
   background: #c0c0c0;
   border: 2px solid;
   border-color: #808080 #ffffff #ffffff #808080;
@@ -1215,7 +1317,7 @@
 }
 
 /* API form */
-[data-theme="aol"] .settings__api-form input {
+[data-theme='aol'] .settings__api-form input {
   background: #ffffff;
   border: 2px solid;
   border-color: #808080 #ffffff #ffffff #808080;
@@ -1226,16 +1328,16 @@
   box-shadow: inset 1px 1px 0 #404040;
 }
 
-[data-theme="aol"] .settings__api-form input:focus {
+[data-theme='aol'] .settings__api-form input:focus {
   border-color: #808080 #ffffff #ffffff #808080;
   box-shadow: inset 1px 1px 0 #404040;
 }
 
-[data-theme="aol"] .settings__api-form input::placeholder {
+[data-theme='aol'] .settings__api-form input::placeholder {
   color: #808080;
 }
 
-[data-theme="aol"] .settings__api-form button {
+[data-theme='aol'] .settings__api-form button {
   background: #c0c0c0;
   border: none;
   border-radius: 0;
@@ -1244,33 +1346,45 @@
   font-weight: 700;
   text-transform: none;
   letter-spacing: 0;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff, inset -2px -2px 0 #404040, inset 2px 2px 0 #dfdfdf;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff,
+    inset -2px -2px 0 #404040,
+    inset 2px 2px 0 #dfdfdf;
 }
 
-[data-theme="aol"] .settings__api-form button:hover:not(:disabled) {
+[data-theme='aol'] .settings__api-form button:hover:not(:disabled) {
   background: #d4d0c8;
   transform: none;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff, inset -2px -2px 0 #404040, inset 2px 2px 0 #dfdfdf;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff,
+    inset -2px -2px 0 #404040,
+    inset 2px 2px 0 #dfdfdf;
 }
 
-[data-theme="aol"] .settings__api-form button:active:not(:disabled) {
-  box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #ffffff, inset 2px 2px 0 #404040, inset -2px -2px 0 #dfdfdf;
+[data-theme='aol'] .settings__api-form button:active:not(:disabled) {
+  box-shadow:
+    inset 1px 1px 0 #808080,
+    inset -1px -1px 0 #ffffff,
+    inset 2px 2px 0 #404040,
+    inset -2px -2px 0 #dfdfdf;
   transform: none;
 }
 
-[data-theme="aol"] .settings__api-link {
+[data-theme='aol'] .settings__api-link {
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   font-weight: 400;
   color: #0000ff;
   text-decoration: underline;
 }
 
-[data-theme="aol"] .settings__api-link:hover {
+[data-theme='aol'] .settings__api-link:hover {
   color: #ff0000;
 }
 
 /* Advanced section */
-[data-theme="aol"] .settings__advanced-toggle {
+[data-theme='aol'] .settings__advanced-toggle {
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   font-weight: 400;
   text-transform: none;
@@ -1280,12 +1394,12 @@
   font-size: 13px;
 }
 
-[data-theme="aol"] .settings__advanced-toggle:hover {
+[data-theme='aol'] .settings__advanced-toggle:hover {
   color: #ff0000;
 }
 
 /* Reset button */
-[data-theme="aol"] .settings__reset-btn {
+[data-theme='aol'] .settings__reset-btn {
   background: #c0c0c0;
   border: none;
   border-radius: 0;
@@ -1294,87 +1408,97 @@
   font-weight: 400;
   text-transform: none;
   letter-spacing: 0;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff;
   font-size: 13px;
 }
 
-[data-theme="aol"] .settings__reset-btn:hover {
+[data-theme='aol'] .settings__reset-btn:hover {
   background: #d4d0c8;
   border: none;
   color: #000000;
 }
 
 /* Export button */
-[data-theme="aol"] .settings__export-btn {
+[data-theme='aol'] .settings__export-btn {
   background: #c0c0c0;
   border: none;
   border-radius: 0;
   color: #000000;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff, inset -2px -2px 0 #404040, inset 2px 2px 0 #dfdfdf;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff,
+    inset -2px -2px 0 #404040,
+    inset 2px 2px 0 #dfdfdf;
 }
 
-[data-theme="aol"] .settings__export-btn:hover {
+[data-theme='aol'] .settings__export-btn:hover {
   background: #d4d0c8;
 }
 
 /* Integration status */
-[data-theme="aol"] .settings__integration-status--active {
+[data-theme='aol'] .settings__integration-status--active {
   background: #c0c0c0;
   color: #008000;
   border: 1px solid #808080;
 }
 
 /* Scrollbar */
-[data-theme="aol"] .settings__drawer::-webkit-scrollbar {
+[data-theme='aol'] .settings__drawer::-webkit-scrollbar {
   width: 16px;
 }
 
-[data-theme="aol"] .settings__drawer::-webkit-scrollbar-track {
+[data-theme='aol'] .settings__drawer::-webkit-scrollbar-track {
   background: repeating-conic-gradient(#c0c0c0 0% 25%, #ffffff 0% 50%) 50% / 2px 2px;
 }
 
-[data-theme="aol"] .settings__drawer::-webkit-scrollbar-thumb {
+[data-theme='aol'] .settings__drawer::-webkit-scrollbar-thumb {
   background: #c0c0c0;
   border-radius: 0;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff;
 }
 
-[data-theme="aol"] .settings__drawer::-webkit-scrollbar-thumb:hover {
+[data-theme='aol'] .settings__drawer::-webkit-scrollbar-thumb:hover {
   background: #d4d0c8;
 }
 
 /* ============================================
    Theme Selector
    ============================================ */
-[data-theme="aol"] .settings__theme-option {
+[data-theme='aol'] .settings__theme-option {
   background: #c0c0c0;
   border: 2px solid;
   border-color: #ffffff #808080 #808080 #ffffff;
   border-radius: 0;
 }
 
-[data-theme="aol"] .settings__theme-option:hover {
+[data-theme='aol'] .settings__theme-option:hover {
   border-color: #ffff00 #808000 #808000 #ffff00;
 }
 
-[data-theme="aol"] .settings__theme-option--active {
+[data-theme='aol'] .settings__theme-option--active {
   border-color: #000080;
   background: #d4d0c8;
-  box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #ffffff;
+  box-shadow:
+    inset 1px 1px 0 #808080,
+    inset -1px -1px 0 #ffffff;
 }
 
-[data-theme="aol"] .settings__theme-name {
+[data-theme='aol'] .settings__theme-name {
   color: #000000;
   font-weight: 700;
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
 }
 
-[data-theme="aol"] .settings__theme-desc {
+[data-theme='aol'] .settings__theme-desc {
   color: #808080;
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
 }
 
-[data-theme="aol"] .settings__theme-check {
+[data-theme='aol'] .settings__theme-check {
   background: #000080;
   color: #ffffff;
   border-radius: 0;
@@ -1383,12 +1507,12 @@
 /* ============================================
    Modal - Win95 dialog box
    ============================================ */
-[data-theme="aol"] .modal-overlay {
+[data-theme='aol'] .modal-overlay {
   background: rgba(0, 0, 128, 0.5);
   backdrop-filter: none;
 }
 
-[data-theme="aol"] .modal {
+[data-theme='aol'] .modal {
   background: #c0c0c0;
   border: 2px solid;
   border-color: #ffffff #808080 #808080 #ffffff;
@@ -1397,18 +1521,18 @@
   padding: 8px;
 }
 
-[data-theme="aol"] .modal h2 {
+[data-theme='aol'] .modal h2 {
   font-weight: 700;
   color: #000000;
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
 }
 
-[data-theme="aol"] .modal p {
+[data-theme='aol'] .modal p {
   color: #000000;
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
 }
 
-[data-theme="aol"] .modal input {
+[data-theme='aol'] .modal input {
   background: #ffffff;
   border: 2px solid;
   border-color: #808080 #ffffff #ffffff #808080;
@@ -1418,46 +1542,52 @@
   box-shadow: inset 1px 1px 0 #404040;
 }
 
-[data-theme="aol"] .modal input:focus {
+[data-theme='aol'] .modal input:focus {
   border-color: #808080 #ffffff #ffffff #808080;
   box-shadow: inset 1px 1px 0 #404040;
 }
 
-[data-theme="aol"] .modal input::placeholder {
+[data-theme='aol'] .modal input::placeholder {
   color: #808080;
 }
 
-[data-theme="aol"] .modal button {
+[data-theme='aol'] .modal button {
   background: #c0c0c0;
   border-radius: 0;
   color: #000000;
   font-weight: 700;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff, inset -2px -2px 0 #404040, inset 2px 2px 0 #dfdfdf;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff,
+    inset -2px -2px 0 #404040,
+    inset 2px 2px 0 #dfdfdf;
 }
 
-[data-theme="aol"] .modal button:hover:not(:disabled) {
+[data-theme='aol'] .modal button:hover:not(:disabled) {
   background: #d4d0c8;
   transform: none;
 }
 
-[data-theme="aol"] .modal a {
+[data-theme='aol'] .modal a {
   color: #0000ff;
   text-decoration: underline;
 }
 
-[data-theme="aol"] .modal a:hover {
+[data-theme='aol'] .modal a:hover {
   color: #ff0000;
 }
 
-[data-theme="aol"] .modal__close {
+[data-theme='aol'] .modal__close {
   background: #c0c0c0;
   border: none;
   border-radius: 0;
   color: #000000;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff;
 }
 
-[data-theme="aol"] .modal__close:hover {
+[data-theme='aol'] .modal__close:hover {
   background: #d4d0c8;
   color: #000000;
 }
@@ -1465,11 +1595,11 @@
 /* ============================================
    Search Overlay - Win95 Find dialog
    ============================================ */
-[data-theme="aol"] .search-overlay {
+[data-theme='aol'] .search-overlay {
   background: rgba(0, 0, 128, 0.4);
 }
 
-[data-theme="aol"] .search-overlay__panel {
+[data-theme='aol'] .search-overlay__panel {
   background: #c0c0c0;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
@@ -1479,11 +1609,11 @@
   box-shadow: 2px 2px 0 #000000;
 }
 
-[data-theme="aol"] .search-overlay__input-row {
+[data-theme='aol'] .search-overlay__input-row {
   border-bottom: 1px solid #808080;
 }
 
-[data-theme="aol"] .search-overlay__input {
+[data-theme='aol'] .search-overlay__input {
   color: #000000;
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   background: #ffffff;
@@ -1491,128 +1621,136 @@
   border-color: #808080 #ffffff #ffffff #808080;
 }
 
-[data-theme="aol"] .search-overlay__input::placeholder {
+[data-theme='aol'] .search-overlay__input::placeholder {
   color: #808080;
 }
 
-[data-theme="aol"] .search-overlay__spinner {
+[data-theme='aol'] .search-overlay__spinner {
   border-color: #c0c0c0;
   border-top-color: #000080;
 }
 
-[data-theme="aol"] .search-overlay__result:hover {
+[data-theme='aol'] .search-overlay__result:hover {
   background: #000080;
   color: #ffffff;
 }
 
-[data-theme="aol"] .search-overlay__result-snippet mark {
+[data-theme='aol'] .search-overlay__result-snippet mark {
   background: #ffff00;
   border-radius: 0;
   color: #000000;
 }
 
-[data-theme="aol"] .search-overlay__results::-webkit-scrollbar-thumb {
+[data-theme='aol'] .search-overlay__results::-webkit-scrollbar-thumb {
   background: #c0c0c0;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff;
 }
 
 /* ============================================
    Plans Panel
    ============================================ */
-[data-theme="aol"] .plans__panel {
+[data-theme='aol'] .plans__panel {
   background: #c0c0c0;
   border: 2px solid;
   border-color: #ffffff #808080 #808080 #ffffff;
   box-shadow: -2px 0 0 #808080;
 }
 
-[data-theme="aol"] .plans__header {
+[data-theme='aol'] .plans__header {
   border-bottom: 2px solid #808080;
   background: linear-gradient(180deg, #000080, #1084d0);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
 
-[data-theme="aol"] .plans__icon {
+[data-theme='aol'] .plans__icon {
   color: #ffcc00;
 }
 
-[data-theme="aol"] .plans__title {
+[data-theme='aol'] .plans__title {
   color: #ffffff;
   font-weight: 700;
   text-shadow: 1px 1px 0 #000000;
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
 }
 
-[data-theme="aol"] .plans__close {
+[data-theme='aol'] .plans__close {
   background: #c0c0c0;
   border: none;
   border-radius: 0;
   color: #000000;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff;
 }
 
-[data-theme="aol"] .plans__close:hover {
+[data-theme='aol'] .plans__close:hover {
   background: #d4d0c8;
 }
 
-[data-theme="aol"] .plans__new-btn {
+[data-theme='aol'] .plans__new-btn {
   background: #c0c0c0;
   color: #000000;
   border-radius: 0;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff, inset -2px -2px 0 #404040, inset 2px 2px 0 #dfdfdf;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff,
+    inset -2px -2px 0 #404040,
+    inset 2px 2px 0 #dfdfdf;
 }
 
-[data-theme="aol"] .plans__new-btn:hover {
+[data-theme='aol'] .plans__new-btn:hover {
   background: #d4d0c8;
 }
 
-[data-theme="aol"] .plans__item {
+[data-theme='aol'] .plans__item {
   background: #c0c0c0;
   border: 2px solid;
   border-color: #ffffff #808080 #808080 #ffffff;
   border-radius: 0;
 }
 
-[data-theme="aol"] .plans__item:hover {
+[data-theme='aol'] .plans__item:hover {
   background: #d4d0c8;
 }
 
-[data-theme="aol"] .plans__status-dot--approved {
+[data-theme='aol'] .plans__status-dot--approved {
   background: #000080;
   border-radius: 0;
 }
 
-[data-theme="aol"] .plans__status-dot--in_progress {
+[data-theme='aol'] .plans__status-dot--in_progress {
   background: #ffcc00;
   border-radius: 0;
 }
 
-[data-theme="aol"] .plans__status-dot--completed {
+[data-theme='aol'] .plans__status-dot--completed {
   background: #008000;
   border-radius: 0;
 }
 
-[data-theme="aol"] .plans__edit-btn {
+[data-theme='aol'] .plans__edit-btn {
   background: transparent;
   border: none;
   color: #0000ff;
   text-decoration: underline;
 }
 
-[data-theme="aol"] .plans__delete-btn {
+[data-theme='aol'] .plans__delete-btn {
   background: transparent;
   border: none;
   color: #ff0000;
   text-decoration: underline;
 }
 
-[data-theme="aol"] .plans__delete-btn:hover {
+[data-theme='aol'] .plans__delete-btn:hover {
   background: transparent;
 }
 
-[data-theme="aol"] .plans__editor-title,
-[data-theme="aol"] .plans__editor-content {
+[data-theme='aol'] .plans__editor-title,
+[data-theme='aol'] .plans__editor-content {
   background: #ffffff;
   border: 2px solid;
   border-color: #808080 #ffffff #ffffff #808080;
@@ -1622,74 +1760,88 @@
   box-shadow: inset 1px 1px 0 #404040;
 }
 
-[data-theme="aol"] .plans__editor-title:focus,
-[data-theme="aol"] .plans__editor-content:focus {
+[data-theme='aol'] .plans__editor-title:focus,
+[data-theme='aol'] .plans__editor-content:focus {
   border-color: #808080 #ffffff #ffffff #808080;
   box-shadow: inset 1px 1px 0 #404040;
 }
 
-[data-theme="aol"] .plans__error {
+[data-theme='aol'] .plans__error {
   color: #ff0000;
 }
 
-[data-theme="aol"] .plans__content::-webkit-scrollbar-thumb {
+[data-theme='aol'] .plans__content::-webkit-scrollbar-thumb {
   background: #c0c0c0;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff;
 }
 
 /* ============================================
    Tape Deck - Win95 media player
    ============================================ */
-[data-theme="aol"] .tape-deck {
+[data-theme='aol'] .tape-deck {
   background: #c0c0c0;
   border: 2px solid;
   border-color: #ffffff #808080 #808080 #ffffff;
   border-radius: 0;
 }
 
-[data-theme="aol"] .tape-deck__action-btn {
+[data-theme='aol'] .tape-deck__action-btn {
   background: #c0c0c0;
   border: none;
   color: #000000;
   border-radius: 0;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff;
 }
 
-[data-theme="aol"] .tape-deck__action-btn:hover {
+[data-theme='aol'] .tape-deck__action-btn:hover {
   background: #d4d0c8;
   color: #000000;
 }
 
-[data-theme="aol"] .tape-deck__action-btn:active {
-  box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #ffffff;
+[data-theme='aol'] .tape-deck__action-btn:active {
+  box-shadow:
+    inset 1px 1px 0 #808080,
+    inset -1px -1px 0 #ffffff;
   transform: none;
 }
 
-[data-theme="aol"] .tape-deck__action-btn--eject.active {
+[data-theme='aol'] .tape-deck__action-btn--eject.active {
   background: #d4d0c8;
   color: #000080;
-  box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #ffffff;
+  box-shadow:
+    inset 1px 1px 0 #808080,
+    inset -1px -1px 0 #ffffff;
 }
 
-[data-theme="aol"] .tape-deck__action-btn--send {
+[data-theme='aol'] .tape-deck__action-btn--send {
   background: #c0c0c0;
   border: none;
   color: #000000;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff, inset -2px -2px 0 #404040, inset 2px 2px 0 #dfdfdf;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff,
+    inset -2px -2px 0 #404040,
+    inset 2px 2px 0 #dfdfdf;
   font-weight: 700;
 }
 
-[data-theme="aol"] .tape-deck__action-btn--send:hover {
+[data-theme='aol'] .tape-deck__action-btn--send:hover {
   background: #d4d0c8;
 }
 
-[data-theme="aol"] .tape-deck__action-btn--mic.recording {
+[data-theme='aol'] .tape-deck__action-btn--mic.recording {
   background: #ff0000;
   color: #ffffff;
-  box-shadow: inset 1px 1px 0 #800000, inset -1px -1px 0 #ff6666;
+  box-shadow:
+    inset 1px 1px 0 #800000,
+    inset -1px -1px 0 #ff6666;
 }
 
-[data-theme="aol"] .tape-deck__input {
+[data-theme='aol'] .tape-deck__input {
   background: #ffffff;
   border: 2px solid;
   border-color: #808080 #ffffff #ffffff #808080;
@@ -1698,16 +1850,16 @@
   box-shadow: inset 1px 1px 0 #404040;
 }
 
-[data-theme="aol"] .tape-deck__input:focus {
+[data-theme='aol'] .tape-deck__input:focus {
   border-color: #808080 #ffffff #ffffff #808080;
   box-shadow: inset 1px 1px 0 #404040;
 }
 
-[data-theme="aol"] .tape-deck__input::placeholder {
+[data-theme='aol'] .tape-deck__input::placeholder {
   color: #808080;
 }
 
-[data-theme="aol"] .tape-deck__empty-slot {
+[data-theme='aol'] .tape-deck__empty-slot {
   color: #808080;
   background: #c0c0c0;
   border-radius: 0;
@@ -1718,25 +1870,29 @@
 /* ============================================
    Tape Collection - Win95 Explorer list
    ============================================ */
-[data-theme="aol"] .tape-collection__drawer {
+[data-theme='aol'] .tape-collection__drawer {
   background: #c0c0c0;
   border: 2px solid;
   border-color: #ffffff #808080 #808080 #ffffff;
 }
 
-[data-theme="aol"] .tape-collection__new-btn {
+[data-theme='aol'] .tape-collection__new-btn {
   background: #c0c0c0;
   border: none;
   border-radius: 0;
   color: #000000;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff, inset -2px -2px 0 #404040, inset 2px 2px 0 #dfdfdf;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff,
+    inset -2px -2px 0 #404040,
+    inset 2px 2px 0 #dfdfdf;
 }
 
-[data-theme="aol"] .tape-collection__new-btn:hover {
+[data-theme='aol'] .tape-collection__new-btn:hover {
   background: #d4d0c8;
 }
 
-[data-theme="aol"] .tape-collection__search-input {
+[data-theme='aol'] .tape-collection__search-input {
   background: #ffffff;
   border: 2px solid;
   border-color: #808080 #ffffff #ffffff #808080;
@@ -1745,39 +1901,45 @@
   box-shadow: inset 1px 1px 0 #404040;
 }
 
-[data-theme="aol"] .tape-collection__item--match {
+[data-theme='aol'] .tape-collection__item--match {
   outline: 2px dotted #000080;
 }
 
-[data-theme="aol"] .tape-collection__delete-btn {
+[data-theme='aol'] .tape-collection__delete-btn {
   background: #c0c0c0;
   border: none;
   border-radius: 0;
   color: #000000;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff;
 }
 
-[data-theme="aol"] .tape-collection__delete-btn:hover {
+[data-theme='aol'] .tape-collection__delete-btn:hover {
   background: #ff0000;
   color: #ffffff;
 }
 
-[data-theme="aol"] .tape-collection__context-btn {
+[data-theme='aol'] .tape-collection__context-btn {
   background: #c0c0c0;
   border: none;
   border-radius: 0;
   color: #000000;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff;
 }
 
-[data-theme="aol"] .tape-collection__context-btn--active {
+[data-theme='aol'] .tape-collection__context-btn--active {
   background: #d4d0c8;
   border: none;
   color: #000080;
-  box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #ffffff;
+  box-shadow:
+    inset 1px 1px 0 #808080,
+    inset -1px -1px 0 #ffffff;
 }
 
-[data-theme="aol"] .tape-collection__confirm-content {
+[data-theme='aol'] .tape-collection__confirm-content {
   background: #c0c0c0;
   border: 2px solid;
   border-color: #ffffff #808080 #808080 #ffffff;
@@ -1785,30 +1947,38 @@
   color: #000000;
 }
 
-[data-theme="aol"] .tape-collection__confirm-ok {
+[data-theme='aol'] .tape-collection__confirm-ok {
   background: #c0c0c0;
   border: none;
   color: #000000;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff, inset -2px -2px 0 #404040, inset 2px 2px 0 #dfdfdf;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff,
+    inset -2px -2px 0 #404040,
+    inset 2px 2px 0 #dfdfdf;
 }
 
-[data-theme="aol"] .tape-collection__confirm-cancel {
+[data-theme='aol'] .tape-collection__confirm-cancel {
   background: #c0c0c0;
   border: none;
   color: #000000;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff, inset -2px -2px 0 #404040, inset 2px 2px 0 #dfdfdf;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff,
+    inset -2px -2px 0 #404040,
+    inset 2px 2px 0 #dfdfdf;
 }
 
 /* ============================================
    Media Library
    ============================================ */
-[data-theme="aol"] .media-library__drawer {
+[data-theme='aol'] .media-library__drawer {
   background: #c0c0c0;
   border: 2px solid;
   border-color: #ffffff #808080 #808080 #ffffff;
 }
 
-[data-theme="aol"] .modal--media-library {
+[data-theme='aol'] .modal--media-library {
   background: #c0c0c0;
   border: 2px solid;
   border-color: #ffffff #808080 #808080 #ffffff;
@@ -1816,7 +1986,7 @@
   box-shadow: 2px 2px 0 #000000;
 }
 
-[data-theme="aol"] .modal--media-library .modal__header h2 {
+[data-theme='aol'] .modal--media-library .modal__header h2 {
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   font-weight: 700;
   font-style: normal;
@@ -1825,21 +1995,23 @@
   color: #000000;
 }
 
-[data-theme="aol"] .modal--media-library .modal__close {
+[data-theme='aol'] .modal--media-library .modal__close {
   background: #c0c0c0;
   border: none;
   border-radius: 0;
   color: #000000;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff;
 }
 
-[data-theme="aol"] .modal--media-library .modal__close:hover {
+[data-theme='aol'] .modal--media-library .modal__close:hover {
   background: #d4d0c8;
   border: none;
   color: #000000;
 }
 
-[data-theme="aol"] .media-library__sort {
+[data-theme='aol'] .media-library__sort {
   background: #c0c0c0;
   border: none;
   border-radius: 0;
@@ -1848,10 +2020,12 @@
   font-weight: 400;
   text-transform: none;
   letter-spacing: 0;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff;
 }
 
-[data-theme="aol"] .media-library__count {
+[data-theme='aol'] .media-library__count {
   background: transparent;
   border: none;
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
@@ -1861,13 +2035,13 @@
   box-shadow: none;
 }
 
-[data-theme="aol"] .media-library__grid {
+[data-theme='aol'] .media-library__grid {
   background: transparent;
   border: none;
   box-shadow: none;
 }
 
-[data-theme="aol"] .media-library__item {
+[data-theme='aol'] .media-library__item {
   background: #c0c0c0;
   border: 2px solid;
   border-color: #ffffff #808080 #808080 #ffffff;
@@ -1875,23 +2049,23 @@
   box-shadow: none;
 }
 
-[data-theme="aol"] .media-library__item:hover {
+[data-theme='aol'] .media-library__item:hover {
   background: #d4d0c8;
   border-color: #000080;
   transform: none;
   box-shadow: none;
 }
 
-[data-theme="aol"] .media-library__thumbnail {
+[data-theme='aol'] .media-library__thumbnail {
   border-radius: 0;
   border: 1px solid #808080;
 }
 
-[data-theme="aol"] .media-library__item-overlay {
+[data-theme='aol'] .media-library__item-overlay {
   background: linear-gradient(transparent 40%, rgba(192, 192, 192, 0.95));
 }
 
-[data-theme="aol"] .media-library__item-name {
+[data-theme='aol'] .media-library__item-name {
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   font-weight: 400;
   font-size: 11px;
@@ -1900,26 +2074,26 @@
   letter-spacing: 0;
 }
 
-[data-theme="aol"] .media-library__item-date {
+[data-theme='aol'] .media-library__item-date {
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   font-size: 11px;
   text-transform: none;
   color: #808080;
 }
 
-[data-theme="aol"] .media-library__empty p {
+[data-theme='aol'] .media-library__empty p {
   color: #808080;
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   font-weight: 400;
 }
 
 /* Lightbox */
-[data-theme="aol"] .media-library__lightbox {
+[data-theme='aol'] .media-library__lightbox {
   background: rgba(0, 0, 128, 0.6);
   backdrop-filter: none;
 }
 
-[data-theme="aol"] .media-library__lightbox-content {
+[data-theme='aol'] .media-library__lightbox-content {
   background: #c0c0c0;
   border: 2px solid;
   border-color: #ffffff #808080 #808080 #ffffff;
@@ -1927,31 +2101,33 @@
   box-shadow: 2px 2px 0 #000000;
 }
 
-[data-theme="aol"] .media-library__lightbox-close {
+[data-theme='aol'] .media-library__lightbox-close {
   background: #c0c0c0;
   border: none;
   border-radius: 0;
   color: #000000;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff;
 }
 
-[data-theme="aol"] .media-library__lightbox-close:hover {
+[data-theme='aol'] .media-library__lightbox-close:hover {
   background: #d4d0c8;
   border: none;
   color: #000000;
 }
 
-[data-theme="aol"] .media-library__lightbox-main {
+[data-theme='aol'] .media-library__lightbox-main {
   background: #000000;
   border-right: 2px solid #808080;
 }
 
-[data-theme="aol"] .media-library__lightbox-sidebar {
+[data-theme='aol'] .media-library__lightbox-sidebar {
   background: #c0c0c0;
   border-left: 2px solid #ffffff;
 }
 
-[data-theme="aol"] .media-library__lightbox-filename {
+[data-theme='aol'] .media-library__lightbox-filename {
   background: #c0c0c0;
   border: 2px solid;
   border-color: #808080 #ffffff #ffffff #808080;
@@ -1964,7 +2140,7 @@
   box-shadow: none;
 }
 
-[data-theme="aol"] .media-library__lightbox-meta {
+[data-theme='aol'] .media-library__lightbox-meta {
   background: #c0c0c0;
   border: 2px solid;
   border-color: #808080 #ffffff #ffffff #808080;
@@ -1975,7 +2151,7 @@
   box-shadow: none;
 }
 
-[data-theme="aol"] .media-library__lightbox-heading {
+[data-theme='aol'] .media-library__lightbox-heading {
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   font-weight: 700;
   font-style: normal;
@@ -1985,7 +2161,7 @@
   border-bottom: 1px solid #808080;
 }
 
-[data-theme="aol"] .media-library__lightbox-description {
+[data-theme='aol'] .media-library__lightbox-description {
   background: #ffffff;
   border: 2px solid;
   border-color: #808080 #ffffff #ffffff #808080;
@@ -1995,7 +2171,7 @@
   box-shadow: inset 1px 1px 0 #404040;
 }
 
-[data-theme="aol"] .media-library__lightbox-no-analysis {
+[data-theme='aol'] .media-library__lightbox-no-analysis {
   background: #ffffe0;
   border: 2px solid;
   border-color: #808080 #ffffff #ffffff #808080;
@@ -2010,12 +2186,12 @@
 /* ============================================
    Image Lightbox (standalone)
    ============================================ */
-[data-theme="aol"] .lightbox-overlay {
+[data-theme='aol'] .lightbox-overlay {
   background: rgba(0, 0, 128, 0.6);
   backdrop-filter: none;
 }
 
-[data-theme="aol"] .lightbox-content {
+[data-theme='aol'] .lightbox-content {
   background: #c0c0c0;
   border: 2px solid;
   border-color: #ffffff #808080 #808080 #ffffff;
@@ -2023,35 +2199,37 @@
   box-shadow: 2px 2px 0 #000000;
 }
 
-[data-theme="aol"] .lightbox-close {
+[data-theme='aol'] .lightbox-close {
   background: #c0c0c0;
   border: none;
   border-radius: 0;
   color: #000000;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff;
 }
 
-[data-theme="aol"] .lightbox-close:hover {
+[data-theme='aol'] .lightbox-close:hover {
   background: #d4d0c8;
   border: none;
   color: #000000;
 }
 
-[data-theme="aol"] .lightbox-image-container {
+[data-theme='aol'] .lightbox-image-container {
   background: #000000;
 }
 
-[data-theme="aol"] .lightbox-image {
+[data-theme='aol'] .lightbox-image {
   border-radius: 0;
   border: 1px solid #808080;
 }
 
-[data-theme="aol"] .lightbox-sidebar {
+[data-theme='aol'] .lightbox-sidebar {
   background: #c0c0c0;
   border-left: 2px solid #ffffff;
 }
 
-[data-theme="aol"] .lightbox-sidebar h3 {
+[data-theme='aol'] .lightbox-sidebar h3 {
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   font-weight: 700;
   color: #000000;
@@ -2059,76 +2237,80 @@
   letter-spacing: 0;
 }
 
-[data-theme="aol"] .lightbox-sidebar p {
+[data-theme='aol'] .lightbox-sidebar p {
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   color: #000000;
 }
 
-[data-theme="aol"] .lightbox-nav {
+[data-theme='aol'] .lightbox-nav {
   background: #c0c0c0;
   border-radius: 0;
   color: #000000;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff;
 }
 
-[data-theme="aol"] .lightbox-nav:hover {
+[data-theme='aol'] .lightbox-nav:hover {
   background: #d4d0c8;
 }
 
-[data-theme="aol"] .lightbox-info-bar {
+[data-theme='aol'] .lightbox-info-bar {
   background: #c0c0c0;
   border-top: 1px solid #808080;
 }
 
-[data-theme="aol"] .lightbox-filename {
+[data-theme='aol'] .lightbox-filename {
   color: #000000;
 }
 
-[data-theme="aol"] .lightbox-counter {
+[data-theme='aol'] .lightbox-counter {
   color: #808080;
 }
 
 /* ============================================
    Liner Notes - Win95 Notepad style
    ============================================ */
-[data-theme="aol"] .liner-notes__panel {
+[data-theme='aol'] .liner-notes__panel {
   background: #c0c0c0;
   border: 2px solid;
   border-color: #ffffff #808080 #808080 #ffffff;
   box-shadow: -2px 0 0 #808080;
 }
 
-[data-theme="aol"] .liner-notes__close {
+[data-theme='aol'] .liner-notes__close {
   background: #c0c0c0;
   border: none;
   border-radius: 0;
   color: #000000;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff;
 }
 
-[data-theme="aol"] .liner-notes__close:hover {
+[data-theme='aol'] .liner-notes__close:hover {
   background: #d4d0c8;
   color: #000000;
 }
 
-[data-theme="aol"] .liner-notes__tape-label {
+[data-theme='aol'] .liner-notes__tape-label {
   background: #ffffff;
   border-radius: 0;
   border: 2px solid;
   border-color: #808080 #ffffff #ffffff #808080;
 }
 
-[data-theme="aol"] .liner-notes__rendered {
+[data-theme='aol'] .liner-notes__rendered {
   color: #000000;
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
 }
 
-[data-theme="aol"] .liner-notes__h1 {
+[data-theme='aol'] .liner-notes__h1 {
   border-bottom: 2px solid;
   border-bottom-color: #808080;
 }
 
-[data-theme="aol"] .liner-notes__code-block {
+[data-theme='aol'] .liner-notes__code-block {
   background: #000000;
   color: #00ff00;
   border: 2px solid;
@@ -2137,7 +2319,7 @@
   font-family: 'Courier New', 'Fixedsys', monospace;
 }
 
-[data-theme="aol"] .liner-notes__textarea {
+[data-theme='aol'] .liner-notes__textarea {
   background: #ffffff;
   border: 2px solid;
   border-color: #808080 #ffffff #ffffff #808080;
@@ -2147,50 +2329,58 @@
   box-shadow: inset 1px 1px 0 #404040;
 }
 
-[data-theme="aol"] .liner-notes__textarea:focus {
+[data-theme='aol'] .liner-notes__textarea:focus {
   border-color: #808080 #ffffff #ffffff #808080;
   box-shadow: inset 1px 1px 0 #404040;
 }
 
-[data-theme="aol"] .liner-notes__btn--edit {
+[data-theme='aol'] .liner-notes__btn--edit {
   background: transparent;
   border: none;
   color: #0000ff;
   text-decoration: underline;
 }
 
-[data-theme="aol"] .liner-notes__btn--save {
+[data-theme='aol'] .liner-notes__btn--save {
   background: #c0c0c0;
   border: none;
   border-radius: 0;
   color: #000000;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff, inset -2px -2px 0 #404040, inset 2px 2px 0 #dfdfdf;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff,
+    inset -2px -2px 0 #404040,
+    inset 2px 2px 0 #dfdfdf;
 }
 
-[data-theme="aol"] .liner-notes__btn--cancel {
+[data-theme='aol'] .liner-notes__btn--cancel {
   background: #c0c0c0;
   border: none;
   border-radius: 0;
   color: #000000;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff;
 }
 
-[data-theme="aol"] .liner-notes__btn--clear {
+[data-theme='aol'] .liner-notes__btn--clear {
   background: transparent;
   border: none;
   color: #ff0000;
   text-decoration: underline;
 }
 
-[data-theme="aol"] .liner-notes__content::-webkit-scrollbar-thumb {
+[data-theme='aol'] .liner-notes__content::-webkit-scrollbar-thumb {
   background: #c0c0c0;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff;
 }
 
 /* ============================================
    Activity Feed - Win95 log window
    ============================================ */
-[data-theme="aol"] .activity-feed {
+[data-theme='aol'] .activity-feed {
   background: #c0c0c0;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
@@ -2199,113 +2389,137 @@
   border-radius: 0;
 }
 
-[data-theme="aol"] .activity-feed__header {
+[data-theme='aol'] .activity-feed__header {
   border-bottom: 1px solid #808080;
 }
 
-[data-theme="aol"] .activity-feed__title {
+[data-theme='aol'] .activity-feed__title {
   color: #000000;
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   font-weight: 700;
 }
 
-[data-theme="aol"] .activity-feed__toggle {
+[data-theme='aol'] .activity-feed__toggle {
   color: #0000ff;
   text-decoration: underline;
 }
 
-[data-theme="aol"] .activity-feed__toggle:hover {
+[data-theme='aol'] .activity-feed__toggle:hover {
   background: transparent;
   color: #ff0000;
 }
 
-[data-theme="aol"] .activity-feed__item--running {
+[data-theme='aol'] .activity-feed__item--running {
   background: #ffffe0;
 }
 
-[data-theme="aol"] .activity-feed__item--error {
+[data-theme='aol'] .activity-feed__item--error {
   background: #ffe0e0;
 }
 
-[data-theme="aol"] .activity-feed__spinner {
+[data-theme='aol'] .activity-feed__spinner {
   border-color: #c0c0c0;
   border-top-color: #000080;
 }
 
-[data-theme="aol"] .activity-feed__check {
+[data-theme='aol'] .activity-feed__check {
   color: #008000;
 }
 
-[data-theme="aol"] .activity-feed__error {
+[data-theme='aol'] .activity-feed__error {
   color: #ff0000;
 }
 
 /* Tool Category Colors */
-[data-theme="aol"] .tool-badge.tool-cat--fs    { border-left: 2px solid #000080; }
-[data-theme="aol"] .tool-badge.tool-cat--exec  { border-left: 2px solid #FF0000; }
-[data-theme="aol"] .tool-badge.tool-cat--voice { border-left: 2px solid #800080; }
-[data-theme="aol"] .tool-badge.tool-cat--data  { border-left: 2px solid #008080; }
-[data-theme="aol"] .tool-badge.tool-cat--plan  { border-left: 2px solid #FF00FF; }
-[data-theme="aol"] .tool-badge.tool-cat--media { border-left: 2px solid #808000; }
+[data-theme='aol'] .tool-badge.tool-cat--fs {
+  border-left: 2px solid #000080;
+}
+[data-theme='aol'] .tool-badge.tool-cat--exec {
+  border-left: 2px solid #ff0000;
+}
+[data-theme='aol'] .tool-badge.tool-cat--voice {
+  border-left: 2px solid #800080;
+}
+[data-theme='aol'] .tool-badge.tool-cat--data {
+  border-left: 2px solid #008080;
+}
+[data-theme='aol'] .tool-badge.tool-cat--plan {
+  border-left: 2px solid #ff00ff;
+}
+[data-theme='aol'] .tool-badge.tool-cat--media {
+  border-left: 2px solid #808000;
+}
 
-[data-theme="aol"] .activity-feed__item.tool-cat--fs    { border-left: 2px solid #000080; }
-[data-theme="aol"] .activity-feed__item.tool-cat--exec  { border-left: 2px solid #FF0000; }
-[data-theme="aol"] .activity-feed__item.tool-cat--voice { border-left: 2px solid #800080; }
-[data-theme="aol"] .activity-feed__item.tool-cat--data  { border-left: 2px solid #008080; }
-[data-theme="aol"] .activity-feed__item.tool-cat--plan  { border-left: 2px solid #FF00FF; }
-[data-theme="aol"] .activity-feed__item.tool-cat--media { border-left: 2px solid #808000; }
+[data-theme='aol'] .activity-feed__item.tool-cat--fs {
+  border-left: 2px solid #000080;
+}
+[data-theme='aol'] .activity-feed__item.tool-cat--exec {
+  border-left: 2px solid #ff0000;
+}
+[data-theme='aol'] .activity-feed__item.tool-cat--voice {
+  border-left: 2px solid #800080;
+}
+[data-theme='aol'] .activity-feed__item.tool-cat--data {
+  border-left: 2px solid #008080;
+}
+[data-theme='aol'] .activity-feed__item.tool-cat--plan {
+  border-left: 2px solid #ff00ff;
+}
+[data-theme='aol'] .activity-feed__item.tool-cat--media {
+  border-left: 2px solid #808000;
+}
 
 /* ============================================
    Job Status Bar
    ============================================ */
-[data-theme="aol"] .job-status-bar {
+[data-theme='aol'] .job-status-bar {
   background: #c0c0c0;
   border: 2px solid;
   border-color: #808080 #ffffff #ffffff #808080;
 }
 
-[data-theme="aol"] .job-status-bar__item:hover {
+[data-theme='aol'] .job-status-bar__item:hover {
   background: #000080;
   color: #ffffff;
 }
 
-[data-theme="aol"] .job-status-bar__spinner {
+[data-theme='aol'] .job-status-bar__spinner {
   border-color: #c0c0c0;
   border-top-color: #000080;
 }
 
-[data-theme="aol"] .job-status-bar__prompt {
+[data-theme='aol'] .job-status-bar__prompt {
   color: #000000;
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
 }
 
-[data-theme="aol"] .job-status-bar__time {
+[data-theme='aol'] .job-status-bar__time {
   color: #808080;
 }
 
-[data-theme="aol"] .job-status-bar__badge {
+[data-theme='aol'] .job-status-bar__badge {
   background: #000080;
   color: #ffffff;
   border-radius: 0;
 }
 
-[data-theme="aol"] .job-status-bar__icon--completed {
+[data-theme='aol'] .job-status-bar__icon--completed {
   color: #008000;
 }
 
-[data-theme="aol"] .job-status-bar__icon--failed {
+[data-theme='aol'] .job-status-bar__icon--failed {
   color: #ff0000;
 }
 
 /* ============================================
    Onboarding - AOL Welcome screen
    ============================================ */
-[data-theme="aol"] .onboarding {
+[data-theme='aol'] .onboarding {
   background: #008080;
   background-image: none;
 }
 
-[data-theme="aol"] .onboarding__container {
+[data-theme='aol'] .onboarding__container {
   background: #c0c0c0;
   border: 2px solid;
   border-color: #ffffff #808080 #808080 #ffffff;
@@ -2314,7 +2528,7 @@
   padding: 8px;
 }
 
-[data-theme="aol"] .onboarding__progress {
+[data-theme='aol'] .onboarding__progress {
   background: #ffffff;
   border: 2px solid;
   border-color: #808080 #ffffff #ffffff #808080;
@@ -2323,12 +2537,12 @@
   box-shadow: inset 1px 1px 0 #404040;
 }
 
-[data-theme="aol"] .onboarding__progress-bar {
+[data-theme='aol'] .onboarding__progress-bar {
   background: #000080;
   border-radius: 0;
 }
 
-[data-theme="aol"] .onboarding__title {
+[data-theme='aol'] .onboarding__title {
   font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Arial, sans-serif;
   font-weight: 700;
   font-style: normal;
@@ -2337,18 +2551,18 @@
   color: #000080;
 }
 
-[data-theme="aol"] .onboarding__subtitle {
+[data-theme='aol'] .onboarding__subtitle {
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   color: #000000;
 }
 
-[data-theme="aol"] .onboarding__subtitle a {
+[data-theme='aol'] .onboarding__subtitle a {
   color: #0000ff;
   font-weight: 400;
   text-decoration: underline;
 }
 
-[data-theme="aol"] .onboarding__back {
+[data-theme='aol'] .onboarding__back {
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   font-weight: 400;
   text-transform: none;
@@ -2357,11 +2571,11 @@
   text-decoration: underline;
 }
 
-[data-theme="aol"] .onboarding__back:hover {
+[data-theme='aol'] .onboarding__back:hover {
   color: #ff0000;
 }
 
-[data-theme="aol"] .onboarding__option {
+[data-theme='aol'] .onboarding__option {
   background: #c0c0c0;
   border: 2px solid;
   border-color: #ffffff #808080 #808080 #ffffff;
@@ -2369,25 +2583,25 @@
   box-shadow: none;
 }
 
-[data-theme="aol"] .onboarding__option:hover {
+[data-theme='aol'] .onboarding__option:hover {
   background: #d4d0c8;
   border-color: #000080;
   transform: none;
   box-shadow: none;
 }
 
-[data-theme="aol"] .onboarding__option--primary {
+[data-theme='aol'] .onboarding__option--primary {
   background: #000080;
   border-color: #4040ff #000040 #000040 #4040ff;
   box-shadow: none;
   color: #ffffff;
 }
 
-[data-theme="aol"] .onboarding__option--primary:hover {
+[data-theme='aol'] .onboarding__option--primary:hover {
   background: #0000aa;
 }
 
-[data-theme="aol"] .onboarding__option-icon {
+[data-theme='aol'] .onboarding__option-icon {
   background: #c0c0c0;
   border: 2px solid;
   border-color: #808080 #ffffff #ffffff #808080;
@@ -2395,31 +2609,31 @@
   box-shadow: none;
 }
 
-[data-theme="aol"] .onboarding__option--primary .onboarding__option-icon {
+[data-theme='aol'] .onboarding__option--primary .onboarding__option-icon {
   background: #000040;
   border-color: #000040 #4040ff #4040ff #000040;
 }
 
-[data-theme="aol"] .onboarding__option-title {
+[data-theme='aol'] .onboarding__option-title {
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   font-weight: 700;
   color: #000000;
 }
 
-[data-theme="aol"] .onboarding__option--primary .onboarding__option-title {
+[data-theme='aol'] .onboarding__option--primary .onboarding__option-title {
   color: #ffffff;
 }
 
-[data-theme="aol"] .onboarding__option-desc {
+[data-theme='aol'] .onboarding__option-desc {
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   color: #808080;
 }
 
-[data-theme="aol"] .onboarding__option--primary .onboarding__option-desc {
+[data-theme='aol'] .onboarding__option--primary .onboarding__option-desc {
   color: #c0c0ff;
 }
 
-[data-theme="aol"] .onboarding__input {
+[data-theme='aol'] .onboarding__input {
   background: #ffffff;
   border: 2px solid;
   border-color: #808080 #ffffff #ffffff #808080;
@@ -2430,12 +2644,12 @@
   box-shadow: inset 1px 1px 0 #404040;
 }
 
-[data-theme="aol"] .onboarding__input:focus {
+[data-theme='aol'] .onboarding__input:focus {
   border-color: #808080 #ffffff #ffffff #808080;
   box-shadow: inset 1px 1px 0 #404040;
 }
 
-[data-theme="aol"] .onboarding__button {
+[data-theme='aol'] .onboarding__button {
   background: #c0c0c0;
   border: none;
   border-radius: 0;
@@ -2444,22 +2658,34 @@
   text-transform: none;
   letter-spacing: 0;
   color: #000000;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff, inset -2px -2px 0 #404040, inset 2px 2px 0 #dfdfdf;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff,
+    inset -2px -2px 0 #404040,
+    inset 2px 2px 0 #dfdfdf;
 }
 
-[data-theme="aol"] .onboarding__button:hover:not(:disabled) {
+[data-theme='aol'] .onboarding__button:hover:not(:disabled) {
   background: #d4d0c8;
   transform: none;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff, inset -2px -2px 0 #404040, inset 2px 2px 0 #dfdfdf;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff,
+    inset -2px -2px 0 #404040,
+    inset 2px 2px 0 #dfdfdf;
   filter: none;
 }
 
-[data-theme="aol"] .onboarding__button:active:not(:disabled) {
-  box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #ffffff, inset 2px 2px 0 #404040, inset -2px -2px 0 #dfdfdf;
+[data-theme='aol'] .onboarding__button:active:not(:disabled) {
+  box-shadow:
+    inset 1px 1px 0 #808080,
+    inset -1px -1px 0 #ffffff,
+    inset 2px 2px 0 #404040,
+    inset -2px -2px 0 #dfdfdf;
   transform: none;
 }
 
-[data-theme="aol"] .onboarding__tutorial-icon kbd {
+[data-theme='aol'] .onboarding__tutorial-icon kbd {
   background: #c0c0c0;
   border: 2px solid;
   border-color: #ffffff #808080 #808080 #ffffff;
@@ -2470,15 +2696,15 @@
   box-shadow: 1px 1px 0 #404040;
 }
 
-[data-theme="aol"] .onboarding__wake-word,
-[data-theme="aol"] .onboarding__tutorial-word {
+[data-theme='aol'] .onboarding__wake-word,
+[data-theme='aol'] .onboarding__tutorial-word {
   font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Arial, sans-serif;
   font-weight: 700;
   font-style: normal;
   color: #ff0000;
 }
 
-[data-theme="aol"] .onboarding__step-label {
+[data-theme='aol'] .onboarding__step-label {
   background: #000080;
   border: none;
   border-radius: 0;
@@ -2488,14 +2714,14 @@
   box-shadow: none;
 }
 
-[data-theme="aol"] .onboarding__feature-title {
+[data-theme='aol'] .onboarding__feature-title {
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   font-weight: 700;
   color: #000000;
 }
 
-[data-theme="aol"] .onboarding__feature-demo,
-[data-theme="aol"] .onboarding__feature-list {
+[data-theme='aol'] .onboarding__feature-demo,
+[data-theme='aol'] .onboarding__feature-list {
   background: #c0c0c0;
   border: 2px solid;
   border-color: #808080 #ffffff #ffffff #808080;
@@ -2503,63 +2729,65 @@
   box-shadow: none;
 }
 
-[data-theme="aol"] .onboarding__drop-zone-demo {
+[data-theme='aol'] .onboarding__drop-zone-demo {
   background: #ffffff;
   border: 2px dashed #808080;
   border-radius: 0;
   box-shadow: none;
 }
 
-[data-theme="aol"] .onboarding__drop-zone-demo svg {
+[data-theme='aol'] .onboarding__drop-zone-demo svg {
   color: #808080;
 }
 
-[data-theme="aol"] .onboarding__drop-zone-demo span {
+[data-theme='aol'] .onboarding__drop-zone-demo span {
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   color: #808080;
 }
 
-[data-theme="aol"] .onboarding__toggle {
+[data-theme='aol'] .onboarding__toggle {
   background: #c0c0c0;
   border: 2px solid;
   border-color: #808080 #ffffff #ffffff #808080;
   border-radius: 0;
 }
 
-[data-theme="aol"] .onboarding__toggle:hover {
+[data-theme='aol'] .onboarding__toggle:hover {
   background: #d4d0c8;
 }
 
-[data-theme="aol"] .onboarding__toggle-slider {
+[data-theme='aol'] .onboarding__toggle-slider {
   background: #ffffff;
   border: 2px solid;
   border-color: #808080 #ffffff #ffffff #808080;
   box-shadow: inset 1px 1px 0 #404040;
 }
 
-[data-theme="aol"] .onboarding__toggle-slider::before {
+[data-theme='aol'] .onboarding__toggle-slider::before {
   background: #c0c0c0;
   border: none;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff;
   border-radius: 0;
 }
 
-[data-theme="aol"] .onboarding__toggle input:checked + .onboarding__toggle-slider {
+[data-theme='aol'] .onboarding__toggle input:checked + .onboarding__toggle-slider {
   background: #000080;
 }
 
-[data-theme="aol"] .onboarding__toggle-label {
+[data-theme='aol'] .onboarding__toggle-label {
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   font-weight: 400;
   color: #000000;
 }
 
-[data-theme="aol"] .onboarding__toggle-desc {
+[data-theme='aol'] .onboarding__toggle-desc {
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   color: #808080;
 }
 
-[data-theme="aol"] .onboarding__nav-back {
+[data-theme='aol'] .onboarding__nav-back {
   background: #c0c0c0;
   border: none;
   border-radius: 0;
@@ -2568,16 +2796,20 @@
   font-weight: 400;
   text-transform: none;
   letter-spacing: 0;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff;
 }
 
-[data-theme="aol"] .onboarding__nav-back:hover {
+[data-theme='aol'] .onboarding__nav-back:hover {
   background: #d4d0c8;
   transform: none;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff;
 }
 
-[data-theme="aol"] .onboarding__skip {
+[data-theme='aol'] .onboarding__skip {
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   font-weight: 400;
   text-transform: none;
@@ -2586,48 +2818,60 @@
   text-decoration: underline;
 }
 
-[data-theme="aol"] .onboarding__skip:hover {
+[data-theme='aol'] .onboarding__skip:hover {
   color: #ff0000;
 }
 
 /* ============================================
    Talk Button - 90s style
    ============================================ */
-[data-theme="aol"] .talk-button {
+[data-theme='aol'] .talk-button {
   background: #c0c0c0;
   border: none;
   border-radius: 0;
   color: #000000;
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff, inset -2px -2px 0 #404040, inset 2px 2px 0 #dfdfdf;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff,
+    inset -2px -2px 0 #404040,
+    inset 2px 2px 0 #dfdfdf;
 }
 
-[data-theme="aol"] .talk-button::before {
+[data-theme='aol'] .talk-button::before {
   display: none;
 }
 
-[data-theme="aol"] .talk-button:hover:not(:disabled) {
+[data-theme='aol'] .talk-button:hover:not(:disabled) {
   background: #d4d0c8;
   border: none;
   transform: none;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff, inset -2px -2px 0 #404040, inset 2px 2px 0 #dfdfdf;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff,
+    inset -2px -2px 0 #404040,
+    inset 2px 2px 0 #dfdfdf;
 }
 
-[data-theme="aol"] .talk-button:active:not(:disabled),
-[data-theme="aol"] .talk-button--active {
+[data-theme='aol'] .talk-button:active:not(:disabled),
+[data-theme='aol'] .talk-button--active {
   background: #d4d0c8;
   border: none;
   color: #000000;
   transform: none;
-  box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #ffffff, inset 2px 2px 0 #404040, inset -2px -2px 0 #dfdfdf;
+  box-shadow:
+    inset 1px 1px 0 #808080,
+    inset -1px -1px 0 #ffffff,
+    inset 2px 2px 0 #404040,
+    inset -2px -2px 0 #dfdfdf;
 }
 
-[data-theme="aol"] .talk-button--active::before,
-[data-theme="aol"] .talk-button--active::after {
+[data-theme='aol'] .talk-button--active::before,
+[data-theme='aol'] .talk-button--active::after {
   display: none;
 }
 
-[data-theme="aol"] .talk-button__label {
+[data-theme='aol'] .talk-button__label {
   font-family: 'MS Sans Serif', Tahoma, sans-serif;
   font-weight: 700;
   text-transform: uppercase;
@@ -2637,54 +2881,56 @@
 /* ============================================
    File Drop Zone - 90s style
    ============================================ */
-[data-theme="aol"] .dropzone-overlay {
+[data-theme='aol'] .dropzone-overlay {
   background: rgba(0, 128, 128, 0.3);
   border: 3px dashed #ffffff;
   backdrop-filter: none;
 }
 
-[data-theme="aol"] .dropzone-overlay__content {
+[data-theme='aol'] .dropzone-overlay__content {
   color: #ffffff;
   text-shadow: 1px 1px 0 #000000;
   font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Arial, sans-serif;
 }
 
-[data-theme="aol"] .dropzone-files {
+[data-theme='aol'] .dropzone-files {
   background: #c0c0c0;
   border: 2px solid;
   border-color: #ffffff #808080 #808080 #ffffff;
   border-radius: 0;
 }
 
-[data-theme="aol"] .dropzone-file__thumb-wrap {
+[data-theme='aol'] .dropzone-file__thumb-wrap {
   border: 2px solid;
   border-color: #808080 #ffffff #ffffff #808080;
   border-radius: 0;
 }
 
-[data-theme="aol"] .dropzone-file__remove {
+[data-theme='aol'] .dropzone-file__remove {
   background: #c0c0c0;
   border-radius: 0;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff;
 }
 
-[data-theme="aol"] .dropzone-file__remove:hover {
+[data-theme='aol'] .dropzone-file__remove:hover {
   background: #ff0000;
   color: #ffffff;
 }
 
-[data-theme="aol"] .dropzone-file__analyzing-badge {
+[data-theme='aol'] .dropzone-file__analyzing-badge {
   background: #000080;
   border-radius: 0;
   color: #ffffff;
 }
 
-[data-theme="aol"] .dropzone-file--analyzing .dropzone-file__thumb-wrap {
+[data-theme='aol'] .dropzone-file--analyzing .dropzone-file__thumb-wrap {
   border-color: #000080;
   box-shadow: none;
 }
 
-[data-theme="aol"] .dropzone-files__add:hover {
+[data-theme='aol'] .dropzone-files__add:hover {
   border-color: #000080;
   color: #000080;
   background: #d4d0c8;
@@ -2694,34 +2940,42 @@
    Floating Record Button (FAB) - mobile
    ============================================ */
 @media (max-width: 480px) {
-  [data-theme="aol"] .app__record-fab {
+  [data-theme='aol'] .app__record-fab {
     background: #c0c0c0;
     border: none;
-    box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff, inset -2px -2px 0 #404040, inset 2px 2px 0 #dfdfdf, 2px 2px 0 #000000;
+    box-shadow:
+      inset -1px -1px 0 #808080,
+      inset 1px 1px 0 #ffffff,
+      inset -2px -2px 0 #404040,
+      inset 2px 2px 0 #dfdfdf,
+      2px 2px 0 #000000;
     border-radius: 0;
   }
 
-  [data-theme="aol"] .app__record-fab svg {
+  [data-theme='aol'] .app__record-fab svg {
     fill: #000000;
   }
 
-  [data-theme="aol"] .app__record-fab-resize {
+  [data-theme='aol'] .app__record-fab-resize {
     background: #808080;
     border: none;
     border-radius: 0;
   }
 
-  [data-theme="aol"] .app__record-fab--recording {
+  [data-theme='aol'] .app__record-fab--recording {
     background: #ff0000;
-    box-shadow: inset 1px 1px 0 #800000, inset -1px -1px 0 #ff6666, 2px 2px 0 #000000;
+    box-shadow:
+      inset 1px 1px 0 #800000,
+      inset -1px -1px 0 #ff6666,
+      2px 2px 0 #000000;
     animation: aol-record-blink 0.5s steps(1) infinite;
   }
 
-  [data-theme="aol"] .app__record-fab--recording svg {
+  [data-theme='aol'] .app__record-fab--recording svg {
     fill: #ffffff;
   }
 
-  [data-theme="aol"] .app__record-fab--tap-to-talk {
+  [data-theme='aol'] .app__record-fab--tap-to-talk {
     animation: aol-tap-blink 1s steps(1) infinite;
   }
 }
@@ -2729,34 +2983,36 @@
 /* ============================================
    Global Scrollbar - Win95 style
    ============================================ */
-[data-theme="aol"] ::-webkit-scrollbar {
+[data-theme='aol'] ::-webkit-scrollbar {
   width: 16px;
   height: 16px;
 }
 
-[data-theme="aol"] ::-webkit-scrollbar-track {
+[data-theme='aol'] ::-webkit-scrollbar-track {
   background: repeating-conic-gradient(#c0c0c0 0% 25%, #ffffff 0% 50%) 50% / 2px 2px;
 }
 
-[data-theme="aol"] ::-webkit-scrollbar-thumb {
+[data-theme='aol'] ::-webkit-scrollbar-thumb {
   background: #c0c0c0;
   border-radius: 0;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff;
 }
 
-[data-theme="aol"] ::-webkit-scrollbar-thumb:hover {
+[data-theme='aol'] ::-webkit-scrollbar-thumb:hover {
   background: #d4d0c8;
 }
 
 /* ============================================
    Selection & Focus
    ============================================ */
-[data-theme="aol"] ::selection {
+[data-theme='aol'] ::selection {
   background: #000080;
   color: #ffffff;
 }
 
-[data-theme="aol"] :focus-visible {
+[data-theme='aol'] :focus-visible {
   outline: 1px dotted #000000;
   outline-offset: 1px;
 }
@@ -2764,7 +3020,7 @@
 /* ============================================
    Keyboard Shortcuts
    ============================================ */
-[data-theme="aol"] .keyboard-shortcuts kbd {
+[data-theme='aol'] .keyboard-shortcuts kbd {
   background: #c0c0c0;
   border: 2px solid;
   border-color: #ffffff #808080 #808080 #ffffff;
@@ -2777,7 +3033,7 @@
 /* ============================================
    Scroll to Bottom Button
    ============================================ */
-[data-theme="aol"] .scroll-to-bottom {
+[data-theme='aol'] .scroll-to-bottom {
   width: 36px;
   height: 36px;
   border-radius: 0;
@@ -2791,14 +3047,14 @@
   font-weight: bold;
 }
 
-[data-theme="aol"] .scroll-to-bottom:hover {
+[data-theme='aol'] .scroll-to-bottom:hover {
   background: #d4d0c8;
   border-color: #ffffff #808080 #808080 #ffffff;
   color: #000080;
   transform: none;
 }
 
-[data-theme="aol"] .scroll-to-bottom:active {
+[data-theme='aol'] .scroll-to-bottom:active {
   border-color: #808080 #ffffff #ffffff #808080;
   transform: none;
   padding-top: 1px;

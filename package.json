@@ -1,7 +1,7 @@
 {
   "name": "walkietalkiebot",
   "version": "0.3.8",
-  "description": "Walkie Talkie Bot — a voice-first AI assistant for Claude Code. Use as a Claude Code plugin (30 MCP tools + 5 skills, offline SQLite) or full server (web UI, 6 retro themes, voice, Telegram)",
+  "description": "Walkie Talkie Bot — a voice-first AI assistant for Claude Code. Use as a Claude Code plugin (30 MCP tools + 5 skills, offline SQLite) or full server (web UI, 6 retro themes, voice)",
   "homepage": "https://walkietalkie.bot",
   "repository": {
     "type": "git",
@@ -29,7 +29,10 @@
     "build": "tsc && vite build && npm run build:server",
     "build:server": "node scripts/build-server.js",
     "preview": "vite preview",
-    "lint": "eslint . --ext ts,tsx",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
     "test": "vitest run && vitest run --config vitest.config.server.ts",
     "test:client": "vitest run",
     "test:server": "vitest run --config vitest.config.server.ts",
@@ -78,9 +81,14 @@
     "@types/react-dom": "^18.2.0",
     "@vitejs/plugin-react": "^4.2.0",
     "esbuild": "^0.21.0",
-    "eslint": "^8.55.0",
+    "eslint": "^9.39.4",
+    "eslint-config-prettier": "^9.1.2",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.26",
     "jsdom": "^27.0.1",
+    "prettier": "^3.8.3",
     "typescript": "^5.3.0",
+    "typescript-eslint": "^8.60.1",
     "vite": "^5.0.0",
     "vitest": "^2.1.9"
   }

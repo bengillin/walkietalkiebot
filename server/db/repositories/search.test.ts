@@ -16,8 +16,18 @@ describe('searchMessages', () => {
   })
 
   it('finds matching messages', () => {
-    createMessage({ id: 'm1', conversationId: 'c1', role: 'user', content: 'How do I fix the authentication bug?' })
-    createMessage({ id: 'm2', conversationId: 'c1', role: 'assistant', content: 'Check your JWT token expiration.' })
+    createMessage({
+      id: 'm1',
+      conversationId: 'c1',
+      role: 'user',
+      content: 'How do I fix the authentication bug?',
+    })
+    createMessage({
+      id: 'm2',
+      conversationId: 'c1',
+      role: 'assistant',
+      content: 'Check your JWT token expiration.',
+    })
 
     const results = searchMessages('authentication')
     expect(results).toHaveLength(1)
@@ -33,9 +43,24 @@ describe('searchMessages', () => {
   })
 
   it('returns multiple matches ranked', () => {
-    createMessage({ id: 'm1', conversationId: 'c1', role: 'user', content: 'react component rendering issue' })
-    createMessage({ id: 'm2', conversationId: 'c1', role: 'assistant', content: 'The react lifecycle hooks need updating' })
-    createMessage({ id: 'm3', conversationId: 'c1', role: 'user', content: 'unrelated message about python' })
+    createMessage({
+      id: 'm1',
+      conversationId: 'c1',
+      role: 'user',
+      content: 'react component rendering issue',
+    })
+    createMessage({
+      id: 'm2',
+      conversationId: 'c1',
+      role: 'assistant',
+      content: 'The react lifecycle hooks need updating',
+    })
+    createMessage({
+      id: 'm3',
+      conversationId: 'c1',
+      role: 'user',
+      content: 'unrelated message about python',
+    })
 
     const results = searchMessages('react')
     expect(results).toHaveLength(2)
@@ -43,7 +68,12 @@ describe('searchMessages', () => {
 
   it('respects limit', () => {
     for (let i = 0; i < 5; i++) {
-      createMessage({ id: `m${i}`, conversationId: 'c1', role: 'user', content: `test message ${i}` })
+      createMessage({
+        id: `m${i}`,
+        conversationId: 'c1',
+        role: 'user',
+        content: `test message ${i}`,
+      })
     }
 
     const results = searchMessages('test', 3)
@@ -51,7 +81,12 @@ describe('searchMessages', () => {
   })
 
   it('includes snippet with match markers', () => {
-    createMessage({ id: 'm1', conversationId: 'c1', role: 'user', content: 'How to configure webpack for production?' })
+    createMessage({
+      id: 'm1',
+      conversationId: 'c1',
+      role: 'user',
+      content: 'How to configure webpack for production?',
+    })
 
     const results = searchMessages('webpack')
     expect(results).toHaveLength(1)

@@ -89,13 +89,13 @@ export function Settings({
       <div className="settings__drawer">
         <div className="settings__header">
           <h3 className="settings__title">Settings</h3>
-          {(
+          {
             <button className="settings__close" onClick={onClose}>
               <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
               </svg>
             </button>
-          )}
+          }
         </div>
 
         <div className="settings__content">
@@ -115,7 +115,9 @@ export function Settings({
                   }}
                   autoFocus
                 />
-                <button className="settings__rename-save" onClick={handleSaveTitle}>Save</button>
+                <button className="settings__rename-save" onClick={handleSaveTitle}>
+                  Save
+                </button>
               </div>
             ) : (
               <div className="settings__rename-row">
@@ -129,7 +131,7 @@ export function Settings({
                   title="Rename tape"
                 >
                   <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
-                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
                   </svg>
                 </button>
               </div>
@@ -177,7 +179,8 @@ export function Settings({
                 <option value="">System default</option>
                 {voices.map((v) => (
                   <option key={v.voiceURI} value={v.voiceURI}>
-                    {v.name}{v.lang ? ` (${v.lang})` : ''}
+                    {v.name}
+                    {v.lang ? ` (${v.lang})` : ''}
                   </option>
                 ))}
               </select>
@@ -215,7 +218,8 @@ export function Settings({
                 placeholder="over"
               />
               <p className="settings__hint">
-                Say this word to end your turn. Only triggers after {triggerWordDelay / 1000}s of silence.
+                Say this word to end your turn. Only triggers after {triggerWordDelay / 1000}s of
+                silence.
               </p>
 
               <label className="settings__input-label">Silence delay</label>
@@ -228,7 +232,9 @@ export function Settings({
                   value={triggerWordDelay}
                   onChange={(e) => setTriggerWordDelay(Number(e.target.value))}
                 />
-                <span className="settings__range-value">{(triggerWordDelay / 1000).toFixed(1)}s</span>
+                <span className="settings__range-value">
+                  {(triggerWordDelay / 1000).toFixed(1)}s
+                </span>
               </div>
             </div>
           )}
@@ -253,9 +259,7 @@ export function Settings({
                 onChange={(e) => setCustomWakeWord(e.target.value)}
                 placeholder="hey talkie"
               />
-              <p className="settings__hint">
-                Say this phrase to start recording hands-free.
-              </p>
+              <p className="settings__hint">Say this phrase to start recording hands-free.</p>
             </div>
           )}
 
@@ -292,11 +296,13 @@ export function Settings({
                 <div className="settings__integration-header">
                   <span className="settings__integration-icon">
                     <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                      <path d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z"/>
+                      <path d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z" />
                     </svg>
                   </span>
                   <span className="settings__integration-name">MCP Server</span>
-                  <span className={`settings__integration-status ${integrations.mcp.configured ? 'settings__integration-status--active' : ''}`}>
+                  <span
+                    className={`settings__integration-status ${integrations.mcp.configured ? 'settings__integration-status--active' : ''}`}
+                  >
                     {integrations.mcp.configured ? 'Ready' : 'Not configured'}
                   </span>
                 </div>
@@ -313,24 +319,22 @@ export function Settings({
                     </button>
                     {showMcpTools && (
                       <div className="settings__mcp-tools">
-                        {integrations.mcp.tools.map(tool => (
-                          <span key={tool} className="settings__mcp-tool">{tool}</span>
+                        {integrations.mcp.tools.map((tool) => (
+                          <span key={tool} className="settings__mcp-tool">
+                            {tool}
+                          </span>
                         ))}
                       </div>
                     )}
                   </div>
                 )}
               </div>
-
             </>
           )}
 
           <details className="settings__advanced">
             <summary className="settings__advanced-toggle">Advanced</summary>
-            <button
-              className="settings__reset-btn"
-              onClick={onResetOnboarding}
-            >
+            <button className="settings__reset-btn" onClick={onResetOnboarding}>
               Reset onboarding
             </button>
           </details>

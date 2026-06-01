@@ -8,9 +8,7 @@ interface KeyboardShortcutsProps {
 const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.platform)
 const modKey = isMac ? 'Cmd' : 'Ctrl'
 
-type ShortcutEntry =
-  | { section: string }
-  | { keys: string[]; desc: string }
+type ShortcutEntry = { section: string } | { keys: string[]; desc: string }
 
 const SHORTCUTS: ShortcutEntry[] = [
   { section: 'Voice' },
@@ -27,12 +25,12 @@ export function KeyboardShortcuts({ isOpen, onClose }: KeyboardShortcutsProps) {
 
   return (
     <div className="shortcuts" onClick={onClose}>
-      <div className="shortcuts__panel" onClick={e => e.stopPropagation()}>
+      <div className="shortcuts__panel" onClick={(e) => e.stopPropagation()}>
         <div className="shortcuts__header">
           <h3 className="shortcuts__title">Keyboard Shortcuts</h3>
           <button className="shortcuts__close" onClick={onClose}>
             <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
-              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
             </svg>
           </button>
         </div>

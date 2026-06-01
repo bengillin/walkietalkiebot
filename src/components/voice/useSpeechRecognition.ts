@@ -9,7 +9,7 @@ interface UseSpeechRecognitionOptions {
   continuous?: boolean
   language?: string
   triggerWord?: string
-  triggerWordDelay?: number  // ms of silence required after trigger word (default 1000)
+  triggerWordDelay?: number // ms of silence required after trigger word (default 1000)
 }
 
 interface SpeechRecognitionResult {
@@ -125,8 +125,7 @@ export function useSpeechRecognition({
   useEffect(() => {
     if (!isSupported) return
 
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     const recognition = new SpeechRecognition()
 
     recognition.continuous = continuous
@@ -183,10 +182,11 @@ export function useSpeechRecognition({
         }
 
         // Check if ends with trigger word (with some flexibility)
-        if (lowerFull.endsWith(lowerTrigger) ||
-            lowerFull.endsWith(lowerTrigger + '.') ||
-            lowerFull.endsWith(lowerTrigger + ',')) {
-
+        if (
+          lowerFull.endsWith(lowerTrigger) ||
+          lowerFull.endsWith(lowerTrigger + '.') ||
+          lowerFull.endsWith(lowerTrigger + ',')
+        ) {
           // Remove trigger word from transcript
           const cleanTranscript = fullTranscriptRef.current
             .replace(new RegExp(`\\s*${trigger}[.,]?\\s*$`, 'i'), '')
@@ -199,7 +199,10 @@ export function useSpeechRecognition({
           triggerTimeoutRef.current = setTimeout(() => {
             if (!triggerFiredRef.current) {
               triggerFiredRef.current = true
-              console.log('[Speech] Silence confirmed, triggering with:', pendingTriggerTranscriptRef.current)
+              console.log(
+                '[Speech] Silence confirmed, triggering with:',
+                pendingTriggerTranscriptRef.current,
+              )
               recognition.stop()
               onTriggerWordRef.current?.(pendingTriggerTranscriptRef.current)
             }

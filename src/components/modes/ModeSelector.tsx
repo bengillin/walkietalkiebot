@@ -12,7 +12,7 @@ export function ModeSelector({ modes, currentMode, onSelectMode }: ModeSelectorP
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  const current = modes.find(m => m.name === currentMode) || modes[0]
+  const current = modes.find((m) => m.name === currentMode) || modes[0]
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -35,14 +35,20 @@ export function ModeSelector({ modes, currentMode, onSelectMode }: ModeSelectorP
       >
         <span className="mode-selector__icon">{current.icon}</span>
         <span className="mode-selector__label">{current.label}</span>
-        <svg className={`mode-selector__chevron ${isOpen ? 'mode-selector__chevron--open' : ''}`} viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
-          <path d="M7 10l5 5 5-5z"/>
+        <svg
+          className={`mode-selector__chevron ${isOpen ? 'mode-selector__chevron--open' : ''}`}
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          width="14"
+          height="14"
+        >
+          <path d="M7 10l5 5 5-5z" />
         </svg>
       </button>
 
       {isOpen && (
         <div className="mode-selector__dropdown">
-          {modes.map(mode => (
+          {modes.map((mode) => (
             <button
               key={mode.name}
               className={`mode-selector__option ${mode.name === currentMode ? 'mode-selector__option--active' : ''}`}

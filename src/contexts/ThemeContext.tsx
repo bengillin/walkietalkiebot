@@ -1,6 +1,12 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 
-export type ThemeName = 'mccallister' | 'imessage' | 'aol' | 'classic-mac' | 'geocities' | 'apple-1984'
+export type ThemeName =
+  | 'mccallister'
+  | 'imessage'
+  | 'aol'
+  | 'classic-mac'
+  | 'geocities'
+  | 'apple-1984'
 
 export interface Theme {
   name: ThemeName
@@ -12,33 +18,33 @@ export const themes: Theme[] = [
   {
     name: 'mccallister',
     displayName: 'TalkBoy',
-    description: 'Silver cassette recorder with chunky buttons and red accents.'
+    description: 'Silver cassette recorder with chunky buttons and red accents.',
   },
   {
     name: 'imessage',
     displayName: 'Bubble',
-    description: 'Minimal and polished, inspired by modern Apple interfaces.'
+    description: 'Minimal and polished, inspired by modern Apple interfaces.',
   },
   {
     name: 'aol',
     displayName: 'Dial-Up',
-    description: 'Beveled gray panels and buddy list energy from the 90s internet.'
+    description: 'Beveled gray panels and buddy list energy from the 90s internet.',
   },
   {
     name: 'classic-mac',
     displayName: 'Finder',
-    description: 'The elegant gray desktop of classic Mac OS.'
+    description: 'The elegant gray desktop of classic Mac OS.',
   },
   {
     name: 'geocities',
     displayName: 'Guestbook',
-    description: 'Neon text on dark backgrounds, like a 90s homepage under construction.'
+    description: 'Neon text on dark backgrounds, like a 90s homepage under construction.',
   },
   {
     name: 'apple-1984',
     displayName: '1984',
-    description: 'Rainbow Apple warmth from the original Macintosh era.'
-  }
+    description: 'Rainbow Apple warmth from the original Macintosh era.',
+  },
 ]
 
 interface ThemeContextValue {
@@ -71,9 +77,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, [theme])
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, themes }}>
-      {children}
-    </ThemeContext.Provider>
+    <ThemeContext.Provider value={{ theme, setTheme, themes }}>{children}</ThemeContext.Provider>
   )
 }
 

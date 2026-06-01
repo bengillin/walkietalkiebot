@@ -59,19 +59,43 @@ describe('getActivitiesForConversation', () => {
   })
 
   it('returns activities ordered by timestamp DESC', () => {
-    createActivity({ id: 'a1', conversationId: 'c1', tool: 'Read', status: 'complete', timestamp: 1000 })
-    createActivity({ id: 'a2', conversationId: 'c1', tool: 'Edit', status: 'complete', timestamp: 2000 })
-    createActivity({ id: 'a3', conversationId: 'c1', tool: 'Bash', status: 'complete', timestamp: 3000 })
+    createActivity({
+      id: 'a1',
+      conversationId: 'c1',
+      tool: 'Read',
+      status: 'complete',
+      timestamp: 1000,
+    })
+    createActivity({
+      id: 'a2',
+      conversationId: 'c1',
+      tool: 'Edit',
+      status: 'complete',
+      timestamp: 2000,
+    })
+    createActivity({
+      id: 'a3',
+      conversationId: 'c1',
+      tool: 'Bash',
+      status: 'complete',
+      timestamp: 3000,
+    })
 
     const activities = getActivitiesForConversation('c1')
     expect(activities).toHaveLength(3)
-    expect(activities[0].tool).toBe('Bash')  // most recent first
+    expect(activities[0].tool).toBe('Bash') // most recent first
     expect(activities[2].tool).toBe('Read')
   })
 
   it('respects limit', () => {
     for (let i = 0; i < 5; i++) {
-      createActivity({ id: `a${i}`, conversationId: 'c1', tool: 'Read', status: 'complete', timestamp: i })
+      createActivity({
+        id: `a${i}`,
+        conversationId: 'c1',
+        tool: 'Read',
+        status: 'complete',
+        timestamp: i,
+      })
     }
     expect(getActivitiesForConversation('c1', 3)).toHaveLength(3)
   })
@@ -80,8 +104,20 @@ describe('getActivitiesForConversation', () => {
 describe('getActivitiesForMessage', () => {
   it('returns activities for a specific message', () => {
     createMessage({ id: 'm1', conversationId: 'c1', role: 'user', content: 'test' })
-    createActivity({ id: 'a1', conversationId: 'c1', messageId: 'm1', tool: 'Read', status: 'complete' })
-    createActivity({ id: 'a2', conversationId: 'c1', messageId: 'm1', tool: 'Edit', status: 'complete' })
+    createActivity({
+      id: 'a1',
+      conversationId: 'c1',
+      messageId: 'm1',
+      tool: 'Read',
+      status: 'complete',
+    })
+    createActivity({
+      id: 'a2',
+      conversationId: 'c1',
+      messageId: 'm1',
+      tool: 'Edit',
+      status: 'complete',
+    })
     createActivity({ id: 'a3', conversationId: 'c1', tool: 'Bash', status: 'complete' }) // no message
 
     const activities = getActivitiesForMessage('m1')

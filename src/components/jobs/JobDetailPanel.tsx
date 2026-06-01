@@ -17,7 +17,7 @@ interface JobEvent {
 
 export function JobDetailPanel({ jobId, onClose }: JobDetailPanelProps) {
   const { jobs, cancelJob } = useJobStore()
-  const job = jobs.find(j => j.id === jobId)
+  const job = jobs.find((j) => j.id === jobId)
   const [events, setEvents] = useState<JobEvent[]>([])
 
   useEffect(() => {
@@ -25,15 +25,18 @@ export function JobDetailPanel({ jobId, onClose }: JobDetailPanelProps) {
     const unsub = api.subscribeToJobEvents(
       jobId,
       (event) => {
-        setEvents(prev => [...prev, {
-          type: event.type,
-          data: event.data,
-          timestamp: Date.now(),
-        }])
+        setEvents((prev) => [
+          ...prev,
+          {
+            type: event.type,
+            data: event.data,
+            timestamp: Date.now(),
+          },
+        ])
       },
       () => {
         // Stream ended
-      }
+      },
     )
 
     return unsub
@@ -44,16 +47,16 @@ export function JobDetailPanel({ jobId, onClose }: JobDetailPanelProps) {
       <div className="job-detail-panel">
         <div className="job-detail-panel__header">
           <span>Job not found</span>
-          <button onClick={onClose} className="job-detail-panel__close">&times;</button>
+          <button onClick={onClose} className="job-detail-panel__close">
+            &times;
+          </button>
         </div>
       </div>
     )
   }
 
   const isActive = job.status === 'running' || job.status === 'queued'
-  const duration = job.started_at
-    ? ((job.completed_at || Date.now()) - job.started_at) / 1000
-    : 0
+  const duration = job.started_at ? ((job.completed_at || Date.now()) - job.started_at) / 1000 : 0
 
   return (
     <div className="job-detail-panel">
@@ -64,17 +67,16 @@ export function JobDetailPanel({ jobId, onClose }: JobDetailPanelProps) {
           </span>
           <span className="job-detail-panel__prompt">{job.prompt}</span>
         </div>
-        <button onClick={onClose} className="job-detail-panel__close">&times;</button>
+        <button onClick={onClose} className="job-detail-panel__close">
+          &times;
+        </button>
       </div>
 
       <div className="job-detail-panel__meta">
         <span>Source: {job.source}</span>
         {duration > 0 && <span>Duration: {Math.round(duration)}s</span>}
         {isActive && (
-          <button
-            className="job-detail-panel__cancel"
-            onClick={() => cancelJob(job.id)}
-          >
+          <button className="job-detail-panel__cancel" onClick={() => cancelJob(job.id)}>
             Cancel
           </button>
         )}
@@ -96,11 +98,7 @@ export function JobDetailPanel({ jobId, onClose }: JobDetailPanelProps) {
         </div>
       )}
 
-      {job.error && (
-        <div className="job-detail-panel__error">
-          {job.error}
-        </div>
-      )}
+      {job.error && <div className="job-detail-panel__error">{job.error}</div>}
     </div>
   )
 }
@@ -111,15 +109,23 @@ function EventItem({ event }: { event: JobEvent }) {
       const activity = JSON.parse(event.data || '{}')
       const icon = getToolIcon(activity.tool)
       return (
-        <div className={`job-detail-panel__event job-detail-panel__event--activity ${getToolCategoryClass(activity.tool || activity.type || '')}`}>
+        <div
+          className={`job-detail-panel__event job-detail-panel__event--activity ${getToolCategoryClass(activity.tool || activity.type || '')}`}
+        >
           <span className="job-detail-panel__event-icon">{icon}</span>
           <span className="job-detail-panel__event-tool">{activity.tool || activity.type}</span>
           {activity.input && (
             <span className="job-detail-panel__event-input">{activity.input}</span>
           )}
           {activity.status && (
-            <span className={`job-detail-panel__event-status job-detail-panel__event-status--${activity.status}`}>
-              {activity.status === 'complete' ? '\u2713' : activity.status === 'error' ? '\u2717' : ''}
+            <span
+              className={`job-detail-panel__event-status job-detail-panel__event-status--${activity.status}`}
+            >
+              {activity.status === 'complete'
+                ? '\u2713'
+                : activity.status === 'error'
+                  ? '\u2717'
+                  : ''}
             </span>
           )}
         </div>
@@ -132,11 +138,7 @@ function EventItem({ event }: { event: JobEvent }) {
   if (event.type === 'text') {
     try {
       const { text } = JSON.parse(event.data || '{}')
-      return (
-        <div className="job-detail-panel__event job-detail-panel__event--text">
-          {text}
-        </div>
-      )
+      return <div className="job-detail-panel__event job-detail-panel__event--text">{text}</div>
     } catch {
       return null
     }
@@ -144,9 +146,7 @@ function EventItem({ event }: { event: JobEvent }) {
 
   if (event.type === 'error') {
     return (
-      <div className="job-detail-panel__event job-detail-panel__event--error">
-        {event.data}
-      </div>
+      <div className="job-detail-panel__event job-detail-panel__event--error">{event.data}</div>
     )
   }
 

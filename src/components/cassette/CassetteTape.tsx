@@ -36,7 +36,7 @@ export function CassetteTape({
     const direction = state === 'rewinding' ? -1 : 1
 
     const interval = setInterval(() => {
-      setReelRotation(prev => (prev + speed * direction) % 360)
+      setReelRotation((prev) => (prev + speed * direction) % 360)
     }, 16)
 
     return () => clearInterval(interval)
@@ -119,9 +119,7 @@ export function CassetteTape({
         )}
 
         {/* Recording indicator */}
-        {state === 'recording' && (
-          <div className="cassette__record-light" />
-        )}
+        {state === 'recording' && <div className="cassette__record-light" />}
       </div>
     </div>
   )

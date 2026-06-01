@@ -45,7 +45,7 @@ api.get('/conversations', (c) => {
   const total = conversations.countConversations()
 
   return c.json({
-    conversations: convos.map(conv => ({
+    conversations: convos.map((conv) => ({
       id: conv.id,
       title: conv.title,
       createdAt: conv.created_at,
@@ -70,7 +70,7 @@ api.get('/conversations/:id', (c) => {
   }
 
   const msgs = messages.getMessagesForConversation(id)
-  const messageIds = msgs.map(m => m.id)
+  const messageIds = msgs.map((m) => m.id)
   const imageMap = messages.getImagesForMessages(messageIds)
   const acts = activities.getActivitiesForConversation(id)
 
@@ -82,20 +82,20 @@ api.get('/conversations/:id', (c) => {
     projectId: conv.project_id,
     parentId: conv.parent_id,
     mode: conv.mode || 'voice',
-    messages: msgs.map(m => ({
+    messages: msgs.map((m) => ({
       id: m.id,
       role: m.role,
       content: m.content,
       timestamp: m.timestamp,
       source: m.source,
-      images: (imageMap.get(m.id) || []).map(img => ({
+      images: (imageMap.get(m.id) || []).map((img) => ({
         id: img.id,
         dataUrl: img.data_url,
         fileName: img.file_name,
         description: img.description,
       })),
     })),
-    activities: acts.map(a => ({
+    activities: acts.map((a) => ({
       id: a.id,
       tool: a.tool,
       input: a.input,
@@ -115,13 +115,16 @@ api.post('/conversations', async (c) => {
 
   const conv = conversations.createConversation({ id, title, mode: body.mode })
 
-  return c.json({
-    id: conv.id,
-    title: conv.title,
-    createdAt: conv.created_at,
-    updatedAt: conv.updated_at,
-    mode: conv.mode || 'voice',
-  }, 201)
+  return c.json(
+    {
+      id: conv.id,
+      title: conv.title,
+      createdAt: conv.created_at,
+      updatedAt: conv.updated_at,
+      mode: conv.mode || 'voice',
+    },
+    201,
+  )
 })
 
 // PATCH /api/conversations/:id - Rename conversation
@@ -219,27 +222,40 @@ api.post('/conversations/:id/messages', async (c) => {
   // Store activities if provided
   if (body.activities && Array.isArray(body.activities)) {
     activities.createActivitiesBatch(
-      body.activities.map((a: { id?: string; tool: string; input?: string; status: 'complete' | 'error'; timestamp?: number; duration?: number; error?: string }) => ({
-        id: a.id || crypto.randomUUID(),
-        conversationId,
-        messageId: msg.id,
-        tool: a.tool,
-        input: a.input,
-        status: a.status,
-        timestamp: a.timestamp,
-        duration: a.duration,
-        error: a.error,
-      }))
+      body.activities.map(
+        (a: {
+          id?: string
+          tool: string
+          input?: string
+          status: 'complete' | 'error'
+          timestamp?: number
+          duration?: number
+          error?: string
+        }) => ({
+          id: a.id || crypto.randomUUID(),
+          conversationId,
+          messageId: msg.id,
+          tool: a.tool,
+          input: a.input,
+          status: a.status,
+          timestamp: a.timestamp,
+          duration: a.duration,
+          error: a.error,
+        }),
+      ),
     )
   }
 
-  return c.json({
-    id: msg.id,
-    role: msg.role,
-    content: msg.content,
-    timestamp: msg.timestamp,
-    source: msg.source,
-  }, 201)
+  return c.json(
+    {
+      id: msg.id,
+      role: msg.role,
+      content: msg.content,
+      timestamp: msg.timestamp,
+      source: msg.source,
+    },
+    201,
+  )
 })
 
 // PATCH /api/images/:id - Update image description
@@ -270,7 +286,7 @@ api.get('/plans', (c) => {
   const planList = plans.listPlans(limit, offset, conversationId)
 
   return c.json({
-    plans: planList.map(p => ({
+    plans: planList.map((p) => ({
       id: p.id,
       title: p.title,
       content: p.content,
@@ -319,15 +335,18 @@ api.post('/plans', async (c) => {
     conversationId: body.conversationId,
   })
 
-  return c.json({
-    id: plan.id,
-    title: plan.title,
-    content: plan.content,
-    status: plan.status,
-    conversationId: plan.conversation_id,
-    createdAt: plan.created_at,
-    updatedAt: plan.updated_at,
-  }, 201)
+  return c.json(
+    {
+      id: plan.id,
+      title: plan.title,
+      content: plan.content,
+      status: plan.status,
+      conversationId: plan.conversation_id,
+      createdAt: plan.created_at,
+      updatedAt: plan.updated_at,
+    },
+    201,
+  )
 })
 
 // PUT /api/plans/:id - Update a plan
@@ -369,7 +388,7 @@ api.get('/search', (c) => {
 
   return c.json({
     query,
-    results: results.map(r => ({
+    results: results.map((r) => ({
       messageId: r.message_id,
       conversationId: r.conversation_id,
       conversationTitle: r.conversation_title,
@@ -476,7 +495,7 @@ api.post('/migrate', async (c) => {
     // Import activities
     if (conv.activities && conv.activities.length > 0) {
       activities.createActivitiesBatch(
-        conv.activities.map(a => ({
+        conv.activities.map((a) => ({
           id: a.id,
           conversationId: conv.id,
           tool: a.tool,
@@ -485,7 +504,7 @@ api.post('/migrate', async (c) => {
           timestamp: a.timestamp,
           duration: a.duration,
           error: a.error,
-        }))
+        })),
       )
     }
 
@@ -523,16 +542,36 @@ api.patch('/conversations/:id/mode', async (c) => {
 // GET /api/integrations - Get status of integrations (MCP)
 api.get('/integrations', (c) => {
   const mcpTools = [
-    'launch_wtb', 'get_wtb_status', 'get_transcript',
-    'get_conversation_history', 'get_claude_session', 'set_claude_session',
-    'disconnect_claude_session', 'get_pending_message', 'respond_to_wtb',
-    'update_wtb_state', 'analyze_image', 'open_url',
-    'create_wtb_job', 'get_wtb_job', 'list_wtb_jobs',
-    'list_conversations', 'get_conversation', 'create_conversation',
-    'rename_conversation', 'delete_conversation', 'search_conversations',
-    'add_message', 'list_plans', 'get_plan',
-    'create_plan', 'update_plan', 'delete_plan',
-    'get_liner_notes', 'set_liner_notes', 'export_conversation',
+    'launch_wtb',
+    'get_wtb_status',
+    'get_transcript',
+    'get_conversation_history',
+    'get_claude_session',
+    'set_claude_session',
+    'disconnect_claude_session',
+    'get_pending_message',
+    'respond_to_wtb',
+    'update_wtb_state',
+    'analyze_image',
+    'open_url',
+    'create_wtb_job',
+    'get_wtb_job',
+    'list_wtb_jobs',
+    'list_conversations',
+    'get_conversation',
+    'create_conversation',
+    'rename_conversation',
+    'delete_conversation',
+    'search_conversations',
+    'add_message',
+    'list_plans',
+    'get_plan',
+    'create_plan',
+    'update_plan',
+    'delete_plan',
+    'get_liner_notes',
+    'set_liner_notes',
+    'export_conversation',
   ]
 
   return c.json({
@@ -599,7 +638,7 @@ api.get('/pending', (c) => {
   }
   return c.json({
     pending: oldest,
-    sessionConnected: !!state.claudeSessionId
+    sessionConnected: !!state.claudeSessionId,
   })
 })
 
@@ -701,20 +740,25 @@ api.post('/analyze-image-cc', async (c) => {
   return new Promise((resolve) => {
     let description = ''
     const handle = spawnClaude({
-      prompt: 'Describe this image in detail. If it appears to be a UI design, wireframe, or sketch, focus on the structure and components. Be thorough but concise. Output ONLY the description, no preamble.',
+      prompt:
+        'Describe this image in detail. If it appears to be a UI design, wireframe, or sketch, focus on the structure and components. Be thorough but concise. Output ONLY the description, no preamble.',
       images: [{ dataUrl, fileName: fileName || 'image.png' }],
       rawMode: true,
       callbacks: {
-        onText: (text) => { description += text },
+        onText: (text) => {
+          description += text
+        },
         onActivity: () => {},
         onError: (error) => {
           console.error('Image analysis via Claude Code failed:', error)
         },
         onComplete: () => {
-          resolve(c.json({
-            description: description.trim() || 'Unable to analyze image.',
-            fileName,
-          }))
+          resolve(
+            c.json({
+              description: description.trim() || 'Unable to analyze image.',
+              fileName,
+            }),
+          )
         },
       },
     })
@@ -722,10 +766,12 @@ api.post('/analyze-image-cc', async (c) => {
     // Timeout after 60 seconds
     setTimeout(() => {
       handle.kill()
-      resolve(c.json({
-        description: description.trim() || 'Analysis timed out.',
-        fileName,
-      }))
+      resolve(
+        c.json({
+          description: description.trim() || 'Analysis timed out.',
+          fileName,
+        }),
+      )
     }, 60000)
   })
 })

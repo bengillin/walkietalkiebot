@@ -13,12 +13,12 @@ export class NotificationDispatcher {
   }
 
   unregister(name: string): void {
-    this.channels = this.channels.filter(c => c.name !== name)
+    this.channels = this.channels.filter((c) => c.name !== name)
   }
 
   async dispatch(notification: Notification): Promise<void> {
     const results = await Promise.allSettled(
-      this.channels.map(channel => channel.send(notification))
+      this.channels.map((channel) => channel.send(notification)),
     )
 
     for (let i = 0; i < results.length; i++) {
@@ -31,7 +31,7 @@ export class NotificationDispatcher {
   }
 
   getChannels(): string[] {
-    return this.channels.map(c => c.name)
+    return this.channels.map((c) => c.name)
   }
 }
 

@@ -18,7 +18,14 @@ export interface OnboardingSettings {
 
 type Step = 'welcome' | 'tts' | 'sound-effects' | 'wake-word' | 'continuous-listening' | 'done'
 
-const STEPS: Step[] = ['welcome', 'tts', 'sound-effects', 'wake-word', 'continuous-listening', 'done']
+const STEPS: Step[] = [
+  'welcome',
+  'tts',
+  'sound-effects',
+  'wake-word',
+  'continuous-listening',
+  'done',
+]
 
 export function Onboarding({ onComplete }: OnboardingProps) {
   const { themes, setTheme } = useTheme()
@@ -60,10 +67,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
       <div className="onboarding__container">
         {showProgress && (
           <div className="onboarding__progress">
-            <div
-              className="onboarding__progress-bar"
-              style={{ width: `${progress}%` }}
-            />
+            <div className="onboarding__progress-bar" style={{ width: `${progress}%` }} />
           </div>
         )}
 
@@ -79,11 +83,10 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           <div className="onboarding__step onboarding__step--welcome">
             <div className="onboarding__speech-bubble">
               <h1 className="onboarding__title">Hey, I'm Talkie</h1>
-              <p className="onboarding__subtitle">
-                Your walkie talkie for Claude Code.
-              </p>
+              <p className="onboarding__subtitle">Your walkie talkie for Claude Code.</p>
               <p className="onboarding__value-prop">
-                Talk hands-free, see tool activity in real-time, and save every conversation as a cassette tape you can search and replay.
+                Talk hands-free, see tool activity in real-time, and save every conversation as a
+                cassette tape you can search and replay.
               </p>
               <p className="onboarding__subtitle">
                 Choose a theme below, you can always change it later.
@@ -97,7 +100,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                     key={t.name}
                     className={`onboarding__theme-swatch onboarding__theme-swatch--${t.name} ${settings.theme === t.name ? 'onboarding__theme-swatch--active' : ''}`}
                     onClick={() => {
-                      setSettings(prev => ({ ...prev, theme: t.name }))
+                      setSettings((prev) => ({ ...prev, theme: t.name }))
                       setTheme(t.name)
                     }}
                   >
@@ -117,23 +120,32 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           <div className="onboarding__step onboarding__step--setting">
             <span className="onboarding__step-label">Voice</span>
             <h2 className="onboarding__setting-title">Speak responses</h2>
-            <p className="onboarding__setting-desc">Claude reads answers aloud using text-to-speech. You can pick a specific voice in settings later.</p>
+            <p className="onboarding__setting-desc">
+              Claude reads answers aloud using text-to-speech. You can pick a specific voice in
+              settings later.
+            </p>
 
             <label className="onboarding__toggle">
               <input
                 type="checkbox"
                 checked={settings.ttsEnabled}
-                onChange={() => setSettings(prev => ({ ...prev, ttsEnabled: !prev.ttsEnabled }))}
+                onChange={() => setSettings((prev) => ({ ...prev, ttsEnabled: !prev.ttsEnabled }))}
               />
               <span className="onboarding__toggle-slider"></span>
               <div className="onboarding__toggle-content">
-                <span className="onboarding__toggle-label">{settings.ttsEnabled ? 'On' : 'Off'}</span>
+                <span className="onboarding__toggle-label">
+                  {settings.ttsEnabled ? 'On' : 'Off'}
+                </span>
               </div>
             </label>
 
             <div className="onboarding__nav">
-              <button className="onboarding__nav-back" onClick={prevStep}>Back</button>
-              <button className="onboarding__button" onClick={nextStep}>Next</button>
+              <button className="onboarding__nav-back" onClick={prevStep}>
+                Back
+              </button>
+              <button className="onboarding__button" onClick={nextStep}>
+                Next
+              </button>
             </div>
           </div>
         )}
@@ -142,23 +154,33 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           <div className="onboarding__step onboarding__step--setting">
             <span className="onboarding__step-label">Audio</span>
             <h2 className="onboarding__setting-title">Sound effects</h2>
-            <p className="onboarding__setting-desc">Cassette tape sounds when recording starts and stops.</p>
+            <p className="onboarding__setting-desc">
+              Cassette tape sounds when recording starts and stops.
+            </p>
 
             <label className="onboarding__toggle">
               <input
                 type="checkbox"
                 checked={settings.soundEffects}
-                onChange={() => setSettings(prev => ({ ...prev, soundEffects: !prev.soundEffects }))}
+                onChange={() =>
+                  setSettings((prev) => ({ ...prev, soundEffects: !prev.soundEffects }))
+                }
               />
               <span className="onboarding__toggle-slider"></span>
               <div className="onboarding__toggle-content">
-                <span className="onboarding__toggle-label">{settings.soundEffects ? 'On' : 'Off'}</span>
+                <span className="onboarding__toggle-label">
+                  {settings.soundEffects ? 'On' : 'Off'}
+                </span>
               </div>
             </label>
 
             <div className="onboarding__nav">
-              <button className="onboarding__nav-back" onClick={prevStep}>Back</button>
-              <button className="onboarding__button" onClick={nextStep}>Next</button>
+              <button className="onboarding__nav-back" onClick={prevStep}>
+                Back
+              </button>
+              <button className="onboarding__button" onClick={nextStep}>
+                Next
+              </button>
             </div>
           </div>
         )}
@@ -167,13 +189,16 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           <div className="onboarding__step onboarding__step--setting">
             <span className="onboarding__step-label">Hands-free</span>
             <h2 className="onboarding__setting-title">Wake word</h2>
-            <p className="onboarding__setting-desc">Say "Hey Talkie" to start recording without touching the keyboard. Customizable in settings.</p>
+            <p className="onboarding__setting-desc">
+              Say "Hey Talkie" to start recording without touching the keyboard. Customizable in
+              settings.
+            </p>
 
             <label className="onboarding__toggle">
               <input
                 type="checkbox"
                 checked={settings.wakeWord}
-                onChange={() => setSettings(prev => ({ ...prev, wakeWord: !prev.wakeWord }))}
+                onChange={() => setSettings((prev) => ({ ...prev, wakeWord: !prev.wakeWord }))}
               />
               <span className="onboarding__toggle-slider"></span>
               <div className="onboarding__toggle-content">
@@ -182,8 +207,12 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             </label>
 
             <div className="onboarding__nav">
-              <button className="onboarding__nav-back" onClick={prevStep}>Back</button>
-              <button className="onboarding__button" onClick={nextStep}>Next</button>
+              <button className="onboarding__nav-back" onClick={prevStep}>
+                Back
+              </button>
+              <button className="onboarding__button" onClick={nextStep}>
+                Next
+              </button>
             </div>
           </div>
         )}
@@ -192,23 +221,37 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           <div className="onboarding__step onboarding__step--setting">
             <span className="onboarding__step-label">Hands-free</span>
             <h2 className="onboarding__setting-title">Continuous listening</h2>
-            <p className="onboarding__setting-desc">Always listening — say "over" when you're done talking to send your message. No spacebar needed.</p>
+            <p className="onboarding__setting-desc">
+              Always listening — say "over" when you're done talking to send your message. No
+              spacebar needed.
+            </p>
 
             <label className="onboarding__toggle">
               <input
                 type="checkbox"
                 checked={settings.continuousListening}
-                onChange={() => setSettings(prev => ({ ...prev, continuousListening: !prev.continuousListening }))}
+                onChange={() =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    continuousListening: !prev.continuousListening,
+                  }))
+                }
               />
               <span className="onboarding__toggle-slider"></span>
               <div className="onboarding__toggle-content">
-                <span className="onboarding__toggle-label">{settings.continuousListening ? 'On' : 'Off'}</span>
+                <span className="onboarding__toggle-label">
+                  {settings.continuousListening ? 'On' : 'Off'}
+                </span>
               </div>
             </label>
 
             <div className="onboarding__nav">
-              <button className="onboarding__nav-back" onClick={prevStep}>Back</button>
-              <button className="onboarding__button" onClick={nextStep}>Next</button>
+              <button className="onboarding__nav-back" onClick={prevStep}>
+                Back
+              </button>
+              <button className="onboarding__button" onClick={nextStep}>
+                Next
+              </button>
             </div>
           </div>
         )}
@@ -221,27 +264,42 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             <ul className="onboarding__summary">
               <li>
                 <span className="onboarding__summary-label">Voice responses</span>
-                <span className="onboarding__summary-value">{settings.ttsEnabled ? 'On' : 'Off'}</span>
+                <span className="onboarding__summary-value">
+                  {settings.ttsEnabled ? 'On' : 'Off'}
+                </span>
               </li>
               <li>
                 <span className="onboarding__summary-label">Sound effects</span>
-                <span className="onboarding__summary-value">{settings.soundEffects ? 'On' : 'Off'}</span>
+                <span className="onboarding__summary-value">
+                  {settings.soundEffects ? 'On' : 'Off'}
+                </span>
               </li>
               <li>
                 <span className="onboarding__summary-label">Wake word</span>
-                <span className="onboarding__summary-value">{settings.wakeWord ? 'On' : 'Off'}</span>
+                <span className="onboarding__summary-value">
+                  {settings.wakeWord ? 'On' : 'Off'}
+                </span>
               </li>
               <li>
                 <span className="onboarding__summary-label">Continuous listening</span>
-                <span className="onboarding__summary-value">{settings.continuousListening ? 'On' : 'Off'}</span>
+                <span className="onboarding__summary-value">
+                  {settings.continuousListening ? 'On' : 'Off'}
+                </span>
               </li>
             </ul>
 
-            <p className="onboarding__setting-desc">Hold spacebar and start talking. Everything can be changed in settings later.</p>
+            <p className="onboarding__setting-desc">
+              Hold spacebar and start talking. Everything can be changed in settings later.
+            </p>
 
             <div className="onboarding__nav">
-              <button className="onboarding__nav-back" onClick={prevStep}>Back</button>
-              <button className="onboarding__button onboarding__button--primary" onClick={handleComplete}>
+              <button className="onboarding__nav-back" onClick={prevStep}>
+                Back
+              </button>
+              <button
+                className="onboarding__button onboarding__button--primary"
+                onClick={handleComplete}
+              >
                 Start using Talkie
               </button>
             </div>

@@ -1,9 +1,7 @@
 import type { DroppedFile } from '../types'
 
 // Analyze image via Claude Code CLI
-export async function analyzeImageViaClaudeCode(
-  file: DroppedFile
-): Promise<string> {
+export async function analyzeImageViaClaudeCode(file: DroppedFile): Promise<string> {
   const response = await fetch('/api/analyze-image-cc', {
     method: 'POST',
     headers: {
@@ -49,7 +47,7 @@ export async function sendMessageViaClaudeCode(
   onActivity?: (activity: ActivityEvent) => void,
   images?: Array<{ dataUrl: string; fileName: string }>,
   onPlan?: (plan: PlanEvent) => void,
-  mode?: string
+  mode?: string,
 ): Promise<string> {
   const response = await fetch('/api/claude-code', {
     method: 'POST',
@@ -124,7 +122,7 @@ export function extractUrls(text: string): string[] {
   const urlRegex = /(https?:\/\/[^\s<>"{}|\\^`[\]]*[^\s<>"{}|\\^`[\].,:;!?)])/g
   const matches = text.match(urlRegex) || []
   return matches
-    .map(url => url.replace(/[.,;:!?)\]]+$/, '')) // Remove trailing punctuation
-    .filter(url => url.length > 0)
+    .map((url) => url.replace(/[.,;:!?)\]]+$/, '')) // Remove trailing punctuation
+    .filter((url) => url.length > 0)
     .filter((url, index, arr) => arr.indexOf(url) === index) // Deduplicate
 }

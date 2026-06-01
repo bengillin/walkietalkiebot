@@ -180,7 +180,9 @@
 }
 
 @keyframes search-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Search match highlight */
@@ -380,8 +382,12 @@
 }
 
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .tape-collection__confirm-content {
@@ -449,4 +455,3 @@
   transform: translateY(-1px);
   box-shadow: 0 3px 0 #003d14;
 }
-

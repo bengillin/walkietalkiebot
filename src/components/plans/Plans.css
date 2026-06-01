@@ -291,15 +291,31 @@
   flex-shrink: 0;
 }
 
-.plans__status-dot--draft { background: var(--text-muted, #55556a); }
-.plans__status-dot--approved { background: #00d4ff; }
-.plans__status-dot--in_progress { background: #ffd93d; animation: planPulse 2s ease-in-out infinite; }
-.plans__status-dot--completed { background: #34c759; }
-.plans__status-dot--archived { background: #666; }
+.plans__status-dot--draft {
+  background: var(--text-muted, #55556a);
+}
+.plans__status-dot--approved {
+  background: #00d4ff;
+}
+.plans__status-dot--in_progress {
+  background: #ffd93d;
+  animation: planPulse 2s ease-in-out infinite;
+}
+.plans__status-dot--completed {
+  background: #34c759;
+}
+.plans__status-dot--archived {
+  background: #666;
+}
 
 @keyframes planPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 /* Detail view */
