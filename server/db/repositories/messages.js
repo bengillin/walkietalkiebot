@@ -2,32 +2,38 @@ import { getDb } from "../index.js";
 import { touchConversation } from "./conversations.js";
 function getMessagesForConversation(conversationId) {
   const db = getDb();
-  return db.prepare(`
+  return db.prepare(
+    `
     SELECT id, conversation_id, role, content, timestamp, position, source
     FROM messages
     WHERE conversation_id = ?
     ORDER BY position ASC
-  `).all(conversationId);
+  `
+  ).all(conversationId);
 }
 function getImagesForMessage(messageId) {
   const db = getDb();
-  return db.prepare(`
+  return db.prepare(
+    `
     SELECT id, message_id, data_url, file_name, description, position
     FROM message_images
     WHERE message_id = ?
     ORDER BY position ASC
-  `).all(messageId);
+  `
+  ).all(messageId);
 }
 function getImagesForMessages(messageIds) {
   if (messageIds.length === 0) return /* @__PURE__ */ new Map();
   const db = getDb();
   const placeholders = messageIds.map(() => "?").join(", ");
-  const rows = db.prepare(`
+  const rows = db.prepare(
+    `
     SELECT id, message_id, data_url, file_name, description, position
     FROM message_images
     WHERE message_id IN (${placeholders})
     ORDER BY position ASC
-  `).all(...messageIds);
+  `
+  ).all(...messageIds);
   const imageMap = /* @__PURE__ */ new Map();
   for (const row of rows) {
     if (!imageMap.has(row.message_id)) {
@@ -41,16 +47,20 @@ function createMessage(input) {
   const db = getDb();
   const timestamp = input.timestamp || Date.now();
   const source = input.source || "web";
-  const posRow = db.prepare(`
+  const posRow = db.prepare(
+    `
     SELECT COALESCE(MAX(position), -1) + 1 as next_pos
     FROM messages
     WHERE conversation_id = ?
-  `).get(input.conversationId);
+  `
+  ).get(input.conversationId);
   const position = posRow.next_pos;
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO messages (id, conversation_id, role, content, timestamp, position, source)
     VALUES (?, ?, ?, ?, ?, ?, ?)
-  `).run(input.id, input.conversationId, input.role, input.content, timestamp, position, source);
+  `
+  ).run(input.id, input.conversationId, input.role, input.content, timestamp, position, source);
   if (input.images && input.images.length > 0) {
     const insertImage = db.prepare(`
       INSERT INTO message_images (id, message_id, data_url, file_name, description, position)

@@ -2,19 +2,23 @@ import { getDb } from "../index.js";
 function createJob(input) {
   const db = getDb();
   const now = Date.now();
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO jobs (id, conversation_id, prompt, status, source, created_at, updated_at)
     VALUES (?, ?, ?, 'queued', ?, ?, ?)
-  `).run(input.id, input.conversationId, input.prompt, input.source || "web", now, now);
+  `
+  ).run(input.id, input.conversationId, input.prompt, input.source || "web", now, now);
   return getJob(input.id);
 }
 function getJob(id) {
   const db = getDb();
-  const row = db.prepare(`
+  const row = db.prepare(
+    `
     SELECT id, conversation_id, prompt, status, source, result, error, pid,
            created_at, updated_at, started_at, completed_at
     FROM jobs WHERE id = ?
-  `).get(id);
+  `
+  ).get(id);
   return row || null;
 }
 function listJobs(filters, limit = 50) {
@@ -31,13 +35,15 @@ function listJobs(filters, limit = 50) {
   }
   const where = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
   params.push(limit);
-  return db.prepare(`
+  return db.prepare(
+    `
     SELECT id, conversation_id, prompt, status, source, result, error, pid,
            created_at, updated_at, started_at, completed_at
     FROM jobs ${where}
     ORDER BY created_at DESC
     LIMIT ?
-  `).all(...params);
+  `
+  ).all(...params);
 }
 function updateJob(id, input) {
   const db = getDb();
@@ -74,10 +80,12 @@ function updateJob(id, input) {
 function createJobEvent(input) {
   const db = getDb();
   const timestamp = Date.now();
-  const result = db.prepare(`
+  const result = db.prepare(
+    `
     INSERT INTO job_events (job_id, event_type, data, timestamp)
     VALUES (?, ?, ?, ?)
-  `).run(input.jobId, input.eventType, input.data || null, timestamp);
+  `
+  ).run(input.jobId, input.eventType, input.data || null, timestamp);
   return {
     id: Number(result.lastInsertRowid),
     job_id: input.jobId,
@@ -89,26 +97,32 @@ function createJobEvent(input) {
 function getJobEvents(jobId, since) {
   const db = getDb();
   if (since) {
-    return db.prepare(`
+    return db.prepare(
+      `
       SELECT id, job_id, event_type, data, timestamp
       FROM job_events
       WHERE job_id = ? AND timestamp > ?
       ORDER BY timestamp ASC
-    `).all(jobId, since);
+    `
+    ).all(jobId, since);
   }
-  return db.prepare(`
+  return db.prepare(
+    `
     SELECT id, job_id, event_type, data, timestamp
     FROM job_events
     WHERE job_id = ?
     ORDER BY timestamp ASC
-  `).all(jobId);
+  `
+  ).all(jobId);
 }
 function cleanupStaleJobs() {
   const db = getDb();
-  const result = db.prepare(`
+  const result = db.prepare(
+    `
     UPDATE jobs SET status = 'failed', error = 'Server restarted', updated_at = ?, completed_at = ?
     WHERE status IN ('queued', 'running')
-  `).run(Date.now(), Date.now());
+  `
+  ).run(Date.now(), Date.now());
   return result.changes;
 }
 function deleteJob(id) {

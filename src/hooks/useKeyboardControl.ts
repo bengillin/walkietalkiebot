@@ -54,10 +54,10 @@ export function useKeyboardControl({
       }
     },
     onCmdK: () => {
-      setShowSearch(prev => !prev)
+      setShowSearch((prev) => !prev)
     },
     onCmdE: () => {
-      const conv = conversations.find(c => c.id === currentConversationId)
+      const conv = conversations.find((c) => c.id === currentConversationId)
       if (conv && conv.messages.length > 0) {
         exportConversation(conv, 'markdown')
       }
@@ -70,7 +70,7 @@ export function useKeyboardControl({
       if (e.key === '?' && !e.metaKey && !e.ctrlKey) {
         const active = document.activeElement
         if (active?.tagName === 'INPUT' || active?.tagName === 'TEXTAREA') return
-        setShowShortcuts(prev => !prev)
+        setShowShortcuts((prev) => !prev)
       }
     }
     window.addEventListener('keydown', handleKey)
@@ -110,7 +110,14 @@ export function useKeyboardControl({
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
     }
-  }, [isListening, isSpeaking, avatarState, handleTalkStart, handleTalkEnd, continuousListeningEnabled])
+  }, [
+    isListening,
+    isSpeaking,
+    avatarState,
+    handleTalkStart,
+    handleTalkEnd,
+    continuousListeningEnabled,
+  ])
 
   // Detect mobile
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
@@ -124,17 +131,19 @@ export function useKeyboardControl({
 
   // Restart listening after response in continuous mode (desktop only)
   useEffect(() => {
-    if (isMobile) return
+    if (isMobile) return undefined
     if (continuousListeningEnabled && avatarState === 'idle' && !isListening && !isSpeaking) {
       const timer = setTimeout(() => {
         startListening()
       }, 500)
       return () => clearTimeout(timer)
     }
+    return undefined
   }, [continuousListeningEnabled, avatarState, isListening, isSpeaking, startListening, isMobile])
 
   // On mobile, show visual prompt to tap when ready
-  const showTapToTalk = isMobile && continuousListeningEnabled && avatarState === 'idle' && !isListening && !isSpeaking
+  const showTapToTalk =
+    isMobile && continuousListeningEnabled && avatarState === 'idle' && !isListening && !isSpeaking
 
   return { showTapToTalk, isMobile }
 }

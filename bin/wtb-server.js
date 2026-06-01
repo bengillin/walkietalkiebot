@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 
 import { spawn, execSync } from 'child_process'
-import { existsSync, mkdirSync, writeFileSync, readFileSync, unlinkSync, createReadStream } from 'fs'
+import { existsSync, mkdirSync, writeFileSync, readFileSync, unlinkSync } from 'fs'
 import { join, dirname } from 'path'
 import { homedir } from 'os'
 import { fileURLToPath } from 'url'
-import { createInterface } from 'readline'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const PLIST_NAME = 'com.wtb.server'
@@ -171,7 +170,7 @@ async function startServer(foreground = false) {
     // Wait for server to be ready
     console.log('Waiting for server to start...')
     for (let i = 0; i < 30; i++) {
-      await new Promise(r => setTimeout(r, 500))
+      await new Promise((r) => setTimeout(r, 500))
       if (isServerRunning()) {
         console.log(`Walkie Talkie Bot server running at http://localhost:${PORT}`)
         return
@@ -205,7 +204,7 @@ async function stopServer() {
 
   // Wait for server to stop
   for (let i = 0; i < 10; i++) {
-    await new Promise(r => setTimeout(r, 500))
+    await new Promise((r) => setTimeout(r, 500))
     if (!isServerRunning()) {
       console.log('Server stopped.')
       return

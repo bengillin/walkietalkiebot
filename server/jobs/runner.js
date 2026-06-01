@@ -1,4 +1,4 @@
-import { spawn, execSync } from "child_process";
+import { spawn, execFileSync } from "child_process";
 import { writeFileSync, mkdirSync, unlinkSync } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
@@ -16,7 +16,9 @@ function detectPlanFromTool(toolName, input) {
   const hasStructure = headingCount >= 2 && listItemCount >= 4;
   if (!isPlanFile && !hasPlanHeading && !hasStructure) return null;
   let title = "Untitled Plan";
-  const titleMatch = content.match(/^#{1,3}\s+(.*(?:plan|implementation|approach|strategy|roadmap|phases?|proposal).*)/im);
+  const titleMatch = content.match(
+    /^#{1,3}\s+(.*(?:plan|implementation|approach|strategy|roadmap|phases?|proposal).*)/im
+  );
   if (titleMatch) {
     title = titleMatch[1].replace(/\*\*/g, "").replace(/`/g, "").trim();
   } else {
@@ -35,7 +37,7 @@ function isClaudeCliAvailable() {
   }
   const claudePath = process.env.CLAUDE_PATH || "claude";
   try {
-    execSync(`which ${claudePath}`, { stdio: "ignore" });
+    execFileSync("which", [claudePath], { stdio: "ignore" });
     claudeCliCache = { available: true, checkedAt: Date.now() };
     return true;
   } catch {
@@ -96,7 +98,13 @@ function spawnClaude(options) {
     "--no-session-persistence"
   ];
   const claudePath = process.env.CLAUDE_PATH || "claude";
-  console.log("Spawning claude:", claudePath, "prompt length:", fullPrompt.length, rawMode ? "(raw mode)" : "(voice mode)");
+  console.log(
+    "Spawning claude:",
+    claudePath,
+    "prompt length:",
+    fullPrompt.length,
+    rawMode ? "(raw mode)" : "(voice mode)"
+  );
   const env = { ...process.env, FORCE_COLOR: "0" };
   delete env.CLAUDECODE;
   const claude = spawn(claudePath, args, {
@@ -118,9 +126,11 @@ function spawnClaude(options) {
       try {
         const event = JSON.parse(line);
         if (event.type === "assistant") {
-          const textContent = event.message?.content?.find((c) => c.type === "text");
+          const textContent = event.message?.content?.find(
+            (c) => c.type === "text"
+          );
           if (textContent?.text) {
-            let text = textContent.text.replace(/<thinking>[\s\S]*?<\/thinking>\s*/g, "");
+            const text = textContent.text.replace(/<thinking>[\s\S]*?<\/thinking>\s*/g, "");
             if (text.trim()) {
               callbacks.onText(text);
             }
@@ -160,7 +170,7 @@ function spawnClaude(options) {
           }
         } else if (event.type === "content_block_delta") {
           if (event.delta?.type === "text_delta" && event.delta?.text) {
-            let text = event.delta.text.replace(/<thinking>[\s\S]*?<\/thinking>\s*/g, "");
+            const text = event.delta.text.replace(/<thinking>[\s\S]*?<\/thinking>\s*/g, "");
             if (text) {
               callbacks.onText(text);
             }

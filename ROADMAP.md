@@ -2,10 +2,10 @@
 
 ## Current State
 
-Walkie Talkie Bot is a voice-first, cassette tape-themed interface for Claude Code with dual distribution (Claude Code plugin + full server with web UI). The codebase is TypeScript throughout, with 140 tests across 10 test files covering the frontend (store, exports, components, plan detection) and server (5 database repositories + HTTP API layer).
+Walkie Talkie Bot is a voice-first, cassette tape-themed interface for Claude Code with dual distribution (Claude Code plugin + full server with web UI). The codebase is TypeScript throughout, with ~170 unit tests across 13 test files (plus Playwright E2E + visual regression) covering the frontend (store, exports, components, plan detection) and server (5 database repositories + HTTP API layer + prompt builder).
 
 ### Architecture highlights
-- **Frontend**: React 18 + Zustand, decomposed into 6 custom hooks (`useVoiceIO`, `useClaudeChat`, `useKeyboardControl`, `useDraggableFab`, `useImageAnalysis`, `useServerSync`)
+- **Frontend**: React 18 + Zustand, decomposed into 8 custom hooks (`useVoiceIO`, `useClaudeChat`, `useKeyboardControl`, `useDraggableFab`, `useImageAnalysis`, `useServerSync`, `useKeyboardShortcuts`, `useSoundEffects`)
 - **Server**: Hono HTTPS server with better-sqlite3, full test coverage for all repositories and API endpoints
 - **MCP server**: TypeScript, compiled via esbuild, 30 tools (15 data + 15 server)
 - **Onboarding**: 7-step wizard (welcome, how-it-works, TTS, sound effects, wake word, continuous listening, done)
@@ -24,8 +24,7 @@ Walkie Talkie Bot is a voice-first, cassette tape-themed interface for Claude Co
 - [x] Custom wake word and trigger word settings
 
 ### Claude Integration
-- [x] Claude Code mode (full agent capabilities via CLI)
-- [x] Direct API mode (Anthropic API with streaming, model selection)
+- [x] Claude Code mode (full agent capabilities via CLI) — the sole integration path; Direct API mode was removed
 - [x] Session management for Claude Code
 - [x] Activity feed showing real-time tool usage (40+ tools with icons, categories, colors)
 - [x] Image analysis via Claude vision (drag-and-drop + media library)
@@ -56,18 +55,35 @@ Walkie Talkie Bot is a voice-first, cassette tape-themed interface for Claude Co
 ### Distribution
 - [x] npm package (`npx walkietalkiebot`)
 - [x] Claude Code plugin (MCP tools + skills)
-- [x] Telegram bot integration
 - [x] Marketing site (walkietalkie.bot) with docs
 
 ### Testing & Quality
-- [x] 140 tests across 10 files
-- [x] Client tests: store, exports, plan detection, components
-- [x] Server tests: conversations, messages, plans, search, activities repositories + HTTP API
+- [x] ~170 unit tests across 13 files + Playwright E2E and visual regression
+- [x] Client tests: store, exports, plan detection, tool config, components (ModeSelector, MediaLibrary)
+- [x] Server tests: conversations, messages, plans, search, activities repositories + HTTP API + prompt builder
 - [x] TypeScript throughout (including MCP server)
 
 ---
 
 ## Planned Features
+
+### Tier 0: Engineering follow-ups (tech debt)
+
+These came out of an audit and are the recommended next foundation work:
+
+- **Enable `noUncheckedIndexedAccess`.** ~100 call sites in `src` need attention;
+  doing it carefully (real guards, not blanket `!`) will catch latent
+  array/object-index bugs. Deferred from the initial strictness pass.
+- **Fix the latent MCP server type error.** `mcp-server/index.ts` does not strictly
+  typecheck against the current `@modelcontextprotocol/sdk` (the `tools/call`
+  handler return type lost a `task` field). The esbuild build ignores it; once
+  fixed, add `tsc -p mcp-server/tsconfig.json` to CI.
+- **Test the core hooks and job orchestration.** `useClaudeChat`, `useVoiceIO`, and
+  `server/jobs/*` (manager/runner) currently have no coverage despite holding the
+  most complex logic.
+- **Replace scattered `console.*` with a small leveled logger** and surface the
+  ~8 silently-swallowed `catch {}` errors to the user.
+- **Dependency upgrades**: React 18→19, Vite 5→8, Vitest 2→3 (do these behind CI).
 
 ### Tier 2: Nice to Have
 

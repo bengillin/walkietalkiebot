@@ -1,4 +1,4 @@
-import { spawn, execSync, type ChildProcess } from 'child_process'
+import { spawn, execFileSync, type ChildProcess } from 'child_process'
 import { writeFileSync, mkdirSync, unlinkSync } from 'fs'
 import { join } from 'path'
 import { tmpdir } from 'os'
@@ -48,7 +48,10 @@ export interface RunnerHandle {
 }
 
 // Detect if a Write/Edit tool call is writing a plan
-function detectPlanFromTool(toolName: string, input: { file_path?: string; content?: string; new_string?: string }): PlanEvent | null {
+function detectPlanFromTool(
+  toolName: string,
+  input: { file_path?: string; content?: string; new_string?: string },
+): PlanEvent | null {
   if (toolName !== 'Write' && toolName !== 'Edit') return null
 
   const filePath = input.file_path || ''
@@ -61,14 +64,17 @@ function detectPlanFromTool(toolName: string, input: { file_path?: string; conte
   // Check if content has plan-like structure
   const headingCount = (content.match(/^#{1,3}\s+.+/gm) || []).length
   const listItemCount = (content.match(/^(?:\d+\.|[-*])\s+/gm) || []).length
-  const hasPlanHeading = /^#{1,3}\s+.*(?:plan|implementation|approach|strategy|roadmap|phases?|proposal)/im.test(content)
+  const hasPlanHeading =
+    /^#{1,3}\s+.*(?:plan|implementation|approach|strategy|roadmap|phases?|proposal)/im.test(content)
   const hasStructure = headingCount >= 2 && listItemCount >= 4
 
   if (!isPlanFile && !hasPlanHeading && !hasStructure) return null
 
   // Extract title
   let title = 'Untitled Plan'
-  const titleMatch = content.match(/^#{1,3}\s+(.*(?:plan|implementation|approach|strategy|roadmap|phases?|proposal).*)/im)
+  const titleMatch = content.match(
+    /^#{1,3}\s+(.*(?:plan|implementation|approach|strategy|roadmap|phases?|proposal).*)/im,
+  )
   if (titleMatch) {
     title = titleMatch[1].replace(/\*\*/g, '').replace(/`/g, '').trim()
   } else {
@@ -95,7 +101,9 @@ export function isClaudeCliAvailable(): boolean {
   }
   const claudePath = process.env.CLAUDE_PATH || 'claude'
   try {
-    execSync(`which ${claudePath}`, { stdio: 'ignore' })
+    // execFile (not execSync) so claudePath is passed as an argument and never
+    // interpreted by a shell — avoids command injection via CLAUDE_PATH.
+    execFileSync('which', [claudePath], { stdio: 'ignore' })
     claudeCliCache = { available: true, checkedAt: Date.now() }
     return true
   } catch {
@@ -112,7 +120,7 @@ export function spawnClaude(options: RunnerOptions): RunnerHandle {
     const promise = Promise.resolve(1)
     setTimeout(() => {
       callbacks.onError(
-        'Claude Code CLI not found. Install it with: npm install -g @anthropic-ai/claude-code'
+        'Claude Code CLI not found. Install it with: npm install -g @anthropic-ai/claude-code',
       )
       callbacks.onComplete(1)
     }, 0)
@@ -139,8 +147,9 @@ export function spawnClaude(options: RunnerOptions): RunnerHandle {
     // Raw mode: send prompt as-is with image file paths prepended
     let imageBlock = ''
     if (tempImagePaths.length > 0) {
-      imageBlock = 'Read these image files and then follow the instructions below:\n' +
-        tempImagePaths.map(p => p).join('\n') +
+      imageBlock =
+        'Read these image files and then follow the instructions below:\n' +
+        tempImagePaths.map((p) => p).join('\n') +
         '\n\n'
     }
     fullPrompt = `${imageBlock}${prompt}`
@@ -155,15 +164,24 @@ export function spawnClaude(options: RunnerOptions): RunnerHandle {
   }
 
   const args = [
-    '-p', fullPrompt,
-    '--output-format', 'stream-json',
+    '-p',
+    fullPrompt,
+    '--output-format',
+    'stream-json',
     '--verbose',
-    '--permission-mode', 'bypassPermissions',
+    '--permission-mode',
+    'bypassPermissions',
     '--no-session-persistence',
   ]
 
   const claudePath = process.env.CLAUDE_PATH || 'claude'
-  console.log('Spawning claude:', claudePath, 'prompt length:', fullPrompt.length, rawMode ? '(raw mode)' : '(voice mode)')
+  console.log(
+    'Spawning claude:',
+    claudePath,
+    'prompt length:',
+    fullPrompt.length,
+    rawMode ? '(raw mode)' : '(voice mode)',
+  )
 
   // Strip CLAUDECODE env var to allow spawning Claude inside a Claude Code session
   const env = { ...process.env, FORCE_COLOR: '0' }
@@ -193,14 +211,17 @@ export function spawnClaude(options: RunnerOptions): RunnerHandle {
         const event = JSON.parse(line)
 
         if (event.type === 'assistant') {
-          const textContent = event.message?.content?.find((c: { type: string }) => c.type === 'text')
+          const textContent = event.message?.content?.find(
+            (c: { type: string }) => c.type === 'text',
+          )
           if (textContent?.text) {
-            let text = textContent.text.replace(/<thinking>[\s\S]*?<\/thinking>\s*/g, '')
+            const text = textContent.text.replace(/<thinking>[\s\S]*?<\/thinking>\s*/g, '')
             if (text.trim()) {
               callbacks.onText(text)
             }
           }
-          const toolUseBlocks = event.message?.content?.filter((c: { type: string }) => c.type === 'tool_use') || []
+          const toolUseBlocks =
+            event.message?.content?.filter((c: { type: string }) => c.type === 'tool_use') || []
           for (const toolBlock of toolUseBlocks) {
             if (toolBlock.id && toolBlock.input) {
               toolInputs[toolBlock.id] = JSON.stringify(toolBlock.input)
@@ -236,7 +257,7 @@ export function spawnClaude(options: RunnerOptions): RunnerHandle {
           }
         } else if (event.type === 'content_block_delta') {
           if (event.delta?.type === 'text_delta' && event.delta?.text) {
-            let text = event.delta.text.replace(/<thinking>[\s\S]*?<\/thinking>\s*/g, '')
+            const text = event.delta.text.replace(/<thinking>[\s\S]*?<\/thinking>\s*/g, '')
             if (text) {
               callbacks.onText(text)
             }
@@ -277,7 +298,8 @@ export function spawnClaude(options: RunnerOptions): RunnerHandle {
             status: subtype === 'error' ? 'error' : 'complete',
           })
         } else if (event.type === 'user') {
-          const toolResults = event.message?.content?.filter((c: { type: string }) => c.type === 'tool_result') || []
+          const toolResults =
+            event.message?.content?.filter((c: { type: string }) => c.type === 'tool_result') || []
           for (const result of toolResults) {
             const toolId = result.tool_use_id
             const toolName = toolNames[toolId] || 'tool'
@@ -313,7 +335,11 @@ export function spawnClaude(options: RunnerOptions): RunnerHandle {
   // Clean up temp image files when process ends
   const cleanupTempFiles = () => {
     for (const p of tempImagePaths) {
-      try { unlinkSync(p) } catch { /* already cleaned up */ }
+      try {
+        unlinkSync(p)
+      } catch {
+        /* already cleaned up */
+      }
     }
   }
 

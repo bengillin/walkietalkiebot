@@ -14,8 +14,10 @@ import { updateState } from "./state.js";
 import { getNotificationDispatcher } from "./notifications/dispatcher.js";
 import { MacOSNotificationChannel } from "./notifications/macos.js";
 import { getJobManager } from "./jobs/manager.js";
+import { authMiddleware, getAuthToken } from "./auth.js";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const distPath = join(__dirname, "..", "dist");
+const MAX_BODY_BYTES = Number(process.env.WTB_MAX_BODY_BYTES) || 50 * 1024 * 1024;
 let server = null;
 function startServer(port = 5173) {
   return new Promise((resolve, reject) => {
@@ -34,7 +36,11 @@ function startServer(port = 5173) {
       const convos = conversationsRepo.listConversations(1, 0);
       if (convos.length > 0) {
         const msgs = messagesRepo.getMessagesForConversation(convos[0].id);
-        const stateMessages = msgs.map((m) => ({ role: m.role, content: m.content, timestamp: m.timestamp }));
+        const stateMessages = msgs.map((m) => ({
+          role: m.role,
+          content: m.content,
+          timestamp: m.timestamp
+        }));
         const lastUser = msgs.filter((m) => m.role === "user").pop();
         const lastAssistant = msgs.filter((m) => m.role === "assistant").pop();
         updateState({
@@ -50,6 +56,7 @@ function startServer(port = 5173) {
     const jobManager = getJobManager();
     jobManager.init();
     const app = new Hono();
+    app.use("*", authMiddleware);
     app.route("/api", api);
     app.use("/*", serveStatic({ root: distPath.replace(process.cwd(), ".") }));
     app.get("*", (c) => {
@@ -78,8 +85,21 @@ function startServer(port = 5173) {
       let body = null;
       if (req.method && ["POST", "PUT", "PATCH"].includes(req.method)) {
         const chunks = [];
+        let total = 0;
+        let tooLarge = false;
         for await (const chunk of req) {
+          total += chunk.length;
+          if (total > MAX_BODY_BYTES) {
+            tooLarge = true;
+            break;
+          }
           chunks.push(chunk);
+        }
+        if (tooLarge) {
+          req.destroy();
+          res.writeHead(413, { "content-type": "application/json" });
+          res.end(JSON.stringify({ error: "Payload too large" }));
+          return;
         }
         body = Buffer.concat(chunks);
       }
@@ -113,7 +133,12 @@ function startServer(port = 5173) {
       server = createHttpServer(handler);
     }
     server.listen(port, () => {
-      console.log(`Talkie server running at ${protocol}://localhost:${port}`);
+      const url = `${protocol}://localhost:${port}`;
+      console.log(`Talkie server running at ${url}`);
+      const authToken = getAuthToken();
+      if (authToken) {
+        console.log(`Auth enabled. Open the UI with: ${url}/?token=${authToken}`);
+      }
       resolve();
     });
     server.on("error", (err) => {

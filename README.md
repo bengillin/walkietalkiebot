@@ -148,16 +148,33 @@ wtb-server logs [-f]      # View logs
 wtb-server install        # Install as macOS launchd daemon
 ```
 
+## Security & Networking
+
+Walkie Talkie Bot runs Claude Code with full agent capabilities on your machine, so treat the server like a shell — **only expose it to people you'd hand a terminal to.**
+
+- **Localhost by default.** The server binds to `localhost`, which is a secure browser context (no HTTPS needed). HTTPS is auto-enabled only when Tailscale certs are found at `~/.wtb/`.
+- **Each request spawns a real agent.** Prompts are run via `claude -p` with `--permission-mode bypassPermissions`, meaning the agent can read/write files and run commands without prompting. Anyone who can reach the API can drive that agent.
+- **Optional shared-secret auth.** Set `WTB_AUTH_TOKEN` to require a bearer token on all `/api/*` requests. **Set this before exposing the server beyond localhost** (e.g. over Tailscale, a tunnel, or a LAN). Without it, the API is unauthenticated.
+
+```bash
+export WTB_AUTH_TOKEN="$(openssl rand -hex 32)"   # require auth on every /api request
+```
+
+Clients pass it as `Authorization: Bearer <token>`.
+
 ## Development
 
 ```bash
 npm install       # Install dependencies
 npm run dev       # Vite dev server (frontend only)
 npm run build     # TypeScript check + Vite build + server bundle + MCP server
-npm run test      # Run all tests (140 tests across 10 files)
+npm run test      # Run all unit tests (~170 across 13 files)
+npm run test:e2e  # Playwright end-to-end tests
+npm run lint      # ESLint
+npm run format    # Prettier
 ```
 
-The frontend is decomposed into custom hooks (`src/hooks/`) for voice I/O, Claude chat, keyboard control, FAB dragging, image analysis, and server sync. The server has full test coverage for all database repositories and HTTP API endpoints.
+The frontend is decomposed into 8 custom hooks (`src/hooks/`) for voice I/O, Claude chat, keyboard control, FAB dragging, image analysis, server sync, shortcuts, and sound effects. The server has full test coverage for all database repositories and HTTP API endpoints.
 
 Full architecture, API reference, and integration guides at [walkietalkie.bot/docs](https://walkietalkie.bot/docs/).
 
