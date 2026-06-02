@@ -98,7 +98,7 @@ site/                   Marketing site (walkietalkie.bot)
 - **Prompt builder**: Pure function in `server/promptBuilder.ts` assembles context, images, mode instruction, and plan detection into the prompt. Tested independently.
 - **Persistence**: localStorage as cache, SQLite (`~/.wtb/wtb.db`) as source of truth. Auto-migration on first server connect.
 - **IPC**: Frontend posts to `/api/send`, MCP tools poll `/api/pending`, respond via `/api/respond`
-- **One-shot processes**: Each `/api/claude-code` call spawns a fresh `claude -p` with `--no-session-persistence --permission-mode bypassPermissions`
+- **Session resumption**: When `/api/claude-code` receives a conversation UUID, the turn runs inside a persistent Claude Code session — `--session-id <uuid>` to create (seeded with recent history), `--resume <uuid>` for later turns (only the new message is sent; Claude Code holds + caches the conversation). An in-process `establishedSessions` set picks the first strategy; on a session fault (`No conversation found` / `already in use`) before any content streams, `spawnClaude` transparently retries with the other strategy, so expired sessions and post-restart state both self-heal. Calls without a conversation id (jobs, image analysis, raw mode) keep the legacy one-shot `--no-session-persistence` behavior. All via `--permission-mode bypassPermissions`.
 - **SSE streaming**: Claude Code events and job events use Server-Sent Events
 - **Theming**: React context applies `data-theme` attribute to root; each theme has a dedicated CSS file with custom properties for all UI elements
 - **Tool identity**: Centralized in `lib/toolConfig.ts` — maps 40+ tools to icons, labels, display names, and 6 categories (fs, exec, voice, data, plan, media) with per-theme colors

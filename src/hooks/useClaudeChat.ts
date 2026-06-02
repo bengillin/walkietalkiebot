@@ -213,6 +213,7 @@ export function useClaudeChat({
             planRef.current = plan
           },
           activeMode,
+          currentConversationId,
         )
 
         if (fullResponse.trim() && ttsEnabled) {

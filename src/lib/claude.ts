@@ -48,11 +48,12 @@ export async function sendMessageViaClaudeCode(
   images?: Array<{ dataUrl: string; fileName: string }>,
   onPlan?: (plan: PlanEvent) => void,
   mode?: string,
+  conversationId?: string | null,
 ): Promise<string> {
   const response = await fetch('/api/claude-code', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message, history, images, mode }),
+    body: JSON.stringify({ message, history, images, mode, conversationId }),
   })
 
   if (!response.ok) {

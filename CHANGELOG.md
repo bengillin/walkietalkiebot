@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Claude Code **session resumption** for conversations: turns now run inside a
+  persistent session (`--session-id` to create, `--resume` to continue) instead of
+  rebuilding and re-sending history every turn. Cuts repeated-context cost/latency
+  on multi-turn conversations and lets Claude Code cache the conversation prefix.
+  Transparent fallback handles expired/orphaned sessions; jobs and one-shot calls
+  are unchanged. Covered by new tests.
 - ESLint 9 flat config (`eslint.config.js`) and Prettier, with `lint`, `format`,
   `format:check`, and `typecheck` npm scripts.
 - GitHub Actions CI (`.github/workflows/ci.yml`) running typecheck, lint, tests, and build.

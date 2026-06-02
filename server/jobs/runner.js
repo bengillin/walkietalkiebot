@@ -45,8 +45,15 @@ function isClaudeCliAvailable() {
     return false;
   }
 }
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const SESSION_NOT_FOUND = "No conversation found with session ID";
+const SESSION_IN_USE = "is already in use";
+const establishedSessions = /* @__PURE__ */ new Set();
+function _resetSessionTracking() {
+  establishedSessions.clear();
+}
 function spawnClaude(options) {
-  const { prompt, history, images, rawMode, mode: modeName, callbacks } = options;
+  const { prompt, history, images, rawMode, mode: modeName, conversationId, callbacks } = options;
   if (!isClaudeCliAvailable()) {
     const promise2 = Promise.resolve(1);
     setTimeout(() => {
@@ -71,42 +78,133 @@ function spawnClaude(options) {
       tempImagePaths.push(tempPath);
     }
   }
-  let fullPrompt;
-  if (rawMode) {
-    let imageBlock = "";
-    if (tempImagePaths.length > 0) {
-      imageBlock = "Read these image files and then follow the instructions below:\n" + tempImagePaths.map((p) => p).join("\n") + "\n\n";
+  const imagePaths = tempImagePaths.length > 0 ? tempImagePaths : void 0;
+  const mode = rawMode ? null : getMode(modeName || "voice");
+  const buildFullPrompt = (includeHistory) => {
+    if (rawMode) {
+      const imageBlock = tempImagePaths.length > 0 ? "Read these image files and then follow the instructions below:\n" + tempImagePaths.join("\n") + "\n\n" : "";
+      return `${imageBlock}${prompt}`;
     }
-    fullPrompt = `${imageBlock}${prompt}`;
-  } else {
-    const mode = getMode(modeName || "voice");
-    fullPrompt = buildPrompt({
+    return buildPrompt({
       message: prompt,
       mode,
-      history,
-      imagePaths: tempImagePaths.length > 0 ? tempImagePaths : void 0
+      history: includeHistory ? history : void 0,
+      imagePaths
     });
-  }
-  const args = [
-    "-p",
-    fullPrompt,
+  };
+  const claudePath = process.env.CLAUDE_PATH || "claude";
+  const env = { ...process.env, FORCE_COLOR: "0" };
+  delete env.CLAUDECODE;
+  const baseArgs = [
     "--output-format",
     "stream-json",
     "--verbose",
     "--permission-mode",
-    "bypassPermissions",
-    "--no-session-persistence"
+    "bypassPermissions"
   ];
-  const claudePath = process.env.CLAUDE_PATH || "claude";
-  console.log(
-    "Spawning claude:",
-    claudePath,
-    "prompt length:",
-    fullPrompt.length,
-    rawMode ? "(raw mode)" : "(voice mode)"
-  );
-  const env = { ...process.env, FORCE_COLOR: "0" };
-  delete env.CLAUDECODE;
+  let cleaned = false;
+  const cleanupTempFiles = () => {
+    if (cleaned) return;
+    cleaned = true;
+    for (const p of tempImagePaths) {
+      try {
+        unlinkSync(p);
+      } catch {
+      }
+    }
+  };
+  const useSession = !rawMode && !!conversationId && UUID_RE.test(conversationId);
+  if (!useSession) {
+    const args = ["-p", buildFullPrompt(true), ...baseArgs, "--no-session-persistence"];
+    console.log(
+      "Spawning claude:",
+      claudePath,
+      "len",
+      args[1].length,
+      rawMode ? "(raw)" : "(voice)"
+    );
+    const proc = runClaudeProcess(claudePath, args, env, {
+      ...callbacks,
+      onComplete: (code) => {
+        cleanupTempFiles();
+        callbacks.onComplete(code);
+      }
+    });
+    return {
+      pid: proc.child.pid || 0,
+      kill: () => {
+        try {
+          proc.child.kill("SIGTERM");
+        } catch {
+        }
+      },
+      promise: proc.promise
+    };
+  }
+  const convId = conversationId;
+  let resolveFinal;
+  const promise = new Promise((res) => {
+    resolveFinal = res;
+  });
+  let current;
+  const launch = (strategy, isRetry) => {
+    const sessionArgs = strategy === "create" ? ["--session-id", convId] : ["--resume", convId];
+    const args = ["-p", buildFullPrompt(strategy === "create"), ...baseArgs, ...sessionArgs];
+    console.log(
+      "Spawning claude:",
+      claudePath,
+      `(session ${strategy}${isRetry ? " retry" : ""})`,
+      "len",
+      args[1].length
+    );
+    let sawContent = false;
+    let sessionFault = false;
+    current = runClaudeProcess(claudePath, args, env, {
+      onText: (t) => {
+        sawContent = true;
+        callbacks.onText(t);
+      },
+      onActivity: (a) => {
+        if (a.type === "tool_start" || a.type === "tool_input" || a.type === "tool_end") {
+          sawContent = true;
+        }
+        if (sessionFault && !sawContent && a.type === "all_complete") return;
+        callbacks.onActivity(a);
+      },
+      onPlan: callbacks.onPlan,
+      onError: (msg) => {
+        if (!sawContent && (msg.includes(SESSION_NOT_FOUND) || msg.includes(SESSION_IN_USE))) {
+          sessionFault = true;
+          return;
+        }
+        callbacks.onError(msg);
+      },
+      onComplete: (code) => {
+        if (sessionFault && !sawContent && !isRetry) {
+          launch(strategy === "create" ? "resume" : "create", true);
+          return;
+        }
+        if (code === 0) establishedSessions.add(convId);
+        else if (sessionFault) establishedSessions.delete(convId);
+        cleanupTempFiles();
+        callbacks.onComplete(code);
+        resolveFinal(code);
+      }
+    });
+  };
+  launch(establishedSessions.has(convId) ? "resume" : "create", false);
+  return {
+    pid: current.child.pid || 0,
+    kill: () => {
+      try {
+        current?.child.kill("SIGTERM");
+      } catch {
+      }
+    },
+    promise
+  };
+}
+function runClaudeProcess(claudePath, args, env, callbacks) {
   const claude = spawn(claudePath, args, {
     cwd: process.cwd(),
     env,
@@ -240,39 +338,21 @@ function spawnClaude(options) {
     console.error("Claude stderr:", text);
     callbacks.onError(text);
   });
-  const cleanupTempFiles = () => {
-    for (const p of tempImagePaths) {
-      try {
-        unlinkSync(p);
-      } catch {
-      }
-    }
-  };
   const promise = new Promise((resolve) => {
     claude.on("close", (code) => {
-      cleanupTempFiles();
       callbacks.onComplete(code || 0);
       resolve(code || 0);
     });
     claude.on("error", (err) => {
-      cleanupTempFiles();
       callbacks.onError(err.message);
       callbacks.onComplete(1);
       resolve(1);
     });
   });
-  return {
-    pid: claude.pid || 0,
-    kill: () => {
-      try {
-        claude.kill("SIGTERM");
-      } catch {
-      }
-    },
-    promise
-  };
+  return { child: claude, promise };
 }
 export {
+  _resetSessionTracking,
   isClaudeCliAvailable,
   spawnClaude
 };

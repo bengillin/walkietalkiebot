@@ -614,7 +614,7 @@ api.post("/open-url", async (c) => {
   });
 });
 api.post("/claude-code", async (c) => {
-  const { message, history, images, mode } = await c.req.json();
+  const { message, history, images, mode, conversationId } = await c.req.json();
   if (!message) {
     return c.json({ error: "Message required" }, 400);
   }
@@ -624,6 +624,7 @@ api.post("/claude-code", async (c) => {
       history: history || state.messages || [],
       images,
       mode,
+      conversationId,
       callbacks: {
         onText: (text) => {
           stream.writeSSE({ data: JSON.stringify({ text }) });
