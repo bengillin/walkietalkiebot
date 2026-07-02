@@ -508,8 +508,7 @@ export const ChatTimeline = memo(function ChatTimeline({
 
         // For assistant messages, find images from the preceding user message
         let referencedImages:
-          | { dataUrl: string; description?: string; fileName: string }[]
-          | undefined
+          { dataUrl: string; description?: string; fileName: string }[] | undefined
         if (message.role === 'assistant' && index > 0) {
           const prevMsg = sortedMessages[index - 1]
           if (prevMsg.role === 'user' && prevMsg.images && prevMsg.images.length > 0) {

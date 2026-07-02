@@ -1,12 +1,7 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 
 export type ThemeName =
-  | 'mccallister'
-  | 'imessage'
-  | 'aol'
-  | 'classic-mac'
-  | 'geocities'
-  | 'apple-1984'
+  'mccallister' | 'imessage' | 'aol' | 'classic-mac' | 'geocities' | 'apple-1984'
 
 export interface Theme {
   name: ThemeName

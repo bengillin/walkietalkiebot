@@ -130,8 +130,7 @@ export function updateLinerNotes(id: string, linerNotes: string | null): void {
 export function getLinerNotes(id: string): string | null {
   const db = getDb()
   const row = db.prepare('SELECT liner_notes FROM conversations WHERE id = ?').get(id) as
-    | { liner_notes: string | null }
-    | undefined
+    { liner_notes: string | null } | undefined
   return row?.liner_notes || null
 }
 
