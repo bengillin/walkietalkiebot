@@ -1,0 +1,11 @@
+dist/
+node_modules/
+mcp-server/node_modules/
+mcp-server/dist/
+server/**/*.js
+coverage/
+test-results/
+playwright-report/
+package-lock.json
+site/
+*.md

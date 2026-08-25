@@ -37,22 +37,30 @@ export interface CreateMessageInput {
 
 export function getMessagesForConversation(conversationId: string): MessageRow[] {
   const db = getDb()
-  return db.prepare(`
+  return db
+    .prepare(
+      `
     SELECT id, conversation_id, role, content, timestamp, position, source
     FROM messages
     WHERE conversation_id = ?
     ORDER BY position ASC
-  `).all(conversationId) as MessageRow[]
+  `,
+    )
+    .all(conversationId) as MessageRow[]
 }
 
 export function getImagesForMessage(messageId: string): MessageImageRow[] {
   const db = getDb()
-  return db.prepare(`
+  return db
+    .prepare(
+      `
     SELECT id, message_id, data_url, file_name, description, position
     FROM message_images
     WHERE message_id = ?
     ORDER BY position ASC
-  `).all(messageId) as MessageImageRow[]
+  `,
+    )
+    .all(messageId) as MessageImageRow[]
 }
 
 export function getImagesForMessages(messageIds: string[]): Map<string, MessageImageRow[]> {
@@ -60,12 +68,16 @@ export function getImagesForMessages(messageIds: string[]): Map<string, MessageI
 
   const db = getDb()
   const placeholders = messageIds.map(() => '?').join(', ')
-  const rows = db.prepare(`
+  const rows = db
+    .prepare(
+      `
     SELECT id, message_id, data_url, file_name, description, position
     FROM message_images
     WHERE message_id IN (${placeholders})
     ORDER BY position ASC
-  `).all(...messageIds) as MessageImageRow[]
+  `,
+    )
+    .all(...messageIds) as MessageImageRow[]
 
   const imageMap = new Map<string, MessageImageRow[]>()
   for (const row of rows) {
@@ -83,17 +95,23 @@ export function createMessage(input: CreateMessageInput): MessageRow {
   const source = input.source || 'web'
 
   // Get next position
-  const posRow = db.prepare(`
+  const posRow = db
+    .prepare(
+      `
     SELECT COALESCE(MAX(position), -1) + 1 as next_pos
     FROM messages
     WHERE conversation_id = ?
-  `).get(input.conversationId) as { next_pos: number }
+  `,
+    )
+    .get(input.conversationId) as { next_pos: number }
   const position = posRow.next_pos
 
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO messages (id, conversation_id, role, content, timestamp, position, source)
     VALUES (?, ?, ?, ?, ?, ?, ?)
-  `).run(input.id, input.conversationId, input.role, input.content, timestamp, position, source)
+  `,
+  ).run(input.id, input.conversationId, input.role, input.content, timestamp, position, source)
 
   // Insert images if provided
   if (input.images && input.images.length > 0) {
@@ -123,7 +141,9 @@ export function createMessage(input: CreateMessageInput): MessageRow {
 
 export function updateImageDescription(imageId: string, description: string): boolean {
   const db = getDb()
-  const result = db.prepare('UPDATE message_images SET description = ? WHERE id = ?').run(description, imageId)
+  const result = db
+    .prepare('UPDATE message_images SET description = ? WHERE id = ?')
+    .run(description, imageId)
   return result.changes > 0
 }
 
@@ -135,6 +155,8 @@ export function deleteMessage(id: string): boolean {
 
 export function countMessagesInConversation(conversationId: string): number {
   const db = getDb()
-  const row = db.prepare('SELECT COUNT(*) as count FROM messages WHERE conversation_id = ?').get(conversationId) as { count: number }
+  const row = db
+    .prepare('SELECT COUNT(*) as count FROM messages WHERE conversation_id = ?')
+    .get(conversationId) as { count: number }
   return row.count
 }

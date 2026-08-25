@@ -14,9 +14,14 @@ import { updateState } from './state.js'
 import { getNotificationDispatcher } from './notifications/dispatcher.js'
 import { MacOSNotificationChannel } from './notifications/macos.js'
 import { getJobManager } from './jobs/manager.js'
+import { authMiddleware, getAuthToken } from './auth.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const distPath = join(__dirname, '..', 'dist')
+
+// Max accepted request body. Generous enough for base64 image payloads;
+// override with WTB_MAX_BODY_BYTES.
+const MAX_BODY_BYTES = Number(process.env.WTB_MAX_BODY_BYTES) || 50 * 1024 * 1024
 
 let server: Server | import('https').Server | null = null
 
@@ -42,9 +47,13 @@ export function startServer(port: number = 5173): Promise<void> {
       const convos = conversationsRepo.listConversations(1, 0)
       if (convos.length > 0) {
         const msgs = messagesRepo.getMessagesForConversation(convos[0].id)
-        const stateMessages = msgs.map(m => ({ role: m.role, content: m.content, timestamp: m.timestamp }))
-        const lastUser = msgs.filter(m => m.role === 'user').pop()
-        const lastAssistant = msgs.filter(m => m.role === 'assistant').pop()
+        const stateMessages = msgs.map((m) => ({
+          role: m.role,
+          content: m.content,
+          timestamp: m.timestamp,
+        }))
+        const lastUser = msgs.filter((m) => m.role === 'user').pop()
+        const lastAssistant = msgs.filter((m) => m.role === 'assistant').pop()
         updateState({
           messages: stateMessages,
           lastUserMessage: lastUser?.content || '',
@@ -64,6 +73,10 @@ export function startServer(port: number = 5173): Promise<void> {
     jobManager.init()
 
     const app = new Hono()
+
+    // Optional shared-secret auth (no-op unless WTB_AUTH_TOKEN is set). Gates both
+    // the API and the web UI; must run before any route.
+    app.use('*', authMiddleware)
 
     // Mount API routes
     app.route('/api', api)
@@ -94,19 +107,32 @@ export function startServer(port: number = 5173): Promise<void> {
       for (const [key, value] of Object.entries(req.headers)) {
         if (value) {
           if (Array.isArray(value)) {
-            value.forEach(v => headers.append(key, v))
+            value.forEach((v) => headers.append(key, v))
           } else {
             headers.set(key, value)
           }
         }
       }
 
-      // Collect request body for POST/PUT/PATCH
+      // Collect request body for POST/PUT/PATCH, bounded to avoid memory-exhaustion DoS.
       let body: Buffer | null = null
       if (req.method && ['POST', 'PUT', 'PATCH'].includes(req.method)) {
         const chunks: Buffer[] = []
+        let total = 0
+        let tooLarge = false
         for await (const chunk of req) {
+          total += (chunk as Buffer).length
+          if (total > MAX_BODY_BYTES) {
+            tooLarge = true
+            break
+          }
           chunks.push(chunk as Buffer)
+        }
+        if (tooLarge) {
+          req.destroy()
+          res.writeHead(413, { 'content-type': 'application/json' })
+          res.end(JSON.stringify({ error: 'Payload too large' }))
+          return
         }
         body = Buffer.concat(chunks)
       }
@@ -149,7 +175,12 @@ export function startServer(port: number = 5173): Promise<void> {
     }
 
     server.listen(port, () => {
-      console.log(`Talkie server running at ${protocol}://localhost:${port}`)
+      const url = `${protocol}://localhost:${port}`
+      console.log(`Talkie server running at ${url}`)
+      const authToken = getAuthToken()
+      if (authToken) {
+        console.log(`Auth enabled. Open the UI with: ${url}/?token=${authToken}`)
+      }
       resolve()
     })
 

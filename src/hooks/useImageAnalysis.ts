@@ -19,37 +19,41 @@ export function useImageAnalysis({
   updateFile,
   imageAnalyses,
 }: UseImageAnalysisParams) {
-  const handleFilesAdd = useCallback(async (files: DroppedFile[]) => {
-    addFiles(files)
+  const handleFilesAdd = useCallback(
+    async (files: DroppedFile[]) => {
+      addFiles(files)
 
-    for (const file of files) {
-      const analysisId = addImageAnalysis({
-        fileId: file.id,
-        fileName: file.name,
-        description: '',
-        status: 'analyzing',
-      })
-
-      analyzeImageViaClaudeCode(file)
-        .then((description) => {
-          updateImageAnalysis(analysisId, { description, status: 'complete' })
-          updateFile(file.id, { description })
-          api.updateImageDescription(file.id, description).catch(() => {})
+      for (const file of files) {
+        const analysisId = addImageAnalysis({
+          fileId: file.id,
+          fileName: file.name,
+          description: '',
+          status: 'analyzing',
         })
-        .catch((err) => {
-          console.error('Image analysis failed:', err)
-          updateImageAnalysis(analysisId, { status: 'error', error: err.message })
-        })
-    }
-  }, [addFiles, addImageAnalysis, updateImageAnalysis, updateFile])
 
-  const analysisStatuses: ImageAnalysisStatus[] = useMemo(() =>
-    imageAnalyses.map(a => ({
-      fileId: a.fileId,
-      status: a.status,
-      description: a.description,
-    })),
-    [imageAnalyses]
+        analyzeImageViaClaudeCode(file)
+          .then((description) => {
+            updateImageAnalysis(analysisId, { description, status: 'complete' })
+            updateFile(file.id, { description })
+            api.updateImageDescription(file.id, description).catch(() => {})
+          })
+          .catch((err) => {
+            console.error('Image analysis failed:', err)
+            updateImageAnalysis(analysisId, { status: 'error', error: err.message })
+          })
+      }
+    },
+    [addFiles, addImageAnalysis, updateImageAnalysis, updateFile],
+  )
+
+  const analysisStatuses: ImageAnalysisStatus[] = useMemo(
+    () =>
+      imageAnalyses.map((a) => ({
+        fileId: a.fileId,
+        status: a.status,
+        description: a.description,
+      })),
+    [imageAnalyses],
   )
 
   return { handleFilesAdd, analysisStatuses }

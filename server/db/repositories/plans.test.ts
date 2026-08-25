@@ -1,13 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { resetTestDb } from '../../test/helpers.js'
 import { createConversation } from './conversations.js'
-import {
-  listPlans,
-  getPlan,
-  createPlan,
-  updatePlan,
-  deletePlan,
-} from './plans.js'
+import { listPlans, getPlan, createPlan, updatePlan, deletePlan } from './plans.js'
 
 beforeEach(() => {
   resetTestDb()

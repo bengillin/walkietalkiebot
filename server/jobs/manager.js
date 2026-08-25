@@ -198,7 +198,17 @@ class JobManager {
             data: JSON.stringify({ status, result: fullResponse, error })
           });
           const dispatcher = getNotificationDispatcher();
-          const notification = status === "completed" ? { type: "job_completed", jobId, title: "Talkie: Task complete", body: fullResponse.slice(0, 80) || "Done." } : { type: "job_failed", jobId, title: "Talkie: Task failed", body: error || "Unknown error" };
+          const notification = status === "completed" ? {
+            type: "job_completed",
+            jobId,
+            title: "Talkie: Task complete",
+            body: fullResponse.slice(0, 80) || "Done."
+          } : {
+            type: "job_failed",
+            jobId,
+            title: "Talkie: Task failed",
+            body: error || "Unknown error"
+          };
           dispatcher.dispatch(notification).catch((e) => console.error("Notification dispatch failed:", e));
           this.activeHandles.delete(jobId);
           const timeout2 = this.activeTimeouts.get(jobId);

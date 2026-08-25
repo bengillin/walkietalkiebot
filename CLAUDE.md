@@ -14,7 +14,7 @@ A voice-first, cassette tape-themed interface for Claude Code with 6 retro theme
 
 - `npm run dev` — Start Vite dev server (frontend only, no API)
 - `npm run build` — TypeScript check + Vite build + esbuild server bundle
-- `npm run test` — Run all tests (client + server, 140 tests across 10 files)
+- `npm run test` — Run all tests (client + server, ~180 unit tests across 15 files)
 - `npm run test:client` — Run frontend tests only (vitest, jsdom)
 - `npm run test:server` — Run server tests only (vitest, node, in-memory SQLite)
 - `wtb-server start -f` — Start server in foreground (serves API + built frontend)
@@ -91,13 +91,14 @@ site/                   Marketing site (walkietalkie.bot)
 ## Key Patterns
 
 - **HTTP localhost**: Localhost is a secure context — no HTTPS needed. HTTPS auto-enabled only when Tailscale certs exist at `~/.wtb/`
+- **Optional auth**: `WTB_AUTH_TOKEN` enables a shared-secret gate (`server/auth.ts`, mounted app-level in `server/index.ts`). Programmatic clients (MCP HTTP proxy) send `Authorization: Bearer <token>`; the web UI presents the token once via `?token=` which sets a `SameSite=Strict` cookie. No-op when unset. Set it before exposing the server beyond localhost — the server runs `claude -p` with `bypassPermissions`, so the API is equivalent to shell access.
 - **Claude Code only**: All communication through Claude Code CLI (`claude -p`). No Direct API mode.
 - **Configurable modes**: 5 built-in modes (Voice, Pair, Architect, Code Review, Debug) defined in `server/modes.ts`. Custom modes loaded from `~/.wtb/modes/*.json`. Modes control prompt instructions and plan detection. Per-conversation mode persisted in DB. Switchable via header dropdown or voice ("switch to architect mode")
 - **Parallel job orchestration**: Up to 3 concurrent background jobs. `POST /api/jobs/orchestrate` dispatches multiple jobs with different modes. Voice command: "run code-review and architect on this" spawns parallel agents. Each job streams independently via SSE.
 - **Prompt builder**: Pure function in `server/promptBuilder.ts` assembles context, images, mode instruction, and plan detection into the prompt. Tested independently.
 - **Persistence**: localStorage as cache, SQLite (`~/.wtb/wtb.db`) as source of truth. Auto-migration on first server connect.
 - **IPC**: Frontend posts to `/api/send`, MCP tools poll `/api/pending`, respond via `/api/respond`
-- **One-shot processes**: Each `/api/claude-code` call spawns a fresh `claude -p` with `--no-session-persistence --permission-mode bypassPermissions`
+- **Session resumption**: When `/api/claude-code` receives a conversation UUID, the turn runs inside a persistent Claude Code session — `--session-id <uuid>` to create (seeded with recent history), `--resume <uuid>` for later turns (only the new message is sent; Claude Code holds + caches the conversation). An in-process `establishedSessions` set picks the first strategy; on a session fault (`No conversation found` / `already in use`) before any content streams, `spawnClaude` transparently retries with the other strategy, so expired sessions and post-restart state both self-heal. Calls without a conversation id (jobs, image analysis, raw mode) keep the legacy one-shot `--no-session-persistence` behavior. All via `--permission-mode bypassPermissions`.
 - **SSE streaming**: Claude Code events and job events use Server-Sent Events
 - **Theming**: React context applies `data-theme` attribute to root; each theme has a dedicated CSS file with custom properties for all UI elements
 - **Tool identity**: Centralized in `lib/toolConfig.ts` — maps 40+ tools to icons, labels, display names, and 6 categories (fs, exec, voice, data, plan, media) with per-theme colors

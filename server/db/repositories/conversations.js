@@ -1,20 +1,24 @@
 import { getDb } from "../index.js";
 function listConversations(limit = 50, offset = 0) {
   const db = getDb();
-  return db.prepare(`
+  return db.prepare(
+    `
     SELECT id, title, created_at, updated_at, project_id, parent_id, mode
     FROM conversations
     ORDER BY updated_at DESC
     LIMIT ? OFFSET ?
-  `).all(limit, offset);
+  `
+  ).all(limit, offset);
 }
 function getConversation(id) {
   const db = getDb();
-  const row = db.prepare(`
+  const row = db.prepare(
+    `
     SELECT id, title, created_at, updated_at, project_id, parent_id, mode
     FROM conversations
     WHERE id = ?
-  `).get(id);
+  `
+  ).get(id);
   return row || null;
 }
 function createConversation(input) {
@@ -22,10 +26,12 @@ function createConversation(input) {
   const now = Date.now();
   const title = input.title || "New conversation";
   const mode = input.mode || "voice";
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO conversations (id, title, created_at, updated_at, project_id, parent_id, mode)
     VALUES (?, ?, ?, ?, ?, ?, ?)
-  `).run(input.id, title, now, now, input.projectId || null, input.parentId || null, mode);
+  `
+  ).run(input.id, title, now, now, input.projectId || null, input.parentId || null, mode);
   return {
     id: input.id,
     title,
@@ -70,7 +76,11 @@ function touchConversation(id) {
 }
 function updateLinerNotes(id, linerNotes) {
   const db = getDb();
-  db.prepare("UPDATE conversations SET liner_notes = ?, updated_at = ? WHERE id = ?").run(linerNotes, Date.now(), id);
+  db.prepare("UPDATE conversations SET liner_notes = ?, updated_at = ? WHERE id = ?").run(
+    linerNotes,
+    Date.now(),
+    id
+  );
 }
 function getLinerNotes(id) {
   const db = getDb();
@@ -79,7 +89,11 @@ function getLinerNotes(id) {
 }
 function updateMode(id, mode) {
   const db = getDb();
-  db.prepare("UPDATE conversations SET mode = ?, updated_at = ? WHERE id = ?").run(mode, Date.now(), id);
+  db.prepare("UPDATE conversations SET mode = ?, updated_at = ? WHERE id = ?").run(
+    mode,
+    Date.now(),
+    id
+  );
 }
 function countConversations() {
   const db = getDb();

@@ -52,25 +52,28 @@ export function TapeDeck({
   contextIds = [],
   onToggleContext,
 }: TapeDeckProps) {
-  const [manualInput, setManualInput] = useState('')  // What user typed manually
+  const [manualInput, setManualInput] = useState('') // What user typed manually
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const deckRef = useRef<HTMLDivElement>(null)
   const justSubmittedRef = useRef(false)
   const wasListeningRef = useRef(false)
-  const lastIncorporatedTranscriptRef = useRef('')  // Track what transcript we've already incorporated
+  const lastIncorporatedTranscriptRef = useRef('') // Track what transcript we've already incorporated
 
   // Compute display value: manual input + voice transcript when listening
-  const inputValue = isListening && transcript
-    ? (manualInput ? manualInput + ' ' + transcript : transcript)
-    : manualInput
+  const inputValue =
+    isListening && transcript
+      ? manualInput
+        ? manualInput + ' ' + transcript
+        : transcript
+      : manualInput
 
   // When listening stops, commit any transcript to manual input (only if it's new)
   useEffect(() => {
     if (!isListening && wasListeningRef.current && !justSubmittedRef.current) {
       // Listening just stopped - incorporate transcript into manual input if it's new
       if (transcript && transcript !== lastIncorporatedTranscriptRef.current) {
-        setManualInput(prev => prev ? prev + ' ' + transcript : transcript)
+        setManualInput((prev) => (prev ? prev + ' ' + transcript : transcript))
         lastIncorporatedTranscriptRef.current = transcript
         // Clear the store transcript so it doesn't get re-added on next listen cycle
         onClearTranscript?.()
@@ -85,7 +88,7 @@ export function TapeDeck({
       justSubmittedRef.current = true
       onSubmit(text)
       setManualInput('')
-      lastIncorporatedTranscriptRef.current = ''  // Reset so new transcripts can be incorporated
+      lastIncorporatedTranscriptRef.current = '' // Reset so new transcripts can be incorporated
       // Reset the flag after a short delay
       setTimeout(() => {
         justSubmittedRef.current = false
@@ -141,7 +144,7 @@ export function TapeDeck({
       for (const entry of entries) {
         document.documentElement.style.setProperty(
           '--tape-deck-height',
-          `${entry.borderBoxSize[0].blockSize}px`
+          `${entry.borderBoxSize[0].blockSize}px`,
         )
       }
     })
@@ -165,13 +168,15 @@ export function TapeDeck({
     const files = e.target.files
     if (!files || files.length === 0 || !onFilesAdd) return
 
-    const imageFiles = Array.from(files).filter(f =>
-      f.type.startsWith('image/') || /\.(png|jpe?g|gif|webp|heic|heif|svg|bmp|tiff?)$/i.test(f.name)
+    const imageFiles = Array.from(files).filter(
+      (f) =>
+        f.type.startsWith('image/') ||
+        /\.(png|jpe?g|gif|webp|heic|heif|svg|bmp|tiff?)$/i.test(f.name),
     )
     if (imageFiles.length === 0) return
 
     const droppedFiles: import('../../types').DroppedFile[] = []
-    imageFiles.forEach(file => {
+    imageFiles.forEach((file) => {
       const reader = new FileReader()
       reader.onload = () => {
         droppedFiles.push({
@@ -193,7 +198,10 @@ export function TapeDeck({
   }
 
   return (
-    <div ref={deckRef} className={`tape-deck ${isListening ? 'tape-deck--recording' : ''} ${isEjected ? 'tape-deck--ejected' : ''}`}>
+    <div
+      ref={deckRef}
+      className={`tape-deck ${isListening ? 'tape-deck--recording' : ''} ${isEjected ? 'tape-deck--ejected' : ''}`}
+    >
       {/* Tape collection drawer */}
       <TapeCollection
         conversations={conversations}
@@ -221,7 +229,7 @@ export function TapeDeck({
             title="Hold to record"
           >
             <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
-              <path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/>
+              <path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z" />
             </svg>
           </button>
         )}
@@ -234,7 +242,10 @@ export function TapeDeck({
             value={inputValue}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
-            placeholder={disabledReason || (isListening ? `Listening... say "${triggerWord}" to send` : 'Type a message...')}
+            placeholder={
+              disabledReason ||
+              (isListening ? `Listening... say "${triggerWord}" to send` : 'Type a message...')
+            }
             disabled={isDisabled || isEjected}
             rows={1}
           />
@@ -252,7 +263,7 @@ export function TapeDeck({
                 title="Attach image"
               >
                 <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
-                  <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                  <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
                 </svg>
               </button>
               <input

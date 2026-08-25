@@ -80,10 +80,7 @@ function getAllModes() {
   if (!cachedModes) {
     const custom = loadCustomModes();
     const customNames = new Set(custom.map((m) => m.name));
-    cachedModes = [
-      ...BUILT_IN_MODES.filter((m) => !customNames.has(m.name)),
-      ...custom
-    ];
+    cachedModes = [...BUILT_IN_MODES.filter((m) => !customNames.has(m.name)), ...custom];
   }
   return cachedModes;
 }
@@ -94,7 +91,12 @@ function getMode(name) {
   return getAllModes().find((m) => m.name === name) || BUILT_IN_MODES[0];
 }
 function getModeInfoList() {
-  return getAllModes().map(({ name, label, description, icon }) => ({ name, label, description, icon }));
+  return getAllModes().map(({ name, label, description, icon }) => ({
+    name,
+    label,
+    description,
+    icon
+  }));
 }
 function reloadModes() {
   cachedModes = null;

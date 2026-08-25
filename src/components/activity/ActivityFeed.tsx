@@ -64,6 +64,7 @@ export function ActivityFeed({ activities, isVisible }: ActivityFeedProps) {
       }, 5000)
       return () => clearTimeout(timer)
     }
+    return undefined
   }, [isVisible, hasRunning, activities.length])
 
   if (!shouldShow || activities.length === 0) {
@@ -80,10 +81,7 @@ export function ActivityFeed({ activities, isVisible }: ActivityFeedProps) {
         <span className="activity-feed__title">Activity</span>
         <span className="activity-feed__count">{activities.length} actions</span>
         {hasMore && (
-          <button
-            className="activity-feed__toggle"
-            onClick={() => setIsExpanded(!isExpanded)}
-          >
+          <button className="activity-feed__toggle" onClick={() => setIsExpanded(!isExpanded)}>
             {isExpanded ? 'Show less' : 'Show all'}
           </button>
         )}
@@ -94,9 +92,7 @@ export function ActivityFeed({ activities, isVisible }: ActivityFeedProps) {
             key={activity.id}
             className={`activity-feed__item activity-feed__item--${activity.status || 'running'} ${getToolCategoryClass(activity.tool || '')}`}
           >
-            <span className="activity-feed__icon">
-              {getToolIcon(activity.tool || '')}
-            </span>
+            <span className="activity-feed__icon">{getToolIcon(activity.tool || '')}</span>
             <span className="activity-feed__label">
               {getToolLabel(activity.tool || '')}
               {activity.input && (
@@ -105,15 +101,9 @@ export function ActivityFeed({ activities, isVisible }: ActivityFeedProps) {
                 </span>
               )}
             </span>
-            {activity.status === 'running' && (
-              <span className="activity-feed__spinner" />
-            )}
-            {activity.status === 'complete' && (
-              <span className="activity-feed__check">✓</span>
-            )}
-            {activity.status === 'error' && (
-              <span className="activity-feed__error">✗</span>
-            )}
+            {activity.status === 'running' && <span className="activity-feed__spinner" />}
+            {activity.status === 'complete' && <span className="activity-feed__check">✓</span>}
+            {activity.status === 'error' && <span className="activity-feed__error">✗</span>}
           </div>
         ))}
       </div>

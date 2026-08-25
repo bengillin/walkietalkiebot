@@ -21,7 +21,10 @@ function findTsFiles(dir, base = dir) {
 
 const serverFiles = findTsFiles('server')
 
-console.log('Building server files:', serverFiles.map(f => relative('.', f)))
+console.log(
+  'Building server files:',
+  serverFiles.map((f) => relative('.', f)),
+)
 
 await build({
   entryPoints: serverFiles,

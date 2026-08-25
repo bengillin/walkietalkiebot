@@ -26,7 +26,7 @@ export function useWakeWord({
 }: UseWakeWordOptions = {}): UseWakeWordResult {
   const [isListening, setIsListening] = useState(false)
   const [lastHeard, setLastHeard] = useState('')
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const recognitionRef = useRef<any>(null)
   const onWakeWordRef = useRef(onWakeWord)
   const enabledRef = useRef(enabled)
@@ -47,32 +47,35 @@ export function useWakeWord({
     return text
       .toLowerCase()
       .replace(/[^\w\s]/g, '') // remove punctuation
-      .replace(/\s+/g, ' ')    // normalize whitespace
+      .replace(/\s+/g, ' ') // normalize whitespace
       .trim()
   }, [])
 
   // Check if text contains the wake word
-  const containsWakeWord = useCallback((text: string, wake: string) => {
-    const normalText = normalize(text)
-    const normalWake = normalize(wake)
+  const containsWakeWord = useCallback(
+    (text: string, wake: string) => {
+      const normalText = normalize(text)
+      const normalWake = normalize(wake)
 
-    // Exact match or contains
-    if (normalText.includes(normalWake)) {
-      return true
-    }
+      // Exact match or contains
+      if (normalText.includes(normalWake)) {
+        return true
+      }
 
-    // Also try common mishearings
-    const variants = [
-      normalWake,
-      normalWake.replace('hey', 'hay'),
-      normalWake.replace('hey', 'a'),
-      normalWake.replace('talkie', 'talk boy'),
-      normalWake.replace('talkie', 'talk voice'),
-      normalWake.replace('talkie', 'doc boy'),
-    ]
+      // Also try common mishearings
+      const variants = [
+        normalWake,
+        normalWake.replace('hey', 'hay'),
+        normalWake.replace('hey', 'a'),
+        normalWake.replace('talkie', 'talk boy'),
+        normalWake.replace('talkie', 'talk voice'),
+        normalWake.replace('talkie', 'doc boy'),
+      ]
 
-    return variants.some(v => normalText.includes(v))
-  }, [normalize])
+      return variants.some((v) => normalText.includes(v))
+    },
+    [normalize],
+  )
 
   useEffect(() => {
     if (!isSupported || !enabled) {
@@ -85,8 +88,7 @@ export function useWakeWord({
       return
     }
 
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     const recognition = new SpeechRecognition()
 
     recognition.continuous = true

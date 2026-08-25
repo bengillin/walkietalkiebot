@@ -7,11 +7,14 @@ import './ChatTimeline.css'
 
 interface ChatTimelineProps {
   messages: Message[]
-  activities: Activity[]              // Live activities (current turn)
-  storedActivities: StoredActivity[]  // Historical activities (persisted)
+  activities: Activity[] // Live activities (current turn)
+  storedActivities: StoredActivity[] // Historical activities (persisted)
   avatarState: AvatarState
   streamingText: string
-  onImageClick?: (image: { dataUrl: string; description?: string; fileName: string }, allImages?: { dataUrl: string; description?: string; fileName: string }[]) => void
+  onImageClick?: (
+    image: { dataUrl: string; description?: string; fileName: string },
+    allImages?: { dataUrl: string; description?: string; fileName: string }[],
+  ) => void
   onPinToLinerNotes?: (content: string) => void
 }
 
@@ -72,7 +75,9 @@ function ToolBadge({ activity }: { activity: DisplayActivity }) {
     : ''
 
   return (
-    <div className={`tool-badge ${getToolCategoryClass(activity.tool)} ${isRunning ? 'running' : ''} ${isError ? 'error' : ''}`}>
+    <div
+      className={`tool-badge ${getToolCategoryClass(activity.tool)} ${isRunning ? 'running' : ''} ${isError ? 'error' : ''}`}
+    >
       <span className="tool-icon">{icon}</span>
       <span className="tool-name">{getToolDisplayName(activity.tool)}</span>
       {shortInput && <span className="tool-input">{shortInput}</span>}
@@ -89,7 +94,7 @@ function ToolBadge({ activity }: { activity: DisplayActivity }) {
 function CollapsibleTools({
   activities,
   isLive = false,
-  messageId: _messageId
+  messageId: _messageId,
 }: {
   activities: DisplayActivity[]
   isLive?: boolean
@@ -105,10 +110,10 @@ function CollapsibleTools({
   if (activities.length === 0) return null
 
   // Get unique tool names for collapsed indicator
-  const toolNames = [...new Set(activities.map(a => a.tool))]
+  const toolNames = [...new Set(activities.map((a) => a.tool))]
 
-  const hasRunning = activities.some(a => a.status === 'running')
-  const hasError = activities.some(a => a.status === 'error')
+  const hasRunning = activities.some((a) => a.status === 'running')
+  const hasError = activities.some((a) => a.status === 'error')
 
   return (
     <div className={`collapsible-tools ${isExpanded ? 'expanded' : 'collapsed'}`}>
@@ -120,12 +125,14 @@ function CollapsibleTools({
             disabled={isLive}
           >
             <span className="collapsible-tools__icons">
-              {toolNames.slice(0, 4).map(name => (
+              {toolNames.slice(0, 4).map((name) => (
                 <span key={name} className="collapsible-tools__icon">
                   {getToolIcon(name)}
                 </span>
               ))}
-              {toolNames.length > 4 && <span className="collapsible-tools__more">+{toolNames.length - 4}</span>}
+              {toolNames.length > 4 && (
+                <span className="collapsible-tools__more">+{toolNames.length - 4}</span>
+              )}
             </span>
             <span className="collapsible-tools__count">
               {activities.length} tool{activities.length !== 1 ? 's' : ''}
@@ -144,12 +151,14 @@ function CollapsibleTools({
           onClick={() => setIsExpanded(true)}
         >
           <span className="collapsible-tools__icons">
-            {toolNames.slice(0, 4).map(name => (
+            {toolNames.slice(0, 4).map((name) => (
               <span key={name} className="collapsible-tools__icon">
                 {getToolIcon(name)}
               </span>
             ))}
-            {toolNames.length > 4 && <span className="collapsible-tools__more">+{toolNames.length - 4}</span>}
+            {toolNames.length > 4 && (
+              <span className="collapsible-tools__more">+{toolNames.length - 4}</span>
+            )}
           </span>
           <span className="collapsible-tools__count">
             {activities.length} tool{activities.length !== 1 ? 's' : ''}
@@ -185,7 +194,7 @@ function renderTextWithLinks(text: string): (string | JSX.Element)[] {
         }}
       >
         {url}
-      </a>
+      </a>,
     )
     lastIndex = start + url.length
   }
@@ -218,7 +227,10 @@ function MessageBubble({
   referencedImages,
 }: {
   message: Message
-  onImageClick?: (image: { dataUrl: string; description?: string; fileName: string }, allImages?: { dataUrl: string; description?: string; fileName: string }[]) => void
+  onImageClick?: (
+    image: { dataUrl: string; description?: string; fileName: string },
+    allImages?: { dataUrl: string; description?: string; fileName: string }[],
+  ) => void
   onPinToLinerNotes?: (content: string) => void
   trackNumber: number
   activities?: DisplayActivity[]
@@ -232,22 +244,19 @@ function MessageBubble({
 
   // Build gallery array for lightbox navigation
   const galleryImages = hasImages
-    ? message.images!.map(img => ({
+    ? message.images!.map((img) => ({
         dataUrl: img.dataUrl,
         description: img.description,
         fileName: img.fileName,
       }))
     : hasRefImages
-    ? referencedImages
-    : undefined
+      ? referencedImages
+      : undefined
 
   return (
     <div className={`message-wrapper ${isUser ? 'user' : 'assistant'}`}>
       {!isUser && activities.length > 0 && (
-        <CollapsibleTools
-          activities={activities}
-          messageId={message.id}
-        />
+        <CollapsibleTools activities={activities} messageId={message.id} />
       )}
       <div className={`message-bubble ${isUser ? 'user' : 'assistant'}`}>
         <div className="message-bubble-content">
@@ -259,24 +268,27 @@ function MessageBubble({
                     src={img.dataUrl}
                     alt={img.fileName}
                     className="message-image-thumb"
-                    onClick={() => onImageClick?.({
-                      dataUrl: img.dataUrl,
-                      description: img.description,
-                      fileName: img.fileName
-                    }, galleryImages)}
+                    onClick={() =>
+                      onImageClick?.(
+                        {
+                          dataUrl: img.dataUrl,
+                          description: img.description,
+                          fileName: img.fileName,
+                        },
+                        galleryImages,
+                      )
+                    }
                   />
                   {img.description && (
                     <span className="message-image-analyzed" title="Analyzed">
                       <svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10">
-                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                       </svg>
                     </span>
                   )}
                 </div>
               ))}
-              {imageCount > 1 && (
-                <span className="message-images-count">{imageCount} images</span>
-              )}
+              {imageCount > 1 && <span className="message-images-count">{imageCount} images</span>}
             </div>
           )}
           {hasRefImages && (
@@ -305,7 +317,7 @@ function MessageBubble({
             title="Pin to liner notes"
           >
             <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
-              <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+              <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
             </svg>
             Liner Notes
           </button>
@@ -335,17 +347,16 @@ function StreamingBubble({
   trackNumber: number
   activities?: DisplayActivity[]
   referencedImages?: { dataUrl: string; description?: string; fileName: string }[]
-  onImageClick?: (image: { dataUrl: string; description?: string; fileName: string }, allImages?: { dataUrl: string; description?: string; fileName: string }[]) => void
+  onImageClick?: (
+    image: { dataUrl: string; description?: string; fileName: string },
+    allImages?: { dataUrl: string; description?: string; fileName: string }[],
+  ) => void
 }) {
   const hasRefImages = referencedImages && referencedImages.length > 0
   return (
     <div className="message-wrapper assistant">
       {activities.length > 0 && (
-        <CollapsibleTools
-          activities={activities}
-          isLive={true}
-          messageId="streaming"
-        />
+        <CollapsibleTools activities={activities} isLive={true} messageId="streaming" />
       )}
       <div className="message-bubble assistant streaming">
         <div className="message-bubble-content">
@@ -381,7 +392,7 @@ function StreamingBubble({
 function buildMessageTimeline(
   messages: Message[],
   storedActivities: StoredActivity[],
-  liveActivities: Activity[]
+  liveActivities: Activity[],
 ): Map<string, DisplayActivity[]> {
   const messageActivities = new Map<string, DisplayActivity[]>()
 
@@ -392,7 +403,7 @@ function buildMessageTimeline(
   for (const stored of storedActivities) {
     // Find the next assistant message after this activity
     const nextAssistantMsg = sortedMessages.find(
-      m => m.role === 'assistant' && m.timestamp > stored.timestamp
+      (m) => m.role === 'assistant' && m.timestamp > stored.timestamp,
     )
 
     if (nextAssistantMsg) {
@@ -404,19 +415,19 @@ function buildMessageTimeline(
 
   // Then, map any completed live activities (for the current turn before finalization)
   const completedLive = liveActivities
-    .filter(a => (a.type === 'tool_start' || a.type === 'thinking') && a.status === 'complete')
+    .filter((a) => (a.type === 'tool_start' || a.type === 'thinking') && a.status === 'complete')
     .map(liveToDisplay)
     .filter((a): a is DisplayActivity => a !== null)
 
   for (const activity of completedLive) {
     const nextAssistantMsg = sortedMessages.find(
-      m => m.role === 'assistant' && m.timestamp > activity.timestamp
+      (m) => m.role === 'assistant' && m.timestamp > activity.timestamp,
     )
 
     if (nextAssistantMsg) {
       const existing = messageActivities.get(nextAssistantMsg.id) || []
       // Avoid duplicates (in case activity is both stored and live)
-      if (!existing.some(e => e.id === activity.id)) {
+      if (!existing.some((e) => e.id === activity.id)) {
         existing.push(activity)
         messageActivities.set(nextAssistantMsg.id, existing)
       }
@@ -427,25 +438,19 @@ function buildMessageTimeline(
 }
 
 // Get live activities that don't belong to any message yet (pending)
-function getPendingActivities(
-  messages: Message[],
-  activities: Activity[]
-): DisplayActivity[] {
-  const toolActivities = activities.filter(
-    a => a.type === 'tool_start' || a.type === 'thinking'
-  )
+function getPendingActivities(messages: Message[], activities: Activity[]): DisplayActivity[] {
+  const toolActivities = activities.filter((a) => a.type === 'tool_start' || a.type === 'thinking')
 
   if (toolActivities.length === 0) return []
 
   // Get the latest assistant message timestamp
-  const assistantMessages = messages.filter(m => m.role === 'assistant')
-  const latestAssistantTime = assistantMessages.length > 0
-    ? Math.max(...assistantMessages.map(m => m.timestamp))
-    : 0
+  const assistantMessages = messages.filter((m) => m.role === 'assistant')
+  const latestAssistantTime =
+    assistantMessages.length > 0 ? Math.max(...assistantMessages.map((m) => m.timestamp)) : 0
 
   // Return activities that are after the latest assistant message
   return toolActivities
-    .filter(a => a.timestamp > latestAssistantTime)
+    .filter((a) => a.timestamp > latestAssistantTime)
     .map(liveToDisplay)
     .filter((a): a is DisplayActivity => a !== null)
 }
@@ -502,11 +507,12 @@ export const ChatTimeline = memo(function ChatTimeline({
         const msgActivities = messageActivities.get(message.id) || []
 
         // For assistant messages, find images from the preceding user message
-        let referencedImages: { dataUrl: string; description?: string; fileName: string }[] | undefined
+        let referencedImages:
+          { dataUrl: string; description?: string; fileName: string }[] | undefined
         if (message.role === 'assistant' && index > 0) {
           const prevMsg = sortedMessages[index - 1]
           if (prevMsg.role === 'user' && prevMsg.images && prevMsg.images.length > 0) {
-            referencedImages = prevMsg.images.map(img => ({
+            referencedImages = prevMsg.images.map((img) => ({
               dataUrl: img.dataUrl,
               description: img.description,
               fileName: img.fileName,
@@ -544,11 +550,7 @@ export const ChatTimeline = memo(function ChatTimeline({
       {pendingActivities.length > 0 && !streamingText && (
         <div className="timeline-item left">
           <div className="message-wrapper assistant">
-            <CollapsibleTools
-              activities={pendingActivities}
-              isLive={true}
-              messageId="pending"
-            />
+            <CollapsibleTools activities={pendingActivities} isLive={true} messageId="pending" />
             {avatarState === 'thinking' && (
               <div className="message-bubble assistant thinking">
                 <TypingIndicator />
@@ -566,8 +568,14 @@ export const ChatTimeline = memo(function ChatTimeline({
             trackNumber={sortedMessages.length + 1}
             activities={pendingActivities}
             referencedImages={
-              sortedMessages.length > 0 && sortedMessages[sortedMessages.length - 1].role === 'user' && sortedMessages[sortedMessages.length - 1].images?.length
-                ? sortedMessages[sortedMessages.length - 1].images!.map(img => ({ dataUrl: img.dataUrl, description: img.description, fileName: img.fileName }))
+              sortedMessages.length > 0 &&
+              sortedMessages[sortedMessages.length - 1].role === 'user' &&
+              sortedMessages[sortedMessages.length - 1].images?.length
+                ? sortedMessages[sortedMessages.length - 1].images!.map((img) => ({
+                    dataUrl: img.dataUrl,
+                    description: img.description,
+                    fileName: img.fileName,
+                  }))
                 : undefined
             }
             onImageClick={onImageClick}
@@ -587,7 +595,7 @@ export const ChatTimeline = memo(function ChatTimeline({
           aria-label="Scroll to bottom"
         >
           <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-            <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/>
+            <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z" />
           </svg>
         </button>
       )}

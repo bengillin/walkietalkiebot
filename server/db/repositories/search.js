@@ -4,7 +4,8 @@ function searchMessages(query, limit = 50) {
   const db = getDb();
   const escapedQuery = query.replace(/['"]/g, "").trim();
   const searchTerms = escapedQuery.split(/\s+/).map((term) => `"${term}"*`).join(" ");
-  const results = db.prepare(`
+  const results = db.prepare(
+    `
     SELECT
       m.id as message_id,
       m.conversation_id,
@@ -19,7 +20,8 @@ function searchMessages(query, limit = 50) {
     WHERE messages_fts MATCH ?
     ORDER BY rank
     LIMIT ?
-  `).all(searchTerms, limit);
+  `
+  ).all(searchTerms, limit);
   return results;
 }
 function rebuildSearchIndex() {

@@ -69,10 +69,10 @@ export function SearchOverlay({ isOpen, onClose, onSelectResult }: SearchOverlay
       onClose()
     } else if (e.key === 'ArrowDown') {
       e.preventDefault()
-      setSelectedIndex(i => Math.min(i + 1, results.length - 1))
+      setSelectedIndex((i) => Math.min(i + 1, results.length - 1))
     } else if (e.key === 'ArrowUp') {
       e.preventDefault()
-      setSelectedIndex(i => Math.max(i - 1, 0))
+      setSelectedIndex((i) => Math.max(i - 1, 0))
     } else if (e.key === 'Enter' && results[selectedIndex]) {
       onSelectResult(results[selectedIndex].conversationId)
       onClose()
@@ -83,10 +83,16 @@ export function SearchOverlay({ isOpen, onClose, onSelectResult }: SearchOverlay
 
   return (
     <div className="search-overlay" onClick={onClose}>
-      <div className="search-overlay__panel" onClick={e => e.stopPropagation()}>
+      <div className="search-overlay__panel" onClick={(e) => e.stopPropagation()}>
         <div className="search-overlay__input-row">
-          <svg className="search-overlay__icon" viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
-            <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+          <svg
+            className="search-overlay__icon"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            width="18"
+            height="18"
+          >
+            <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
           </svg>
           <input
             ref={inputRef}
@@ -94,7 +100,7 @@ export function SearchOverlay({ isOpen, onClose, onSelectResult }: SearchOverlay
             type="text"
             placeholder="Search all conversations..."
             value={query}
-            onChange={e => handleQueryChange(e.target.value)}
+            onChange={(e) => handleQueryChange(e.target.value)}
             onKeyDown={handleKeyDown}
           />
           {isLoading && <span className="search-overlay__spinner" />}
@@ -114,7 +120,9 @@ export function SearchOverlay({ isOpen, onClose, onSelectResult }: SearchOverlay
               >
                 <div className="search-overlay__result-header">
                   <span className="search-overlay__result-tape">{result.conversationTitle}</span>
-                  <span className="search-overlay__result-time">{formatTime(result.timestamp)}</span>
+                  <span className="search-overlay__result-time">
+                    {formatTime(result.timestamp)}
+                  </span>
                 </div>
                 <div
                   className="search-overlay__result-snippet"

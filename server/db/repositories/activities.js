@@ -1,30 +1,36 @@
 import { getDb } from "../index.js";
 function getActivitiesForConversation(conversationId, limit = 100) {
   const db = getDb();
-  return db.prepare(`
+  return db.prepare(
+    `
     SELECT id, conversation_id, message_id, tool, input, status, timestamp, duration, error
     FROM activities
     WHERE conversation_id = ?
     ORDER BY timestamp DESC
     LIMIT ?
-  `).all(conversationId, limit);
+  `
+  ).all(conversationId, limit);
 }
 function getActivitiesForMessage(messageId) {
   const db = getDb();
-  return db.prepare(`
+  return db.prepare(
+    `
     SELECT id, conversation_id, message_id, tool, input, status, timestamp, duration, error
     FROM activities
     WHERE message_id = ?
     ORDER BY timestamp ASC
-  `).all(messageId);
+  `
+  ).all(messageId);
 }
 function createActivity(input) {
   const db = getDb();
   const timestamp = input.timestamp || Date.now();
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO activities (id, conversation_id, message_id, tool, input, status, timestamp, duration, error)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(
+  `
+  ).run(
     input.id,
     input.conversationId,
     input.messageId || null,

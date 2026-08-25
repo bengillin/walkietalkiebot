@@ -18,7 +18,9 @@
   align-items: center;
   gap: 20px;
   color: #ff7ec3;
-  text-shadow: 0 0 20px rgba(255, 126, 195, 0.6), 0 0 40px rgba(255, 126, 195, 0.3);
+  text-shadow:
+    0 0 20px rgba(255, 126, 195, 0.6),
+    0 0 40px rgba(255, 126, 195, 0.3);
   animation: dropzonePulse 2s ease infinite;
 }
 
@@ -35,13 +37,26 @@
 }
 
 @keyframes dropzoneIn {
-  from { opacity: 0; backdrop-filter: blur(0) saturate(1); }
-  to { opacity: 1; backdrop-filter: blur(12px) saturate(1.4); }
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0) saturate(1);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(12px) saturate(1.4);
+  }
 }
 
 @keyframes dropzonePulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.02); }
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.02);
+  }
 }
 
 /* File preview bar - sits above tape deck */
@@ -186,6 +201,11 @@
 }
 
 @keyframes analyzing {
-  0%, 100% { box-shadow: 0 0 10px rgba(255, 126, 195, 0.4); }
-  50% { box-shadow: 0 0 20px rgba(255, 126, 195, 0.7); }
+  0%,
+  100% {
+    box-shadow: 0 0 10px rgba(255, 126, 195, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 126, 195, 0.7);
+  }
 }

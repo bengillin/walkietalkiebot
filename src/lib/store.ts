@@ -1,5 +1,14 @@
 import { create } from 'zustand'
-import type { Activity, AppState, AvatarState, Conversation, DroppedFile, ImageAnalysis, Message, StoredActivity } from '../types'
+import type {
+  Activity,
+  AppState,
+  AvatarState,
+  Conversation,
+  DroppedFile,
+  ImageAnalysis,
+  Message,
+  StoredActivity,
+} from '../types'
 import * as api from './api'
 
 // Convert live activities to compact stored format
@@ -64,7 +73,7 @@ function saveConversationsToStorage(conversations: Conversation[]) {
 
 // Generate a title from the first user message
 function generateTitle(messages: Message[]): string {
-  const firstUserMessage = messages.find(m => m.role === 'user')
+  const firstUserMessage = messages.find((m) => m.role === 'user')
   if (!firstUserMessage) return 'New conversation'
   const content = firstUserMessage.content.trim()
   return content.length > 40 ? content.slice(0, 40) + '...' : content
@@ -88,9 +97,8 @@ let serverProjectId: string | null = null
 export const useStore = create<AppState>((set, get) => {
   // Initialize with saved conversations from localStorage
   const savedConversations = loadConversationsFromStorage()
-  const initialConversation = savedConversations.length > 0
-    ? savedConversations[0]
-    : createNewConversation()
+  const initialConversation =
+    savedConversations.length > 0 ? savedConversations[0] : createNewConversation()
 
   // If no conversations exist, create initial one
   if (savedConversations.length === 0) {
@@ -141,23 +149,26 @@ export const useStore = create<AppState>((set, get) => {
 
       // Sync to server (fire and forget)
       if (serverSyncEnabled && state.currentConversationId) {
-        api.addMessage(state.currentConversationId, {
-          role: message.role,
-          content: message.content,
-          source: 'web',
-          images: images?.map(img => ({
-            id: img.id,
-            dataUrl: img.dataUrl,
-            fileName: img.fileName,
-            description: img.description,
-          })),
-        }).catch(err => console.warn('Failed to sync message to server:', err))
+        api
+          .addMessage(state.currentConversationId, {
+            role: message.role,
+            content: message.content,
+            source: 'web',
+            images: images?.map((img) => ({
+              id: img.id,
+              dataUrl: img.dataUrl,
+              fileName: img.fileName,
+              description: img.description,
+            })),
+          })
+          .catch((err) => console.warn('Failed to sync message to server:', err))
 
         // Update title on server if first user message
         if (isFirstMessage && message.role === 'user') {
           const title = generateTitle(newMessages)
-          api.updateConversation(state.currentConversationId, { title })
-            .catch(err => console.warn('Failed to update conversation title:', err))
+          api
+            .updateConversation(state.currentConversationId, { title })
+            .catch((err) => console.warn('Failed to update conversation title:', err))
         }
       }
     },
@@ -174,7 +185,7 @@ export const useStore = create<AppState>((set, get) => {
         // If branching, copy messages from parent
         let initialMessages: Message[] = []
         if (parentId) {
-          const parent = state.conversations.find(c => c.id === parentId)
+          const parent = state.conversations.find((c) => c.id === parentId)
           if (parent) {
             initialMessages = [...parent.messages]
             newConv.messages = initialMessages
@@ -196,19 +207,27 @@ export const useStore = create<AppState>((set, get) => {
 
       // Sync to server
       if (serverSyncEnabled) {
-        api.createConversation(newConv.title, newConv.projectId || undefined, newConv.parentId || undefined)
-          .then(serverConv => {
+        api
+          .createConversation(
+            newConv.title,
+            newConv.projectId || undefined,
+            newConv.parentId || undefined,
+          )
+          .then((serverConv) => {
             // Update local ID to match server if different
             if (serverConv.id !== newConv.id) {
-              set(state => ({
-                currentConversationId: state.currentConversationId === newConv.id ? serverConv.id : state.currentConversationId,
-                conversations: state.conversations.map(c =>
-                  c.id === newConv.id ? { ...c, id: serverConv.id } : c
+              set((state) => ({
+                currentConversationId:
+                  state.currentConversationId === newConv.id
+                    ? serverConv.id
+                    : state.currentConversationId,
+                conversations: state.conversations.map((c) =>
+                  c.id === newConv.id ? { ...c, id: serverConv.id } : c,
                 ),
               }))
             }
           })
-          .catch(err => console.warn('Failed to create conversation on server:', err))
+          .catch((err) => console.warn('Failed to create conversation on server:', err))
       }
     },
 
@@ -227,9 +246,10 @@ export const useStore = create<AppState>((set, get) => {
 
       // If server sync is enabled, fetch fresh data
       if (serverSyncEnabled) {
-        api.getConversation(id)
-          .then(serverConv => {
-            const freshMessages = serverConv.messages.map(m => ({
+        api
+          .getConversation(id)
+          .then((serverConv) => {
+            const freshMessages = serverConv.messages.map((m) => ({
               id: m.id,
               role: m.role,
               content: m.content,
@@ -237,7 +257,7 @@ export const useStore = create<AppState>((set, get) => {
               source: m.source,
               images: m.images,
             }))
-            const freshActivities = serverConv.activities.map(a => ({
+            const freshActivities = serverConv.activities.map((a) => ({
               id: a.id,
               tool: a.tool,
               input: a.input,
@@ -247,13 +267,13 @@ export const useStore = create<AppState>((set, get) => {
               error: a.error,
             }))
 
-            set(state => {
+            set((state) => {
               // Only update if still on this conversation
               if (state.currentConversationId !== id) return state
 
               // Update local cache
-              const conversations = state.conversations.map(c =>
-                c.id === id ? { ...c, messages: freshMessages, activities: freshActivities } : c
+              const conversations = state.conversations.map((c) =>
+                c.id === id ? { ...c, messages: freshMessages, activities: freshActivities } : c,
               )
               saveConversationsToStorage(conversations)
 
@@ -264,7 +284,7 @@ export const useStore = create<AppState>((set, get) => {
               }
             })
           })
-          .catch(err => console.warn('Failed to load conversation from server:', err))
+          .catch((err) => console.warn('Failed to load conversation from server:', err))
       }
     },
 
@@ -292,9 +312,7 @@ export const useStore = create<AppState>((set, get) => {
         }
 
         // Remove from context if present
-        const contextConversationIds = state.contextConversationIds.filter(
-          (cid) => cid !== id
-        )
+        const contextConversationIds = state.contextConversationIds.filter((cid) => cid !== id)
 
         saveConversationsToStorage(conversations)
 
@@ -309,15 +327,16 @@ export const useStore = create<AppState>((set, get) => {
 
       // Sync to server
       if (serverSyncEnabled) {
-        api.deleteConversation(id)
-          .catch(err => console.warn('Failed to delete conversation on server:', err))
+        api
+          .deleteConversation(id)
+          .catch((err) => console.warn('Failed to delete conversation on server:', err))
       }
     },
 
     renameConversation: (id: string, title: string) => {
       set((state) => {
         const conversations = state.conversations.map((c) =>
-          c.id === id ? { ...c, title, updatedAt: Date.now() } : c
+          c.id === id ? { ...c, title, updatedAt: Date.now() } : c,
         )
         saveConversationsToStorage(conversations)
         return { conversations }
@@ -325,8 +344,9 @@ export const useStore = create<AppState>((set, get) => {
 
       // Sync to server
       if (serverSyncEnabled) {
-        api.updateConversation(id, { title })
-          .catch(err => console.warn('Failed to rename conversation on server:', err))
+        api
+          .updateConversation(id, { title })
+          .catch((err) => console.warn('Failed to rename conversation on server:', err))
       }
     },
 
@@ -422,9 +442,7 @@ export const useStore = create<AppState>((set, get) => {
     },
     updateActivity: (id, updates) => {
       set((state) => ({
-        activities: state.activities.map((a) =>
-          a.id === id ? { ...a, ...updates } : a
-        ),
+        activities: state.activities.map((a) => (a.id === id ? { ...a, ...updates } : a)),
       }))
     },
     clearActivities: () => set({ activities: [] }),
@@ -481,9 +499,7 @@ export const useStore = create<AppState>((set, get) => {
     },
     updateFile: (id: string, updates: Partial<DroppedFile>) => {
       set((state) => ({
-        attachedFiles: state.attachedFiles.map((f) =>
-          f.id === id ? { ...f, ...updates } : f
-        ),
+        attachedFiles: state.attachedFiles.map((f) => (f.id === id ? { ...f, ...updates } : f)),
       }))
     },
     clearFiles: () => set({ attachedFiles: [] }),
@@ -503,9 +519,7 @@ export const useStore = create<AppState>((set, get) => {
     },
     updateImageAnalysis: (id, updates) => {
       set((state) => ({
-        imageAnalyses: state.imageAnalyses.map((a) =>
-          a.id === id ? { ...a, ...updates } : a
-        ),
+        imageAnalyses: state.imageAnalyses.map((a) => (a.id === id ? { ...a, ...updates } : a)),
       }))
     },
     clearImageAnalyses: () => set({ imageAnalyses: [] }),
@@ -514,9 +528,7 @@ export const useStore = create<AppState>((set, get) => {
       const completed = state.imageAnalyses.filter((a) => a.status === 'complete')
       if (completed.length === 0) return ''
 
-      return completed
-        .map((a) => `[Image: ${a.fileName}]\n${a.description}`)
-        .join('\n\n')
+      return completed.map((a) => `[Image: ${a.fileName}]\n${a.description}`).join('\n\n')
     },
 
     // Liner Notes
@@ -528,7 +540,7 @@ export const useStore = create<AppState>((set, get) => {
       // Update local cache
       set((state) => {
         const conversations = state.conversations.map((c) =>
-          c.id === conversationId ? { ...c, linerNotes: notes, updatedAt: Date.now() } : c
+          c.id === conversationId ? { ...c, linerNotes: notes, updatedAt: Date.now() } : c,
         )
         saveConversationsToStorage(conversations)
         return { conversations }
@@ -536,8 +548,9 @@ export const useStore = create<AppState>((set, get) => {
 
       // Sync to server
       if (serverSyncEnabled) {
-        api.saveLinerNotes(conversationId, notes)
-          .catch(err => console.warn('Failed to save liner notes to server:', err))
+        api
+          .saveLinerNotes(conversationId, notes)
+          .catch((err) => console.warn('Failed to save liner notes to server:', err))
       }
     },
 
@@ -567,7 +580,7 @@ export const useStore = create<AppState>((set, get) => {
           mergedConvos.push({
             id: fullConv.id,
             title: fullConv.title,
-            messages: fullConv.messages.map(m => ({
+            messages: fullConv.messages.map((m) => ({
               id: m.id,
               role: m.role,
               content: m.content,
@@ -575,7 +588,7 @@ export const useStore = create<AppState>((set, get) => {
               source: m.source,
               images: m.images,
             })),
-            activities: fullConv.activities.map(a => ({
+            activities: fullConv.activities.map((a) => ({
               id: a.id,
               tool: a.tool,
               input: a.input,
@@ -605,7 +618,7 @@ export const useStore = create<AppState>((set, get) => {
         saveConversationsToStorage(mergedConvos)
 
         // Update current conversation data if it changed
-        const currentConv = mergedConvos.find(c => c.id === state.currentConversationId)
+        const currentConv = mergedConvos.find((c) => c.id === state.currentConversationId)
 
         set({
           conversations: mergedConvos,
@@ -654,4 +667,3 @@ export function enableServerSync() {
 export function setProjectId(projectId: string) {
   serverProjectId = projectId
 }
-

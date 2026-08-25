@@ -104,7 +104,10 @@ class JobManager {
         handle.kill()
         this.activeHandles.delete(id)
         const timeout = this.activeTimeouts.get(id)
-        if (timeout) { clearTimeout(timeout); this.activeTimeouts.delete(id) }
+        if (timeout) {
+          clearTimeout(timeout)
+          this.activeTimeouts.delete(id)
+        }
       }
       jobsRepo.updateJob(id, { status: 'cancelled', completed_at: Date.now() })
       this.emitEvent(id, {
@@ -177,11 +180,15 @@ class JobManager {
     let history: Array<{ role: string; content: string }> = []
     let mode: string | undefined
     const events = jobsRepo.getJobEvents(jobId)
-    const contextEvent = events.find(e => e.event_type === 'context')
+    const contextEvent = events.find((e) => e.event_type === 'context')
     if (contextEvent?.data) {
-      try { history = JSON.parse(contextEvent.data) } catch { /* ignore */ }
+      try {
+        history = JSON.parse(contextEvent.data)
+      } catch {
+        /* ignore */
+      }
     }
-    const modeEvent = events.find(e => e.event_type === 'mode')
+    const modeEvent = events.find((e) => e.event_type === 'mode')
     if (modeEvent?.data) {
       mode = modeEvent.data
     }
@@ -242,15 +249,31 @@ class JobManager {
           })
 
           const dispatcher = getNotificationDispatcher()
-          const notification: Notification = status === 'completed'
-            ? { type: 'job_completed', jobId, title: 'Talkie: Task complete', body: fullResponse.slice(0, 80) || 'Done.' }
-            : { type: 'job_failed', jobId, title: 'Talkie: Task failed', body: error || 'Unknown error' }
-          dispatcher.dispatch(notification).catch(e => console.error('Notification dispatch failed:', e))
+          const notification: Notification =
+            status === 'completed'
+              ? {
+                  type: 'job_completed',
+                  jobId,
+                  title: 'Talkie: Task complete',
+                  body: fullResponse.slice(0, 80) || 'Done.',
+                }
+              : {
+                  type: 'job_failed',
+                  jobId,
+                  title: 'Talkie: Task failed',
+                  body: error || 'Unknown error',
+                }
+          dispatcher
+            .dispatch(notification)
+            .catch((e) => console.error('Notification dispatch failed:', e))
 
           // Clean up and process next queued jobs
           this.activeHandles.delete(jobId)
           const timeout = this.activeTimeouts.get(jobId)
-          if (timeout) { clearTimeout(timeout); this.activeTimeouts.delete(jobId) }
+          if (timeout) {
+            clearTimeout(timeout)
+            this.activeTimeouts.delete(jobId)
+          }
           this.processNext()
         },
       },
@@ -284,7 +307,10 @@ class JobManager {
     // Clear timeout when job completes naturally
     handle.promise.then(() => {
       const t = this.activeTimeouts.get(jobId)
-      if (t) { clearTimeout(t); this.activeTimeouts.delete(jobId) }
+      if (t) {
+        clearTimeout(t)
+        this.activeTimeouts.delete(jobId)
+      }
     })
   }
 }

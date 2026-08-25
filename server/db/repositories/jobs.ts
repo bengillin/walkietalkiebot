@@ -49,25 +49,34 @@ export function createJob(input: CreateJobInput): JobRow {
   const db = getDb()
   const now = Date.now()
 
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO jobs (id, conversation_id, prompt, status, source, created_at, updated_at)
     VALUES (?, ?, ?, 'queued', ?, ?, ?)
-  `).run(input.id, input.conversationId, input.prompt, input.source || 'web', now, now)
+  `,
+  ).run(input.id, input.conversationId, input.prompt, input.source || 'web', now, now)
 
   return getJob(input.id)!
 }
 
 export function getJob(id: string): JobRow | null {
   const db = getDb()
-  const row = db.prepare(`
+  const row = db
+    .prepare(
+      `
     SELECT id, conversation_id, prompt, status, source, result, error, pid,
            created_at, updated_at, started_at, completed_at
     FROM jobs WHERE id = ?
-  `).get(id) as JobRow | undefined
+  `,
+    )
+    .get(id) as JobRow | undefined
   return row || null
 }
 
-export function listJobs(filters?: { status?: string; conversationId?: string }, limit = 50): JobRow[] {
+export function listJobs(
+  filters?: { status?: string; conversationId?: string },
+  limit = 50,
+): JobRow[] {
   const db = getDb()
   const conditions: string[] = []
   const params: (string | number)[] = []
@@ -84,13 +93,17 @@ export function listJobs(filters?: { status?: string; conversationId?: string },
   const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : ''
   params.push(limit)
 
-  return db.prepare(`
+  return db
+    .prepare(
+      `
     SELECT id, conversation_id, prompt, status, source, result, error, pid,
            created_at, updated_at, started_at, completed_at
     FROM jobs ${where}
     ORDER BY created_at DESC
     LIMIT ?
-  `).all(...params) as JobRow[]
+  `,
+    )
+    .all(...params) as JobRow[]
 }
 
 export function updateJob(id: string, input: UpdateJobInput): JobRow | null {
@@ -133,10 +146,14 @@ export function createJobEvent(input: CreateJobEventInput): JobEventRow {
   const db = getDb()
   const timestamp = Date.now()
 
-  const result = db.prepare(`
+  const result = db
+    .prepare(
+      `
     INSERT INTO job_events (job_id, event_type, data, timestamp)
     VALUES (?, ?, ?, ?)
-  `).run(input.jobId, input.eventType, input.data || null, timestamp)
+  `,
+    )
+    .run(input.jobId, input.eventType, input.data || null, timestamp)
 
   return {
     id: Number(result.lastInsertRowid),
@@ -151,28 +168,40 @@ export function getJobEvents(jobId: string, since?: number): JobEventRow[] {
   const db = getDb()
 
   if (since) {
-    return db.prepare(`
+    return db
+      .prepare(
+        `
       SELECT id, job_id, event_type, data, timestamp
       FROM job_events
       WHERE job_id = ? AND timestamp > ?
       ORDER BY timestamp ASC
-    `).all(jobId, since) as JobEventRow[]
+    `,
+      )
+      .all(jobId, since) as JobEventRow[]
   }
 
-  return db.prepare(`
+  return db
+    .prepare(
+      `
     SELECT id, job_id, event_type, data, timestamp
     FROM job_events
     WHERE job_id = ?
     ORDER BY timestamp ASC
-  `).all(jobId) as JobEventRow[]
+  `,
+    )
+    .all(jobId) as JobEventRow[]
 }
 
 export function cleanupStaleJobs(): number {
   const db = getDb()
-  const result = db.prepare(`
+  const result = db
+    .prepare(
+      `
     UPDATE jobs SET status = 'failed', error = 'Server restarted', updated_at = ?, completed_at = ?
     WHERE status IN ('queued', 'running')
-  `).run(Date.now(), Date.now())
+  `,
+    )
+    .run(Date.now(), Date.now())
   return result.changes
 }
 

@@ -56,7 +56,9 @@ describe('ModeSelector', () => {
   })
 
   it('returns null when no modes available', () => {
-    const { container } = render(<ModeSelector modes={[]} currentMode="voice" onSelectMode={() => {}} />)
+    const { container } = render(
+      <ModeSelector modes={[]} currentMode="voice" onSelectMode={() => {}} />,
+    )
     expect(container.firstChild).toBeNull()
   })
 })

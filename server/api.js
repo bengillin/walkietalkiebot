@@ -91,13 +91,16 @@ api.post("/conversations", async (c) => {
   const id = body.id || crypto.randomUUID();
   const title = body.title || "New conversation";
   const conv = conversations.createConversation({ id, title, mode: body.mode });
-  return c.json({
-    id: conv.id,
-    title: conv.title,
-    createdAt: conv.created_at,
-    updatedAt: conv.updated_at,
-    mode: conv.mode || "voice"
-  }, 201);
+  return c.json(
+    {
+      id: conv.id,
+      title: conv.title,
+      createdAt: conv.created_at,
+      updatedAt: conv.updated_at,
+      mode: conv.mode || "voice"
+    },
+    201
+  );
 });
 api.patch("/conversations/:id", async (c) => {
   const id = c.req.param("id");
@@ -168,26 +171,31 @@ api.post("/conversations/:id/messages", async (c) => {
   }
   if (body.activities && Array.isArray(body.activities)) {
     activities.createActivitiesBatch(
-      body.activities.map((a) => ({
-        id: a.id || crypto.randomUUID(),
-        conversationId,
-        messageId: msg.id,
-        tool: a.tool,
-        input: a.input,
-        status: a.status,
-        timestamp: a.timestamp,
-        duration: a.duration,
-        error: a.error
-      }))
+      body.activities.map(
+        (a) => ({
+          id: a.id || crypto.randomUUID(),
+          conversationId,
+          messageId: msg.id,
+          tool: a.tool,
+          input: a.input,
+          status: a.status,
+          timestamp: a.timestamp,
+          duration: a.duration,
+          error: a.error
+        })
+      )
     );
   }
-  return c.json({
-    id: msg.id,
-    role: msg.role,
-    content: msg.content,
-    timestamp: msg.timestamp,
-    source: msg.source
-  }, 201);
+  return c.json(
+    {
+      id: msg.id,
+      role: msg.role,
+      content: msg.content,
+      timestamp: msg.timestamp,
+      source: msg.source
+    },
+    201
+  );
 });
 api.patch("/images/:id", async (c) => {
   const imageId = c.req.param("id");
@@ -247,15 +255,18 @@ api.post("/plans", async (c) => {
     status: body.status,
     conversationId: body.conversationId
   });
-  return c.json({
-    id: plan.id,
-    title: plan.title,
-    content: plan.content,
-    status: plan.status,
-    conversationId: plan.conversation_id,
-    createdAt: plan.created_at,
-    updatedAt: plan.updated_at
-  }, 201);
+  return c.json(
+    {
+      id: plan.id,
+      title: plan.title,
+      content: plan.content,
+      status: plan.status,
+      conversationId: plan.conversation_id,
+      createdAt: plan.created_at,
+      updatedAt: plan.updated_at
+    },
+    201
+  );
 });
 api.put("/plans/:id", async (c) => {
   const id = c.req.param("id");
@@ -559,19 +570,23 @@ api.post("/analyze-image-cc", async (c) => {
           console.error("Image analysis via Claude Code failed:", error);
         },
         onComplete: () => {
-          resolve(c.json({
-            description: description.trim() || "Unable to analyze image.",
-            fileName
-          }));
+          resolve(
+            c.json({
+              description: description.trim() || "Unable to analyze image.",
+              fileName
+            })
+          );
         }
       }
     });
     setTimeout(() => {
       handle.kill();
-      resolve(c.json({
-        description: description.trim() || "Analysis timed out.",
-        fileName
-      }));
+      resolve(
+        c.json({
+          description: description.trim() || "Analysis timed out.",
+          fileName
+        })
+      );
     }, 6e4);
   });
 });
@@ -599,7 +614,7 @@ api.post("/open-url", async (c) => {
   });
 });
 api.post("/claude-code", async (c) => {
-  const { message, history, images, mode } = await c.req.json();
+  const { message, history, images, mode, conversationId } = await c.req.json();
   if (!message) {
     return c.json({ error: "Message required" }, 400);
   }
@@ -609,6 +624,7 @@ api.post("/claude-code", async (c) => {
       history: history || state.messages || [],
       images,
       mode,
+      conversationId,
       callbacks: {
         onText: (text) => {
           stream.writeSSE({ data: JSON.stringify({ text }) });

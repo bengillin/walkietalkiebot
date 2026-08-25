@@ -35,7 +35,7 @@ jobRoutes.post('/orchestrate', async (c) => {
     })
   })
 
-  return c.json({ jobs: jobs.map(j => ({ id: j.id, status: j.status })) })
+  return c.json({ jobs: jobs.map((j) => ({ id: j.id, status: j.status })) })
 })
 
 // GET /api/jobs - List jobs
@@ -98,19 +98,22 @@ jobRoutes.get('/:id/events', async (c) => {
     let closed = false
     const unsubscribe = manager.subscribe(id, (event) => {
       if (closed) return
-      stream.writeSSE({
-        data: JSON.stringify(event),
-      }).catch(() => {
-        closed = true
-        unsubscribe()
-      })
+      stream
+        .writeSSE({
+          data: JSON.stringify(event),
+        })
+        .catch(() => {
+          closed = true
+          unsubscribe()
+        })
 
       // Close stream on terminal status
       if (event.type === 'status_change') {
         try {
           const data = JSON.parse(event.data)
           if (['completed', 'failed', 'cancelled'].includes(data.status)) {
-            stream.writeSSE({ data: JSON.stringify({ done: true, status: data.status }) })
+            stream
+              .writeSSE({ data: JSON.stringify({ done: true, status: data.status }) })
               .catch(() => {})
             closed = true
             unsubscribe()

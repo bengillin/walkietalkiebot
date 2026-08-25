@@ -1,9 +1,7 @@
 import type { DroppedFile } from '../types'
 
 // Analyze image via Claude Code CLI
-export async function analyzeImageViaClaudeCode(
-  file: DroppedFile
-): Promise<string> {
+export async function analyzeImageViaClaudeCode(file: DroppedFile): Promise<string> {
   const response = await fetch('/api/analyze-image-cc', {
     method: 'POST',
     headers: {
@@ -49,12 +47,13 @@ export async function sendMessageViaClaudeCode(
   onActivity?: (activity: ActivityEvent) => void,
   images?: Array<{ dataUrl: string; fileName: string }>,
   onPlan?: (plan: PlanEvent) => void,
-  mode?: string
+  mode?: string,
+  conversationId?: string | null,
 ): Promise<string> {
   const response = await fetch('/api/claude-code', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message, history, images, mode }),
+    body: JSON.stringify({ message, history, images, mode, conversationId }),
   })
 
   if (!response.ok) {
@@ -124,7 +123,7 @@ export function extractUrls(text: string): string[] {
   const urlRegex = /(https?:\/\/[^\s<>"{}|\\^`[\]]*[^\s<>"{}|\\^`[\].,:;!?)])/g
   const matches = text.match(urlRegex) || []
   return matches
-    .map(url => url.replace(/[.,;:!?)\]]+$/, '')) // Remove trailing punctuation
-    .filter(url => url.length > 0)
+    .map((url) => url.replace(/[.,;:!?)\]]+$/, '')) // Remove trailing punctuation
+    .filter((url) => url.length > 0)
     .filter((url, index, arr) => arr.indexOf(url) === index) // Deduplicate
 }

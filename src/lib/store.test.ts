@@ -6,9 +6,15 @@ const localStorageMock = (() => {
   let store: Record<string, string> = {}
   return {
     getItem: (key: string) => store[key] || null,
-    setItem: (key: string, value: string) => { store[key] = value },
-    removeItem: (key: string) => { delete store[key] },
-    clear: () => { store = {} },
+    setItem: (key: string, value: string) => {
+      store[key] = value
+    },
+    removeItem: (key: string) => {
+      delete store[key]
+    },
+    clear: () => {
+      store = {}
+    },
   }
 })()
 
@@ -19,13 +25,15 @@ describe('useStore', () => {
     localStorageMock.clear()
     useStore.setState({
       messages: [],
-      conversations: [{
-        id: 'test-conv',
-        title: 'Test',
-        messages: [],
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      }],
+      conversations: [
+        {
+          id: 'test-conv',
+          title: 'Test',
+          messages: [],
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        },
+      ],
       currentConversationId: 'test-conv',
       activities: [],
       attachedFiles: [],
@@ -87,9 +95,11 @@ describe('useStore', () => {
     })
 
     it('updates activity', () => {
-      const id = useStore.getState().addActivity({ type: 'tool_start', tool: 'Edit', status: 'running' })
+      const id = useStore
+        .getState()
+        .addActivity({ type: 'tool_start', tool: 'Edit', status: 'running' })
       useStore.getState().updateActivity(id, { status: 'complete' })
-      const activity = useStore.getState().activities.find(a => a.id === id)
+      const activity = useStore.getState().activities.find((a) => a.id === id)
       expect(activity?.status).toBe('complete')
     })
 

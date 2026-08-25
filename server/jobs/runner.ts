@@ -1,4 +1,4 @@
-import { spawn, execSync, type ChildProcess } from 'child_process'
+import { spawn, execFileSync, type ChildProcess } from 'child_process'
 import { writeFileSync, mkdirSync, unlinkSync } from 'fs'
 import { join } from 'path'
 import { tmpdir } from 'os'
@@ -38,6 +38,10 @@ export interface RunnerOptions {
   images?: ImageAttachment[]
   rawMode?: boolean // Skip voice mode wrapping, send prompt as-is with image paths
   mode?: string // Mode name for prompt construction (default: 'voice')
+  // When set to a conversation UUID, the turn runs inside a persistent Claude Code
+  // session (--session-id / --resume) instead of a one-shot process, so history is
+  // not rebuilt and the conversation prefix is cached across turns.
+  conversationId?: string
   callbacks: RunnerCallbacks
 }
 
@@ -48,7 +52,10 @@ export interface RunnerHandle {
 }
 
 // Detect if a Write/Edit tool call is writing a plan
-function detectPlanFromTool(toolName: string, input: { file_path?: string; content?: string; new_string?: string }): PlanEvent | null {
+function detectPlanFromTool(
+  toolName: string,
+  input: { file_path?: string; content?: string; new_string?: string },
+): PlanEvent | null {
   if (toolName !== 'Write' && toolName !== 'Edit') return null
 
   const filePath = input.file_path || ''
@@ -61,14 +68,17 @@ function detectPlanFromTool(toolName: string, input: { file_path?: string; conte
   // Check if content has plan-like structure
   const headingCount = (content.match(/^#{1,3}\s+.+/gm) || []).length
   const listItemCount = (content.match(/^(?:\d+\.|[-*])\s+/gm) || []).length
-  const hasPlanHeading = /^#{1,3}\s+.*(?:plan|implementation|approach|strategy|roadmap|phases?|proposal)/im.test(content)
+  const hasPlanHeading =
+    /^#{1,3}\s+.*(?:plan|implementation|approach|strategy|roadmap|phases?|proposal)/im.test(content)
   const hasStructure = headingCount >= 2 && listItemCount >= 4
 
   if (!isPlanFile && !hasPlanHeading && !hasStructure) return null
 
   // Extract title
   let title = 'Untitled Plan'
-  const titleMatch = content.match(/^#{1,3}\s+(.*(?:plan|implementation|approach|strategy|roadmap|phases?|proposal).*)/im)
+  const titleMatch = content.match(
+    /^#{1,3}\s+(.*(?:plan|implementation|approach|strategy|roadmap|phases?|proposal).*)/im,
+  )
   if (titleMatch) {
     title = titleMatch[1].replace(/\*\*/g, '').replace(/`/g, '').trim()
   } else {
@@ -95,7 +105,9 @@ export function isClaudeCliAvailable(): boolean {
   }
   const claudePath = process.env.CLAUDE_PATH || 'claude'
   try {
-    execSync(`which ${claudePath}`, { stdio: 'ignore' })
+    // execFile (not execSync) so claudePath is passed as an argument and never
+    // interpreted by a shell — avoids command injection via CLAUDE_PATH.
+    execFileSync('which', [claudePath], { stdio: 'ignore' })
     claudeCliCache = { available: true, checkedAt: Date.now() }
     return true
   } catch {
@@ -104,15 +116,30 @@ export function isClaudeCliAvailable(): boolean {
   }
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+const SESSION_NOT_FOUND = 'No conversation found with session ID'
+const SESSION_IN_USE = 'is already in use'
+
+// Conversations whose Claude Code session has been created during THIS server
+// process. Decides --resume vs --session-id for the first attempt; resets on
+// restart, after which the transparent fallback in spawnClaude re-syncs with
+// whatever sessions exist on disk.
+const establishedSessions = new Set<string>()
+
+/** Test seam: forget all in-process session tracking. */
+export function _resetSessionTracking(): void {
+  establishedSessions.clear()
+}
+
 export function spawnClaude(options: RunnerOptions): RunnerHandle {
-  const { prompt, history, images, rawMode, mode: modeName, callbacks } = options
+  const { prompt, history, images, rawMode, mode: modeName, conversationId, callbacks } = options
 
   // Pre-flight: check if claude CLI exists before trying to spawn it
   if (!isClaudeCliAvailable()) {
     const promise = Promise.resolve(1)
     setTimeout(() => {
       callbacks.onError(
-        'Claude Code CLI not found. Install it with: npm install -g @anthropic-ai/claude-code'
+        'Claude Code CLI not found. Install it with: npm install -g @anthropic-ai/claude-code',
       )
       callbacks.onComplete(1)
     }, 0)
@@ -133,42 +160,176 @@ export function spawnClaude(options: RunnerOptions): RunnerHandle {
       tempImagePaths.push(tempPath)
     }
   }
+  const imagePaths = tempImagePaths.length > 0 ? tempImagePaths : undefined
 
-  let fullPrompt: string
-  if (rawMode) {
-    // Raw mode: send prompt as-is with image file paths prepended
-    let imageBlock = ''
-    if (tempImagePaths.length > 0) {
-      imageBlock = 'Read these image files and then follow the instructions below:\n' +
-        tempImagePaths.map(p => p).join('\n') +
-        '\n\n'
+  // Build the per-turn prompt. On session resume we omit history (the session
+  // already holds it); on create / one-shot we include it as a seed.
+  const mode = rawMode ? null : getMode(modeName || 'voice')
+  const buildFullPrompt = (includeHistory: boolean): string => {
+    if (rawMode) {
+      const imageBlock =
+        tempImagePaths.length > 0
+          ? 'Read these image files and then follow the instructions below:\n' +
+            tempImagePaths.join('\n') +
+            '\n\n'
+          : ''
+      return `${imageBlock}${prompt}`
     }
-    fullPrompt = `${imageBlock}${prompt}`
-  } else {
-    const mode = getMode(modeName || 'voice')
-    fullPrompt = buildPrompt({
+    return buildPrompt({
       message: prompt,
-      mode,
-      history,
-      imagePaths: tempImagePaths.length > 0 ? tempImagePaths : undefined,
+      mode: mode!,
+      history: includeHistory ? history : undefined,
+      imagePaths,
     })
   }
 
-  const args = [
-    '-p', fullPrompt,
-    '--output-format', 'stream-json',
-    '--verbose',
-    '--permission-mode', 'bypassPermissions',
-    '--no-session-persistence',
-  ]
-
   const claudePath = process.env.CLAUDE_PATH || 'claude'
-  console.log('Spawning claude:', claudePath, 'prompt length:', fullPrompt.length, rawMode ? '(raw mode)' : '(voice mode)')
-
   // Strip CLAUDECODE env var to allow spawning Claude inside a Claude Code session
   const env = { ...process.env, FORCE_COLOR: '0' }
   delete env.CLAUDECODE
 
+  const baseArgs = [
+    '--output-format',
+    'stream-json',
+    '--verbose',
+    '--permission-mode',
+    'bypassPermissions',
+  ]
+
+  // Clean up temp image files exactly once, after the final attempt.
+  let cleaned = false
+  const cleanupTempFiles = () => {
+    if (cleaned) return
+    cleaned = true
+    for (const p of tempImagePaths) {
+      try {
+        unlinkSync(p)
+      } catch {
+        /* already cleaned up */
+      }
+    }
+  }
+
+  const useSession = !rawMode && !!conversationId && UUID_RE.test(conversationId)
+
+  // One-shot path (jobs, image analysis, raw mode, or clients without a
+  // conversation id): unchanged legacy behavior.
+  if (!useSession) {
+    const args = ['-p', buildFullPrompt(true), ...baseArgs, '--no-session-persistence']
+    console.log(
+      'Spawning claude:',
+      claudePath,
+      'len',
+      args[1].length,
+      rawMode ? '(raw)' : '(voice)',
+    )
+    const proc = runClaudeProcess(claudePath, args, env, {
+      ...callbacks,
+      onComplete: (code) => {
+        cleanupTempFiles()
+        callbacks.onComplete(code)
+      },
+    })
+    return {
+      pid: proc.child.pid || 0,
+      kill: () => {
+        try {
+          proc.child.kill('SIGTERM')
+        } catch {
+          /* already dead */
+        }
+      },
+      promise: proc.promise,
+    }
+  }
+
+  // Session path: --session-id to create (seed with history), --resume to
+  // continue. If the first strategy hits a session fault before any content
+  // streams, transparently retry with the other strategy.
+  const convId = conversationId as string
+  let resolveFinal!: (code: number) => void
+  const promise = new Promise<number>((res) => {
+    resolveFinal = res
+  })
+  let current!: { child: ChildProcess; promise: Promise<number> }
+
+  const launch = (strategy: 'create' | 'resume', isRetry: boolean) => {
+    const sessionArgs = strategy === 'create' ? ['--session-id', convId] : ['--resume', convId]
+    const args = ['-p', buildFullPrompt(strategy === 'create'), ...baseArgs, ...sessionArgs]
+    console.log(
+      'Spawning claude:',
+      claudePath,
+      `(session ${strategy}${isRetry ? ' retry' : ''})`,
+      'len',
+      args[1].length,
+    )
+
+    let sawContent = false
+    let sessionFault = false
+
+    current = runClaudeProcess(claudePath, args, env, {
+      onText: (t) => {
+        sawContent = true
+        callbacks.onText(t)
+      },
+      onActivity: (a) => {
+        if (a.type === 'tool_start' || a.type === 'tool_input' || a.type === 'tool_end') {
+          sawContent = true
+        }
+        // Suppress the failed attempt's terminal "all_complete" before a retry.
+        if (sessionFault && !sawContent && a.type === 'all_complete') return
+        callbacks.onActivity(a)
+      },
+      onPlan: callbacks.onPlan,
+      onError: (msg) => {
+        if (!sawContent && (msg.includes(SESSION_NOT_FOUND) || msg.includes(SESSION_IN_USE))) {
+          sessionFault = true
+          return // swallow; handled in onComplete
+        }
+        callbacks.onError(msg)
+      },
+      onComplete: (code) => {
+        if (sessionFault && !sawContent && !isRetry) {
+          // In-process tracking disagrees with on-disk sessions: flip strategy
+          // and try once more.
+          launch(strategy === 'create' ? 'resume' : 'create', true)
+          return
+        }
+        if (code === 0) establishedSessions.add(convId)
+        else if (sessionFault) establishedSessions.delete(convId)
+        cleanupTempFiles()
+        callbacks.onComplete(code)
+        resolveFinal(code)
+      },
+    })
+  }
+
+  launch(establishedSessions.has(convId) ? 'resume' : 'create', false)
+
+  return {
+    pid: current.child.pid || 0,
+    kill: () => {
+      try {
+        current?.child.kill('SIGTERM')
+      } catch {
+        /* already dead */
+      }
+    },
+    promise,
+  }
+}
+
+/**
+ * Low-level: spawn a single `claude -p` process for the given args and stream
+ * stdout/stderr through the callbacks. Session strategy and temp-file lifecycle
+ * are handled by spawnClaude.
+ */
+function runClaudeProcess(
+  claudePath: string,
+  args: string[],
+  env: NodeJS.ProcessEnv,
+  callbacks: RunnerCallbacks,
+): { child: ChildProcess; promise: Promise<number> } {
   const claude = spawn(claudePath, args, {
     cwd: process.cwd(),
     env,
@@ -193,14 +354,17 @@ export function spawnClaude(options: RunnerOptions): RunnerHandle {
         const event = JSON.parse(line)
 
         if (event.type === 'assistant') {
-          const textContent = event.message?.content?.find((c: { type: string }) => c.type === 'text')
+          const textContent = event.message?.content?.find(
+            (c: { type: string }) => c.type === 'text',
+          )
           if (textContent?.text) {
-            let text = textContent.text.replace(/<thinking>[\s\S]*?<\/thinking>\s*/g, '')
+            const text = textContent.text.replace(/<thinking>[\s\S]*?<\/thinking>\s*/g, '')
             if (text.trim()) {
               callbacks.onText(text)
             }
           }
-          const toolUseBlocks = event.message?.content?.filter((c: { type: string }) => c.type === 'tool_use') || []
+          const toolUseBlocks =
+            event.message?.content?.filter((c: { type: string }) => c.type === 'tool_use') || []
           for (const toolBlock of toolUseBlocks) {
             if (toolBlock.id && toolBlock.input) {
               toolInputs[toolBlock.id] = JSON.stringify(toolBlock.input)
@@ -236,7 +400,7 @@ export function spawnClaude(options: RunnerOptions): RunnerHandle {
           }
         } else if (event.type === 'content_block_delta') {
           if (event.delta?.type === 'text_delta' && event.delta?.text) {
-            let text = event.delta.text.replace(/<thinking>[\s\S]*?<\/thinking>\s*/g, '')
+            const text = event.delta.text.replace(/<thinking>[\s\S]*?<\/thinking>\s*/g, '')
             if (text) {
               callbacks.onText(text)
             }
@@ -277,7 +441,8 @@ export function spawnClaude(options: RunnerOptions): RunnerHandle {
             status: subtype === 'error' ? 'error' : 'complete',
           })
         } else if (event.type === 'user') {
-          const toolResults = event.message?.content?.filter((c: { type: string }) => c.type === 'tool_result') || []
+          const toolResults =
+            event.message?.content?.filter((c: { type: string }) => c.type === 'tool_result') || []
           for (const result of toolResults) {
             const toolId = result.tool_use_id
             const toolName = toolNames[toolId] || 'tool'
@@ -310,37 +475,18 @@ export function spawnClaude(options: RunnerOptions): RunnerHandle {
     callbacks.onError(text)
   })
 
-  // Clean up temp image files when process ends
-  const cleanupTempFiles = () => {
-    for (const p of tempImagePaths) {
-      try { unlinkSync(p) } catch { /* already cleaned up */ }
-    }
-  }
-
   const promise = new Promise<number>((resolve) => {
     claude.on('close', (code) => {
-      cleanupTempFiles()
       callbacks.onComplete(code || 0)
       resolve(code || 0)
     })
 
     claude.on('error', (err) => {
-      cleanupTempFiles()
       callbacks.onError(err.message)
       callbacks.onComplete(1)
       resolve(1)
     })
   })
 
-  return {
-    pid: claude.pid || 0,
-    kill: () => {
-      try {
-        claude.kill('SIGTERM')
-      } catch {
-        // Process may already be dead
-      }
-    },
-    promise,
-  }
+  return { child: claude, promise }
 }

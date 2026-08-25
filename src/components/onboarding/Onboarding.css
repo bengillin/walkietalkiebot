@@ -1,58 +1,121 @@
 /* Per-theme onboarding tokens — scoped to .onboarding for guaranteed resolution */
 :root .onboarding {
-  --onb-bg: #0f0f1a; --onb-heading: #ffffff; --onb-text: #a0a0b8; --onb-accent: #00d4ff;
-  --onb-card-bg: #1a1a2e; --onb-card-bg-hover: #252542; --onb-card-border: rgba(255,255,255,0.1);
-  --onb-badge-text: #000000; --onb-badge-alt-bg: #252542; --onb-badge-alt-text: #a0a0b8;
-  --onb-status-warn-bg: #f59e0b; --onb-status-warn-text: #000000;
-  --onb-input-bg: #1a1a2e; --onb-toggle-track: rgba(255,255,255,0.1);
+  --onb-bg: #0f0f1a;
+  --onb-heading: #ffffff;
+  --onb-text: #a0a0b8;
+  --onb-accent: #00d4ff;
+  --onb-card-bg: #1a1a2e;
+  --onb-card-bg-hover: #252542;
+  --onb-card-border: rgba(255, 255, 255, 0.1);
+  --onb-badge-text: #000000;
+  --onb-badge-alt-bg: #252542;
+  --onb-badge-alt-text: #a0a0b8;
+  --onb-status-warn-bg: #f59e0b;
+  --onb-status-warn-text: #000000;
+  --onb-input-bg: #1a1a2e;
+  --onb-toggle-track: rgba(255, 255, 255, 0.1);
   --onb-progress-track: #252542;
 }
-[data-theme="mccallister"] .onboarding {
-  --onb-bg: #a8a8a8; --onb-heading: #000000; --onb-text: #1a1a1a; --onb-accent: #cc0000;
-  --onb-card-bg: #c8c8c8; --onb-card-bg-hover: #d0d0d0; --onb-card-border: #707070;
-  --onb-badge-text: #ffffff; --onb-badge-alt-bg: #808080; --onb-badge-alt-text: #ffffff;
-  --onb-status-warn-bg: #707070; --onb-status-warn-text: #ffffff;
-  --onb-input-bg: #d8d8d8; --onb-toggle-track: #808080;
+[data-theme='mccallister'] .onboarding {
+  --onb-bg: #a8a8a8;
+  --onb-heading: #000000;
+  --onb-text: #1a1a1a;
+  --onb-accent: #cc0000;
+  --onb-card-bg: #c8c8c8;
+  --onb-card-bg-hover: #d0d0d0;
+  --onb-card-border: #707070;
+  --onb-badge-text: #ffffff;
+  --onb-badge-alt-bg: #808080;
+  --onb-badge-alt-text: #ffffff;
+  --onb-status-warn-bg: #707070;
+  --onb-status-warn-text: #ffffff;
+  --onb-input-bg: #d8d8d8;
+  --onb-toggle-track: #808080;
   --onb-progress-track: #c8c8c8;
 }
-[data-theme="imessage"] .onboarding {
-  --onb-bg: #ffffff; --onb-heading: #000000; --onb-text: #3c3c43; --onb-accent: #007aff;
-  --onb-card-bg: #f2f2f7; --onb-card-bg-hover: #e5e5ea; --onb-card-border: rgba(60,60,67,0.12);
-  --onb-badge-text: #ffffff; --onb-badge-alt-bg: #e5e5ea; --onb-badge-alt-text: #3c3c43;
-  --onb-status-warn-bg: #ff9500; --onb-status-warn-text: #ffffff;
-  --onb-input-bg: #f2f2f7; --onb-toggle-track: #e5e5ea;
+[data-theme='imessage'] .onboarding {
+  --onb-bg: #ffffff;
+  --onb-heading: #000000;
+  --onb-text: #3c3c43;
+  --onb-accent: #007aff;
+  --onb-card-bg: #f2f2f7;
+  --onb-card-bg-hover: #e5e5ea;
+  --onb-card-border: rgba(60, 60, 67, 0.12);
+  --onb-badge-text: #ffffff;
+  --onb-badge-alt-bg: #e5e5ea;
+  --onb-badge-alt-text: #3c3c43;
+  --onb-status-warn-bg: #ff9500;
+  --onb-status-warn-text: #ffffff;
+  --onb-input-bg: #f2f2f7;
+  --onb-toggle-track: #e5e5ea;
   --onb-progress-track: #e5e5ea;
 }
-[data-theme="aol"] .onboarding {
-  --onb-bg: #c0c0c0; --onb-heading: #000000; --onb-text: #000080; --onb-accent: #003399;
-  --onb-card-bg: #d4d0c8; --onb-card-bg-hover: #e0dcd4; --onb-card-border: #808080;
-  --onb-badge-text: #ffffff; --onb-badge-alt-bg: #c0c0c0; --onb-badge-alt-text: #000000;
-  --onb-status-warn-bg: #808080; --onb-status-warn-text: #ffffff;
-  --onb-input-bg: #ffffff; --onb-toggle-track: #808080;
+[data-theme='aol'] .onboarding {
+  --onb-bg: #c0c0c0;
+  --onb-heading: #000000;
+  --onb-text: #000080;
+  --onb-accent: #003399;
+  --onb-card-bg: #d4d0c8;
+  --onb-card-bg-hover: #e0dcd4;
+  --onb-card-border: #808080;
+  --onb-badge-text: #ffffff;
+  --onb-badge-alt-bg: #c0c0c0;
+  --onb-badge-alt-text: #000000;
+  --onb-status-warn-bg: #808080;
+  --onb-status-warn-text: #ffffff;
+  --onb-input-bg: #ffffff;
+  --onb-toggle-track: #808080;
   --onb-progress-track: #a8a8a8;
 }
-[data-theme="classic-mac"] .onboarding {
-  --onb-bg: #dddddd; --onb-heading: #000000; --onb-text: #222222; --onb-accent: #3366cc;
-  --onb-card-bg: #ffffff; --onb-card-bg-hover: #eeeeee; --onb-card-border: #000000;
-  --onb-badge-text: #ffffff; --onb-badge-alt-bg: #cccccc; --onb-badge-alt-text: #000000;
-  --onb-status-warn-bg: #999999; --onb-status-warn-text: #000000;
-  --onb-input-bg: #ffffff; --onb-toggle-track: #cccccc;
+[data-theme='classic-mac'] .onboarding {
+  --onb-bg: #dddddd;
+  --onb-heading: #000000;
+  --onb-text: #222222;
+  --onb-accent: #3366cc;
+  --onb-card-bg: #ffffff;
+  --onb-card-bg-hover: #eeeeee;
+  --onb-card-border: #000000;
+  --onb-badge-text: #ffffff;
+  --onb-badge-alt-bg: #cccccc;
+  --onb-badge-alt-text: #000000;
+  --onb-status-warn-bg: #999999;
+  --onb-status-warn-text: #000000;
+  --onb-input-bg: #ffffff;
+  --onb-toggle-track: #cccccc;
   --onb-progress-track: #cccccc;
 }
-[data-theme="geocities"] .onboarding {
-  --onb-bg: #000033; --onb-heading: #ffffff; --onb-text: #00ffff; --onb-accent: #ff00ff;
-  --onb-card-bg: #000066; --onb-card-bg-hover: #330066; --onb-card-border: #6600cc;
-  --onb-badge-text: #ffffff; --onb-badge-alt-bg: #1a0033; --onb-badge-alt-text: #ff66ff;
-  --onb-status-warn-bg: #6600cc; --onb-status-warn-text: #ffffff;
-  --onb-input-bg: #1a0033; --onb-toggle-track: #330066;
+[data-theme='geocities'] .onboarding {
+  --onb-bg: #000033;
+  --onb-heading: #ffffff;
+  --onb-text: #00ffff;
+  --onb-accent: #ff00ff;
+  --onb-card-bg: #000066;
+  --onb-card-bg-hover: #330066;
+  --onb-card-border: #6600cc;
+  --onb-badge-text: #ffffff;
+  --onb-badge-alt-bg: #1a0033;
+  --onb-badge-alt-text: #ff66ff;
+  --onb-status-warn-bg: #6600cc;
+  --onb-status-warn-text: #ffffff;
+  --onb-input-bg: #1a0033;
+  --onb-toggle-track: #330066;
   --onb-progress-track: #222266;
 }
-[data-theme="apple-1984"] .onboarding {
-  --onb-bg: #f5e6c8; --onb-heading: #2c1810; --onb-text: #5a3a28; --onb-accent: #E03A3E;
-  --onb-card-bg: #e8d5b0; --onb-card-bg-hover: #dcc8a0; --onb-card-border: #c4a882;
-  --onb-badge-text: #ffffff; --onb-badge-alt-bg: #c4a882; --onb-badge-alt-text: #2c1810;
-  --onb-status-warn-bg: #c4a882; --onb-status-warn-text: #2c1810;
-  --onb-input-bg: #f5e6c8; --onb-toggle-track: #c4a882;
+[data-theme='apple-1984'] .onboarding {
+  --onb-bg: #f5e6c8;
+  --onb-heading: #2c1810;
+  --onb-text: #5a3a28;
+  --onb-accent: #e03a3e;
+  --onb-card-bg: #e8d5b0;
+  --onb-card-bg-hover: #dcc8a0;
+  --onb-card-border: #c4a882;
+  --onb-badge-text: #ffffff;
+  --onb-badge-alt-bg: #c4a882;
+  --onb-badge-alt-text: #2c1810;
+  --onb-status-warn-bg: #c4a882;
+  --onb-status-warn-text: #2c1810;
+  --onb-input-bg: #f5e6c8;
+  --onb-toggle-track: #c4a882;
   --onb-progress-track: #dcc8a0;
 }
 
@@ -118,7 +181,6 @@
   transition: width 0.3s ease;
 }
 
-
 /* Welcome step — wider to fit speech bubble + swatches */
 .onboarding__step--welcome {
   max-width: 560px;
@@ -164,22 +226,22 @@
 }
 
 /* ── McCallister / TalkBoy ── */
-[data-theme="mccallister"] .onboarding__speech-bubble {
+[data-theme='mccallister'] .onboarding__speech-bubble {
   background: linear-gradient(180deg, #d8d8d8 0%, #c8c8c8 100%);
   border: 3px solid #909090;
   border-radius: 8px;
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.5),
-    3px 3px 0 rgba(0,0,0,0.2);
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    3px 3px 0 rgba(0, 0, 0, 0.2);
 }
-[data-theme="mccallister"] .onboarding__speech-bubble::before {
+[data-theme='mccallister'] .onboarding__speech-bubble::before {
   top: -12px;
   border-left: 12px solid transparent;
   border-right: 12px solid transparent;
   border-bottom: 12px solid #d8d8d8;
   filter: drop-shadow(0 -1px 0 #909090);
 }
-[data-theme="mccallister"] .onboarding__speech-bubble .onboarding__title {
+[data-theme='mccallister'] .onboarding__speech-bubble .onboarding__title {
   font-family: 'Arial Black', 'Helvetica Neue', Impact, sans-serif;
   font-size: 28px;
   font-weight: 900;
@@ -187,7 +249,7 @@
   letter-spacing: 0.02em;
   color: #1a1a1a;
 }
-[data-theme="mccallister"] .onboarding__speech-bubble .onboarding__subtitle {
+[data-theme='mccallister'] .onboarding__speech-bubble .onboarding__subtitle {
   font-family: 'Arial', 'Helvetica Neue', sans-serif;
   font-size: 15px;
   font-weight: 500;
@@ -195,26 +257,26 @@
 }
 
 /* ── Bubble / iMessage ── */
-[data-theme="imessage"] .onboarding__speech-bubble {
+[data-theme='imessage'] .onboarding__speech-bubble {
   background: #e5e5ea;
   border: none;
   border-radius: 20px;
   box-shadow: none;
 }
-[data-theme="imessage"] .onboarding__speech-bubble::before {
+[data-theme='imessage'] .onboarding__speech-bubble::before {
   top: -9px;
   border-left: 9px solid transparent;
   border-right: 9px solid transparent;
   border-bottom: 9px solid #e5e5ea;
 }
-[data-theme="imessage"] .onboarding__speech-bubble .onboarding__title {
+[data-theme='imessage'] .onboarding__speech-bubble .onboarding__title {
   font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif;
   font-size: 32px;
   font-weight: 700;
   letter-spacing: -0.5px;
   color: #000000;
 }
-[data-theme="imessage"] .onboarding__speech-bubble .onboarding__subtitle {
+[data-theme='imessage'] .onboarding__speech-bubble .onboarding__subtitle {
   font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
   font-size: 17px;
   font-weight: 400;
@@ -223,14 +285,14 @@
 }
 
 /* ── Dial-Up / AOL ── */
-[data-theme="aol"] .onboarding__speech-bubble {
+[data-theme='aol'] .onboarding__speech-bubble {
   background: #c0c0c0;
   border: 2px solid;
   border-color: #ffffff #808080 #808080 #ffffff;
   border-radius: 0;
   box-shadow: 1px 1px 0 #000000;
 }
-[data-theme="aol"] .onboarding__speech-bubble::before {
+[data-theme='aol'] .onboarding__speech-bubble::before {
   /* Win95 tooltip pointer — small beveled triangle */
   top: -8px;
   border-left: 8px solid transparent;
@@ -238,14 +300,14 @@
   border-bottom: 8px solid #c0c0c0;
   filter: drop-shadow(0 -1px 0 #ffffff);
 }
-[data-theme="aol"] .onboarding__speech-bubble .onboarding__title {
+[data-theme='aol'] .onboarding__speech-bubble .onboarding__title {
   font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Arial, sans-serif;
   font-size: 24px;
   font-weight: 700;
   letter-spacing: 0;
   color: #000000;
 }
-[data-theme="aol"] .onboarding__speech-bubble .onboarding__subtitle {
+[data-theme='aol'] .onboarding__speech-bubble .onboarding__subtitle {
   font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Arial, sans-serif;
   font-size: 14px;
   font-weight: 400;
@@ -253,27 +315,27 @@
 }
 
 /* ── Finder / Classic Mac ── */
-[data-theme="classic-mac"] .onboarding__speech-bubble {
+[data-theme='classic-mac'] .onboarding__speech-bubble {
   background: #ffffff;
   border: 1px solid #000000;
   border-radius: 5px;
   box-shadow: 1px 1px 0 #999999;
 }
-[data-theme="classic-mac"] .onboarding__speech-bubble::before {
+[data-theme='classic-mac'] .onboarding__speech-bubble::before {
   top: -8px;
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
   border-bottom: 8px solid #ffffff;
   filter: drop-shadow(0 -1px 0 #000000);
 }
-[data-theme="classic-mac"] .onboarding__speech-bubble .onboarding__title {
+[data-theme='classic-mac'] .onboarding__speech-bubble .onboarding__title {
   font-family: 'Chicago', 'Geneva', 'Charcoal', 'Lucida Grande', sans-serif;
   font-size: 24px;
   font-weight: 700;
   letter-spacing: 0;
   color: #000000;
 }
-[data-theme="classic-mac"] .onboarding__speech-bubble .onboarding__subtitle {
+[data-theme='classic-mac'] .onboarding__speech-bubble .onboarding__subtitle {
   font-family: 'Geneva', 'Lucida Grande', 'Helvetica Neue', sans-serif;
   font-size: 14px;
   font-weight: 400;
@@ -281,13 +343,13 @@
 }
 
 /* ── Guestbook / GeoCities ── */
-[data-theme="geocities"] .onboarding__speech-bubble {
+[data-theme='geocities'] .onboarding__speech-bubble {
   background: #330033;
   border: 2px solid #ff00ff;
   border-radius: 0;
   box-shadow: 0 0 8px rgba(255, 0, 255, 0.3);
 }
-[data-theme="geocities"] .onboarding__speech-bubble::before {
+[data-theme='geocities'] .onboarding__speech-bubble::before {
   top: -10px;
   border-left: 10px solid transparent;
   border-right: 10px solid transparent;
@@ -295,14 +357,14 @@
   /* Neon outline triangle — sits just outside the border */
   filter: drop-shadow(0 -2px 4px rgba(255, 0, 255, 0.5));
 }
-[data-theme="geocities"] .onboarding__speech-bubble .onboarding__title {
+[data-theme='geocities'] .onboarding__speech-bubble .onboarding__title {
   font-family: 'Comic Sans MS', 'Comic Sans', cursive, sans-serif;
   font-size: 28px;
   font-weight: 700;
   color: #ffffff;
   text-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
 }
-[data-theme="geocities"] .onboarding__speech-bubble .onboarding__subtitle {
+[data-theme='geocities'] .onboarding__speech-bubble .onboarding__subtitle {
   font-family: 'Comic Sans MS', 'Comic Sans', cursive, sans-serif;
   font-size: 15px;
   font-weight: 400;
@@ -311,7 +373,7 @@
 }
 
 /* ── 1984 / Apple ── */
-[data-theme="apple-1984"] .onboarding__speech-bubble {
+[data-theme='apple-1984'] .onboarding__speech-bubble {
   background: #e8d5b0;
   border: 1px solid #c4a882;
   border-radius: 10px;
@@ -319,14 +381,14 @@
   position: relative;
   overflow: visible;
 }
-[data-theme="apple-1984"] .onboarding__speech-bubble::before {
+[data-theme='apple-1984'] .onboarding__speech-bubble::before {
   top: -9px;
   border-left: 9px solid transparent;
   border-right: 9px solid transparent;
   border-bottom: 9px solid #e8d5b0;
   filter: drop-shadow(0 -1px 0 #c4a882);
 }
-[data-theme="apple-1984"] .onboarding__speech-bubble::after {
+[data-theme='apple-1984'] .onboarding__speech-bubble::after {
   content: '';
   position: absolute;
   top: 0;
@@ -334,22 +396,30 @@
   right: 0;
   height: 3px;
   border-radius: 10px 10px 0 0;
-  background: linear-gradient(to right,
-    #61BB46 0%, #61BB46 16.66%,
-    #FDB827 16.66%, #FDB827 33.33%,
-    #F5821F 33.33%, #F5821F 50%,
-    #E03A3E 50%, #E03A3E 66.66%,
-    #963D97 66.66%, #963D97 83.33%,
-    #009DDC 83.33%, #009DDC 100%);
+  background: linear-gradient(
+    to right,
+    #61bb46 0%,
+    #61bb46 16.66%,
+    #fdb827 16.66%,
+    #fdb827 33.33%,
+    #f5821f 33.33%,
+    #f5821f 50%,
+    #e03a3e 50%,
+    #e03a3e 66.66%,
+    #963d97 66.66%,
+    #963d97 83.33%,
+    #009ddc 83.33%,
+    #009ddc 100%
+  );
 }
-[data-theme="apple-1984"] .onboarding__speech-bubble .onboarding__title {
+[data-theme='apple-1984'] .onboarding__speech-bubble .onboarding__title {
   font-family: 'Futura', 'Century Gothic', 'Gill Sans', sans-serif;
   font-size: 30px;
   font-weight: 700;
   letter-spacing: 0.04em;
   color: #2c1810;
 }
-[data-theme="apple-1984"] .onboarding__speech-bubble .onboarding__subtitle {
+[data-theme='apple-1984'] .onboarding__speech-bubble .onboarding__subtitle {
   font-family: 'Futura', 'Century Gothic', 'Gill Sans', sans-serif;
   font-size: 16px;
   font-weight: 400;
@@ -413,7 +483,9 @@
 }
 
 /* Button text color — use badge-text token (contrasts with accent bg) */
-.onboarding__button { color: var(--onb-badge-text); }
+.onboarding__button {
+  color: var(--onb-badge-text);
+}
 
 /* Setting steps */
 .onboarding__step--setting {
@@ -508,70 +580,74 @@
 /* Per-theme toggle styling — match each theme's border-radius and visual language */
 
 /* McCallister — chunky industrial slide switch */
-[data-theme="mccallister"] .onboarding__toggle {
+[data-theme='mccallister'] .onboarding__toggle {
   border: 1px solid #707070;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
 }
-[data-theme="mccallister"] .onboarding__toggle-slider {
+[data-theme='mccallister'] .onboarding__toggle-slider {
   border-radius: 4px;
   background: #808080;
   border: 1px solid #555555;
-  box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
 }
-[data-theme="mccallister"] .onboarding__toggle-slider::before {
+[data-theme='mccallister'] .onboarding__toggle-slider::before {
   border-radius: 3px;
   background: linear-gradient(180deg, #e0e0e0 0%, #c0c0c0 100%);
   box-shadow: 0 1px 0 #707070;
 }
-[data-theme="mccallister"] .onboarding__toggle input:checked + .onboarding__toggle-slider {
+[data-theme='mccallister'] .onboarding__toggle input:checked + .onboarding__toggle-slider {
   background: #cc0000;
   border-color: #990000;
 }
 
 /* iMessage — iOS-style pill toggle, clean white container */
-[data-theme="imessage"] .onboarding__toggle {
+[data-theme='imessage'] .onboarding__toggle {
   background: #ffffff;
   border: 1px solid rgba(60, 60, 67, 0.12);
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
-[data-theme="imessage"] .onboarding__toggle-slider {
+[data-theme='imessage'] .onboarding__toggle-slider {
   width: 51px;
   height: 31px;
   border-radius: 15.5px;
   background: rgba(120, 120, 128, 0.16);
   border: none;
 }
-[data-theme="imessage"] .onboarding__toggle-slider::before {
+[data-theme='imessage'] .onboarding__toggle-slider::before {
   width: 27px;
   height: 27px;
   border-radius: 50%;
   background: #ffffff;
   border: none;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 1px 1px rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.15),
+    0 1px 1px rgba(0, 0, 0, 0.06);
   top: 50%;
   left: 2px;
 }
-[data-theme="imessage"] .onboarding__toggle input:checked + .onboarding__toggle-slider {
+[data-theme='imessage'] .onboarding__toggle input:checked + .onboarding__toggle-slider {
   background: #34c759;
 }
-[data-theme="imessage"] .onboarding__toggle input:checked + .onboarding__toggle-slider::before {
+[data-theme='imessage'] .onboarding__toggle input:checked + .onboarding__toggle-slider::before {
   transform: translateX(20px) translateY(-50%);
 }
 
 /* AOL — Win95 beveled rectangle */
-[data-theme="aol"] .onboarding__toggle {
+[data-theme='aol'] .onboarding__toggle {
   border-radius: 0;
   border: 2px solid #808080;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff;
 }
-[data-theme="aol"] .onboarding__toggle-slider {
+[data-theme='aol'] .onboarding__toggle-slider {
   border-radius: 0;
   background: #808080;
   border: 2px solid;
   border-color: #808080 #ffffff #ffffff #808080;
 }
-[data-theme="aol"] .onboarding__toggle-slider::before {
+[data-theme='aol'] .onboarding__toggle-slider::before {
   border-radius: 0;
   background: #c0c0c0;
   border: 2px solid;
@@ -582,25 +658,25 @@
   top: 50%;
   left: 2px;
 }
-[data-theme="aol"] .onboarding__toggle input:checked + .onboarding__toggle-slider {
+[data-theme='aol'] .onboarding__toggle input:checked + .onboarding__toggle-slider {
   background: #000080;
   border-color: #808080 #ffffff #ffffff #808080;
 }
-[data-theme="aol"] .onboarding__toggle input:checked + .onboarding__toggle-slider::before {
+[data-theme='aol'] .onboarding__toggle input:checked + .onboarding__toggle-slider::before {
   transform: translateX(20px) translateY(-50%);
 }
 
 /* Classic Mac — Platinum appearance with 1px black borders */
-[data-theme="classic-mac"] .onboarding__toggle {
+[data-theme='classic-mac'] .onboarding__toggle {
   border: 1px solid #000000;
   box-shadow: 1px 1px 0 #000000;
 }
-[data-theme="classic-mac"] .onboarding__toggle-slider {
+[data-theme='classic-mac'] .onboarding__toggle-slider {
   border-radius: 4px;
   background: #aaaaaa;
   border: 1px solid #000000;
 }
-[data-theme="classic-mac"] .onboarding__toggle-slider::before {
+[data-theme='classic-mac'] .onboarding__toggle-slider::before {
   border-radius: 3px;
   background: #eeeeee;
   border: 1px solid #000000;
@@ -609,57 +685,57 @@
   top: 50%;
   left: 2px;
 }
-[data-theme="classic-mac"] .onboarding__toggle input:checked + .onboarding__toggle-slider {
+[data-theme='classic-mac'] .onboarding__toggle input:checked + .onboarding__toggle-slider {
   background: #3366cc;
   border-color: #000000;
 }
-[data-theme="classic-mac"] .onboarding__toggle input:checked + .onboarding__toggle-slider::before {
+[data-theme='classic-mac'] .onboarding__toggle input:checked + .onboarding__toggle-slider::before {
   transform: translateX(20px) translateY(-50%);
 }
 
 /* GeoCities — sharp neon edges */
-[data-theme="geocities"] .onboarding__toggle {
+[data-theme='geocities'] .onboarding__toggle {
   border-radius: 0;
   border: 2px solid #6600cc;
   box-shadow: 0 0 6px rgba(255, 0, 255, 0.2);
 }
-[data-theme="geocities"] .onboarding__toggle-slider {
+[data-theme='geocities'] .onboarding__toggle-slider {
   border-radius: 0;
   background: #1a1a44;
   border: 1px solid #6600cc;
 }
-[data-theme="geocities"] .onboarding__toggle-slider::before {
+[data-theme='geocities'] .onboarding__toggle-slider::before {
   border-radius: 0;
   background: #9933ff;
   box-shadow: 0 0 4px rgba(153, 51, 255, 0.5);
 }
-[data-theme="geocities"] .onboarding__toggle input:checked + .onboarding__toggle-slider {
+[data-theme='geocities'] .onboarding__toggle input:checked + .onboarding__toggle-slider {
   background: #330066;
   border-color: #ff00ff;
 }
-[data-theme="geocities"] .onboarding__toggle input:checked + .onboarding__toggle-slider::before {
+[data-theme='geocities'] .onboarding__toggle input:checked + .onboarding__toggle-slider::before {
   background: #00ffff;
   box-shadow: 0 0 6px rgba(0, 255, 255, 0.6);
 }
 
 /* 1984 — warm beige container, rainbow-accented toggle */
-[data-theme="apple-1984"] .onboarding__toggle {
+[data-theme='apple-1984'] .onboarding__toggle {
   background: #e8d5b0;
   border: 1.5px solid #c4a882;
   border-radius: 8px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
-[data-theme="apple-1984"] .onboarding__toggle:hover {
+[data-theme='apple-1984'] .onboarding__toggle:hover {
   background: #dcc8a0;
 }
-[data-theme="apple-1984"] .onboarding__toggle-slider {
+[data-theme='apple-1984'] .onboarding__toggle-slider {
   width: 44px;
   height: 24px;
   border-radius: 4px;
   background: #c4a882;
   border: 1.5px solid #b0966e;
 }
-[data-theme="apple-1984"] .onboarding__toggle-slider::before {
+[data-theme='apple-1984'] .onboarding__toggle-slider::before {
   width: 18px;
   height: 18px;
   border-radius: 3px;
@@ -669,14 +745,18 @@
   top: 50%;
   left: 2px;
 }
-[data-theme="apple-1984"] .onboarding__toggle input:checked + .onboarding__toggle-slider {
-  background: linear-gradient(to right,
-    #61BB46 0%, #FDB827 25%,
-    #F5821F 50%, #E03A3E 75%,
-    #963D97 100%);
+[data-theme='apple-1984'] .onboarding__toggle input:checked + .onboarding__toggle-slider {
+  background: linear-gradient(
+    to right,
+    #61bb46 0%,
+    #fdb827 25%,
+    #f5821f 50%,
+    #e03a3e 75%,
+    #963d97 100%
+  );
   border-color: #5a3a28;
 }
-[data-theme="apple-1984"] .onboarding__toggle input:checked + .onboarding__toggle-slider::before {
+[data-theme='apple-1984'] .onboarding__toggle input:checked + .onboarding__toggle-slider::before {
   transform: translateX(20px) translateY(-50%);
   background: linear-gradient(180deg, #ffffff, #f5eed8);
   border-color: #5a3a28;
@@ -748,7 +828,9 @@
   background: linear-gradient(180deg, #c8c8c8 0%, #b0b0b0 100%);
   border: 2px solid #707070;
   border-radius: 0;
-  box-shadow: 0 2px 0 #707070, inset 0 1px 0 rgba(255,255,255,0.3);
+  box-shadow:
+    0 2px 0 #707070,
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
   font-family: 'Arial Black', 'Helvetica Neue', Impact, sans-serif;
 }
 .onboarding__theme-swatch--mccallister::before {
@@ -767,7 +849,9 @@
 }
 .onboarding__theme-swatch--mccallister.onboarding__theme-swatch--active {
   border-color: #cc0000;
-  box-shadow: 0 2px 0 #707070, 0 0 0 2px rgba(204, 0, 0, 0.4);
+  box-shadow:
+    0 2px 0 #707070,
+    0 0 0 2px rgba(204, 0, 0, 0.4);
 }
 
 /* Bubble (iMessage) swatch — blue speech bubble */
@@ -805,7 +889,9 @@
 }
 .onboarding__theme-swatch--imessage.onboarding__theme-swatch--active {
   border-color: #007aff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 0 0 2px rgba(0, 122, 255, 0.25);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.08),
+    0 0 0 2px rgba(0, 122, 255, 0.25);
 }
 
 /* Dial-Up (AOL) swatch — mini Win95 blue title bar */
@@ -813,7 +899,9 @@
   background: #c0c0c0;
   border: 2px solid #808080;
   border-radius: 0;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff;
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff;
   font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Arial, sans-serif;
   overflow: hidden;
 }
@@ -842,7 +930,10 @@
 }
 .onboarding__theme-swatch--aol.onboarding__theme-swatch--active {
   border-color: #000080;
-  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #ffffff, 0 0 0 2px rgba(0, 51, 153, 0.4);
+  box-shadow:
+    inset -1px -1px 0 #808080,
+    inset 1px 1px 0 #ffffff,
+    0 0 0 2px rgba(0, 51, 153, 0.4);
 }
 
 /* Finder (Classic Mac) swatch — ⌘ command key */
@@ -867,7 +958,9 @@
 }
 .onboarding__theme-swatch--classic-mac.onboarding__theme-swatch--active {
   border-color: #3366cc;
-  box-shadow: 1px 1px 0 #000000, 0 0 0 2px rgba(51, 102, 204, 0.4);
+  box-shadow:
+    1px 1px 0 #000000,
+    0 0 0 2px rgba(51, 102, 204, 0.4);
 }
 
 /* Guestbook (GeoCities) swatch — animated sparkle star */
@@ -889,8 +982,15 @@
   animation: onb-sparkle 1.5s ease-in-out infinite;
 }
 @keyframes onb-sparkle {
-  0%, 100% { opacity: 1; text-shadow: 0 0 6px rgba(255, 255, 0, 0.8); }
-  50% { opacity: 0.5; text-shadow: 0 0 2px rgba(255, 255, 0, 0.3); }
+  0%,
+  100% {
+    opacity: 1;
+    text-shadow: 0 0 6px rgba(255, 255, 0, 0.8);
+  }
+  50% {
+    opacity: 0.5;
+    text-shadow: 0 0 2px rgba(255, 255, 0, 0.3);
+  }
 }
 .onboarding__theme-swatch--geocities .onboarding__theme-swatch-label {
   color: #00ff00;
@@ -898,7 +998,9 @@
 }
 .onboarding__theme-swatch--geocities.onboarding__theme-swatch--active {
   border-color: #00ffff;
-  box-shadow: 0 0 10px rgba(0, 255, 255, 0.5), 0 0 6px rgba(255, 0, 255, 0.3);
+  box-shadow:
+    0 0 10px rgba(0, 255, 255, 0.5),
+    0 0 6px rgba(255, 0, 255, 0.3);
 }
 
 /* 1984 (Apple) swatch — rainbow stripe across top */
@@ -917,13 +1019,21 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(to right,
-    #61BB46 0%, #61BB46 16.66%,
-    #FDB827 16.66%, #FDB827 33.33%,
-    #F5821F 33.33%, #F5821F 50%,
-    #E03A3E 50%, #E03A3E 66.66%,
-    #963D97 66.66%, #963D97 83.33%,
-    #009DDC 83.33%, #009DDC 100%);
+  background: linear-gradient(
+    to right,
+    #61bb46 0%,
+    #61bb46 16.66%,
+    #fdb827 16.66%,
+    #fdb827 33.33%,
+    #f5821f 33.33%,
+    #f5821f 50%,
+    #e03a3e 50%,
+    #e03a3e 66.66%,
+    #963d97 66.66%,
+    #963d97 83.33%,
+    #009ddc 83.33%,
+    #009ddc 100%
+  );
 }
 /* CSS floppy disk with rainbow fill */
 .onboarding__theme-swatch--apple-1984::before {
@@ -933,13 +1043,17 @@
   background:
     /* Metal shutter at top center */
     linear-gradient(#e8e8e8, #888888) no-repeat center 0 / 10px 5px,
-    /* Label area at bottom */
-    linear-gradient(#ffffff, #f0e0c0) no-repeat center bottom / 12px 6px,
+    /* Label area at bottom */ linear-gradient(#ffffff, #f0e0c0) no-repeat center bottom / 12px 6px,
     /* Rainbow body — saturated bands */
-    linear-gradient(180deg,
-      #4CAF00 0%, #FFB300 20%,
-      #FF6D00 40%, #D50000 60%,
-      #7B1FA2 80%, #0077CC 100%);
+    linear-gradient(
+        180deg,
+        #4caf00 0%,
+        #ffb300 20%,
+        #ff6d00 40%,
+        #d50000 60%,
+        #7b1fa2 80%,
+        #0077cc 100%
+      );
   border: 2px solid #2c1810;
 }
 .onboarding__theme-swatch--apple-1984 .onboarding__theme-swatch-label {
@@ -948,8 +1062,10 @@
   letter-spacing: 0.02em;
 }
 .onboarding__theme-swatch--apple-1984.onboarding__theme-swatch--active {
-  border-color: #E03A3E;
-  box-shadow: 0 1px 3px rgba(44, 24, 16, 0.1), 0 0 0 2px rgba(224, 58, 62, 0.3);
+  border-color: #e03a3e;
+  box-shadow:
+    0 1px 3px rgba(44, 24, 16, 0.1),
+    0 0 0 2px rgba(224, 58, 62, 0.3);
 }
 
 /* Navigation */
@@ -1070,7 +1186,9 @@
   background: var(--onb-card-bg);
   border: 2px solid var(--onb-card-border);
   border-radius: var(--radius-md);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
   text-align: left;
   width: 100%;
   font: inherit;

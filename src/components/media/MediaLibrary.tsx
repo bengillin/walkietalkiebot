@@ -49,7 +49,7 @@ export function MediaLibrary({ conversations, onClose }: MediaLibraryProps) {
     items.sort((a, b) =>
       sortOrder === 'newest'
         ? b.messageTimestamp - a.messageTimestamp
-        : a.messageTimestamp - b.messageTimestamp
+        : a.messageTimestamp - b.messageTimestamp,
     )
 
     return items
@@ -71,16 +71,15 @@ export function MediaLibrary({ conversations, onClose }: MediaLibraryProps) {
     <div className="media-library">
       <div className="media-library__backdrop" onClick={onClose} />
 
-      <div className={`media-library__drawer ${selectedIndex !== null ? 'media-library__drawer--expanded' : ''}`}>
+      <div
+        className={`media-library__drawer ${selectedIndex !== null ? 'media-library__drawer--expanded' : ''}`}
+      >
         <div className="media-library__header">
           {selectedItem ? (
             <>
-              <button
-                className="media-library__back"
-                onClick={() => setSelectedIndex(null)}
-              >
+              <button className="media-library__back" onClick={() => setSelectedIndex(null)}>
                 <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-                  <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                  <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
                 </svg>
                 Back
               </button>
@@ -111,7 +110,7 @@ export function MediaLibrary({ conversations, onClose }: MediaLibraryProps) {
                 aria-label="Previous image"
               >
                 <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-                  <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                  <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
                 </svg>
               </button>
               <img
@@ -126,7 +125,7 @@ export function MediaLibrary({ conversations, onClose }: MediaLibraryProps) {
                 aria-label="Next image"
               >
                 <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-                  <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/>
+                  <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z" />
                 </svg>
               </button>
             </div>
@@ -140,7 +139,9 @@ export function MediaLibrary({ conversations, onClose }: MediaLibraryProps) {
               </span>
               <h3 className="media-library__detail-heading">Analysis</h3>
               {selectedItem.image.description ? (
-                <p className="media-library__detail-description">{selectedItem.image.description}</p>
+                <p className="media-library__detail-description">
+                  {selectedItem.image.description}
+                </p>
               ) : (
                 <p className="media-library__detail-no-analysis">No analysis available</p>
               )}
@@ -149,7 +150,7 @@ export function MediaLibrary({ conversations, onClose }: MediaLibraryProps) {
         ) : mediaItems.length === 0 ? (
           <div className="media-library__empty">
             <svg viewBox="0 0 24 24" fill="currentColor" width="48" height="48">
-              <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+              <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
             </svg>
             <p>No images yet</p>
             <span>Images shared in conversations will appear here</span>
@@ -168,7 +169,9 @@ export function MediaLibrary({ conversations, onClose }: MediaLibraryProps) {
               />
               <div className="media-library__item-overlay">
                 <span className="media-library__item-name">{item.image.fileName}</span>
-                <span className="media-library__item-date">{formatDate(item.messageTimestamp)}</span>
+                <span className="media-library__item-date">
+                  {formatDate(item.messageTimestamp)}
+                </span>
               </div>
             </div>
           ))

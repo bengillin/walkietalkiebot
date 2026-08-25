@@ -50,7 +50,10 @@ export function useSoundEffects(enabled: boolean = true) {
     // Create audio context on first user interaction
     const initAudio = () => {
       if (!audioContextRef.current) {
-        audioContextRef.current = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)()
+        audioContextRef.current = new (
+          window.AudioContext ||
+          (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+        )()
       }
     }
 
@@ -63,52 +66,58 @@ export function useSoundEffects(enabled: boolean = true) {
     }
   }, [])
 
-  const playTone = useCallback((config: SoundConfig, delay: number = 0) => {
-    const ctx = audioContextRef.current
-    if (!ctx || !enabled) return
+  const playTone = useCallback(
+    (config: SoundConfig, delay: number = 0) => {
+      const ctx = audioContextRef.current
+      if (!ctx || !enabled) return
 
-    const oscillator = ctx.createOscillator()
-    const gainNode = ctx.createGain()
+      const oscillator = ctx.createOscillator()
+      const gainNode = ctx.createGain()
 
-    oscillator.connect(gainNode)
-    gainNode.connect(ctx.destination)
+      oscillator.connect(gainNode)
+      gainNode.connect(ctx.destination)
 
-    oscillator.type = config.type
-    oscillator.frequency.value = config.frequency
+      oscillator.type = config.type
+      oscillator.frequency.value = config.frequency
 
-    const now = ctx.currentTime + delay / 1000
-    const duration = config.duration / 1000
+      const now = ctx.currentTime + delay / 1000
+      const duration = config.duration / 1000
 
-    if (config.ramp === 'up') {
-      gainNode.gain.setValueAtTime(0, now)
-      gainNode.gain.linearRampToValueAtTime(config.volume, now + duration * 0.3)
-      gainNode.gain.linearRampToValueAtTime(0, now + duration)
-    } else if (config.ramp === 'down') {
-      gainNode.gain.setValueAtTime(config.volume, now)
-      gainNode.gain.linearRampToValueAtTime(0, now + duration)
-    } else {
-      gainNode.gain.setValueAtTime(config.volume, now)
-      gainNode.gain.setValueAtTime(0, now + duration)
-    }
-
-    oscillator.start(now)
-    oscillator.stop(now + duration)
-  }, [enabled])
-
-  const play = useCallback((sound: SoundType) => {
-    const config = SOUNDS[sound]
-    if (!config) return
-
-    if (Array.isArray(config)) {
-      let delay = 0
-      for (const tone of config) {
-        playTone(tone, delay)
-        delay += tone.duration
+      if (config.ramp === 'up') {
+        gainNode.gain.setValueAtTime(0, now)
+        gainNode.gain.linearRampToValueAtTime(config.volume, now + duration * 0.3)
+        gainNode.gain.linearRampToValueAtTime(0, now + duration)
+      } else if (config.ramp === 'down') {
+        gainNode.gain.setValueAtTime(config.volume, now)
+        gainNode.gain.linearRampToValueAtTime(0, now + duration)
+      } else {
+        gainNode.gain.setValueAtTime(config.volume, now)
+        gainNode.gain.setValueAtTime(0, now + duration)
       }
-    } else {
-      playTone(config)
-    }
-  }, [playTone])
+
+      oscillator.start(now)
+      oscillator.stop(now + duration)
+    },
+    [enabled],
+  )
+
+  const play = useCallback(
+    (sound: SoundType) => {
+      const config = SOUNDS[sound]
+      if (!config) return
+
+      if (Array.isArray(config)) {
+        let delay = 0
+        for (const tone of config) {
+          playTone(tone, delay)
+          delay += tone.duration
+        }
+      } else {
+        playTone(config)
+      }
+    },
+    [playTone],
+  )
 
   return { play }
 }

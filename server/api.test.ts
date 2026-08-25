@@ -64,7 +64,9 @@ describe('Conversation CRUD', () => {
   it('renames a conversation', async () => {
     const { json: created } = await req('POST', '/conversations', { title: 'Old Title' })
 
-    const { status, json } = await req('PATCH', `/conversations/${created.id}`, { title: 'New Title' })
+    const { status, json } = await req('PATCH', `/conversations/${created.id}`, {
+      title: 'New Title',
+    })
     expect(status).toBe(200)
     expect(json.title).toBe('New Title')
   })
@@ -131,7 +133,10 @@ describe('Messages', () => {
     const { json: conv } = await req('POST', '/conversations', { title: 'Chat' })
 
     await req('POST', `/conversations/${conv.id}/messages`, { role: 'user', content: 'Hi' })
-    await req('POST', `/conversations/${conv.id}/messages`, { role: 'assistant', content: 'Hello!' })
+    await req('POST', `/conversations/${conv.id}/messages`, {
+      role: 'assistant',
+      content: 'Hello!',
+    })
 
     const { json } = await req('GET', `/conversations/${conv.id}`)
     expect(json.messages).toHaveLength(2)
@@ -152,7 +157,9 @@ describe('Liner Notes', () => {
   it('sets and gets liner notes', async () => {
     const { json: conv } = await req('POST', '/conversations', { title: 'Notes Test' })
 
-    await req('PUT', `/conversations/${conv.id}/liner-notes`, { linerNotes: '# My Notes\n\nSome details.' })
+    await req('PUT', `/conversations/${conv.id}/liner-notes`, {
+      linerNotes: '# My Notes\n\nSome details.',
+    })
 
     const { json } = await req('GET', `/conversations/${conv.id}/liner-notes`)
     expect(json.linerNotes).toBe('# My Notes\n\nSome details.')
@@ -172,8 +179,14 @@ describe('Search', () => {
 
   it('finds messages by content', async () => {
     const { json: conv } = await req('POST', '/conversations', { title: 'Search Test' })
-    await req('POST', `/conversations/${conv.id}/messages`, { role: 'user', content: 'Tell me about quantum physics' })
-    await req('POST', `/conversations/${conv.id}/messages`, { role: 'assistant', content: 'Quantum physics is fascinating' })
+    await req('POST', `/conversations/${conv.id}/messages`, {
+      role: 'user',
+      content: 'Tell me about quantum physics',
+    })
+    await req('POST', `/conversations/${conv.id}/messages`, {
+      role: 'assistant',
+      content: 'Quantum physics is fascinating',
+    })
 
     const { json } = await req('GET', '/search?q=quantum')
     expect(json.results.length).toBeGreaterThanOrEqual(1)
@@ -201,7 +214,10 @@ describe('Plan CRUD', () => {
   })
 
   it('gets a plan by ID', async () => {
-    const { json: created } = await req('POST', '/plans', { title: 'My Plan', content: 'Details here' })
+    const { json: created } = await req('POST', '/plans', {
+      title: 'My Plan',
+      content: 'Details here',
+    })
 
     const { status, json } = await req('GET', `/plans/${created.id}`)
     expect(status).toBe(200)

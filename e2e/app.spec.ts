@@ -146,7 +146,7 @@ test.describe('Theme switching', () => {
       await setTheme(page, theme)
 
       const dataTheme = await page.evaluate(() =>
-        document.documentElement.getAttribute('data-theme')
+        document.documentElement.getAttribute('data-theme'),
       )
       expect(dataTheme).toBe(theme)
 

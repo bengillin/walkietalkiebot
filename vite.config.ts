@@ -35,10 +35,12 @@ function wtbApi(): Plugin {
         if (req.method === 'GET') {
           res.setHeader('Content-Type', 'application/json')
           res.setHeader('Access-Control-Allow-Origin', '*')
-          res.end(JSON.stringify({
-            running: true,
-            avatarState: state.avatarState,
-          }))
+          res.end(
+            JSON.stringify({
+              running: true,
+              avatarState: state.avatarState,
+            }),
+          )
         } else {
           next()
         }
@@ -49,11 +51,13 @@ function wtbApi(): Plugin {
         if (req.method === 'GET') {
           res.setHeader('Content-Type', 'application/json')
           res.setHeader('Access-Control-Allow-Origin', '*')
-          res.end(JSON.stringify({
-            transcript: state.transcript,
-            lastUserMessage: state.lastUserMessage,
-            lastAssistantMessage: state.lastAssistantMessage,
-          }))
+          res.end(
+            JSON.stringify({
+              transcript: state.transcript,
+              lastUserMessage: state.lastUserMessage,
+              lastAssistantMessage: state.lastAssistantMessage,
+            }),
+          )
         } else {
           next()
         }
@@ -64,9 +68,11 @@ function wtbApi(): Plugin {
         if (req.method === 'GET') {
           res.setHeader('Content-Type', 'application/json')
           res.setHeader('Access-Control-Allow-Origin', '*')
-          res.end(JSON.stringify({
-            messages: state.messages,
-          }))
+          res.end(
+            JSON.stringify({
+              messages: state.messages,
+            }),
+          )
         } else {
           next()
         }
@@ -76,7 +82,9 @@ function wtbApi(): Plugin {
       server.middlewares.use('/api/state', (req, res, next) => {
         if (req.method === 'POST') {
           let body = ''
-          req.on('data', chunk => { body += chunk })
+          req.on('data', (chunk) => {
+            body += chunk
+          })
           req.on('end', () => {
             try {
               const update = JSON.parse(body)
@@ -107,7 +115,9 @@ function wtbApi(): Plugin {
           res.end(JSON.stringify({ sessionId: state.claudeSessionId }))
         } else if (req.method === 'POST') {
           let body = ''
-          req.on('data', chunk => { body += chunk })
+          req.on('data', (chunk) => {
+            body += chunk
+          })
           req.on('end', () => {
             try {
               const { sessionId } = JSON.parse(body)
@@ -142,10 +152,12 @@ function wtbApi(): Plugin {
         if (req.method === 'GET') {
           res.setHeader('Content-Type', 'application/json')
           res.setHeader('Access-Control-Allow-Origin', '*')
-          res.end(JSON.stringify({
-            pending: state.pendingMessage,
-            sessionConnected: !!state.claudeSessionId
-          }))
+          res.end(
+            JSON.stringify({
+              pending: state.pendingMessage,
+              sessionConnected: !!state.claudeSessionId,
+            }),
+          )
         } else {
           next()
         }
@@ -155,7 +167,9 @@ function wtbApi(): Plugin {
       server.middlewares.use('/api/respond', (req, res, next) => {
         if (req.method === 'POST') {
           let body = ''
-          req.on('data', chunk => { body += chunk })
+          req.on('data', (chunk) => {
+            body += chunk
+          })
           req.on('end', () => {
             try {
               const { content } = JSON.parse(body)
@@ -198,7 +212,9 @@ function wtbApi(): Plugin {
       server.middlewares.use('/api/send', (req, res, next) => {
         if (req.method === 'POST') {
           let body = ''
-          req.on('data', chunk => { body += chunk })
+          req.on('data', (chunk) => {
+            body += chunk
+          })
           req.on('end', () => {
             try {
               const { message } = JSON.parse(body)
@@ -213,7 +229,7 @@ function wtbApi(): Plugin {
               // Set pending message for Claude to pick up
               state.pendingMessage = {
                 content: message,
-                timestamp: Date.now()
+                timestamp: Date.now(),
               }
 
               // Set up SSE for response
@@ -223,7 +239,7 @@ function wtbApi(): Plugin {
 
               // Wait for response (timeout after 2 minutes)
               const timeout = setTimeout(() => {
-                state.responseCallbacks = state.responseCallbacks.filter(cb => cb !== callback)
+                state.responseCallbacks = state.responseCallbacks.filter((cb) => cb !== callback)
                 res.write(`data: ${JSON.stringify({ error: 'Timeout waiting for response' })}\n\n`)
                 res.end()
               }, 120000)
@@ -236,7 +252,6 @@ function wtbApi(): Plugin {
               }
 
               state.responseCallbacks.push(callback)
-
             } catch {
               res.statusCode = 400
               res.end(JSON.stringify({ error: 'Invalid JSON' }))
@@ -256,7 +271,9 @@ function wtbApi(): Plugin {
       server.middlewares.use('/api/analyze-image', (req, res, next) => {
         if (req.method === 'POST') {
           let body = ''
-          req.on('data', chunk => { body += chunk })
+          req.on('data', (chunk) => {
+            body += chunk
+          })
           req.on('end', async () => {
             try {
               const { dataUrl, fileName, type, apiKey: clientApiKey } = JSON.parse(body)
@@ -270,7 +287,12 @@ function wtbApi(): Plugin {
               const apiKey = clientApiKey || process.env.ANTHROPIC_API_KEY
               if (!apiKey) {
                 res.statusCode = 400
-                res.end(JSON.stringify({ error: 'API key required for image analysis - please add one in Settings even when using Claude Code mode' }))
+                res.end(
+                  JSON.stringify({
+                    error:
+                      'API key required for image analysis - please add one in Settings even when using Claude Code mode',
+                  }),
+                )
                 return
               }
 
@@ -331,10 +353,11 @@ Be thorough but concise. This description will be used as context for building o
               res.setHeader('Content-Type', 'application/json')
               res.setHeader('Access-Control-Allow-Origin', '*')
               res.end(JSON.stringify({ description, fileName }))
-
             } catch (err) {
               res.statusCode = 500
-              res.end(JSON.stringify({ error: err instanceof Error ? err.message : 'Unknown error' }))
+              res.end(
+                JSON.stringify({ error: err instanceof Error ? err.message : 'Unknown error' }),
+              )
             }
           })
         } else if (req.method === 'OPTIONS') {
@@ -351,7 +374,9 @@ Be thorough but concise. This description will be used as context for building o
       server.middlewares.use('/api/open-url', (req, res, next) => {
         if (req.method === 'POST') {
           let body = ''
-          req.on('data', chunk => { body += chunk })
+          req.on('data', (chunk) => {
+            body += chunk
+          })
           req.on('end', () => {
             try {
               const { url } = JSON.parse(body)
@@ -407,7 +432,9 @@ Be thorough but concise. This description will be used as context for building o
       server.middlewares.use('/api/claude-code', (req, res, next) => {
         if (req.method === 'POST') {
           let body = ''
-          req.on('data', chunk => { body += chunk })
+          req.on('data', (chunk) => {
+            body += chunk
+          })
           req.on('end', () => {
             try {
               const { message, history } = JSON.parse(body)
@@ -425,8 +452,11 @@ Be thorough but concise. This description will be used as context for building o
               const recentMessages = (history || state.messages || []).slice(-10)
               let contextBlock = ''
               if (recentMessages.length > 0) {
-                contextBlock = '[Recent conversation]\n' +
-                  recentMessages.map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n') +
+                contextBlock =
+                  '[Recent conversation]\n' +
+                  recentMessages
+                    .map((m) => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`)
+                    .join('\n') +
                   '\n[/Recent conversation]\n\n'
               }
 
@@ -435,12 +465,29 @@ Be thorough but concise. This description will be used as context for building o
 
 User: ${message}`
               // Use stream-json format for structured output with tool call visibility
-              const args = ['-p', voiceMessage, '--output-format', 'stream-json', '--verbose', '--allowedTools', 'Read,Edit,Write,Bash']
+              const args = [
+                '-p',
+                voiceMessage,
+                '--output-format',
+                'stream-json',
+                '--verbose',
+                '--allowedTools',
+                'Read,Edit,Write,Bash',
+              ]
               const claudePath = '/Users/ben/.local/bin/claude'
-              console.log('Spawning claude:', claudePath, args, state.claudeSessionId ? '(resuming session)' : '(new session)')
+              console.log(
+                'Spawning claude:',
+                claudePath,
+                args,
+                state.claudeSessionId ? '(resuming session)' : '(new session)',
+              )
               const claude = spawn(claudePath, args, {
                 cwd: process.cwd(),
-                env: { ...process.env, FORCE_COLOR: '0', PATH: process.env.PATH + ':/Users/ben/.local/bin' },
+                env: {
+                  ...process.env,
+                  FORCE_COLOR: '0',
+                  PATH: process.env.PATH + ':/Users/ben/.local/bin',
+                },
                 stdio: ['ignore', 'pipe', 'pipe'],
                 detached: false,
               })
@@ -470,16 +517,22 @@ User: ${message}`
                     // Handle different event types from stream-json format
                     if (event.type === 'assistant') {
                       // Text response from Claude
-                      const textContent = event.message?.content?.find((c: any) => c.type === 'text')
+                      const textContent = event.message?.content?.find(
+                        (c: any) => c.type === 'text',
+                      )
                       if (textContent?.text) {
                         // Strip thinking blocks
-                        let text = textContent.text.replace(/<thinking>[\s\S]*?<\/thinking>\s*/g, '')
+                        const text = textContent.text.replace(
+                          /<thinking>[\s\S]*?<\/thinking>\s*/g,
+                          '',
+                        )
                         if (text.trim()) {
                           res.write(`data: ${JSON.stringify({ text })}\n\n`)
                         }
                       }
                       // Also check for tool_use blocks in message content
-                      const toolUseBlocks = event.message?.content?.filter((c: any) => c.type === 'tool_use') || []
+                      const toolUseBlocks =
+                        event.message?.content?.filter((c: any) => c.type === 'tool_use') || []
                       for (const toolBlock of toolUseBlocks) {
                         // Store full input for display
                         if (toolBlock.id && toolBlock.input) {
@@ -496,14 +549,16 @@ User: ${message}`
                             inputDetail = toolBlock.input.pattern
                           }
                         }
-                        res.write(`data: ${JSON.stringify({
-                          activity: {
-                            type: 'tool_start',
-                            tool: toolBlock.name,
-                            id: toolBlock.id,
-                            input: inputDetail
-                          }
-                        })}\n\n`)
+                        res.write(
+                          `data: ${JSON.stringify({
+                            activity: {
+                              type: 'tool_start',
+                              tool: toolBlock.name,
+                              id: toolBlock.id,
+                              input: inputDetail,
+                            },
+                          })}\n\n`,
+                        )
                       }
                     } else if (event.type === 'content_block_start') {
                       // Starting a new content block (could be tool use)
@@ -512,24 +567,30 @@ User: ${message}`
                         currentToolName = event.content_block.name
                         toolInputs[currentToolId] = ''
                         toolNames[currentToolId] = event.content_block.name
-                        res.write(`data: ${JSON.stringify({
-                          activity: {
-                            type: 'tool_start',
-                            tool: event.content_block.name,
-                            id: event.content_block.id
-                          }
-                        })}\n\n`)
+                        res.write(
+                          `data: ${JSON.stringify({
+                            activity: {
+                              type: 'tool_start',
+                              tool: event.content_block.name,
+                              id: event.content_block.id,
+                            },
+                          })}\n\n`,
+                        )
                       }
                     } else if (event.type === 'content_block_delta') {
                       // Delta update - could be text or tool input
                       if (event.delta?.type === 'text_delta' && event.delta?.text) {
-                        let text = event.delta.text.replace(/<thinking>[\s\S]*?<\/thinking>\s*/g, '')
+                        const text = event.delta.text.replace(
+                          /<thinking>[\s\S]*?<\/thinking>\s*/g,
+                          '',
+                        )
                         if (text) {
                           res.write(`data: ${JSON.stringify({ text })}\n\n`)
                         }
                       } else if (event.delta?.type === 'input_json_delta' && currentToolId) {
                         // Accumulate tool input JSON
-                        toolInputs[currentToolId] = (toolInputs[currentToolId] || '') + event.delta.partial_json
+                        toolInputs[currentToolId] =
+                          (toolInputs[currentToolId] || '') + event.delta.partial_json
                       }
                     } else if (event.type === 'content_block_stop' && currentToolId) {
                       // Tool input complete - send the input details
@@ -546,13 +607,15 @@ User: ${message}`
                             inputDetail = input.pattern
                           }
                           if (inputDetail) {
-                            res.write(`data: ${JSON.stringify({
-                              activity: {
-                                type: 'tool_input',
-                                id: currentToolId,
-                                input: inputDetail
-                              }
-                            })}\n\n`)
+                            res.write(
+                              `data: ${JSON.stringify({
+                                activity: {
+                                  type: 'tool_input',
+                                  id: currentToolId,
+                                  input: inputDetail,
+                                },
+                              })}\n\n`,
+                            )
                           }
                         }
                       } catch {
@@ -563,15 +626,18 @@ User: ${message}`
                       // Final result - mark all running tools as complete
                       const subtype = event.subtype || 'complete'
                       // Send a general completion signal
-                      res.write(`data: ${JSON.stringify({
-                        activity: {
-                          type: 'all_complete',
-                          status: subtype === 'error' ? 'error' : 'complete'
-                        }
-                      })}\n\n`)
+                      res.write(
+                        `data: ${JSON.stringify({
+                          activity: {
+                            type: 'all_complete',
+                            status: subtype === 'error' ? 'error' : 'complete',
+                          },
+                        })}\n\n`,
+                      )
                     } else if (event.type === 'user') {
                       // User message contains tool_result blocks
-                      const toolResults = event.message?.content?.filter((c: any) => c.type === 'tool_result') || []
+                      const toolResults =
+                        event.message?.content?.filter((c: any) => c.type === 'tool_result') || []
                       for (const result of toolResults) {
                         const toolId = result.tool_use_id
                         const toolName = toolNames[toolId] || 'tool'
@@ -583,15 +649,17 @@ User: ${message}`
                           const textContent = result.content.find((c: any) => c.type === 'text')
                           output = textContent?.text?.slice(0, 200) || ''
                         }
-                        res.write(`data: ${JSON.stringify({
-                          activity: {
-                            type: 'tool_end',
-                            tool: toolName,
-                            id: toolId,
-                            status: isError ? 'error' : 'complete',
-                            output
-                          }
-                        })}\n\n`)
+                        res.write(
+                          `data: ${JSON.stringify({
+                            activity: {
+                              type: 'tool_end',
+                              tool: toolName,
+                              id: toolId,
+                              status: isError ? 'error' : 'complete',
+                              output,
+                            },
+                          })}\n\n`,
+                        )
                       }
                     }
                   } catch (e) {
@@ -617,7 +685,6 @@ User: ${message}`
                 res.write(`data: ${JSON.stringify({ error: err.message })}\n\n`)
                 res.end()
               })
-
             } catch {
               res.statusCode = 400
               res.end(JSON.stringify({ error: 'Invalid JSON' }))

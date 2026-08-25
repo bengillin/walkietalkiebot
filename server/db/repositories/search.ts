@@ -18,9 +18,14 @@ export function searchMessages(query: string, limit = 50): SearchResult[] {
   // Use FTS5 match syntax for the search
   // Escape special FTS characters and add * for prefix matching
   const escapedQuery = query.replace(/['"]/g, '').trim()
-  const searchTerms = escapedQuery.split(/\s+/).map(term => `"${term}"*`).join(' ')
+  const searchTerms = escapedQuery
+    .split(/\s+/)
+    .map((term) => `"${term}"*`)
+    .join(' ')
 
-  const results = db.prepare(`
+  const results = db
+    .prepare(
+      `
     SELECT
       m.id as message_id,
       m.conversation_id,
@@ -35,7 +40,9 @@ export function searchMessages(query: string, limit = 50): SearchResult[] {
     WHERE messages_fts MATCH ?
     ORDER BY rank
     LIMIT ?
-  `).all(searchTerms, limit) as SearchResult[]
+  `,
+    )
+    .all(searchTerms, limit) as SearchResult[]
 
   return results
 }

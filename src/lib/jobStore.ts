@@ -7,7 +7,11 @@ interface JobState {
   activeSubscriptions: Map<string, () => void>
 
   // Actions
-  createJob: (conversationId: string, prompt: string, history?: Array<{ role: string; content: string }>) => Promise<string>
+  createJob: (
+    conversationId: string,
+    prompt: string,
+    history?: Array<{ role: string; content: string }>,
+  ) => Promise<string>
   cancelJob: (id: string) => Promise<void>
   refreshJobs: () => Promise<void>
   subscribeToJob: (id: string) => () => void
@@ -67,7 +71,7 @@ export const useJobStore = create<JobState>((set, get) => ({
         // On done, clean up subscription and refresh
         subs.delete(id)
         get().refreshJobs()
-      }
+      },
     )
 
     subs.set(id, unsub)
@@ -75,8 +79,8 @@ export const useJobStore = create<JobState>((set, get) => ({
   },
 
   clearCompleted: () => {
-    set(state => ({
-      jobs: state.jobs.filter(j => !['completed', 'failed', 'cancelled'].includes(j.status)),
+    set((state) => ({
+      jobs: state.jobs.filter((j) => !['completed', 'failed', 'cancelled'].includes(j.status)),
     }))
   },
 }))

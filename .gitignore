@@ -7,3 +7,9 @@ dist/
 mcp-server/node_modules/
 server/db/talkboy.db
 server/**/*.test.js
+
+# Test / build output
+test-results/
+playwright-report/
+coverage/
+.vite/

@@ -1,10 +1,4 @@
-export type AvatarState =
-  | 'idle'
-  | 'listening'
-  | 'thinking'
-  | 'speaking'
-  | 'happy'
-  | 'confused'
+export type AvatarState = 'idle' | 'listening' | 'thinking' | 'speaking' | 'happy' | 'confused'
 
 export type ActivityType = 'tool_start' | 'tool_end' | 'thinking' | 'text'
 
@@ -43,11 +37,11 @@ export interface Activity {
 export interface StoredActivity {
   id: string
   tool: string
-  input?: string        // Truncated for storage
+  input?: string // Truncated for storage
   status: 'complete' | 'error'
   timestamp: number
-  duration?: number     // Time taken in ms (useful for performance analysis)
-  error?: string        // Error message if failed
+  duration?: number // Time taken in ms (useful for performance analysis)
+  error?: string // Error message if failed
 }
 
 export interface MessageImage {
@@ -70,11 +64,11 @@ export interface Conversation {
   id: string
   title: string
   messages: Message[]
-  activities?: StoredActivity[]  // Historical tool use, loaded with conversation
-  linerNotes?: string | null     // Pinned artifacts/plans/docs
-  mode?: string                  // Active mode for this conversation
-  projectId?: string | null      // Project/directory grouping
-  parentId?: string | null       // Parent conversation (branching)
+  activities?: StoredActivity[] // Historical tool use, loaded with conversation
+  linerNotes?: string | null // Pinned artifacts/plans/docs
+  mode?: string // Active mode for this conversation
+  projectId?: string | null // Project/directory grouping
+  parentId?: string | null // Parent conversation (branching)
   createdAt: number
   updatedAt: number
 }
@@ -86,7 +80,10 @@ export interface AppState {
   // Current conversation
   currentConversationId: string | null
   messages: Message[]
-  addMessage: (message: Omit<Message, 'id' | 'timestamp' | 'images'>, images?: MessageImage[]) => void
+  addMessage: (
+    message: Omit<Message, 'id' | 'timestamp' | 'images'>,
+    images?: MessageImage[],
+  ) => void
 
   // All conversations
   conversations: Conversation[]
@@ -133,7 +130,7 @@ export interface AppState {
 
   // Stored activities (persisted with conversation)
   storedActivities: StoredActivity[]
-  finalizeActivities: () => void  // Convert live activities to stored when turn ends
+  finalizeActivities: () => void // Convert live activities to stored when turn ends
 
   // File attachments
   attachedFiles: DroppedFile[]

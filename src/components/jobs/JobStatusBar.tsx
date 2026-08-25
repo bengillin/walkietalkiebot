@@ -14,10 +14,12 @@ export function JobStatusBar() {
     return () => clearInterval(interval)
   }, [refreshJobs])
 
-  const activeJobs = jobs.filter(j => j.status === 'running' || j.status === 'queued')
-  const recentCompleted = jobs.filter(j =>
-    ['completed', 'failed'].includes(j.status) &&
-    j.completed_at && Date.now() - j.completed_at < 30000
+  const activeJobs = jobs.filter((j) => j.status === 'running' || j.status === 'queued')
+  const recentCompleted = jobs.filter(
+    (j) =>
+      ['completed', 'failed'].includes(j.status) &&
+      j.completed_at &&
+      Date.now() - j.completed_at < 30000,
   )
 
   // Don't render if nothing to show
@@ -28,7 +30,7 @@ export function JobStatusBar() {
   return (
     <>
       <div className="job-status-bar">
-        {activeJobs.map(job => (
+        {activeJobs.map((job) => (
           <div
             key={job.id}
             className={`job-status-bar__item job-status-bar__item--${job.status}`}
@@ -43,15 +45,15 @@ export function JobStatusBar() {
                 <ElapsedTime since={job.started_at} />
               </span>
             )}
-            {job.status === 'queued' && (
-              <span className="job-status-bar__badge">queued</span>
-            )}
+            {job.status === 'queued' && <span className="job-status-bar__badge">queued</span>}
             {job.source === 'orchestrate' && (
-              <span className="job-status-bar__badge job-status-bar__badge--orchestrate">parallel</span>
+              <span className="job-status-bar__badge job-status-bar__badge--orchestrate">
+                parallel
+              </span>
             )}
           </div>
         ))}
-        {recentCompleted.map(job => (
+        {recentCompleted.map((job) => (
           <div
             key={job.id}
             className={`job-status-bar__item job-status-bar__item--${job.status}`}
@@ -62,19 +64,16 @@ export function JobStatusBar() {
             </span>
             <span className="job-status-bar__prompt">
               {job.status === 'completed'
-                ? (job.result?.slice(0, 60) || 'Done') + (job.result && job.result.length > 60 ? '...' : '')
-                : job.error || 'Failed'
-              }
+                ? (job.result?.slice(0, 60) || 'Done') +
+                  (job.result && job.result.length > 60 ? '...' : '')
+                : job.error || 'Failed'}
             </span>
           </div>
         ))}
       </div>
 
       {expandedJobId && (
-        <JobDetailPanel
-          jobId={expandedJobId}
-          onClose={() => setExpandedJobId(null)}
-        />
+        <JobDetailPanel jobId={expandedJobId} onClose={() => setExpandedJobId(null)} />
       )}
     </>
   )
@@ -93,5 +92,9 @@ function ElapsedTime({ since }: { since: number }) {
   if (elapsed < 60) return <>{elapsed}s</>
   const mins = Math.floor(elapsed / 60)
   const secs = elapsed % 60
-  return <>{mins}m {secs}s</>
+  return (
+    <>
+      {mins}m {secs}s
+    </>
+  )
 }

@@ -11,10 +11,22 @@ const pkg = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf-8'))
 const version = pkg.version
 
 const replacements = [
-  { file: '.claude-plugin/plugin.json', pattern: /"version":\s*"[^"]+"/,       replace: `"version": "${version}"` },
-  { file: 'mcp-server/package.json',    pattern: /"version":\s*"[^"]+"/,       replace: `"version": "${version}"` },
-  { file: 'site/public/llms.txt',       pattern: /Version:\s*[\d.]+/,          replace: `Version: ${version}` },
-  { file: 'site/index.html',            pattern: /"softwareVersion":\s*"[^"]+"/, replace: `"softwareVersion": "${version}"` },
+  {
+    file: '.claude-plugin/plugin.json',
+    pattern: /"version":\s*"[^"]+"/,
+    replace: `"version": "${version}"`,
+  },
+  {
+    file: 'mcp-server/package.json',
+    pattern: /"version":\s*"[^"]+"/,
+    replace: `"version": "${version}"`,
+  },
+  { file: 'site/public/llms.txt', pattern: /Version:\s*[\d.]+/, replace: `Version: ${version}` },
+  {
+    file: 'site/index.html',
+    pattern: /"softwareVersion":\s*"[^"]+"/,
+    replace: `"softwareVersion": "${version}"`,
+  },
 ]
 
 let updated = 0

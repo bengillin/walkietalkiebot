@@ -33,7 +33,12 @@ describe('createMessage', () => {
 
   it('auto-increments position', () => {
     createMessage({ id: 'm1', conversationId: 'conv1', role: 'user', content: 'First' })
-    const m2 = createMessage({ id: 'm2', conversationId: 'conv1', role: 'assistant', content: 'Second' })
+    const m2 = createMessage({
+      id: 'm2',
+      conversationId: 'conv1',
+      role: 'assistant',
+      content: 'Second',
+    })
     expect(m2.position).toBe(1)
   })
 
@@ -44,7 +49,12 @@ describe('createMessage', () => {
       role: 'user',
       content: 'See this image',
       images: [
-        { id: 'img1', dataUrl: 'data:image/png;base64,abc', fileName: 'test.png', description: 'A test image' },
+        {
+          id: 'img1',
+          dataUrl: 'data:image/png;base64,abc',
+          fileName: 'test.png',
+          description: 'A test image',
+        },
       ],
     })
 

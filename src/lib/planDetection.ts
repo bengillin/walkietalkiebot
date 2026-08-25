@@ -26,15 +26,15 @@ export function detectPlan(response: string): DetectedPlan | null {
 
   // Check for structured plan indicators
   const structureIndicators = [
-    /^#{2,3}\s+(?:phase|step|stage|part|section)\s+\d/im,     // ## Phase 1, ## Step 1
-    /^\d+\.\s+\*\*[^*]+\*\*/m,                                 // 1. **Bold step title**
-    /^#{2,3}\s+\d+[\.\)]/m,                                    // ## 1. or ## 1)
-    /^-\s+\[[ x]\]/m,                                          // - [ ] checkbox items
-    /(?:^#{2,3}\s+.+\n(?:[\s\S]*?)^-\s+.+){2,}/m,            // Multiple sections with lists
+    /^#{2,3}\s+(?:phase|step|stage|part|section)\s+\d/im, // ## Phase 1, ## Step 1
+    /^\d+\.\s+\*\*[^*]+\*\*/m, // 1. **Bold step title**
+    /^#{2,3}\s+\d+[.)]/m, // ## 1. or ## 1)
+    /^-\s+\[[ x]\]/m, // - [ ] checkbox items
+    /(?:^#{2,3}\s+.+\n(?:[\s\S]*?)^-\s+.+){2,}/m, // Multiple sections with lists
   ]
 
   // Must have at least some structure
-  const hasStructure = structureIndicators.some(pattern => pattern.test(response))
+  const hasStructure = structureIndicators.some((pattern) => pattern.test(response))
 
   // Count headings and list items as a heuristic
   const headingCount = (response.match(/^#{1,3}\s+.+/gm) || []).length
@@ -84,7 +84,7 @@ export function detectPlan(response: string): DetectedPlan | null {
  */
 export async function detectAndSavePlan(
   response: string,
-  conversationId: string | null
+  conversationId: string | null,
 ): Promise<api.Plan | null> {
   const detected = detectPlan(response)
   if (!detected) return null

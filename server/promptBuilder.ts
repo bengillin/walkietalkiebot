@@ -16,8 +16,8 @@ export function buildPrompt(input: PromptInput): string {
     const recent = history.slice(-10)
     blocks.push(
       '[Recent conversation]\n' +
-      recent.map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n') +
-      '\n[/Recent conversation]'
+        recent.map((m) => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n') +
+        '\n[/Recent conversation]',
     )
   }
 
@@ -25,8 +25,8 @@ export function buildPrompt(input: PromptInput): string {
   if (imagePaths && imagePaths.length > 0) {
     blocks.push(
       '[Attached Images - Use the Read tool to view these image files]\n' +
-      imagePaths.join('\n') +
-      '\n[/Attached Images]'
+        imagePaths.join('\n') +
+        '\n[/Attached Images]',
     )
   }
 
@@ -36,7 +36,7 @@ export function buildPrompt(input: PromptInput): string {
   // Plan detection block (only for modes that want it)
   if (mode.planDetection) {
     blocks.push(
-      '[PLAN OUTPUT - If you produce a detailed plan, write it to /tmp/wtb-plan.md using the Write tool, then give a brief summary of what you planned.]'
+      '[PLAN OUTPUT - If you produce a detailed plan, write it to /tmp/wtb-plan.md using the Write tool, then give a brief summary of what you planned.]',
     )
   }
 

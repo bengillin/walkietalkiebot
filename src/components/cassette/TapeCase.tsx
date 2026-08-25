@@ -33,7 +33,11 @@ export function TapeCase({
   // Generate a gradient based on title if no artwork provided
   const defaultGradient = generateGradientFromString(title)
   const backgroundStyle = artworkUrl
-    ? { backgroundImage: `url(${artworkUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+    ? {
+        backgroundImage: `url(${artworkUrl})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }
     : { background: artworkGradient || defaultGradient }
 
   return (
@@ -75,7 +79,13 @@ export function TapeCase({
             />
           </div>
           {onEject && (
-            <button className="tape-case__eject-btn" onClick={(e) => { e.stopPropagation(); onEject(); }}>
+            <button
+              className="tape-case__eject-btn"
+              onClick={(e) => {
+                e.stopPropagation()
+                onEject()
+              }}
+            >
               Eject
             </button>
           )}

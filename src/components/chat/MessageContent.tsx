@@ -128,7 +128,11 @@ function renderInline(text: string): (string | JSX.Element)[] {
       parts.push(<strong key={`b${key++}`}>{match[2]}</strong>)
     } else if (match[3]) {
       // Inline code
-      parts.push(<code key={`c${key++}`} className="msg-inline-code">{match[3]}</code>)
+      parts.push(
+        <code key={`c${key++}`} className="msg-inline-code">
+          {match[3]}
+        </code>,
+      )
     } else if (match[4]) {
       // Italic
       parts.push(<em key={`i${key++}`}>{match[4]}</em>)
@@ -165,7 +169,7 @@ function renderUrls(text: string, keyOffset: number): (string | JSX.Element)[] {
         }}
       >
         {url}
-      </a>
+      </a>,
     )
     lastIndex = start + url.length
   }
@@ -211,17 +215,20 @@ export function MessageContent({ content }: MessageContentProps) {
             return (
               <div key={i} className="msg-segment msg-code-block">
                 {seg.language && <span className="msg-code-lang">{seg.language}</span>}
-                <pre><code>{seg.code}</code></pre>
+                <pre>
+                  <code>{seg.code}</code>
+                </pre>
               </div>
             )
-          case 'heading':
+          case 'heading': {
             const Tag = `h${seg.level + 1}` as 'h2' | 'h3' | 'h4'
             return (
               <Tag key={i} className={`msg-segment msg-heading msg-heading--${seg.level}`}>
                 {renderInline(seg.text)}
               </Tag>
             )
-          case 'list':
+          }
+          case 'list': {
             const ListTag = seg.ordered ? 'ol' : 'ul'
             return (
               <ListTag key={i} className="msg-segment msg-list">
@@ -230,6 +237,7 @@ export function MessageContent({ content }: MessageContentProps) {
                 ))}
               </ListTag>
             )
+          }
           case 'separator':
             return <hr key={i} className="msg-segment msg-separator" />
           default:
