@@ -4,7 +4,7 @@ A voice-first, cassette tape-themed interface for Claude Code with 6 retro theme
 
 ## Tech Stack
 
-- **Frontend**: React 18, TypeScript, Vite, Zustand
+- **Frontend**: React 19, TypeScript, Vite, Zustand
 - **Server**: Node.js, Hono, better-sqlite3 (WAL mode)
 - **MCP**: @modelcontextprotocol/sdk (stdio transport)
 - **Voice**: Web Speech API (browser-native STT/TTS)

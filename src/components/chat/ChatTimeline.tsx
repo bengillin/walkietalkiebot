@@ -1,3 +1,4 @@
+import type React from 'react'
 import { useEffect, useRef, useState, memo } from 'react'
 import { Message, Activity, AvatarState, StoredActivity } from '../../types'
 import { openUrl } from '../../lib/claude'
@@ -173,8 +174,8 @@ function CollapsibleTools({
 // Render text with clickable URLs
 const URL_REGEX = /(https?:\/\/[^\s<>"{}|\\^`[\]]*[^\s<>"{}|\\^`[\].,:;!?)])/g
 
-function renderTextWithLinks(text: string): (string | JSX.Element)[] {
-  const parts: (string | JSX.Element)[] = []
+function renderTextWithLinks(text: string): (string | React.JSX.Element)[] {
+  const parts: (string | React.JSX.Element)[] = []
   let lastIndex = 0
 
   for (const match of text.matchAll(URL_REGEX)) {
