@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `format:check`, and `typecheck` npm scripts.
 - GitHub Actions CI (`.github/workflows/ci.yml`) running typecheck, lint, tests, and build.
 - `CHANGELOG.md` and `CONTRIBUTING.md`.
+- Test coverage for the four least-covered modules: `useClaudeChat` (32 tests),
+  `useVoiceIO` (29), the job runner's stdout stream parsing (28), and the job
+  manager (29). Suite goes from 181 to 299 unit tests.
 - `typecheck:mcp` script (`tsc -p mcp-server/tsconfig.json --noEmit`), now part of
   `npm run typecheck` and therefore gated in CI. The MCP server is bundled with
   esbuild, which skips type checking, so it could previously drift unnoticed.
@@ -35,6 +38,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Server tests ran against compiled `.js` build artifacts instead of the `.ts`
+  sources. `npm run build` writes the compiled output next to each source file,
+  and both extensionless imports and explicit `.js` specifiers resolved to it —
+  so editing a `.ts` and running `npm test` without rebuilding reported green
+  against code that no longer existed. `vitest.config.server.ts` now forces
+  resolution to source.
 - MCP server reported a stale version (`0.3.1`) to clients in its `initialize`
   response, because `scripts/sync-version.js` synced `mcp-server/package.json`
   but not the hardcoded literal in `mcp-server/index.ts`. Bumped to `0.3.8` and
