@@ -141,7 +141,7 @@ export function useSpeechSynthesis({
     let match
 
     while ((match = sentencePattern.exec(remaining)) !== null) {
-      const sentence = match[1].trim()
+      const sentence = match[1]?.trim() ?? ''
       if (sentence) sentences.push(sentence)
       remaining = remaining.slice(match[0].length)
       if (!remaining) break

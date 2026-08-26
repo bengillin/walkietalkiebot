@@ -14,16 +14,22 @@ function parseSegments(content: string): Segment[] {
   const segments: Segment[] = []
   let i = 0
 
+  // Every read below is already bounds-checked by the enclosing `i <
+  // lines.length`, but the index signature is still `string | undefined`.
+  // Reading past the end yields '', which every predicate here treats as
+  // "not a special line" — the same outcome as stopping.
+  const at = (n: number): string => lines[n] ?? ''
+
   while (i < lines.length) {
-    const line = lines[i]
+    const line = at(i)
 
     // Code block
     if (line.startsWith('```')) {
       const lang = line.slice(3).trim()
       const codeLines: string[] = []
       i++
-      while (i < lines.length && !lines[i].startsWith('```')) {
-        codeLines.push(lines[i])
+      while (i < lines.length && !at(i).startsWith('```')) {
+        codeLines.push(at(i))
         i++
       }
       i++ // skip closing ```
@@ -58,8 +64,8 @@ function parseSegments(content: string): Segment[] {
     // List items (collect consecutive)
     if (/^[-*] /.test(line)) {
       const items: string[] = []
-      while (i < lines.length && /^[-*] /.test(lines[i])) {
-        items.push(lines[i].slice(2))
+      while (i < lines.length && /^[-*] /.test(at(i))) {
+        items.push(at(i).slice(2))
         i++
       }
       segments.push({ type: 'list', ordered: false, items })
@@ -67,8 +73,8 @@ function parseSegments(content: string): Segment[] {
     }
     if (/^\d+\. /.test(line)) {
       const items: string[] = []
-      while (i < lines.length && /^\d+\. /.test(lines[i])) {
-        items.push(lines[i].replace(/^\d+\.\s*/, ''))
+      while (i < lines.length && /^\d+\. /.test(at(i))) {
+        items.push(at(i).replace(/^\d+\.\s*/, ''))
         i++
       }
       segments.push({ type: 'list', ordered: true, items })
@@ -85,16 +91,16 @@ function parseSegments(content: string): Segment[] {
     const paraLines: string[] = []
     while (
       i < lines.length &&
-      lines[i].trim() !== '' &&
-      !lines[i].startsWith('```') &&
-      !lines[i].startsWith('# ') &&
-      !lines[i].startsWith('## ') &&
-      !lines[i].startsWith('### ') &&
-      !/^---+$/.test(lines[i].trim()) &&
-      !/^[-*] /.test(lines[i]) &&
-      !/^\d+\. /.test(lines[i])
+      at(i).trim() !== '' &&
+      !at(i).startsWith('```') &&
+      !at(i).startsWith('# ') &&
+      !at(i).startsWith('## ') &&
+      !at(i).startsWith('### ') &&
+      !/^---+$/.test(at(i).trim()) &&
+      !/^[-*] /.test(at(i)) &&
+      !/^\d+\. /.test(at(i))
     ) {
-      paraLines.push(lines[i])
+      paraLines.push(at(i))
       i++
     }
     if (paraLines.length > 0) {

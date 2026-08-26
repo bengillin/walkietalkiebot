@@ -104,7 +104,8 @@ export function useWakeWord({
       // Check both interim and final results for faster response
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const result = event.results[i]
-        const transcript = result[0].transcript
+        const transcript = result?.[0]?.transcript
+        if (!transcript) continue
 
         setLastHeard(transcript)
 

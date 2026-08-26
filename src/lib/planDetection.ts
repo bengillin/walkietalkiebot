@@ -18,11 +18,11 @@ interface DetectedPlan {
 export function detectPlan(response: string): DetectedPlan | null {
   if (!response || response.length < 100) return null
 
-  // Plan title patterns - headings that signal a plan
-  const planHeadingPatterns = [
-    /^(#{1,3})\s+(.*(?:plan|implementation|approach|strategy|roadmap|phases?|steps?|proposal|design|architecture|sprint|milestone).*)/im,
-    /^(#{1,3})\s+(.*)/m, // Fallback: any heading if we detect plan structure below
-  ]
+  // Heading that signals a plan. (A second "fallback: any heading" pattern used
+  // to sit alongside this one but was never referenced — the title fallback
+  // below uses its own regex.)
+  const planHeadingPattern =
+    /^(#{1,3})\s+(.*(?:plan|implementation|approach|strategy|roadmap|phases?|steps?|proposal|design|architecture|sprint|milestone).*)/im
 
   // Check for structured plan indicators
   const structureIndicators = [
@@ -44,7 +44,7 @@ export function detectPlan(response: string): DetectedPlan | null {
   // A plan should have either:
   // - Explicit plan heading + some structure
   // - Multiple headings + many list items (looks like organized work)
-  const hasExplicitPlanHeading = planHeadingPatterns[0].test(response)
+  const hasExplicitPlanHeading = planHeadingPattern.test(response)
   const hasPlanLikeStructure = (headingCount >= 2 && listItemCount >= 4) || checkboxCount >= 3
 
   if (!hasExplicitPlanHeading && !hasPlanLikeStructure && !hasStructure) {
@@ -53,15 +53,10 @@ export function detectPlan(response: string): DetectedPlan | null {
 
   // Extract plan title from the first relevant heading
   let title = 'Untitled Plan'
-  const titleMatch = response.match(planHeadingPatterns[0])
-  if (titleMatch) {
-    title = titleMatch[2].trim()
-  } else {
-    // Use the first heading as fallback
-    const firstHeading = response.match(/^#{1,3}\s+(.+)/m)
-    if (firstHeading) {
-      title = firstHeading[1].trim()
-    }
+  // Prefer the plan-signalling heading; otherwise fall back to the first heading.
+  const heading = response.match(planHeadingPattern)?.[2] ?? response.match(/^#{1,3}\s+(.+)/m)?.[1]
+  if (heading) {
+    title = heading.trim()
   }
 
   // Clean up title - remove markdown formatting

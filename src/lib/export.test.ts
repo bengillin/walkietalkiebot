@@ -92,7 +92,7 @@ describe('exportAsJson', () => {
   it('includes activities', () => {
     const json = JSON.parse(exportAsJson(mockConversation))
     expect(json.activities).toHaveLength(2)
-    expect(json.activities[0].tool).toBe('Read')
+    expect(json.activities[0]?.tool).toBe('Read')
   })
 
   it('includes image metadata without dataUrl', () => {
@@ -111,8 +111,8 @@ describe('parseImportJson', () => {
 
     expect(imported.title).toBe('Test Conversation')
     expect(imported.messages).toHaveLength(2)
-    expect(imported.messages[0].role).toBe('user')
-    expect(imported.messages[0].content).toBe('Hello')
+    expect(imported.messages[0]?.role).toBe('user')
+    expect(imported.messages[0]?.content).toBe('Hello')
     expect(imported.mode).toBe('architect')
     expect(imported.linerNotes).toBe('Some notes here')
   })

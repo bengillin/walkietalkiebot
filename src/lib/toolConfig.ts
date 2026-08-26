@@ -200,8 +200,7 @@ const DEFAULT_IDENTITY: ToolIdentity = {
  */
 export function parseToolName(rawName: string): string {
   if (!rawName) return ''
-  const match = rawName.match(/^mcp__[^_]+__(.+)$/)
-  return match ? match[1] : rawName
+  return rawName.match(/^mcp__[^_]+__(.+)$/)?.[1] ?? rawName
 }
 
 /**
