@@ -21,6 +21,12 @@ const replacements = [
     pattern: /"version":\s*"[^"]+"/,
     replace: `"version": "${version}"`,
   },
+  {
+    // The version the MCP server reports to clients in its initialize response.
+    file: 'mcp-server/index.ts',
+    pattern: /(name: 'wtb', version: ')[^']+(')/,
+    replace: `$1${version}$2`,
+  },
   { file: 'site/public/llms.txt', pattern: /Version:\s*[\d.]+/, replace: `Version: ${version}` },
   {
     file: 'site/index.html',

@@ -26,7 +26,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Typecheck
+      # Covers both the app (tsc --noEmit) and the MCP server
+      # (tsc -p mcp-server/tsconfig.json), which esbuild would otherwise skip.
+      - name: Typecheck (app + MCP server)
         run: npm run typecheck
 
       - name: Lint

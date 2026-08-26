@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `format:check`, and `typecheck` npm scripts.
 - GitHub Actions CI (`.github/workflows/ci.yml`) running typecheck, lint, tests, and build.
 - `CHANGELOG.md` and `CONTRIBUTING.md`.
+- `typecheck:mcp` script (`tsc -p mcp-server/tsconfig.json --noEmit`), now part of
+  `npm run typecheck` and therefore gated in CI. The MCP server is bundled with
+  esbuild, which skips type checking, so it could previously drift unnoticed.
 - Optional shared-secret API auth via the `WTB_AUTH_TOKEN` environment variable;
   when set, all `/api/*` requests require an `Authorization: Bearer <token>` header.
 - Request body size limit on the HTTP server to prevent memory-exhaustion DoS.
@@ -32,7 +35,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Documentation drift: corrected the test count (~170 unit tests across 13 files),
+- MCP server reported a stale version (`0.3.1`) to clients in its `initialize`
+  response, because `scripts/sync-version.js` synced `mcp-server/package.json`
+  but not the hardcoded literal in `mcp-server/index.ts`. Bumped to `0.3.8` and
+  added the file to the sync script.
+- MCP server type error: `ToolResult` declared `content[].type` as `string`, which
+  no longer satisfied the `tools/call` handler signature after the SDK added a
+  `task` result variant. It now aliases the SDK's own `CallToolResult`, so the
+  shape tracks the SDK instead of drifting from it.
+- Documentation drift: corrected the test count (181 unit tests across 15 files),
   the custom-hook count (8), and removed stale references to the long-removed
   Direct API mode and Telegram integration.
 

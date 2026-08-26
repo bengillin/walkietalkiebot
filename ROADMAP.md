@@ -2,7 +2,7 @@
 
 ## Current State
 
-Walkie Talkie Bot is a voice-first, cassette tape-themed interface for Claude Code with dual distribution (Claude Code plugin + full server with web UI). The codebase is TypeScript throughout, with ~170 unit tests across 13 test files (plus Playwright E2E + visual regression) covering the frontend (store, exports, components, plan detection) and server (5 database repositories + HTTP API layer + prompt builder).
+Walkie Talkie Bot is a voice-first, cassette tape-themed interface for Claude Code with dual distribution (Claude Code plugin + full server with web UI). The codebase is TypeScript throughout, with 181 unit tests across 15 test files (plus Playwright E2E + visual regression) covering the frontend (store, exports, components, plan detection) and server (5 database repositories + HTTP API layer + prompt builder + auth).
 
 ### Architecture highlights
 - **Frontend**: React 18 + Zustand, decomposed into 8 custom hooks (`useVoiceIO`, `useClaudeChat`, `useKeyboardControl`, `useDraggableFab`, `useImageAnalysis`, `useServerSync`, `useKeyboardShortcuts`, `useSoundEffects`)
@@ -58,7 +58,7 @@ Walkie Talkie Bot is a voice-first, cassette tape-themed interface for Claude Co
 - [x] Marketing site (walkietalkie.bot) with docs
 
 ### Testing & Quality
-- [x] ~170 unit tests across 13 files + Playwright E2E and visual regression
+- [x] 181 unit tests across 15 files + Playwright E2E and visual regression
 - [x] Client tests: store, exports, plan detection, tool config, components (ModeSelector, MediaLibrary)
 - [x] Server tests: conversations, messages, plans, search, activities repositories + HTTP API + prompt builder
 - [x] TypeScript throughout (including MCP server)
@@ -74,16 +74,19 @@ These came out of an audit and are the recommended next foundation work:
 - **Enable `noUncheckedIndexedAccess`.** ~100 call sites in `src` need attention;
   doing it carefully (real guards, not blanket `!`) will catch latent
   array/object-index bugs. Deferred from the initial strictness pass.
-- **Fix the latent MCP server type error.** `mcp-server/index.ts` does not strictly
-  typecheck against the current `@modelcontextprotocol/sdk` (the `tools/call`
-  handler return type lost a `task` field). The esbuild build ignores it; once
-  fixed, add `tsc -p mcp-server/tsconfig.json` to CI.
+- ~~**Fix the latent MCP server type error.**~~ Done. The local `ToolResult`
+  interface widened `content[].type` to `string`, so it stopped matching the
+  `tools/call` handler signature once the SDK added a `task` result variant.
+  It now aliases the SDK's own `CallToolResult`, and `npm run typecheck:mcp`
+  (`tsc -p mcp-server/tsconfig.json`) runs in CI so esbuild can't hide a
+  regression again.
 - **Test the core hooks and job orchestration.** `useClaudeChat`, `useVoiceIO`, and
   `server/jobs/*` (manager/runner) currently have no coverage despite holding the
   most complex logic.
 - **Replace scattered `console.*` with a small leveled logger** and surface the
   ~8 silently-swallowed `catch {}` errors to the user.
-- **Dependency upgrades**: React 18→19, Vite 5→8, Vitest 2→3 (do these behind CI).
+- **Dependency upgrades**: React 18→19 still pending. Vite 5→8 and Vitest 2→4 are
+  done (and cleared all 16 npm audit advisories) now that CI covers them.
 
 ### Tier 2: Nice to Have
 

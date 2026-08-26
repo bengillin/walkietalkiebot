@@ -1,6 +1,7 @@
 import { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js'
+import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js'
 import { spawn, exec } from 'child_process'
 import { promisify } from 'util'
 import { fileURLToPath } from 'url'
@@ -41,9 +42,10 @@ let wtbProcess: ChildProcess | null = null
 
 // ─── Types ───
 
-interface ToolResult {
-  content: Array<{ type: string; text: string }>
-}
+// Alias the SDK's own result type rather than hand-rolling a shape: the local
+// interface widened `type` to `string`, which stopped matching the tools/call
+// handler signature once the SDK added the `task` result variant.
+type ToolResult = CallToolResult
 
 interface ApiResult {
   error?: string
@@ -417,7 +419,7 @@ function formatMarkdown(
 }
 
 // ─── MCP Server ───
-const server = new Server({ name: 'wtb', version: '0.3.1' }, { capabilities: { tools: {} } })
+const server = new Server({ name: 'wtb', version: '0.3.8' }, { capabilities: { tools: {} } })
 
 // ─── Tool Definitions (30 tools) ───
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
