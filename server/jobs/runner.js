@@ -4,6 +4,8 @@ import { join } from "path";
 import { tmpdir } from "os";
 import { buildPrompt } from "../promptBuilder.js";
 import { getMode } from "../modes.js";
+import { createLogger } from "../logger.js";
+const log = createLogger("runner");
 function detectPlanFromTool(toolName, input) {
   if (toolName !== "Write" && toolName !== "Edit") return null;
   const filePath = input.file_path || "";
@@ -113,7 +115,7 @@ function spawnClaude(options) {
   if (!useSession) {
     const fullPrompt = buildFullPrompt(true);
     const args = ["-p", fullPrompt, ...baseArgs, "--no-session-persistence"];
-    console.log(
+    log.debug(
       "Spawning claude:",
       claudePath,
       "len",
@@ -148,7 +150,7 @@ function spawnClaude(options) {
     const sessionArgs = strategy === "create" ? ["--session-id", convId] : ["--resume", convId];
     const fullPrompt = buildFullPrompt(strategy === "create");
     const args = ["-p", fullPrompt, ...baseArgs, ...sessionArgs];
-    console.log(
+    log.debug(
       "Spawning claude:",
       claudePath,
       `(session ${strategy}${isRetry ? " retry" : ""})`,
@@ -328,13 +330,13 @@ function runClaudeProcess(claudePath, args, env, callbacks) {
           }
         }
       } catch (e) {
-        console.log("Parse error for line:", line.slice(0, 100));
+        log.debug("Parse error for line:", line.slice(0, 100));
       }
     }
   });
   claude.stderr.on("data", (data) => {
     const text = data.toString();
-    console.error("Claude stderr:", text);
+    log.error("Claude stderr:", text);
     callbacks.onError(text);
   });
   const promise = new Promise((resolve) => {

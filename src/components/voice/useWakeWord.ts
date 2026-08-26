@@ -1,5 +1,9 @@
 import { useEffect, useRef, useCallback, useState } from 'react'
 
+import { createLogger } from '../../lib/logger'
+
+const log = createLogger('wake-word')
+
 interface UseWakeWordOptions {
   wakeWord?: string
   onWakeWord?: () => void
@@ -96,7 +100,7 @@ export function useWakeWord({
     recognition.lang = language
 
     recognition.onstart = () => {
-      console.log('[WakeWord] Started listening for:', wakeWord)
+      log.debug('Started listening for:', wakeWord)
       setIsListening(true)
     }
 
@@ -110,7 +114,7 @@ export function useWakeWord({
         setLastHeard(transcript)
 
         if (containsWakeWord(transcript, wakeWord)) {
-          console.log('[WakeWord] Wake word detected in:', transcript)
+          log.debug('Wake word detected in:', transcript)
           // Stop listening temporarily to avoid double-triggers
           recognition.stop()
           onWakeWordRef.current?.()
@@ -128,12 +132,12 @@ export function useWakeWord({
       if (event.error === 'aborted') {
         return
       }
-      console.error('[WakeWord] Error:', event.error)
+      log.error('Error:', event.error)
       setIsListening(false)
     }
 
     recognition.onend = () => {
-      console.log('[WakeWord] Ended')
+      log.debug('Ended')
       setIsListening(false)
 
       // Auto-restart if still enabled (after a brief pause)
@@ -141,10 +145,10 @@ export function useWakeWord({
         restartTimeoutRef.current = setTimeout(() => {
           if (enabledRef.current && recognitionRef.current) {
             try {
-              console.log('[WakeWord] Auto-restarting...')
+              log.debug('Auto-restarting...')
               recognitionRef.current.start()
             } catch (e) {
-              console.error('[WakeWord] Failed to restart:', e)
+              log.error('Failed to restart:', e)
             }
           }
         }, 300)
@@ -157,7 +161,7 @@ export function useWakeWord({
     try {
       recognition.start()
     } catch (e) {
-      console.error('[WakeWord] Failed to start:', e)
+      log.error('Failed to start:', e)
     }
 
     return () => {

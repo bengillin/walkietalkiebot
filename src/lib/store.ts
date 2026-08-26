@@ -11,6 +11,10 @@ import type {
 } from '../types'
 import * as api from './api'
 
+import { createLogger } from './logger'
+
+const log = createLogger('store')
+
 // Convert live activities to compact stored format
 function activityToStored(activity: Activity): StoredActivity | null {
   // Only store completed tool activities
@@ -43,7 +47,7 @@ function migrateLocalStorageKeys() {
     localStorage.removeItem(oldKey)
   }
   if (keysToMigrate.length > 0) {
-    console.log(`Migrated ${keysToMigrate.length} localStorage keys to wtb_*`)
+    log.debug(`Migrated ${keysToMigrate.length} localStorage keys to wtb_*`)
   }
   localStorage.setItem('_wtb_keys_migrated', '1')
 }
@@ -57,7 +61,8 @@ function loadConversationsFromStorage(): Conversation[] {
   try {
     const stored = localStorage.getItem(STORAGE_KEY)
     return stored ? JSON.parse(stored) : []
-  } catch {
+  } catch (err) {
+    log.warn('Could not read cached conversations; starting empty:', err)
     return []
   }
 }
@@ -66,8 +71,10 @@ function loadConversationsFromStorage(): Conversation[] {
 function saveConversationsToStorage(conversations: Conversation[]) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(conversations))
-  } catch {
-    // Ignore storage errors
+  } catch (err) {
+    // Usually a full quota. The server remains the source of truth, so this is
+    // recoverable, but it should not vanish silently.
+    log.warn('Could not cache conversations locally (storage full?):', err)
   }
 }
 
@@ -160,14 +167,14 @@ export const useStore = create<AppState>((set, get) => {
               description: img.description,
             })),
           })
-          .catch((err) => console.warn('Failed to sync message to server:', err))
+          .catch((err) => log.warn('Failed to sync message to server:', err))
 
         // Update title on server if first user message
         if (isFirstMessage && message.role === 'user') {
           const title = generateTitle(newMessages)
           api
             .updateConversation(state.currentConversationId, { title })
-            .catch((err) => console.warn('Failed to update conversation title:', err))
+            .catch((err) => log.warn('Failed to update conversation title:', err))
         }
       }
     },
@@ -226,7 +233,7 @@ export const useStore = create<AppState>((set, get) => {
               }))
             }
           })
-          .catch((err) => console.warn('Failed to create conversation on server:', err))
+          .catch((err) => log.warn('Failed to create conversation on server:', err))
       }
     },
 
@@ -283,7 +290,7 @@ export const useStore = create<AppState>((set, get) => {
               }
             })
           })
-          .catch((err) => console.warn('Failed to load conversation from server:', err))
+          .catch((err) => log.warn('Failed to load conversation from server:', err))
       }
     },
 
@@ -329,7 +336,7 @@ export const useStore = create<AppState>((set, get) => {
       if (serverSyncEnabled) {
         api
           .deleteConversation(id)
-          .catch((err) => console.warn('Failed to delete conversation on server:', err))
+          .catch((err) => log.warn('Failed to delete conversation on server:', err))
       }
     },
 
@@ -346,7 +353,7 @@ export const useStore = create<AppState>((set, get) => {
       if (serverSyncEnabled) {
         api
           .updateConversation(id, { title })
-          .catch((err) => console.warn('Failed to rename conversation on server:', err))
+          .catch((err) => log.warn('Failed to rename conversation on server:', err))
       }
     },
 
@@ -550,7 +557,7 @@ export const useStore = create<AppState>((set, get) => {
       if (serverSyncEnabled) {
         api
           .saveLinerNotes(conversationId, notes)
-          .catch((err) => console.warn('Failed to save liner notes to server:', err))
+          .catch((err) => log.warn('Failed to save liner notes to server:', err))
       }
     },
 
@@ -626,7 +633,7 @@ export const useStore = create<AppState>((set, get) => {
           storedActivities: currentConv?.activities || state.storedActivities,
         })
       } catch (err) {
-        console.warn('Failed to sync from server:', err)
+        log.warn('Failed to sync from server:', err)
       }
     },
 
@@ -645,13 +652,13 @@ export const useStore = create<AppState>((set, get) => {
 
         if (result.success) {
           api.markMigrationComplete()
-          console.log(`Migration complete: ${result.imported} imported, ${result.skipped} skipped`)
+          log.debug(`Migration complete: ${result.imported} imported, ${result.skipped} skipped`)
           return true
         }
 
         return false
       } catch (err) {
-        console.warn('Migration failed:', err)
+        log.warn('Migration failed:', err)
         return false
       }
     },

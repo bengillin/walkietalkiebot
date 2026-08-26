@@ -1,5 +1,9 @@
 import * as api from './api'
 
+import { createLogger } from './logger'
+
+const log = createLogger('plans')
+
 interface DetectedPlan {
   title: string
   content: string
@@ -91,10 +95,10 @@ export async function detectAndSavePlan(
       status: 'draft',
       conversationId,
     })
-    console.log('[PlanDetection] Saved plan:', plan.id, detected.title)
+    log.debug('Saved plan:', plan.id, detected.title)
     return plan
   } catch (err) {
-    console.warn('[PlanDetection] Failed to save plan:', err)
+    log.warn('Failed to save plan:', err)
     return null
   }
 }

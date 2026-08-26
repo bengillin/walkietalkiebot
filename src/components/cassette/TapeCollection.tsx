@@ -6,6 +6,10 @@ import * as api from '../../lib/api'
 import { parseImportJson } from '../../lib/export'
 import './TapeCollection.css'
 
+import { createLogger } from '../../lib/logger'
+
+const log = createLogger('tapes')
+
 // Summarize title to 5 words or less
 function summarizeTitle(title: string): string {
   const words = title.split(/\s+/).filter(Boolean)
@@ -122,7 +126,7 @@ export function TapeCollection({
         onSelect(result.id) // Switch to imported conversation
         onClose()
       } catch (err) {
-        console.warn('Import failed:', err)
+        log.warn('Import failed:', err)
       }
       if (importInputRef.current) importInputRef.current.value = ''
     },
@@ -157,8 +161,10 @@ export function TapeCollection({
         const { results } = await api.searchMessages(query)
         const matchingIds = new Set(results.map((r) => r.conversationId))
         setSearchResults(matchingIds)
-      } catch {
-        // Fall back to local title search
+      } catch (err) {
+        // Full-text search is unavailable; degrade to local title matching so
+        // the UI still responds, but say so rather than pretending it worked.
+        log.warn('Full-text search failed; falling back to title search:', err)
         const lowerQuery = query.toLowerCase()
         const matchingIds = new Set(
           conversations.filter((c) => c.title.toLowerCase().includes(lowerQuery)).map((c) => c.id),

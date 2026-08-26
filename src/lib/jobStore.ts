@@ -2,6 +2,10 @@ import { create } from 'zustand'
 import * as api from './api'
 import type { Job } from './api'
 
+import { createLogger } from './logger'
+
+const log = createLogger('jobs')
+
 interface JobState {
   jobs: Job[]
   activeSubscriptions: Map<string, () => void>
@@ -47,8 +51,9 @@ export const useJobStore = create<JobState>((set, get) => ({
     try {
       const { jobs } = await api.listJobs()
       set({ jobs })
-    } catch {
-      // Server may not be available
+    } catch (err) {
+      // Expected when the server is not running; not worth alarming the user.
+      log.debug('Could not refresh jobs:', err)
     }
   },
 

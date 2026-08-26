@@ -1,5 +1,9 @@
 import type Database from 'better-sqlite3'
 
+import { createLogger } from '../logger.js'
+
+const log = createLogger('db')
+
 const SCHEMA_VERSION = 6
 
 export function initSchema(db: Database.Database): void {
@@ -34,12 +38,12 @@ function runMigrations(db: Database.Database, fromVersion: number): void {
   for (let i = fromVersion; i < migrations.length; i++) {
     const migrate = migrations[i]
     if (!migrate) continue
-    console.log(`Running migration to version ${i + 1}...`)
+    log.debug(`Running migration to version ${i + 1}...`)
     migrate(db)
     db.prepare('INSERT INTO schema_version (version) VALUES (?)').run(i + 1)
   }
 
-  console.log(`Schema migrated to version ${SCHEMA_VERSION}`)
+  log.debug(`Schema migrated to version ${SCHEMA_VERSION}`)
 }
 
 function migrateV1(db: Database.Database): void {

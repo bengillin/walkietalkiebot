@@ -15,6 +15,8 @@ import { getNotificationDispatcher } from "./notifications/dispatcher.js";
 import { MacOSNotificationChannel } from "./notifications/macos.js";
 import { getJobManager } from "./jobs/manager.js";
 import { authMiddleware, getAuthToken } from "./auth.js";
+import { createLogger } from "./logger.js";
+const log = createLogger("server");
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const distPath = join(__dirname, "..", "dist");
 const MAX_BODY_BYTES = Number(process.env.WTB_MAX_BODY_BYTES) || 50 * 1024 * 1024;
@@ -28,7 +30,7 @@ function startServer(port = 5173) {
     try {
       initDb();
     } catch (err) {
-      console.error("Failed to initialize database:", err);
+      log.error("Failed to initialize database:", err);
       reject(err);
       return;
     }
@@ -134,10 +136,10 @@ function startServer(port = 5173) {
     }
     server.listen(port, () => {
       const url = `${protocol}://localhost:${port}`;
-      console.log(`Talkie server running at ${url}`);
+      log.debug(`Talkie server running at ${url}`);
       const authToken = getAuthToken();
       if (authToken) {
-        console.log(`Auth enabled. Open the UI with: ${url}/?token=${authToken}`);
+        log.debug(`Auth enabled. Open the UI with: ${url}/?token=${authToken}`);
       }
       resolve();
     });
@@ -161,7 +163,7 @@ async function stopServer() {
 }
 function setupShutdownHandlers() {
   const shutdown = async (signal) => {
-    console.log(`
+    log.debug(`
 Received ${signal}, shutting down gracefully...`);
     await stopServer();
     process.exit(0);
@@ -172,7 +174,7 @@ Received ${signal}, shutting down gracefully...`);
 if (import.meta.url === `file://${process.argv[1]}`) {
   setupShutdownHandlers();
   const port = parseInt(process.env.PORT || "5173", 10);
-  startServer(port).catch(console.error);
+  startServer(port).catch((err) => log.error("Server failed to start:", err));
 }
 export {
   startServer,

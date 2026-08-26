@@ -2,6 +2,10 @@ import { useEffect } from 'react'
 import * as api from '../lib/api'
 import { enableServerSync, setProjectId } from '../lib/store'
 
+import { createLogger } from '../lib/logger'
+
+const log = createLogger('sync')
+
 export function useServerSync(
   migrateToServer: () => Promise<boolean>,
   syncFromServer: () => Promise<void>,
@@ -22,10 +26,10 @@ export function useServerSync(
           }
 
           if (api.needsMigration()) {
-            console.log('Migrating localStorage data to server...')
+            log.debug('Migrating localStorage data to server...')
             const success = await migrateToServer()
             if (success) {
-              console.log('Migration complete')
+              log.debug('Migration complete')
               await syncFromServer()
             }
           } else {
@@ -33,7 +37,7 @@ export function useServerSync(
           }
         }
       } catch (err) {
-        console.warn('Server sync unavailable:', err)
+        log.warn('Server sync unavailable:', err)
       }
     }
 

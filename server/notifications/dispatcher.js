@@ -1,11 +1,13 @@
+import { createLogger } from "../logger.js";
+const log = createLogger("notify");
 class NotificationDispatcher {
   channels = [];
   register(channel) {
     if (channel.isAvailable()) {
       this.channels.push(channel);
-      console.log(`Notification channel registered: ${channel.name}`);
+      log.debug(`Notification channel registered: ${channel.name}`);
     } else {
-      console.log(`Notification channel not available: ${channel.name}`);
+      log.debug(`Notification channel not available: ${channel.name}`);
     }
   }
   unregister(name) {
@@ -17,7 +19,7 @@ class NotificationDispatcher {
     );
     for (const [i, result] of results.entries()) {
       if (result.status === "rejected") {
-        console.error(`Notification failed on ${this.channels[i]?.name}:`, result.reason);
+        log.error(`Notification failed on ${this.channels[i]?.name}:`, result.reason);
       }
     }
   }

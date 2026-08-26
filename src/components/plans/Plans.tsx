@@ -3,6 +3,10 @@ import { MessageContent } from '../chat/MessageContent'
 import * as api from '../../lib/api'
 import './Plans.css'
 
+import { createLogger } from '../../lib/logger'
+
+const log = createLogger('plans')
+
 interface PlansProps {
   isOpen: boolean
   onClose: () => void
@@ -44,7 +48,7 @@ export function Plans({ isOpen, onClose, conversationId, onNavigateToConversatio
       setPlans(fetched)
     } catch (err) {
       setError('Could not load plans. Is the server running?')
-      console.warn('Failed to load plans:', err)
+      log.warn('Failed to load plans:', err)
     } finally {
       setLoading(false)
     }
@@ -66,7 +70,7 @@ export function Plans({ isOpen, onClose, conversationId, onNavigateToConversatio
       setPlans((prev) => [plan, ...prev])
       setSelectedPlan(plan)
     } catch (err) {
-      console.warn('Failed to create plan:', err)
+      log.warn('Failed to create plan:', err)
     }
   }
 
@@ -84,7 +88,7 @@ export function Plans({ isOpen, onClose, conversationId, onNavigateToConversatio
         setSelectedPlan((prev) => (prev ? { ...prev, status: status as api.Plan['status'] } : null))
       }
     } catch (err) {
-      console.warn('Failed to update plan status:', err)
+      log.warn('Failed to update plan status:', err)
     }
   }
 
@@ -96,7 +100,7 @@ export function Plans({ isOpen, onClose, conversationId, onNavigateToConversatio
         setSelectedPlan(null)
       }
     } catch (err) {
-      console.warn('Failed to delete plan:', err)
+      log.warn('Failed to delete plan:', err)
     }
   }
 
@@ -251,7 +255,7 @@ function PlanDetail({
       onUpdate({ title: editTitle, content: editContent })
       setIsEditing(false)
     } catch (err) {
-      console.warn('Failed to save plan:', err)
+      log.warn('Failed to save plan:', err)
     }
   }
 

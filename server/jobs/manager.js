@@ -3,6 +3,8 @@ import { getNotificationDispatcher } from "../notifications/dispatcher.js";
 import * as jobsRepo from "../db/repositories/jobs.js";
 import * as messagesRepo from "../db/repositories/messages.js";
 import * as conversationsRepo from "../db/repositories/conversations.js";
+import { createLogger } from "../logger.js";
+const log = createLogger("jobs");
 function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 }
@@ -16,7 +18,7 @@ class JobManager {
   init() {
     const cleaned = jobsRepo.cleanupStaleJobs();
     if (cleaned > 0) {
-      console.log(`Cleaned up ${cleaned} stale jobs from previous run`);
+      log.debug(`Cleaned up ${cleaned} stale jobs from previous run`);
     }
   }
   createJob(params) {
@@ -111,7 +113,7 @@ class JobManager {
         try {
           callback(event);
         } catch (e) {
-          console.error("Job event subscriber error:", e);
+          log.error("Job event subscriber error:", e);
         }
       }
     }
@@ -141,7 +143,8 @@ class JobManager {
     if (contextEvent?.data) {
       try {
         history = JSON.parse(contextEvent.data);
-      } catch {
+      } catch (err) {
+        log.warn(`Job ${jobId} has unreadable history; running without it:`, err);
       }
     }
     const modeEvent = events.find((e) => e.event_type === "mode");
@@ -190,7 +193,7 @@ class JobManager {
               });
               conversationsRepo.touchConversation(job.conversation_id);
             } catch (e) {
-              console.error("Failed to save job response as message:", e);
+              log.error("Failed to save job response as message:", e);
             }
           }
           this.emitEvent(jobId, {
@@ -209,7 +212,7 @@ class JobManager {
             title: "Talkie: Task failed",
             body: error || "Unknown error"
           };
-          dispatcher.dispatch(notification).catch((e) => console.error("Notification dispatch failed:", e));
+          dispatcher.dispatch(notification).catch((e) => log.error("Notification dispatch failed:", e));
           this.activeHandles.delete(jobId);
           const timeout2 = this.activeTimeouts.get(jobId);
           if (timeout2) {
@@ -225,7 +228,7 @@ class JobManager {
     const timeout = setTimeout(() => {
       const currentJob = jobsRepo.getJob(jobId);
       if (currentJob?.status === "running") {
-        console.warn(`Job ${jobId} timed out after ${JobManager.JOB_TIMEOUT_MS / 1e3}s, killing`);
+        log.warn(`Job ${jobId} timed out after ${JobManager.JOB_TIMEOUT_MS / 1e3}s, killing`);
         handle.kill();
         jobsRepo.updateJob(jobId, {
           status: "failed",

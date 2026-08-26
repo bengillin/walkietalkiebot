@@ -5,6 +5,10 @@ import { useWakeWord } from '../components/voice/useWakeWord'
 import { useSoundEffects } from './useSoundEffects'
 import type { AvatarState } from '../types'
 
+import { createLogger } from '../lib/logger'
+
+const log = createLogger('voice')
+
 interface UseVoiceIOParams {
   onSendMessageRef: React.MutableRefObject<(text: string) => void>
   avatarState: AvatarState
@@ -101,7 +105,7 @@ export function useVoiceIO({
       setTimeout(() => setAvatarState('idle'), 1500)
     },
     onError: (err) => {
-      console.error('TTS error:', err)
+      log.error('TTS error:', err)
       setAvatarState('idle')
     },
   })
@@ -141,7 +145,7 @@ export function useVoiceIO({
     wakeWord: customWakeWord || 'hey talkie',
     enabled: wakeWordEnabled && !isListening && !isSpeaking && avatarState !== 'thinking',
     onWakeWord: () => {
-      console.log('[App] Wake word detected, starting recording')
+      log.debug('Wake word detected, starting recording')
       handleTalkStart()
     },
   })

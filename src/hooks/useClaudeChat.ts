@@ -5,6 +5,10 @@ import * as api from '../lib/api'
 import type { AvatarState, DroppedFile, Message, MessageImage, Activity } from '../types'
 import type { SoundType } from './useSoundEffects'
 
+import { createLogger } from '../lib/logger'
+
+const log = createLogger('chat')
+
 interface UseClaudeChatParams {
   ttsEnabled: boolean
   messages: Message[]
@@ -137,7 +141,7 @@ export function useClaudeChat({
                 )
                 setTimeout(() => setPlanNotification(null), 5000)
               })
-              .catch((err) => console.warn('Orchestration failed:', err))
+              .catch((err) => log.warn('Orchestration failed:', err))
 
             addMessage({ role: 'user', content: text })
             addMessage({
@@ -240,11 +244,11 @@ export function useClaudeChat({
               conversationId: currentConversationId,
             })
             .then((plan) => {
-              console.log('[PlanDetection] Saved plan from tool use:', plan.id, plan.title)
+              log.debug('Saved plan from tool use:', plan.id, plan.title)
               setPlanNotification(plan.title)
               setTimeout(() => setPlanNotification(null), 5000)
             })
-            .catch((err) => console.warn('[PlanDetection] Failed to save plan:', err))
+            .catch((err) => log.warn('Failed to save plan:', err))
         } else if (fullResponse.trim()) {
           detectAndSavePlan(fullResponse, currentConversationId).then((plan) => {
             if (plan) {
@@ -254,7 +258,7 @@ export function useClaudeChat({
           })
         }
       } catch (err) {
-        console.error('API error:', err)
+        log.error('API error:', err)
         playSound('error')
         setError(err instanceof Error ? err.message : 'Something went wrong')
         setAvatarState('confused')

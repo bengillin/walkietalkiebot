@@ -14,7 +14,7 @@ A voice-first, cassette tape-themed interface for Claude Code with 6 retro theme
 
 - `npm run dev` — Start Vite dev server (frontend only, no API)
 - `npm run build` — TypeScript check + Vite build + esbuild server bundle
-- `npm run test` — Run all tests (client + server, 299 unit tests across 19 files)
+- `npm run test` — Run all tests (client + server, 322 unit tests across 22 files)
 - `npm run test:client` — Run frontend tests only (vitest, jsdom)
 - `npm run test:server` — Run server tests only (vitest, node, in-memory SQLite)
 - `wtb-server start -f` — Start server in foreground (serves API + built frontend)
@@ -105,6 +105,7 @@ site/                   Marketing site (walkietalkie.bot)
 - **Dual distribution**: npm package (`npx walkietalkiebot`) for full server + web UI; Claude Code plugin for MCP tools + skills (data tools work offline via direct SQLite)
 - **MCP hybrid architecture**: Data tools (conversations, plans, search, notes, export) use SQLite directly; server tools (voice, IPC, session, jobs) proxy HTTP to the Talkie server
 - **Auto-generated JS**: `server/**/*.js` and `mcp-server/dist/` are compiled from TypeScript by `npm run build:server` — do not edit them directly
+- **Logging**: use `createLogger('scope')` from `src/lib/logger.ts` (client) or `server/logger.ts` (server) rather than `console.*`. Levels are debug/info/warn/error/silent — client reads `localStorage['wtb:logLevel']` (default debug in dev, warn in prod; set it from the console with `wtbLogLevel('debug')`), server reads `WTB_LOG_LEVEL` (default info). The MCP server deliberately uses bare `console.error`: it speaks JSON-RPC over stdio, so anything on stdout corrupts the protocol
 - **Three TypeScript projects**: `tsconfig.json` (src), `tsconfig.server.json` (server), `mcp-server/tsconfig.json`. `npm run typecheck` runs all three and CI gates on it. The server and MCP server are bundled by esbuild, which strips types without checking them, so without their own tsconfigs a type error there reaches production silently. All three enable `noUncheckedIndexedAccess`
 - **Hook architecture**: App.tsx delegates to 8 custom hooks for voice, chat, keyboard, FAB, images, server sync, sounds, and shortcuts. Circular dependency between voice and chat is resolved via a ref pattern (useVoiceIO accepts onSendMessageRef)
 - **Testing**: Separate vitest configs for client (jsdom) and server (node). Server tests use in-memory SQLite via initDbForTesting(). API tests use Hono's app.request() method. Because `npm run build` emits compiled `.js` beside every server `.ts`, `vitest.config.server.ts` forces resolution to the `.ts` sources — without it the suite silently tests build output
