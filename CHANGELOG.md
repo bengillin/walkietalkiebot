@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Test coverage for the four least-covered modules: `useClaudeChat` (32 tests),
   `useVoiceIO` (29), the job runner's stdout stream parsing (28), and the job
   manager (29). Suite goes from 181 to 299 unit tests.
+- React 18 → 19 (with `@types/react`/`@types/react-dom` 19). zustand stays on
+  4.x, which works with React 19 through the `use-sync-external-store` shim.
 - Leveled loggers for the client (`src/lib/logger.ts`) and server
   (`server/logger.ts`), replacing 77 scattered `console.*` calls with scoped,
   filterable output. Client level comes from `localStorage['wtb:logLevel']`
@@ -42,6 +44,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The global `JSX` namespace was removed in `@types/react` 19; `JSX.Element`
+  references now use `React.JSX.Element`. `useRef` requires an initial value.
+- Cleared 8 npm audit advisories (hono, @hono/node-server, brace-expansion,
+  fast-uri, ip-address, postcss) published since the last dependency sweep.
+  Lockfile-only — no `package.json` ranges changed.
 - Hardened Claude CLI discovery to use `execFile` instead of `execSync` string
   interpolation, removing a shell-injection vector via `CLAUDE_PATH`.
 - Enabled `noImplicitReturns` in `tsconfig.json` and made conditional `useEffect`

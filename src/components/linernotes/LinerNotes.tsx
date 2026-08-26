@@ -1,3 +1,4 @@
+import type React from 'react'
 import { useState, useEffect, useRef } from 'react'
 import './LinerNotes.css'
 
@@ -61,7 +62,7 @@ export function LinerNotes({
   // Simple markdown rendering (headings, bold, lists, code blocks)
   const renderMarkdown = (text: string) => {
     const lines = text.split('\n')
-    const elements: JSX.Element[] = []
+    const elements: React.JSX.Element[] = []
     let inCodeBlock = false
     let codeContent = ''
     for (let i = 0; i < lines.length; i++) {
@@ -158,8 +159,8 @@ export function LinerNotes({
   }
 
   // Inline markdown: **bold**, `code`, *italic*
-  const renderInline = (text: string): (string | JSX.Element)[] => {
-    const parts: (string | JSX.Element)[] = []
+  const renderInline = (text: string): (string | React.JSX.Element)[] => {
+    const parts: (string | React.JSX.Element)[] = []
     let remaining = text
     let key = 0
 
