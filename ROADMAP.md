@@ -2,7 +2,7 @@
 
 ## Current State
 
-Walkie Talkie Bot is a voice-first, cassette tape-themed interface for Claude Code with dual distribution (Claude Code plugin + full server with web UI). The codebase is TypeScript throughout, with 181 unit tests across 15 test files (plus Playwright E2E + visual regression) covering the frontend (store, exports, components, plan detection) and server (5 database repositories + HTTP API layer + prompt builder + auth).
+Walkie Talkie Bot is a voice-first, cassette tape-themed interface for Claude Code with dual distribution (Claude Code plugin + full server with web UI). The codebase is TypeScript throughout, with 299 unit tests across 19 test files (plus Playwright E2E + visual regression) covering the frontend (store, exports, components, plan detection) and server (5 database repositories + HTTP API layer + prompt builder + auth).
 
 ### Architecture highlights
 - **Frontend**: React 18 + Zustand, decomposed into 8 custom hooks (`useVoiceIO`, `useClaudeChat`, `useKeyboardControl`, `useDraggableFab`, `useImageAnalysis`, `useServerSync`, `useKeyboardShortcuts`, `useSoundEffects`)
@@ -58,9 +58,9 @@ Walkie Talkie Bot is a voice-first, cassette tape-themed interface for Claude Co
 - [x] Marketing site (walkietalkie.bot) with docs
 
 ### Testing & Quality
-- [x] 181 unit tests across 15 files + Playwright E2E and visual regression
-- [x] Client tests: store, exports, plan detection, tool config, components (ModeSelector, MediaLibrary)
-- [x] Server tests: conversations, messages, plans, search, activities repositories + HTTP API + prompt builder
+- [x] 299 unit tests across 19 files + Playwright E2E and visual regression
+- [x] Client tests: store, exports, plan detection, tool config, components (ModeSelector, MediaLibrary), core hooks (useClaudeChat, useVoiceIO)
+- [x] Server tests: conversations, messages, plans, search, activities repositories + HTTP API + prompt builder + auth + job runner/manager
 - [x] TypeScript throughout (including MCP server)
 
 ---
@@ -80,9 +80,12 @@ These came out of an audit and are the recommended next foundation work:
   It now aliases the SDK's own `CallToolResult`, and `npm run typecheck:mcp`
   (`tsc -p mcp-server/tsconfig.json`) runs in CI so esbuild can't hide a
   regression again.
-- **Test the core hooks and job orchestration.** `useClaudeChat`, `useVoiceIO`, and
-  `server/jobs/*` (manager/runner) currently have no coverage despite holding the
-  most complex logic.
+- ~~**Test the core hooks and job orchestration.**~~ Done. `useClaudeChat` (32),
+  `useVoiceIO` (29), the job runner's stdout parsing (28), and the job manager
+  (29) are now covered. Doing it surfaced two things worth knowing: the server
+  suite had been resolving to compiled `.js` build artifacts rather than the
+  `.ts` sources (fixed in `vitest.config.server.ts`), and a multi-word mode
+  label like "Code Review" can never match the spoken mode-switch pattern.
 - **Replace scattered `console.*` with a small leveled logger** and surface the
   ~8 silently-swallowed `catch {}` errors to the user.
 - **Dependency upgrades**: React 18→19 still pending. Vite 5→8 and Vitest 2→4 are

@@ -14,7 +14,7 @@ A voice-first, cassette tape-themed interface for Claude Code with 6 retro theme
 
 - `npm run dev` — Start Vite dev server (frontend only, no API)
 - `npm run build` — TypeScript check + Vite build + esbuild server bundle
-- `npm run test` — Run all tests (client + server, ~180 unit tests across 15 files)
+- `npm run test` — Run all tests (client + server, 299 unit tests across 19 files)
 - `npm run test:client` — Run frontend tests only (vitest, jsdom)
 - `npm run test:server` — Run server tests only (vitest, node, in-memory SQLite)
 - `wtb-server start -f` — Start server in foreground (serves API + built frontend)
@@ -106,7 +106,7 @@ site/                   Marketing site (walkietalkie.bot)
 - **MCP hybrid architecture**: Data tools (conversations, plans, search, notes, export) use SQLite directly; server tools (voice, IPC, session, jobs) proxy HTTP to the Talkie server
 - **Auto-generated JS**: `server/**/*.js` and `mcp-server/dist/` are compiled from TypeScript by `npm run build:server` — do not edit them directly
 - **Hook architecture**: App.tsx delegates to 8 custom hooks for voice, chat, keyboard, FAB, images, server sync, sounds, and shortcuts. Circular dependency between voice and chat is resolved via a ref pattern (useVoiceIO accepts onSendMessageRef)
-- **Testing**: Separate vitest configs for client (jsdom) and server (node). Server tests use in-memory SQLite via initDbForTesting(). API tests use Hono's app.request() method
+- **Testing**: Separate vitest configs for client (jsdom) and server (node). Server tests use in-memory SQLite via initDbForTesting(). API tests use Hono's app.request() method. Because `npm run build` emits compiled `.js` beside every server `.ts`, `vitest.config.server.ts` forces resolution to the `.ts` sources — without it the suite silently tests build output
 
 ## Themes
 
