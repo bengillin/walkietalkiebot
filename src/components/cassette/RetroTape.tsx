@@ -111,6 +111,8 @@ export function RetroTape({
 
 // Helper to get a consistent color for a conversation
 export function getTapeColor(index: number): TapeColor {
-  const colors: TapeColor[] = ['orange', 'blue', 'pink', 'green', 'purple', 'yellow', 'red', 'teal']
-  return colors[index % colors.length]
+  const colors = ['orange', 'blue', 'pink', 'green', 'purple', 'yellow', 'red', 'teal'] as const
+  // Falls back to the first colour for a negative index, where `%` would
+  // otherwise land out of range.
+  return colors[index % colors.length] ?? colors[0]
 }

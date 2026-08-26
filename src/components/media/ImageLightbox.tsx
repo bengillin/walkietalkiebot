@@ -20,7 +20,9 @@ export function ImageLightbox({ image, images, onClose }: ImageLightboxProps) {
     gallery ? gallery.findIndex((img) => img.dataUrl === image.dataUrl) : 0,
   )
 
-  const currentImage = gallery ? gallery[Math.max(0, currentIndex)] : image
+  // `image` is always supplied, so it doubles as the fallback if the gallery
+  // lookup ever lands out of range.
+  const currentImage = (gallery ? gallery[Math.max(0, currentIndex)] : image) ?? image
   const hasPrev = gallery !== null && currentIndex > 0
   const hasNext = gallery !== null && currentIndex < gallery.length - 1
 

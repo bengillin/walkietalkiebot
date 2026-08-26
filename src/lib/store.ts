@@ -97,8 +97,7 @@ let serverProjectId: string | null = null
 export const useStore = create<AppState>((set, get) => {
   // Initialize with saved conversations from localStorage
   const savedConversations = loadConversationsFromStorage()
-  const initialConversation =
-    savedConversations.length > 0 ? savedConversations[0] : createNewConversation()
+  const initialConversation = savedConversations[0] ?? createNewConversation()
 
   // If no conversations exist, create initial one
   if (savedConversations.length === 0) {
@@ -298,10 +297,11 @@ export const useStore = create<AppState>((set, get) => {
         let newActivities = state.storedActivities
 
         if (state.currentConversationId === id) {
-          if (conversations.length > 0) {
-            newCurrentId = conversations[0].id
-            newMessages = conversations[0].messages
-            newActivities = conversations[0].activities || []
+          const next = conversations[0]
+          if (next) {
+            newCurrentId = next.id
+            newMessages = next.messages
+            newActivities = next.activities || []
           } else {
             const newConv = createNewConversation()
             conversations.push(newConv)

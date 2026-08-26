@@ -8,15 +8,22 @@ beforeEach(() => {
   resetState()
 })
 
+// Response bodies are assertion targets, not contracts; keep them indexable.
+type JsonBody = Record<string, any>
+
 // Helper to make requests and parse JSON
-async function req(method: string, path: string, body?: unknown) {
+async function req(
+  method: string,
+  path: string,
+  body?: unknown,
+): Promise<{ status: number; json: JsonBody }> {
   const init: RequestInit = { method, headers: {} }
   if (body) {
     init.headers = { 'Content-Type': 'application/json' }
     init.body = JSON.stringify(body)
   }
   const res = await api.request(path, init)
-  return { status: res.status, json: await res.json() }
+  return { status: res.status, json: (await res.json()) as JsonBody }
 }
 
 describe('GET /api/status', () => {

@@ -71,9 +71,13 @@ Walkie Talkie Bot is a voice-first, cassette tape-themed interface for Claude Co
 
 These came out of an audit and are the recommended next foundation work:
 
-- **Enable `noUncheckedIndexedAccess`.** ~100 call sites in `src` need attention;
-  doing it carefully (real guards, not blanket `!`) will catch latent
-  array/object-index bugs. Deferred from the initial strictness pass.
+- ~~**Enable `noUncheckedIndexedAccess`.**~~ Done, across `src`, `server`, and
+  the MCP server. Fixing the 107 `src` sites turned up two real crash paths
+  (`e.touches[0]` read on touchend in the draggable FAB; `borderBoxSize[0]` in
+  TapeDeck, which not every engine populates). Enabling it on `server` first
+  required a `tsconfig.server.json` — the root config only included `src`, so
+  the whole server tree had never been type-checked at all. `npm run typecheck`
+  now covers all three projects and is gated in CI.
 - ~~**Fix the latent MCP server type error.**~~ Done. The local `ToolResult`
   interface widened `content[].type` to `string`, so it stopped matching the
   `tools/call` handler signature once the SDK added a `task` result variant.

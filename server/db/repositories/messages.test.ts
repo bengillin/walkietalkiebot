@@ -60,8 +60,8 @@ describe('createMessage', () => {
 
     const images = getImagesForMessage('m1')
     expect(images).toHaveLength(1)
-    expect(images[0].file_name).toBe('test.png')
-    expect(images[0].description).toBe('A test image')
+    expect(images[0]?.file_name).toBe('test.png')
+    expect(images[0]?.description).toBe('A test image')
   })
 
   it('creates message with custom source', () => {
@@ -88,9 +88,9 @@ describe('getMessagesForConversation', () => {
 
     const msgs = getMessagesForConversation('conv1')
     expect(msgs).toHaveLength(3)
-    expect(msgs[0].content).toBe('First')
-    expect(msgs[1].content).toBe('Second')
-    expect(msgs[2].content).toBe('Third')
+    expect(msgs[0]?.content).toBe('First')
+    expect(msgs[1]?.content).toBe('Second')
+    expect(msgs[2]?.content).toBe('Third')
   })
 })
 
@@ -136,7 +136,7 @@ describe('updateImageDescription', () => {
     })
     expect(updateImageDescription('img1', 'A nice photo')).toBe(true)
     const images = getImagesForMessage('m1')
-    expect(images[0].description).toBe('A nice photo')
+    expect(images[0]?.description).toBe('A nice photo')
   })
 
   it('returns false for non-existing image', () => {

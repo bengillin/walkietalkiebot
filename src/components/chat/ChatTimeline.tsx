@@ -477,6 +477,11 @@ export const ChatTimeline = memo(function ChatTimeline({
   // Sort messages by timestamp
   const sortedMessages = [...messages].sort((a, b) => a.timestamp - b.timestamp)
 
+  // Images the streaming reply is responding to: only when the last message is
+  // the user's, matching the per-message lookup above.
+  const lastMessage = sortedMessages[sortedMessages.length - 1]
+  const trailingUserImages = lastMessage?.role === 'user' ? lastMessage.images : undefined
+
   // Auto-scroll to bottom when new content arrives
   useEffect(() => {
     if (shouldAutoScroll && bottomRef.current) {
@@ -511,7 +516,7 @@ export const ChatTimeline = memo(function ChatTimeline({
           { dataUrl: string; description?: string; fileName: string }[] | undefined
         if (message.role === 'assistant' && index > 0) {
           const prevMsg = sortedMessages[index - 1]
-          if (prevMsg.role === 'user' && prevMsg.images && prevMsg.images.length > 0) {
+          if (prevMsg?.role === 'user' && prevMsg.images && prevMsg.images.length > 0) {
             referencedImages = prevMsg.images.map((img) => ({
               dataUrl: img.dataUrl,
               description: img.description,
@@ -567,17 +572,11 @@ export const ChatTimeline = memo(function ChatTimeline({
             text={streamingText}
             trackNumber={sortedMessages.length + 1}
             activities={pendingActivities}
-            referencedImages={
-              sortedMessages.length > 0 &&
-              sortedMessages[sortedMessages.length - 1].role === 'user' &&
-              sortedMessages[sortedMessages.length - 1].images?.length
-                ? sortedMessages[sortedMessages.length - 1].images!.map((img) => ({
-                    dataUrl: img.dataUrl,
-                    description: img.description,
-                    fileName: img.fileName,
-                  }))
-                : undefined
-            }
+            referencedImages={trailingUserImages?.map((img) => ({
+              dataUrl: img.dataUrl,
+              description: img.description,
+              fileName: img.fileName,
+            }))}
             onImageClick={onImageClick}
           />
         </div>

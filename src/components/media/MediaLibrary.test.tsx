@@ -111,8 +111,9 @@ describe('MediaLibrary', () => {
   it('opens lightbox when image is clicked', () => {
     const onClose = vi.fn()
     render(<MediaLibrary conversations={mockConversations} onClose={onClose} />)
-    const images = screen.getAllByRole('img')
-    fireEvent.click(images[0])
+    // getAllByRole throws when nothing matches, so index 0 is present.
+    const [firstImage] = screen.getAllByRole('img')
+    fireEvent.click(firstImage as HTMLElement)
     expect(screen.getByText('Analysis')).toBeInTheDocument()
   })
 

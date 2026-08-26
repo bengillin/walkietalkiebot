@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import type { RunnerCallbacks, RunnerHandle, RunnerOptions } from './runner.js'
 import type { JobStreamEvent } from './manager.js'
+import type { JobRow } from '../db/repositories/jobs.js'
 
 /**
  * A scripted spawnClaude. Each call parks a record the test can drive, so a job
@@ -21,9 +22,15 @@ const runner = vi.hoisted(() => {
     reset: () => {
       runs.length = 0
     },
+    /** The Nth parked run; throws loudly if the test expected a spawn that never happened. */
+    at(index: number): Run {
+      const run = runs[index]
+      if (!run) throw new Error(`Expected a spawned run at index ${index}, got ${runs.length}`)
+      return run
+    },
     /** Drive a parked run to a natural finish. */
     finish(index: number, code = 0) {
-      const run = runs[index]
+      const run = this.at(index)
       run.callbacks.onComplete(code)
       run.resolve(code)
     },
@@ -80,6 +87,13 @@ function create(overrides: Partial<Parameters<typeof manager.createJob>[0]> = {}
   return manager.createJob({ conversationId: CONV, prompt: 'do the thing', ...overrides })
 }
 
+/** Create N jobs at once, as a tuple so element access stays typed. */
+function createJobs(n: 4): [JobRow, JobRow, JobRow, JobRow]
+function createJobs(n: 5): [JobRow, JobRow, JobRow, JobRow, JobRow]
+function createJobs(n: number): JobRow[] {
+  return Array.from({ length: n }, () => create())
+}
+
 /** Collect every event emitted for a job. */
 function collect(jobId: string) {
   const events: JobStreamEvent[] = []
@@ -93,20 +107,20 @@ describe('createJob', () => {
 
     expect(jobsRepo.getJob(job.id)?.status).toBe('running')
     expect(runner.runs).toHaveLength(1)
-    expect(runner.runs[0].options.prompt).toBe('do the thing')
+    expect(runner.at(0).options.prompt).toBe('do the thing')
   })
 
   it('records the spawned pid on the job row', () => {
     const job = create()
-    expect(jobsRepo.getJob(job.id)?.pid).toBe(runner.runs[0].handle.pid)
+    expect(jobsRepo.getJob(job.id)?.pid).toBe(runner.at(0).handle.pid)
   })
 
   it('passes history and mode through to the runner', () => {
     const history = [{ role: 'user', content: 'earlier' }]
     create({ history, mode: 'architect' })
 
-    expect(runner.runs[0].options.history).toEqual(history)
-    expect(runner.runs[0].options.mode).toBe('architect')
+    expect(runner.at(0).options.history).toEqual(history)
+    expect(runner.at(0).options.mode).toBe('architect')
   })
 
   it('defaults the source to web', () => {
@@ -118,13 +132,13 @@ describe('createJob', () => {
     create()
     // A conversationId here would put the job into a resumable session, which
     // background jobs deliberately do not use.
-    expect(runner.runs[0].options.conversationId).toBeUndefined()
+    expect(runner.at(0).options.conversationId).toBeUndefined()
   })
 })
 
 describe('concurrency', () => {
   it('runs at most three jobs at once and leaves the rest queued', () => {
-    const jobs = [create(), create(), create(), create(), create()]
+    const jobs = createJobs(5)
 
     expect(runner.runs).toHaveLength(3)
     const statuses = jobs.map((j) => jobsRepo.getJob(j.id)?.status)
@@ -132,7 +146,7 @@ describe('concurrency', () => {
   })
 
   it('starts the oldest queued job when a running one finishes', () => {
-    const jobs = [create(), create(), create(), create()]
+    const jobs = createJobs(4)
     expect(jobsRepo.getJob(jobs[3].id)?.status).toBe('queued')
 
     runner.finish(0)
@@ -142,7 +156,7 @@ describe('concurrency', () => {
   })
 
   it('drains the whole queue as slots free up', () => {
-    const jobs = [create(), create(), create(), create(), create()]
+    const jobs = createJobs(5)
     runner.finish(0)
     runner.finish(1)
 
@@ -159,8 +173,8 @@ describe('concurrency', () => {
 describe('completion', () => {
   it('marks the job completed and stores the streamed text as the result', () => {
     const job = create()
-    runner.runs[0].callbacks.onText('part one ')
-    runner.runs[0].callbacks.onText('part two')
+    runner.at(0).callbacks.onText('part one ')
+    runner.at(0).callbacks.onText('part two')
     runner.finish(0)
 
     const row = jobsRepo.getJob(job.id)
@@ -171,7 +185,7 @@ describe('completion', () => {
 
   it('saves the response as an assistant message on the conversation', () => {
     create()
-    runner.runs[0].callbacks.onText('the answer')
+    runner.at(0).callbacks.onText('the answer')
     runner.finish(0)
 
     const messages = messagesRepo.getMessagesForConversation(CONV)
@@ -197,7 +211,7 @@ describe('completion', () => {
 
   it('notifies on success and on failure', () => {
     create()
-    runner.runs[0].callbacks.onText('done')
+    runner.at(0).callbacks.onText('done')
     runner.finish(0)
     expect(dispatch).toHaveBeenCalledWith(expect.objectContaining({ type: 'job_completed' }))
 
@@ -209,8 +223,8 @@ describe('completion', () => {
 
   it('persists streamed text and activity as job events', () => {
     const job = create()
-    runner.runs[0].callbacks.onText('hello')
-    runner.runs[0].callbacks.onActivity({ type: 'tool_start', tool: 'Read', id: 't1' })
+    runner.at(0).callbacks.onText('hello')
+    runner.at(0).callbacks.onActivity({ type: 'tool_start', tool: 'Read', id: 't1' })
     runner.finish(0)
 
     const types = jobsRepo.getJobEvents(job.id).map((e) => e.event_type)
@@ -220,7 +234,7 @@ describe('completion', () => {
 
   it('records runner errors as error events', () => {
     const job = create()
-    runner.runs[0].callbacks.onError('something broke')
+    runner.at(0).callbacks.onError('something broke')
 
     const errorEvent = jobsRepo.getJobEvents(job.id).find((e) => e.event_type === 'error')
     expect(errorEvent?.data).toBe('something broke')
@@ -229,7 +243,7 @@ describe('completion', () => {
 
 describe('cancellation', () => {
   it('cancels a queued job without ever spawning it', () => {
-    const jobs = [create(), create(), create(), create()]
+    const jobs = createJobs(4)
     const queued = jobs[3]
 
     expect(manager.cancelJob(queued.id)).toBe(true)
@@ -241,12 +255,12 @@ describe('cancellation', () => {
     const job = create()
 
     expect(manager.cancelJob(job.id)).toBe(true)
-    expect(runner.runs[0].kill).toHaveBeenCalled()
+    expect(runner.at(0).kill).toHaveBeenCalled()
     expect(jobsRepo.getJob(job.id)?.status).toBe('cancelled')
   })
 
   it('frees the slot so a queued job can start', () => {
-    const jobs = [create(), create(), create(), create()]
+    const jobs = createJobs(4)
     manager.cancelJob(jobs[0].id)
 
     expect(runner.runs).toHaveLength(4)
@@ -279,7 +293,7 @@ describe('subscriptions', () => {
     const job = manager.createJob({ conversationId: CONV, prompt: 'x' })
     const unsubscribe = manager.subscribe(job.id, (e) => seen.push(e))
 
-    runner.runs[0].callbacks.onText('streamed')
+    runner.at(0).callbacks.onText('streamed')
     expect(seen).toContainEqual({ type: 'text', data: JSON.stringify({ text: 'streamed' }) })
     unsubscribe()
   })
@@ -289,7 +303,7 @@ describe('subscriptions', () => {
     const { events, unsubscribe } = collect(job.id)
     unsubscribe()
 
-    runner.runs[0].callbacks.onText('ignored')
+    runner.at(0).callbacks.onText('ignored')
     expect(events).toHaveLength(0)
   })
 
@@ -298,7 +312,7 @@ describe('subscriptions', () => {
     const a = collect(job.id)
     const b = collect(job.id)
 
-    runner.runs[0].callbacks.onText('broadcast')
+    runner.at(0).callbacks.onText('broadcast')
 
     expect(a.events).toHaveLength(1)
     expect(b.events).toHaveLength(1)
@@ -312,7 +326,7 @@ describe('subscriptions', () => {
     })
     manager.subscribe(job.id, (e) => good.push(e))
 
-    expect(() => runner.runs[0].callbacks.onText('still delivered')).not.toThrow()
+    expect(() => runner.at(0).callbacks.onText('still delivered')).not.toThrow()
     expect(good).toHaveLength(1)
   })
 
@@ -321,7 +335,7 @@ describe('subscriptions', () => {
     create() // second job, driven below via runner.runs[1]
     const { events } = collect(first.id)
 
-    runner.runs[1].callbacks.onText('for the second job')
+    runner.at(1).callbacks.onText('for the second job')
     expect(events).toHaveLength(0)
   })
 })
@@ -333,7 +347,7 @@ describe('timeouts', () => {
 
     vi.advanceTimersByTime(10 * 60 * 1000 + 1)
 
-    expect(runner.runs[0].kill).toHaveBeenCalled()
+    expect(runner.at(0).kill).toHaveBeenCalled()
     const row = jobsRepo.getJob(job.id)
     expect(row?.status).toBe('failed')
     expect(row?.error).toContain('Timed out')
@@ -347,13 +361,13 @@ describe('timeouts', () => {
     vi.advanceTimersByTime(10 * 60 * 1000 + 1)
 
     expect(jobsRepo.getJob(job.id)?.status).toBe('completed')
-    expect(runner.runs[0].kill).not.toHaveBeenCalled()
+    expect(runner.at(0).kill).not.toHaveBeenCalled()
   })
 })
 
 describe('queries', () => {
   it('lists jobs filtered by status', () => {
-    const jobs = [create(), create(), create(), create()]
+    const jobs = createJobs(4)
     runner.finish(0)
 
     const completed = manager.listJobs({ status: 'completed' })

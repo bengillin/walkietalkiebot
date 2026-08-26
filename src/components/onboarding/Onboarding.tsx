@@ -43,17 +43,14 @@ export function Onboarding({ onComplete }: OnboardingProps) {
   const progress = (currentIndex / (STEPS.length - 1)) * 100
 
   const nextStep = () => {
-    const idx = STEPS.indexOf(step)
-    if (idx < STEPS.length - 1) {
-      setStep(STEPS[idx + 1])
-    }
+    const next = STEPS[STEPS.indexOf(step) + 1]
+    if (next) setStep(next)
   }
 
   const prevStep = () => {
     const idx = STEPS.indexOf(step)
-    if (idx > 0) {
-      setStep(STEPS[idx - 1])
-    }
+    const prev = idx > 0 ? STEPS[idx - 1] : undefined
+    if (prev) setStep(prev)
   }
 
   const handleComplete = () => {

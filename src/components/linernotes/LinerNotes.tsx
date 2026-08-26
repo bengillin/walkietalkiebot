@@ -65,7 +65,9 @@ export function LinerNotes({
     let inCodeBlock = false
     let codeContent = ''
     for (let i = 0; i < lines.length; i++) {
-      const line = lines[i]
+      // Bounds are guaranteed by the loop condition; `?? ''` just satisfies the
+      // index signature without asserting.
+      const line = lines[i] ?? ''
 
       // Code block toggling
       if (line.startsWith('```')) {

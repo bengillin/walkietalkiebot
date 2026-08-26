@@ -613,11 +613,14 @@ function App() {
         onTouchStart={(e) => {
           const touchStart = Date.now()
           const touch = e.touches[0]
+          if (!touch) return
           const startX = touch.clientX
           const startY = touch.clientY
           const checkForDrag = setTimeout(() => handleFabDragStart(e), 300)
           const handleTouchMove = (moveE: TouchEvent) => {
+            // Empty on touchend/touchcancel.
             const moveTouch = moveE.touches[0]
+            if (!moveTouch) return
             const dx = Math.abs(moveTouch.clientX - startX)
             const dy = Math.abs(moveTouch.clientY - startY)
             if (dx > 10 || dy > 10) {

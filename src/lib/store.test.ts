@@ -58,29 +58,29 @@ describe('useStore', () => {
       useStore.getState().addMessage({ role: 'user', content: 'Hello' })
       const messages = useStore.getState().messages
       expect(messages).toHaveLength(1)
-      expect(messages[0].role).toBe('user')
-      expect(messages[0].content).toBe('Hello')
+      expect(messages[0]?.role).toBe('user')
+      expect(messages[0]?.content).toBe('Hello')
     })
 
     it('adds an assistant message', () => {
       useStore.getState().addMessage({ role: 'assistant', content: 'Hi there!' })
       const messages = useStore.getState().messages
       expect(messages).toHaveLength(1)
-      expect(messages[0].role).toBe('assistant')
+      expect(messages[0]?.role).toBe('assistant')
     })
 
     it('generates message IDs', () => {
       useStore.getState().addMessage({ role: 'user', content: 'Test' })
       const messages = useStore.getState().messages
-      expect(messages[0].id).toBeDefined()
-      expect(typeof messages[0].id).toBe('string')
+      expect(messages[0]?.id).toBeDefined()
+      expect(typeof messages[0]?.id).toBe('string')
     })
 
     it('adds timestamps to messages', () => {
       const before = Date.now()
       useStore.getState().addMessage({ role: 'user', content: 'Test' })
       const after = Date.now()
-      const timestamp = useStore.getState().messages[0].timestamp
+      const timestamp = useStore.getState().messages[0]?.timestamp
       expect(timestamp).toBeGreaterThanOrEqual(before)
       expect(timestamp).toBeLessThanOrEqual(after)
     })
@@ -91,7 +91,7 @@ describe('useStore', () => {
       useStore.getState().addActivity({ type: 'tool_start', tool: 'Read' })
       const activities = useStore.getState().activities
       expect(activities).toHaveLength(1)
-      expect(activities[0].tool).toBe('Read')
+      expect(activities[0]?.tool).toBe('Read')
     })
 
     it('updates activity', () => {

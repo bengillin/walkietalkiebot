@@ -107,7 +107,7 @@ export function useClaudeChat({
       if (availableModes && availableModes.length > 0 && currentConversationId) {
         const multiMatch = text.match(MULTI_MODE_PATTERN)
         if (multiMatch) {
-          const modesPart = multiMatch[1]
+          const modesPart = multiMatch[1] ?? ''
           const modeNames = modesPart.split(/\s+and\s+|\s*,\s*/).map((s) =>
             s
               .replace(/\s*mode\s*/gi, '')
@@ -123,7 +123,7 @@ export function useClaudeChat({
           if (matchedModes.length >= 2) {
             // Extract the actual prompt (everything after "on/for/against")
             const promptMatch = text.match(/(?:on|for|against)\s+(.+)/i)
-            const orchestratePrompt = promptMatch ? promptMatch[1] : text
+            const orchestratePrompt = promptMatch?.[1] ?? text
 
             api
               .orchestrateJobs({
@@ -152,9 +152,8 @@ export function useClaudeChat({
       // Detect single mode switching
       let activeMode = mode
       if (onModeChange && availableModes) {
-        const match = text.match(MODE_SWITCH_PATTERN)
-        if (match) {
-          const requested = match[1].toLowerCase()
+        const requested = text.match(MODE_SWITCH_PATTERN)?.[1]?.toLowerCase()
+        if (requested) {
           const found = availableModes.find(
             (m) => m.name === requested || m.label.toLowerCase() === requested,
           )

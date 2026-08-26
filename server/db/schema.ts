@@ -32,8 +32,10 @@ function runMigrations(db: Database.Database, fromVersion: number): void {
   ]
 
   for (let i = fromVersion; i < migrations.length; i++) {
+    const migrate = migrations[i]
+    if (!migrate) continue
     console.log(`Running migration to version ${i + 1}...`)
-    migrations[i](db)
+    migrate(db)
     db.prepare('INSERT INTO schema_version (version) VALUES (?)').run(i + 1)
   }
 

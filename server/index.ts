@@ -44,9 +44,9 @@ export function startServer(port: number = 5173): Promise<void> {
 
     // Hydrate in-memory state from most recent conversation
     try {
-      const convos = conversationsRepo.listConversations(1, 0)
-      if (convos.length > 0) {
-        const msgs = messagesRepo.getMessagesForConversation(convos[0].id)
+      const [mostRecent] = conversationsRepo.listConversations(1, 0)
+      if (mostRecent) {
+        const msgs = messagesRepo.getMessagesForConversation(mostRecent.id)
         const stateMessages = msgs.map((m) => ({
           role: m.role,
           content: m.content,
@@ -141,7 +141,7 @@ export function startServer(port: number = 5173): Promise<void> {
         method: req.method || 'GET',
         headers,
         body: body,
-        // @ts-expect-error - Node.js specific
+        // Node-specific; present in @types/node, so no suppression needed.
         duplex: 'half',
       })
 

@@ -79,13 +79,9 @@ function detectPlanFromTool(
   const titleMatch = content.match(
     /^#{1,3}\s+(.*(?:plan|implementation|approach|strategy|roadmap|phases?|proposal).*)/im,
   )
-  if (titleMatch) {
-    title = titleMatch[1].replace(/\*\*/g, '').replace(/`/g, '').trim()
-  } else {
-    const firstHeading = content.match(/^#{1,3}\s+(.+)/m)
-    if (firstHeading) {
-      title = firstHeading[1].replace(/\*\*/g, '').replace(/`/g, '').trim()
-    }
+  const heading = titleMatch?.[1] ?? content.match(/^#{1,3}\s+(.+)/m)?.[1]
+  if (heading) {
+    title = heading.replace(/\*\*/g, '').replace(/`/g, '').trim()
   }
 
   if (title.length > 100) title = title.slice(0, 97) + '...'
@@ -185,7 +181,7 @@ export function spawnClaude(options: RunnerOptions): RunnerHandle {
 
   const claudePath = process.env.CLAUDE_PATH || 'claude'
   // Strip CLAUDECODE env var to allow spawning Claude inside a Claude Code session
-  const env = { ...process.env, FORCE_COLOR: '0' }
+  const env: NodeJS.ProcessEnv = { ...process.env, FORCE_COLOR: '0' }
   delete env.CLAUDECODE
 
   const baseArgs = [
@@ -215,12 +211,13 @@ export function spawnClaude(options: RunnerOptions): RunnerHandle {
   // One-shot path (jobs, image analysis, raw mode, or clients without a
   // conversation id): unchanged legacy behavior.
   if (!useSession) {
-    const args = ['-p', buildFullPrompt(true), ...baseArgs, '--no-session-persistence']
+    const fullPrompt = buildFullPrompt(true)
+    const args = ['-p', fullPrompt, ...baseArgs, '--no-session-persistence']
     console.log(
       'Spawning claude:',
       claudePath,
       'len',
-      args[1].length,
+      fullPrompt.length,
       rawMode ? '(raw)' : '(voice)',
     )
     const proc = runClaudeProcess(claudePath, args, env, {
@@ -255,13 +252,14 @@ export function spawnClaude(options: RunnerOptions): RunnerHandle {
 
   const launch = (strategy: 'create' | 'resume', isRetry: boolean) => {
     const sessionArgs = strategy === 'create' ? ['--session-id', convId] : ['--resume', convId]
-    const args = ['-p', buildFullPrompt(strategy === 'create'), ...baseArgs, ...sessionArgs]
+    const fullPrompt = buildFullPrompt(strategy === 'create')
+    const args = ['-p', fullPrompt, ...baseArgs, ...sessionArgs]
     console.log(
       'Spawning claude:',
       claudePath,
       `(session ${strategy}${isRetry ? ' retry' : ''})`,
       'len',
-      args[1].length,
+      fullPrompt.length,
     )
 
     let sawContent = false
@@ -389,9 +387,10 @@ function runClaudeProcess(
           }
         } else if (event.type === 'content_block_start') {
           if (event.content_block?.type === 'tool_use') {
-            currentToolId = event.content_block.id
-            toolInputs[currentToolId] = ''
-            toolNames[currentToolId] = event.content_block.name
+            const toolId = String(event.content_block.id)
+            currentToolId = toolId
+            toolInputs[toolId] = ''
+            toolNames[toolId] = event.content_block.name
             callbacks.onActivity({
               type: 'tool_start',
               tool: event.content_block.name,

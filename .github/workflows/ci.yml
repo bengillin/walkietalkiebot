@@ -26,9 +26,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Covers both the app (tsc --noEmit) and the MCP server
-      # (tsc -p mcp-server/tsconfig.json), which esbuild would otherwise skip.
-      - name: Typecheck (app + MCP server)
+      # Covers all three TypeScript projects: the app, the server, and the MCP
+      # server. The latter two are bundled by esbuild, which strips types
+      # without checking them, so nothing else would catch a type error there.
+      - name: Typecheck (app + server + MCP server)
         run: npm run typecheck
 
       - name: Lint

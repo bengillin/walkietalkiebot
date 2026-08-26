@@ -119,11 +119,11 @@ describe('sending a message', () => {
       await result.current.handleSendMessage('next')
     })
 
-    expect(sendMock.mock.calls[0][2]).toEqual([
+    expect(sendMock.mock.calls[0]?.[2]).toEqual([
       { role: 'user', content: 'earlier' },
       { role: 'assistant', content: 'reply' },
     ])
-    expect(sendMock.mock.calls[0][7]).toBe('conv-1')
+    expect(sendMock.mock.calls[0]?.[7]).toBe('conv-1')
   })
 
   it('speaks the response when TTS is on, and shows a happy avatar when it is off', async () => {
@@ -167,7 +167,7 @@ describe('image attachments', () => {
     expect(params.addMessage).toHaveBeenCalledWith({ role: 'user', content: 'what is this' }, [
       { id: 'f1', dataUrl: file.dataUrl, fileName: 'shot.png', description: 'a screenshot' },
     ])
-    expect(sendMock.mock.calls[0][4]).toEqual([{ dataUrl: file.dataUrl, fileName: 'shot.png' }])
+    expect(sendMock.mock.calls[0]?.[4]).toEqual([{ dataUrl: file.dataUrl, fileName: 'shot.png' }])
   })
 
   it('clears attachments and their analyses after a successful send', async () => {
@@ -191,7 +191,7 @@ describe('image attachments', () => {
       await result.current.handleSendMessage('describe it')
     })
 
-    const sentMessage = sendMock.mock.calls[0][0]
+    const sentMessage = sendMock.mock.calls[0]?.[0]
     expect(sentMessage).toContain('[Image Context]')
     expect(sentMessage).toContain('a red circle')
     expect(sentMessage).toContain('describe it')
@@ -206,7 +206,7 @@ describe('image attachments', () => {
     })
 
     expect(getImageContext).not.toHaveBeenCalled()
-    expect(sendMock.mock.calls[0][0]).toBe('hi')
+    expect(sendMock.mock.calls[0]?.[0]).toBe('hi')
   })
 })
 
@@ -219,7 +219,7 @@ describe('mode switching', () => {
     })
 
     expect(params.onModeChange).toHaveBeenCalledWith('architect')
-    expect(sendMock.mock.calls[0][6]).toBe('architect')
+    expect(sendMock.mock.calls[0]?.[6]).toBe('architect')
   })
 
   it('matches a mode by its single-word label as well as its name', async () => {
@@ -264,7 +264,7 @@ describe('mode switching', () => {
     })
 
     expect(params.onModeChange).not.toHaveBeenCalled()
-    expect(sendMock.mock.calls[0][6]).toBe('voice')
+    expect(sendMock.mock.calls[0]?.[6]).toBe('voice')
   })
 })
 

@@ -4,8 +4,6 @@ import { join } from "path";
 const WTB_DIR = join(homedir(), ".wtb");
 const OLD_DIR_2 = join(homedir(), ".talkie");
 const OLD_DIR_1 = join(homedir(), ".talkboy");
-const CERT_PATH = join(WTB_DIR, "cert.pem");
-const KEY_PATH = join(WTB_DIR, "key.pem");
 const TAILSCALE_CERT_PATH = join(WTB_DIR, "tailscale.crt");
 const TAILSCALE_KEY_PATH = join(WTB_DIR, "tailscale.key");
 function ensureWtbDir() {

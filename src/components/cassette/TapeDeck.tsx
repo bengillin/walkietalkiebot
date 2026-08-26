@@ -142,10 +142,9 @@ export function TapeDeck({
     if (!el) return
     const observer = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        document.documentElement.style.setProperty(
-          '--tape-deck-height',
-          `${entry.borderBoxSize[0].blockSize}px`,
-        )
+        // borderBoxSize is not populated by every engine; contentRect always is.
+        const height = entry.borderBoxSize[0]?.blockSize ?? entry.contentRect.height
+        document.documentElement.style.setProperty('--tape-deck-height', `${height}px`)
       }
     })
     observer.observe(el)

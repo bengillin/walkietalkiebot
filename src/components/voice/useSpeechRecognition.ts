@@ -143,10 +143,14 @@ export function useSpeechRecognition({
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const result = event.results[i]
+        // Both indexes come from the platform's own bounds, but the DOM types
+        // model them as sparse; skip anything that is not actually there.
+        const alternative = result?.[0]
+        if (!alternative) continue
         if (result.isFinal) {
-          finalTranscript += result[0].transcript
+          finalTranscript += alternative.transcript
         } else {
-          interimTranscript += result[0].transcript
+          interimTranscript += alternative.transcript
         }
       }
 

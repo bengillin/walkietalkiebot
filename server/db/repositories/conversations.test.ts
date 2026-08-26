@@ -63,8 +63,8 @@ describe('listConversations', () => {
 
     const list = listConversations()
     expect(list).toHaveLength(2)
-    expect(list[0].id).toBe('c1')
-    expect(list[1].id).toBe('c2')
+    expect(list[0]?.id).toBe('c1')
+    expect(list[1]?.id).toBe('c2')
   })
 
   it('respects limit and offset', () => {

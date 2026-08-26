@@ -1,0 +1,27 @@
+{
+  // The server is bundled by esbuild, which strips types without checking them,
+  // and the root tsconfig only includes `src` — so until this file existed the
+  // whole server tree (API, auth, DB repositories, job runner) was never
+  // type-checked. `npm run typecheck` now runs this too.
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "types": ["node"],
+    "skipLibCheck": true,
+    "noEmit": true,
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noUncheckedIndexedAccess": true,
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true
+  },
+  "include": ["server"],
+  // Build output, checked via its .ts source instead.
+  "exclude": ["server/**/*.js"]
+}

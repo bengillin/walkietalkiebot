@@ -20,14 +20,29 @@ export function useDraggableFab() {
   const dragStartRef = useRef<{ x: number; y: number; fabX: number; fabY: number } | null>(null)
   const resizeStartRef = useRef<{ size: number; startY: number } | null>(null)
 
+  /**
+   * Pointer coordinates for a mouse or touch event. Returns null when a touch
+   * event carries no active touches — `touches` is empty on touchend, which would
+   * otherwise read `undefined.clientX` and throw.
+   */
+  function pointerPosition(
+    e: TouchEvent | MouseEvent | React.TouchEvent | React.MouseEvent,
+  ): { x: number; y: number } | null {
+    if ('touches' in e) {
+      const touch = e.touches[0]
+      return touch ? { x: touch.clientX, y: touch.clientY } : null
+    }
+    return { x: e.clientX, y: e.clientY }
+  }
+
   // Drag handlers
   const handleFabDragStart = useCallback(
     (e: React.TouchEvent | React.MouseEvent) => {
       if ((e.target as HTMLElement).classList.contains('app__record-fab-resize')) return
       e.preventDefault()
-      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
-      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
-      dragStartRef.current = { x: clientX, y: clientY, fabX: fabPosition.x, fabY: fabPosition.y }
+      const pos = pointerPosition(e)
+      if (!pos) return
+      dragStartRef.current = { x: pos.x, y: pos.y, fabX: fabPosition.x, fabY: fabPosition.y }
       setIsDraggingFab(true)
     },
     [fabPosition],
@@ -36,10 +51,10 @@ export function useDraggableFab() {
   const handleFabDragMove = useCallback(
     (e: TouchEvent | MouseEvent) => {
       if (!dragStartRef.current || !isDraggingFab) return
-      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
-      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
-      const deltaX = dragStartRef.current.x - clientX
-      const deltaY = dragStartRef.current.y - clientY
+      const pos = pointerPosition(e)
+      if (!pos) return
+      const deltaX = dragStartRef.current.x - pos.x
+      const deltaY = dragStartRef.current.y - pos.y
       const newX = Math.max(
         10,
         Math.min(window.innerWidth - fabSize - 10, dragStartRef.current.fabX + deltaX),
@@ -66,8 +81,9 @@ export function useDraggableFab() {
     (e: React.TouchEvent | React.MouseEvent) => {
       e.preventDefault()
       e.stopPropagation()
-      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
-      resizeStartRef.current = { size: fabSize, startY: clientY }
+      const pos = pointerPosition(e)
+      if (!pos) return
+      resizeStartRef.current = { size: fabSize, startY: pos.y }
       setIsResizingFab(true)
     },
     [fabSize],
@@ -76,8 +92,9 @@ export function useDraggableFab() {
   const handleFabResizeMove = useCallback(
     (e: TouchEvent | MouseEvent) => {
       if (!resizeStartRef.current || !isResizingFab) return
-      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
-      const deltaY = resizeStartRef.current.startY - clientY
+      const pos = pointerPosition(e)
+      if (!pos) return
+      const deltaY = resizeStartRef.current.startY - pos.y
       const newSize = Math.max(48, Math.min(120, resizeStartRef.current.size + deltaY))
       setFabSize(newSize)
     },

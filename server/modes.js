@@ -88,7 +88,7 @@ function getModes() {
   return getAllModes();
 }
 function getMode(name) {
-  return getAllModes().find((m) => m.name === name) || BUILT_IN_MODES[0];
+  return getAllModes().find((m) => m.name === name) ?? BUILT_IN_MODES[0];
 }
 function getModeInfoList() {
   return getAllModes().map(({ name, label, description, icon }) => ({

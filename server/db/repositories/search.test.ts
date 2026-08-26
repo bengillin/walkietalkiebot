@@ -31,8 +31,8 @@ describe('searchMessages', () => {
 
     const results = searchMessages('authentication')
     expect(results).toHaveLength(1)
-    expect(results[0].message_id).toBe('m1')
-    expect(results[0].conversation_title).toBe('Test Conversation')
+    expect(results[0]?.message_id).toBe('m1')
+    expect(results[0]?.conversation_title).toBe('Test Conversation')
   })
 
   it('finds messages with prefix matching', () => {
@@ -90,7 +90,7 @@ describe('searchMessages', () => {
 
     const results = searchMessages('webpack')
     expect(results).toHaveLength(1)
-    expect(results[0].snippet).toContain('<mark>')
+    expect(results[0]?.snippet).toContain('<mark>')
   })
 
   it('searches across conversations', () => {
