@@ -24,7 +24,8 @@ export interface CreateJobInput {
 
 export interface UpdateJobInput {
   status?: JobRow['status']
-  result?: string
+  // null explicitly clears the column; undefined leaves it untouched.
+  result?: string | null
   error?: string
   pid?: number | null
   started_at?: number

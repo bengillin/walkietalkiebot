@@ -60,7 +60,9 @@ function noopCallbacks() {
 
 /** The args array passed to the Nth spawn() call. */
 function argsOf(call: number): string[] {
-  return spawnMock.mock.calls[call][1] as string[]
+  const recorded = spawnMock.mock.calls[call]
+  if (!recorded) throw new Error(`Expected a spawn() call at index ${call}`)
+  return recorded[1] as string[]
 }
 
 describe('spawnClaude session strategy', () => {

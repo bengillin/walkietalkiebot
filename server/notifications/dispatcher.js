@@ -15,11 +15,9 @@ class NotificationDispatcher {
     const results = await Promise.allSettled(
       this.channels.map((channel) => channel.send(notification))
     );
-    for (let i = 0; i < results.length; i++) {
-      const result = results[i];
-      const channel = this.channels[i];
+    for (const [i, result] of results.entries()) {
       if (result.status === "rejected") {
-        console.error(`Notification failed on ${channel.name}:`, result.reason);
+        console.error(`Notification failed on ${this.channels[i]?.name}:`, result.reason);
       }
     }
   }

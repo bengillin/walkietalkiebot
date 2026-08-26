@@ -33,9 +33,9 @@ function startServer(port = 5173) {
       return;
     }
     try {
-      const convos = conversationsRepo.listConversations(1, 0);
-      if (convos.length > 0) {
-        const msgs = messagesRepo.getMessagesForConversation(convos[0].id);
+      const [mostRecent] = conversationsRepo.listConversations(1, 0);
+      if (mostRecent) {
+        const msgs = messagesRepo.getMessagesForConversation(mostRecent.id);
         const stateMessages = msgs.map((m) => ({
           role: m.role,
           content: m.content,
@@ -107,7 +107,7 @@ function startServer(port = 5173) {
         method: req.method || "GET",
         headers,
         body,
-        // @ts-expect-error - Node.js specific
+        // Node-specific; present in @types/node, so no suppression needed.
         duplex: "half"
       });
       const response = await app.fetch(request);

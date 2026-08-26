@@ -83,8 +83,8 @@ describe('getActivitiesForConversation', () => {
 
     const activities = getActivitiesForConversation('c1')
     expect(activities).toHaveLength(3)
-    expect(activities[0].tool).toBe('Bash') // most recent first
-    expect(activities[2].tool).toBe('Read')
+    expect(activities[0]?.tool).toBe('Bash') // most recent first
+    expect(activities[2]?.tool).toBe('Read')
   })
 
   it('respects limit', () => {

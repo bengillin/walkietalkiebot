@@ -305,7 +305,7 @@ describe('stream parsing: tool activity', () => {
       c.emit('close', 0)
     })
 
-    expect(activitiesOfType(cb, 'tool_end')[0].output).toHaveLength(200)
+    expect(activitiesOfType(cb, 'tool_end')[0]?.output).toHaveLength(200)
   })
 
   it('reads tool output from array-shaped tool_result content', async () => {
@@ -325,7 +325,7 @@ describe('stream parsing: tool activity', () => {
       c.emit('close', 0)
     })
 
-    expect(activitiesOfType(cb, 'tool_end')[0].output).toBe('from array')
+    expect(activitiesOfType(cb, 'tool_end')[0]?.output).toBe('from array')
   })
 
   it('maps a result event to all_complete, flagging the error subtype', async () => {
@@ -442,7 +442,7 @@ describe('plan detection from tool use', () => {
       c.emit('close', 0)
     })
 
-    const plan = cb.onPlan.mock.calls[0][0] as { title: string }
+    const plan = cb.onPlan.mock.calls[0]?.[0] as { title: string }
     expect(plan.title).toHaveLength(100)
     expect(plan.title.endsWith('...')).toBe(true)
   })
@@ -481,7 +481,7 @@ describe('process failures', () => {
     const handle = spawnClaude({ prompt: 'hi', callbacks: callbacks() })
     handle.kill()
 
-    const child = spawnMock.mock.results[0].value as FakeChild
+    const child = spawnMock.mock.results[0]?.value as FakeChild
     expect(child.kill).toHaveBeenCalledWith('SIGTERM')
   })
 
@@ -505,7 +505,7 @@ describe('image attachments', () => {
     )
 
     expect(writeFileSync).toHaveBeenCalledTimes(1)
-    const [tempPath, buffer] = vi.mocked(writeFileSync).mock.calls[0]
+    const [tempPath, buffer] = vi.mocked(writeFileSync).mock.calls[0] ?? []
     expect(String(tempPath)).toMatch(/wtb-images/)
     expect(String(tempPath)).toMatch(/\.png$/)
     // Payload is the decoded base64, not the data URL.
@@ -524,7 +524,7 @@ describe('image attachments', () => {
       { images: [png], rawMode: true, prompt: 'what is this' },
     )
 
-    const prompt = spawnMock.mock.calls[0][1][1] as string
+    const prompt = (spawnMock.mock.calls[0]?.[1] as string[])[1] as string
     expect(prompt).toContain('Read these image files')
     expect(prompt).toMatch(/wtb-images/)
     expect(prompt).toContain('what is this')

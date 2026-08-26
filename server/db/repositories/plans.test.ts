@@ -55,7 +55,7 @@ describe('listPlans', () => {
 
     const plans = listPlans()
     expect(plans).toHaveLength(2)
-    expect(plans[0].id).toBe('p1')
+    expect(plans[0]?.id).toBe('p1')
   })
 
   it('respects limit and offset', () => {

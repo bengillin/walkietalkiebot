@@ -737,7 +737,7 @@ api.post('/analyze-image-cc', async (c) => {
     return c.json({ error: 'Image data required' }, 400)
   }
 
-  return new Promise((resolve) => {
+  return new Promise<Response>((resolve) => {
     let description = ''
     const handle = spawnClaude({
       prompt:
@@ -790,7 +790,7 @@ api.post('/open-url', async (c) => {
 
   console.log('Opening URL in browser:', url)
 
-  return new Promise((resolve) => {
+  return new Promise<Response>((resolve) => {
     // Use macOS 'open' command to open in default browser
     const open = spawn('open', [url])
 

@@ -105,6 +105,7 @@ site/                   Marketing site (walkietalkie.bot)
 - **Dual distribution**: npm package (`npx walkietalkiebot`) for full server + web UI; Claude Code plugin for MCP tools + skills (data tools work offline via direct SQLite)
 - **MCP hybrid architecture**: Data tools (conversations, plans, search, notes, export) use SQLite directly; server tools (voice, IPC, session, jobs) proxy HTTP to the Talkie server
 - **Auto-generated JS**: `server/**/*.js` and `mcp-server/dist/` are compiled from TypeScript by `npm run build:server` — do not edit them directly
+- **Three TypeScript projects**: `tsconfig.json` (src), `tsconfig.server.json` (server), `mcp-server/tsconfig.json`. `npm run typecheck` runs all three and CI gates on it. The server and MCP server are bundled by esbuild, which strips types without checking them, so without their own tsconfigs a type error there reaches production silently. All three enable `noUncheckedIndexedAccess`
 - **Hook architecture**: App.tsx delegates to 8 custom hooks for voice, chat, keyboard, FAB, images, server sync, sounds, and shortcuts. Circular dependency between voice and chat is resolved via a ref pattern (useVoiceIO accepts onSendMessageRef)
 - **Testing**: Separate vitest configs for client (jsdom) and server (node). Server tests use in-memory SQLite via initDbForTesting(). API tests use Hono's app.request() method. Because `npm run build` emits compiled `.js` beside every server `.ts`, `vitest.config.server.ts` forces resolution to the `.ts` sources — without it the suite silently tests build output
 

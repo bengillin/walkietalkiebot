@@ -119,8 +119,7 @@ export function createMessage(input: CreateMessageInput): MessageRow {
       INSERT INTO message_images (id, message_id, data_url, file_name, description, position)
       VALUES (?, ?, ?, ?, ?, ?)
     `)
-    for (let i = 0; i < input.images.length; i++) {
-      const img = input.images[i]
+    for (const [i, img] of input.images.entries()) {
       insertImage.run(img.id, input.id, img.dataUrl, img.fileName, img.description || null, i)
     }
   }

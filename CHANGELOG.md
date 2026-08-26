@@ -22,6 +22,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Test coverage for the four least-covered modules: `useClaudeChat` (32 tests),
   `useVoiceIO` (29), the job runner's stdout stream parsing (28), and the job
   manager (29). Suite goes from 181 to 299 unit tests.
+- `noUncheckedIndexedAccess` across all three TypeScript projects, plus
+  `tsconfig.server.json` and a `typecheck:server` script so the server is
+  type-checked at all — the root config only included `src`, so until now a
+  type error anywhere under `server/` passed both `npm run typecheck` and
+  `npm run build`.
 - `typecheck:mcp` script (`tsc -p mcp-server/tsconfig.json --noEmit`), now part of
   `npm run typecheck` and therefore gated in CI. The MCP server is bundled with
   esbuild, which skips type checking, so it could previously drift unnoticed.
@@ -38,6 +43,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Two latent crash paths caught by the new strictness flag: the draggable FAB
+  read `e.touches[0].clientX` in four handlers, which throws on
+  touchend/touchcancel where `touches` is empty; and TapeDeck read
+  `entry.borderBoxSize[0].blockSize`, which not every engine populates.
+- `getTapeColor()` returned undefined for a negative index, since `%` keeps the
+  sign; it now falls back to the first colour.
+- `UpdateJobInput.result` was typed `string | undefined` while the job manager
+  passed `null` to clear it. Widened to `string | null`, which is what the
+  repository already handled.
 - Server tests ran against compiled `.js` build artifacts instead of the `.ts`
   sources. `npm run build` writes the compiled output next to each source file,
   and both extensionless imports and explicit `.js` specifiers resolved to it —

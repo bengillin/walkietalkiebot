@@ -18,7 +18,7 @@ export interface ModeInfo {
   icon: string
 }
 
-const BUILT_IN_MODES: Mode[] = [
+const BUILT_IN_MODES: [Mode, ...Mode[]] = [
   {
     name: 'voice',
     label: 'Voice',
@@ -119,7 +119,8 @@ export function getModes(): Mode[] {
 }
 
 export function getMode(name: string): Mode {
-  return getAllModes().find((m) => m.name === name) || BUILT_IN_MODES[0]
+  // Voice is the first built-in and the documented default.
+  return getAllModes().find((m) => m.name === name) ?? BUILT_IN_MODES[0]
 }
 
 export function getModeInfoList(): ModeInfo[] {
