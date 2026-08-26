@@ -1,6 +1,8 @@
 import { existsSync, readdirSync, readFileSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
+import { createLogger } from "./logger.js";
+const log = createLogger("modes");
 const BUILT_IN_MODES = [
   {
     name: "voice",
@@ -50,7 +52,8 @@ function loadCustomModes() {
   let files;
   try {
     files = readdirSync(MODES_DIR).filter((f) => f.endsWith(".json"));
-  } catch {
+  } catch (err) {
+    log.warn(`Could not read custom modes from ${MODES_DIR}:`, err);
     return [];
   }
   for (const file of files) {
@@ -67,10 +70,10 @@ function loadCustomModes() {
           planDetection: mode.planDetection ?? false
         });
       } else {
-        console.warn(`Skipping mode ${file}: missing required fields (name, label, instruction)`);
+        log.warn(`Skipping mode ${file}: missing required fields (name, label, instruction)`);
       }
     } catch (err) {
-      console.warn(`Failed to load mode ${file}:`, err);
+      log.warn(`Failed to load mode ${file}:`, err);
     }
   }
   return modes;

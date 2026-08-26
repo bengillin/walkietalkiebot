@@ -22,6 +22,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Test coverage for the four least-covered modules: `useClaudeChat` (32 tests),
   `useVoiceIO` (29), the job runner's stdout stream parsing (28), and the job
   manager (29). Suite goes from 181 to 299 unit tests.
+- Leveled loggers for the client (`src/lib/logger.ts`) and server
+  (`server/logger.ts`), replacing 77 scattered `console.*` calls with scoped,
+  filterable output. Client level comes from `localStorage['wtb:logLevel']`
+  (default: debug in dev, warn in prod) and can be changed at runtime with
+  `wtbLogLevel('debug')`; server level comes from `WTB_LOG_LEVEL` (default
+  info). Adds the missing `src/vite-env.d.ts`.
 - `noUncheckedIndexedAccess` across all three TypeScript projects, plus
   `tsconfig.server.json` and a `typecheck:server` script so the server is
   type-checked at all — the root config only included `src`, so until now a
@@ -43,6 +49,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- A failed search rendered "No results found" — identical to a genuine empty
+  result — so a search outage looked like an answer. It now reports the failure
+  distinctly, and clears once a later search succeeds.
+- A full localStorage quota silently stopped caching conversations. It now logs
+  a warning; the server remains the source of truth, so nothing is lost.
+- Full-text search failing over to local title matching, a job with unreadable
+  history running without context, and unreadable custom mode files all now log
+  instead of vanishing.
 - Two latent crash paths caught by the new strictness flag: the draggable FAB
   read `e.touches[0].clientX` in four handlers, which throws on
   touchend/touchcancel where `touches` is empty; and TapeDeck read

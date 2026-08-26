@@ -12,6 +12,8 @@ import * as plans from "./db/repositories/plans.js";
 import { spawnClaude, isClaudeCliAvailable } from "./jobs/runner.js";
 import { jobRoutes } from "./jobs/api.js";
 import { getModeInfoList, reloadModes } from "./modes.js";
+import { createLogger } from "./logger.js";
+const log = createLogger("api");
 const api = new Hono();
 api.use("*", cors());
 api.route("/jobs", jobRoutes);
@@ -459,12 +461,12 @@ api.get("/session", (c) => {
 api.post("/session", async (c) => {
   const { sessionId } = await c.req.json();
   updateState({ claudeSessionId: sessionId || null });
-  console.log("Claude session ID set:", state.claudeSessionId);
+  log.debug("Claude session ID set:", state.claudeSessionId);
   return c.json({ success: true, sessionId: state.claudeSessionId });
 });
 api.delete("/session", (c) => {
   updateState({ claudeSessionId: null });
-  console.log("Claude session ID cleared");
+  log.debug("Claude session ID cleared");
   return c.json({ success: true });
 });
 api.get("/pending", (c) => {
@@ -484,7 +486,7 @@ api.post("/respond", async (c) => {
   if (!content) {
     return c.json({ error: "Content required" }, 400);
   }
-  console.log("IPC response received:", content.slice(0, 100) + "...");
+  log.debug("IPC response received:", content.slice(0, 100) + "...");
   let targetId = requestId;
   if (!targetId) {
     let oldestTime = Infinity;
@@ -511,7 +513,7 @@ api.post("/send", async (c) => {
     return c.json({ error: "Message required" }, 400);
   }
   const requestId = generateRequestId();
-  console.log("IPC message received from frontend:", message.slice(0, 100), `[${requestId}]`);
+  log.debug("IPC message received from frontend:", message.slice(0, 100), `[${requestId}]`);
   return streamSSE(c, async (stream) => {
     let resolved = false;
     const cleanup = () => {
@@ -567,7 +569,7 @@ api.post("/analyze-image-cc", async (c) => {
         onActivity: () => {
         },
         onError: (error) => {
-          console.error("Image analysis via Claude Code failed:", error);
+          log.error("Image analysis via Claude Code failed:", error);
         },
         onComplete: () => {
           resolve(
@@ -598,7 +600,7 @@ api.post("/open-url", async (c) => {
   if (!url.startsWith("http://") && !url.startsWith("https://")) {
     return c.json({ error: "Only http/https URLs allowed" }, 400);
   }
-  console.log("Opening URL in browser:", url);
+  log.debug("Opening URL in browser:", url);
   return new Promise((resolve) => {
     const open = spawn("open", [url]);
     open.on("error", (err) => {

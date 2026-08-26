@@ -2,6 +2,10 @@ import { existsSync, readdirSync, readFileSync } from 'fs'
 import { homedir } from 'os'
 import { join } from 'path'
 
+import { createLogger } from './logger.js'
+
+const log = createLogger('modes')
+
 export interface Mode {
   name: string
   label: string
@@ -75,7 +79,8 @@ function loadCustomModes(): Mode[] {
   let files: string[]
   try {
     files = readdirSync(MODES_DIR).filter((f) => f.endsWith('.json'))
-  } catch {
+  } catch (err) {
+    log.warn(`Could not read custom modes from ${MODES_DIR}:`, err)
     return []
   }
 
@@ -93,10 +98,10 @@ function loadCustomModes(): Mode[] {
           planDetection: mode.planDetection ?? false,
         })
       } else {
-        console.warn(`Skipping mode ${file}: missing required fields (name, label, instruction)`)
+        log.warn(`Skipping mode ${file}: missing required fields (name, label, instruction)`)
       }
     } catch (err) {
-      console.warn(`Failed to load mode ${file}:`, err)
+      log.warn(`Failed to load mode ${file}:`, err)
     }
   }
   return modes

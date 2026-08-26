@@ -2,7 +2,7 @@
 
 ## Current State
 
-Walkie Talkie Bot is a voice-first, cassette tape-themed interface for Claude Code with dual distribution (Claude Code plugin + full server with web UI). The codebase is TypeScript throughout, with 299 unit tests across 19 test files (plus Playwright E2E + visual regression) covering the frontend (store, exports, components, plan detection) and server (5 database repositories + HTTP API layer + prompt builder + auth).
+Walkie Talkie Bot is a voice-first, cassette tape-themed interface for Claude Code with dual distribution (Claude Code plugin + full server with web UI). The codebase is TypeScript throughout, with 322 unit tests across 22 test files (plus Playwright E2E + visual regression) covering the frontend (store, exports, components, plan detection) and server (5 database repositories + HTTP API layer + prompt builder + auth).
 
 ### Architecture highlights
 - **Frontend**: React 18 + Zustand, decomposed into 8 custom hooks (`useVoiceIO`, `useClaudeChat`, `useKeyboardControl`, `useDraggableFab`, `useImageAnalysis`, `useServerSync`, `useKeyboardShortcuts`, `useSoundEffects`)
@@ -58,7 +58,7 @@ Walkie Talkie Bot is a voice-first, cassette tape-themed interface for Claude Co
 - [x] Marketing site (walkietalkie.bot) with docs
 
 ### Testing & Quality
-- [x] 299 unit tests across 19 files + Playwright E2E and visual regression
+- [x] 322 unit tests across 22 files + Playwright E2E and visual regression
 - [x] Client tests: store, exports, plan detection, tool config, components (ModeSelector, MediaLibrary), core hooks (useClaudeChat, useVoiceIO)
 - [x] Server tests: conversations, messages, plans, search, activities repositories + HTTP API + prompt builder + auth + job runner/manager
 - [x] TypeScript throughout (including MCP server)
@@ -90,8 +90,15 @@ These came out of an audit and are the recommended next foundation work:
   suite had been resolving to compiled `.js` build artifacts rather than the
   `.ts` sources (fixed in `vitest.config.server.ts`), and a multi-word mode
   label like "Code Review" can never match the spoken mode-switch pattern.
-- **Replace scattered `console.*` with a small leveled logger** and surface the
-  ~8 silently-swallowed `catch {}` errors to the user.
+- ~~**Replace scattered `console.*` with a small leveled logger**~~ Done.
+  `src/lib/logger.ts` (level from `localStorage['wtb:logLevel']`, defaulting to
+  debug in dev / warn in prod) and `server/logger.ts` (level from
+  `WTB_LOG_LEVEL`). All 77 call sites in `src` and `server` are now scoped and
+  leveled; the MCP server was already correct, using only `console.error` so
+  stdout stays clean JSON-RPC. Auditing the 24 bare `catch {}` blocks showed
+  most are deliberate control flow ("not JSON, treat as plain string", "already
+  dead" on kill); the ones that were genuinely hiding failures now log, and two
+  that misled the user are fixed — see the CHANGELOG.
 - **Dependency upgrades**: React 18→19 still pending. Vite 5→8 and Vitest 2→4 are
   done (and cleared all 16 npm audit advisories) now that CI covers them.
 

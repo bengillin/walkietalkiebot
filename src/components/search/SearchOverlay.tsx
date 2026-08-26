@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import * as api from '../../lib/api'
+import { createLogger } from '../../lib/logger'
 import type { SearchResult } from '../../lib/api'
 import './SearchOverlay.css'
 
@@ -19,11 +20,14 @@ function formatTime(timestamp: number): string {
   return date.toLocaleDateString([], { month: 'short', day: 'numeric' })
 }
 
+const log = createLogger('search')
+
 export function SearchOverlay({ isOpen, onClose, onSelectResult }: SearchOverlayProps) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SearchResult[]>([])
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<number>(0)
 
@@ -32,6 +36,7 @@ export function SearchOverlay({ isOpen, onClose, onSelectResult }: SearchOverlay
     if (isOpen) {
       setQuery('')
       setResults([])
+      setError(null)
       setSelectedIndex(0)
       setTimeout(() => inputRef.current?.focus(), 50)
     }
@@ -48,6 +53,7 @@ export function SearchOverlay({ isOpen, onClose, onSelectResult }: SearchOverlay
 
     if (!value.trim()) {
       setResults([])
+      setError(null)
       return
     }
 
@@ -56,8 +62,13 @@ export function SearchOverlay({ isOpen, onClose, onSelectResult }: SearchOverlay
       try {
         const { results: searchResults } = await api.searchMessages(value, 20)
         setResults(searchResults)
-      } catch {
+        setError(null)
+      } catch (err) {
+        // Previously this set an empty result list, so a failed search was
+        // indistinguishable from a genuine "no matches".
+        log.error('Search request failed:', err)
         setResults([])
+        setError(err instanceof Error ? err.message : 'Search is unavailable')
       } finally {
         setIsLoading(false)
       }
@@ -135,7 +146,9 @@ export function SearchOverlay({ isOpen, onClose, onSelectResult }: SearchOverlay
         )}
 
         {query.trim() && !isLoading && results.length === 0 && (
-          <div className="search-overlay__empty">No results found</div>
+          <div className="search-overlay__empty">
+            {error ? `Search failed: ${error}` : 'No results found'}
+          </div>
         )}
       </div>
     </div>

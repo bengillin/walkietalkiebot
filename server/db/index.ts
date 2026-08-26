@@ -4,16 +4,20 @@ import { dirname, join } from 'path'
 import { homedir } from 'os'
 import { initSchema } from './schema.js'
 
+import { createLogger } from '../logger.js'
+
+const log = createLogger('db')
+
 // One-time migration: rename ~/.talkboy/ or ~/.talkie/ → ~/.wtb/
 function migrateDataDir() {
   const wtbDir = join(homedir(), '.wtb')
   const oldDir2 = join(homedir(), '.talkie')
   const oldDir1 = join(homedir(), '.talkboy')
   if (existsSync(oldDir2) && !existsSync(wtbDir)) {
-    console.log(`Migrating ${oldDir2} → ${wtbDir}`)
+    log.debug(`Migrating ${oldDir2} → ${wtbDir}`)
     renameSync(oldDir2, wtbDir)
   } else if (existsSync(oldDir1) && !existsSync(wtbDir)) {
-    console.log(`Migrating ${oldDir1} → ${wtbDir}`)
+    log.debug(`Migrating ${oldDir1} → ${wtbDir}`)
     renameSync(oldDir1, wtbDir)
   }
 }
@@ -54,7 +58,7 @@ export function initDb(): Database.Database {
   // Initialize schema
   initSchema(db)
 
-  console.log(`Database initialized at ${dbPath}`)
+  log.debug(`Database initialized at ${dbPath}`)
   return db
 }
 
@@ -62,7 +66,7 @@ export function closeDb(): void {
   if (db) {
     db.close()
     db = null
-    console.log('Database closed')
+    log.debug('Database closed')
   }
 }
 

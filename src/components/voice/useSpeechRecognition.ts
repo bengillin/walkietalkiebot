@@ -1,5 +1,9 @@
 import { useEffect, useRef, useCallback, useState } from 'react'
 
+import { createLogger } from '../../lib/logger'
+
+const log = createLogger('speech')
+
 interface UseSpeechRecognitionOptions {
   onResult?: (transcript: string) => void
   onInterimResult?: (transcript: string) => void
@@ -133,7 +137,7 @@ export function useSpeechRecognition({
     recognition.lang = language
 
     recognition.onstart = () => {
-      console.log('[Speech] Started listening')
+      log.debug('Started listening')
       setIsListening(true)
     }
 
@@ -154,7 +158,7 @@ export function useSpeechRecognition({
         }
       }
 
-      console.log('[Speech] Result:', { interimTranscript, finalTranscript })
+      log.debug('Result:', { interimTranscript, finalTranscript })
 
       // Accumulate final transcripts
       if (finalTranscript) {
@@ -196,17 +200,14 @@ export function useSpeechRecognition({
             .replace(new RegExp(`\\s*${trigger}[.,]?\\s*$`, 'i'), '')
             .trim()
 
-          console.log('[Speech] Trigger word detected, waiting for silence...')
+          log.debug('Trigger word detected, waiting for silence...')
           pendingTriggerTranscriptRef.current = cleanTranscript
 
           // Wait for silence before triggering (configurable delay)
           triggerTimeoutRef.current = setTimeout(() => {
             if (!triggerFiredRef.current) {
               triggerFiredRef.current = true
-              console.log(
-                '[Speech] Silence confirmed, triggering with:',
-                pendingTriggerTranscriptRef.current,
-              )
+              log.debug('Silence confirmed, triggering with:', pendingTriggerTranscriptRef.current)
               recognition.stop()
               onTriggerWordRef.current?.(pendingTriggerTranscriptRef.current)
             }
@@ -216,13 +217,13 @@ export function useSpeechRecognition({
     }
 
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-      console.error('[Speech] Error:', event.error)
+      log.error('Error:', event.error)
       onErrorRef.current?.(event.error)
       setIsListening(false)
     }
 
     recognition.onend = () => {
-      console.log('[Speech] Ended')
+      log.debug('Ended')
       setIsListening(false)
       onEndRef.current?.()
     }
@@ -238,7 +239,7 @@ export function useSpeechRecognition({
   }, [isSupported, continuous, language])
 
   const start = useCallback(() => {
-    console.log('[Speech] start() called, recognitionRef:', !!recognitionRef.current)
+    log.debug('start() called, recognitionRef:', !!recognitionRef.current)
     if (recognitionRef.current) {
       // Only update transcript state if needed to avoid re-renders
       setTranscript('')
@@ -252,13 +253,13 @@ export function useSpeechRecognition({
       try {
         recognitionRef.current.start()
       } catch (e) {
-        console.error('Failed to start recognition:', e)
+        log.error('Failed to start recognition:', e)
       }
     }
   }, [setTranscript])
 
   const stop = useCallback(() => {
-    console.log('[Speech] stop() called')
+    log.debug('stop() called')
     if (triggerTimeoutRef.current) {
       clearTimeout(triggerTimeoutRef.current)
       triggerTimeoutRef.current = null

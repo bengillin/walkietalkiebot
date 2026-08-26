@@ -4,6 +4,10 @@ import * as api from '../lib/api'
 import type { DroppedFile, ImageAnalysis } from '../types'
 import type { ImageAnalysisStatus } from '../components/dropzone/FileDropZone'
 
+import { createLogger } from '../lib/logger'
+
+const log = createLogger('images')
+
 interface UseImageAnalysisParams {
   addFiles: (files: DroppedFile[]) => void
   addImageAnalysis: (analysis: Omit<ImageAnalysis, 'id' | 'timestamp'>) => string
@@ -38,7 +42,7 @@ export function useImageAnalysis({
             api.updateImageDescription(file.id, description).catch(() => {})
           })
           .catch((err) => {
-            console.error('Image analysis failed:', err)
+            log.error('Image analysis failed:', err)
             updateImageAnalysis(analysisId, { status: 'error', error: err.message })
           })
       }

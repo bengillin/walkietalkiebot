@@ -3,15 +3,17 @@ import { existsSync, mkdirSync, renameSync } from "fs";
 import { dirname, join } from "path";
 import { homedir } from "os";
 import { initSchema } from "./schema.js";
+import { createLogger } from "../logger.js";
+const log = createLogger("db");
 function migrateDataDir() {
   const wtbDir = join(homedir(), ".wtb");
   const oldDir2 = join(homedir(), ".talkie");
   const oldDir1 = join(homedir(), ".talkboy");
   if (existsSync(oldDir2) && !existsSync(wtbDir)) {
-    console.log(`Migrating ${oldDir2} \u2192 ${wtbDir}`);
+    log.debug(`Migrating ${oldDir2} \u2192 ${wtbDir}`);
     renameSync(oldDir2, wtbDir);
   } else if (existsSync(oldDir1) && !existsSync(wtbDir)) {
-    console.log(`Migrating ${oldDir1} \u2192 ${wtbDir}`);
+    log.debug(`Migrating ${oldDir1} \u2192 ${wtbDir}`);
     renameSync(oldDir1, wtbDir);
   }
 }
@@ -39,14 +41,14 @@ function initDb() {
   db.pragma("journal_mode = WAL");
   db.pragma("foreign_keys = ON");
   initSchema(db);
-  console.log(`Database initialized at ${dbPath}`);
+  log.debug(`Database initialized at ${dbPath}`);
   return db;
 }
 function closeDb() {
   if (db) {
     db.close();
     db = null;
-    console.log("Database closed");
+    log.debug("Database closed");
   }
 }
 function isDbConnected() {

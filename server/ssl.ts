@@ -2,6 +2,10 @@ import { existsSync, mkdirSync, readFileSync, renameSync } from 'fs'
 import { homedir } from 'os'
 import { join } from 'path'
 
+import { createLogger } from './logger.js'
+
+const log = createLogger('ssl')
+
 const WTB_DIR = join(homedir(), '.wtb')
 const OLD_DIR_2 = join(homedir(), '.talkie')
 const OLD_DIR_1 = join(homedir(), '.talkboy')
@@ -41,7 +45,7 @@ export function getSSLCerts(): SSLCerts | null {
   ensureWtbDir()
 
   if (existsSync(TAILSCALE_CERT_PATH) && existsSync(TAILSCALE_KEY_PATH)) {
-    console.log('Using Tailscale HTTPS certificates')
+    log.debug('Using Tailscale HTTPS certificates')
     return {
       cert: readFileSync(TAILSCALE_CERT_PATH, 'utf-8'),
       key: readFileSync(TAILSCALE_KEY_PATH, 'utf-8'),

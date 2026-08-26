@@ -5,6 +5,10 @@ import { tmpdir } from 'os'
 import { buildPrompt } from '../promptBuilder.js'
 import { getMode } from '../modes.js'
 
+import { createLogger } from '../logger.js'
+
+const log = createLogger('runner')
+
 export interface ActivityEvent {
   type: 'tool_start' | 'tool_end' | 'tool_input' | 'all_complete'
   tool?: string
@@ -213,7 +217,7 @@ export function spawnClaude(options: RunnerOptions): RunnerHandle {
   if (!useSession) {
     const fullPrompt = buildFullPrompt(true)
     const args = ['-p', fullPrompt, ...baseArgs, '--no-session-persistence']
-    console.log(
+    log.debug(
       'Spawning claude:',
       claudePath,
       'len',
@@ -254,7 +258,7 @@ export function spawnClaude(options: RunnerOptions): RunnerHandle {
     const sessionArgs = strategy === 'create' ? ['--session-id', convId] : ['--resume', convId]
     const fullPrompt = buildFullPrompt(strategy === 'create')
     const args = ['-p', fullPrompt, ...baseArgs, ...sessionArgs]
-    console.log(
+    log.debug(
       'Spawning claude:',
       claudePath,
       `(session ${strategy}${isRetry ? ' retry' : ''})`,
@@ -463,14 +467,14 @@ function runClaudeProcess(
           }
         }
       } catch (e) {
-        console.log('Parse error for line:', line.slice(0, 100))
+        log.debug('Parse error for line:', line.slice(0, 100))
       }
     }
   })
 
   claude.stderr.on('data', (data: Buffer) => {
     const text = data.toString()
-    console.error('Claude stderr:', text)
+    log.error('Claude stderr:', text)
     callbacks.onError(text)
   })
 
