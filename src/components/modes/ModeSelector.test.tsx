@@ -61,4 +61,23 @@ describe('ModeSelector', () => {
     )
     expect(container.firstChild).toBeNull()
   })
+
+  it('is labelled as the mode, not as a microphone control', () => {
+    render(<ModeSelector modes={mockModes} currentMode="voice" onSelectMode={() => {}} />)
+    expect(screen.getByRole('button', { name: 'Mode: Voice' })).toBeInTheDocument()
+    expect(screen.getByText('Mode')).toBeInTheDocument()
+  })
+
+  it('closes on Escape without letting it reach app-wide handlers', () => {
+    const appHandler = vi.fn()
+    window.addEventListener('keydown', appHandler)
+    render(<ModeSelector modes={mockModes} currentMode="voice" onSelectMode={() => {}} />)
+    fireEvent.click(screen.getByTitle(/^Mode:/))
+    expect(screen.getByText('Systems thinking')).toBeInTheDocument()
+
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByText('Systems thinking')).not.toBeInTheDocument()
+    expect(appHandler).not.toHaveBeenCalled()
+    window.removeEventListener('keydown', appHandler)
+  })
 })

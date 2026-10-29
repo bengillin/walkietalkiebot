@@ -155,3 +155,109 @@ test.describe('Theme switching', () => {
     })
   }
 })
+
+test.describe('Escape closes the topmost layer', () => {
+  test.beforeEach(async ({ page }) => {
+    await skipOnboarding(page)
+  })
+
+  test('closes the tape collection', async ({ page }) => {
+    await page.click('.app__header-btn--eject')
+    await expect(page.locator('.tape-collection__drawer')).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(page.locator('.tape-collection__drawer')).not.toBeVisible()
+  })
+
+  test('closes one layer per press, top first', async ({ page }) => {
+    await page.click('.app__header-btn--eject')
+    await expect(page.locator('.tape-collection__drawer')).toBeVisible()
+    // The drawer's backdrop covers the header; dispatch directly to stack layers
+    await page.locator('[title="Settings"]').dispatchEvent('click')
+    await expect(page.locator('.settings__drawer')).toBeVisible()
+
+    await page.keyboard.press('Escape')
+    await expect(page.locator('.settings__drawer')).not.toBeVisible()
+    await expect(page.locator('.tape-collection__drawer')).toBeVisible()
+
+    await page.keyboard.press('Escape')
+    await expect(page.locator('.tape-collection__drawer')).not.toBeVisible()
+  })
+
+  test('closes the mode dropdown only', async ({ page }) => {
+    await page.waitForSelector('.mode-selector', { timeout: 5000 })
+    await page.click('[title="Plans"]')
+    await expect(page.locator('.plans__panel')).toBeVisible()
+    await page.locator('.mode-selector__trigger').dispatchEvent('click')
+    await expect(page.locator('.mode-selector__dropdown')).toBeVisible()
+
+    await page.keyboard.press('Escape')
+    await expect(page.locator('.mode-selector__dropdown')).not.toBeVisible()
+    await expect(page.locator('.plans__panel')).toBeVisible()
+  })
+
+  test('search still closes itself, and only itself', async ({ page }) => {
+    await page.click('.app__header-btn--eject')
+    await expect(page.locator('.tape-collection__drawer')).toBeVisible()
+    await page.keyboard.press('Meta+k')
+    await expect(page.locator('.search-overlay')).toBeVisible()
+
+    await page.keyboard.press('Escape')
+    await expect(page.locator('.search-overlay')).not.toBeVisible()
+    await expect(page.locator('.tape-collection__drawer')).toBeVisible()
+  })
+})
+
+test.describe('Conversations are created lazily', () => {
+  test('loading the app and starting a new tape create nothing on the server', async ({
+    page,
+    request,
+  }) => {
+    const total = async () =>
+      (await (await request.get('/api/conversations?limit=1')).json()).total as number
+    const before = await total()
+
+    await skipOnboarding(page)
+    await page.click('.app__header-btn--eject')
+    await page.click('.tape-collection__new-btn')
+    await page.waitForTimeout(1000)
+
+    expect(await total()).toBe(before)
+  })
+})
+
+test.describe('Mobile header', () => {
+  const themes = ['mccallister', 'imessage', 'aol', 'classic-mac', 'geocities', 'apple-1984']
+  test.use({ viewport: { width: 390, height: 844 } })
+
+  for (const theme of themes) {
+    test(`${theme}: every header control is on screen`, async ({ page }) => {
+      await skipOnboarding(page)
+      await setTheme(page, theme)
+      await page.waitForSelector('.mode-selector', { timeout: 5000 })
+
+      const boxes = await page.$$eval('.app__header button', (els) =>
+        els
+          .map((el) => el.getBoundingClientRect())
+          .filter((r) => r.width > 0 && r.height > 0)
+          .map((r) => ({ left: r.left, right: r.right }))
+          .sort((a, b) => a.left - b.left),
+      )
+      expect(boxes.length).toBeGreaterThanOrEqual(4)
+      boxes.forEach((box, i) => {
+        expect(box.left).toBeGreaterThanOrEqual(0)
+        expect(box.right).toBeLessThanOrEqual(390)
+        const prev = boxes[i - 1]
+        if (prev) expect(box.left).toBeGreaterThanOrEqual(prev.right) // no overlap
+      })
+
+      // Secondary actions live in the overflow menu
+      await page.click('.app__header-more-btn')
+      const menu = page.locator('.app__header-menu')
+      for (const label of ['Settings', 'Plans', 'Liner Notes', 'Media Library']) {
+        await expect(menu.getByRole('menuitem', { name: label })).toBeInViewport()
+      }
+      await menu.getByRole('menuitem', { name: 'Settings' }).click()
+      await expect(page.locator('.settings__drawer')).toBeVisible()
+    })
+  }
+})

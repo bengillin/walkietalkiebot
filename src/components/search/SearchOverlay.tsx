@@ -77,6 +77,8 @@ export function SearchOverlay({ isOpen, onClose, onSelectResult }: SearchOverlay
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
+      // Handled here; don't let the app-wide Escape close another layer too
+      e.stopPropagation()
       onClose()
     } else if (e.key === 'ArrowDown') {
       e.preventDefault()
