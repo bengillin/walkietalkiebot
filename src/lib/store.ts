@@ -144,6 +144,9 @@ export function mergeMessages(local: Message[], server: Message[]): Message[] {
 }
 
 const isNotFound = (err: unknown) => (err as { status?: unknown } | null)?.status === 404
+// 410: the tape was deleted. 404 alone means the server never had it (or lost
+// its database), which is not a reason to throw away unsynced messages.
+const isGone = (err: unknown) => (err as { status?: unknown } | null)?.status === 410
 const isConflict = (err: unknown) => (err as { status?: unknown } | null)?.status === 409
 
 /** Run fn over items, a few at a time. */
@@ -315,6 +318,9 @@ export const useStore = create<AppState>((set, get) => {
         delete failures[tape.id]
         updateConversations((c) => (c.id === tape.id ? { ...c, localOnly: false } : c))
         markSynced(tape.id, new Set(tape.messages.map((m) => m.id)), outcome?.remapped)
+      } else if (outcome?.gone) {
+        delete failures[tape.id]
+        dropDeletedTape(tape.id)
       } else if (outcome && !outcome.ok) {
         const count = (failures[tape.id] ?? 0) + 1
         failures[tape.id] = count
@@ -361,6 +367,9 @@ export const useStore = create<AppState>((set, get) => {
       // unsynced and are posted one by one.
       const result = await api.migrateFromLocalStorage([conv])
       const outcome = result.results?.find((r) => r.id === id)
+      if (outcome?.gone) {
+        throw Object.assign(new Error(`Conversation ${id} was deleted`), { status: 410 })
+      }
       if (outcome ? !outcome.ok : !result.success) {
         throw new Error(`Server did not store conversation ${id}: ${outcome?.error ?? 'unknown'}`)
       }
@@ -420,6 +429,7 @@ export const useStore = create<AppState>((set, get) => {
     if (!serverSyncEnabled) return undefined
     return enqueueWrite(id, 'Failed to sync messages to server', async () => {
       if (deletedIds.has(id)) return
+      let reuploaded = false
       try {
         await ensureServerConversation(id)
         for (;;) {
@@ -430,6 +440,14 @@ export const useStore = create<AppState>((set, get) => {
           try {
             await postMessage(id, next)
           } catch (err) {
+            if (isNotFound(err) && !reuploaded) {
+              // The server lost the tape (e.g. it now runs on another
+              // database) without it being deleted: upload it again, whole
+              reuploaded = true
+              updateConversations((c) => (c.id === id ? { ...c, localOnly: true } : c))
+              await ensureServerConversation(id)
+              continue
+            }
             if (!isConflict(err)) throw err
             // Its id is taken by another tape: post it under a fresh one
             const fresh = crypto.randomUUID()
@@ -445,10 +463,75 @@ export const useStore = create<AppState>((set, get) => {
         if (timer) clearTimeout(timer)
         retryTimers.delete(id)
       } catch (err) {
+        if (isGone(err)) {
+          // Deleted elsewhere while this tab still had writes for it
+          log.info(`Tape ${id} was deleted elsewhere; dropping it`)
+          dropDeletedTape(id)
+          return
+        }
         scheduleRetry(id)
         throw err
       }
     })
+  }
+
+  /**
+   * Remove a tape locally (the open one falls back to the next, or a blank
+   * tape) and keep it out of later merges. Returns the removed tape, if any.
+   */
+  const removeTape = (id: string): Conversation | undefined => {
+    const removed = get().conversations.find((c) => c.id === id)
+    deletedIds.add(id)
+
+    set((state) => {
+      const conversations = state.conversations.filter((c) => c.id !== id)
+
+      // If deleting current conversation, switch to another or start a
+      // blank local-only tape (created on the server on its first message,
+      // like every other new tape)
+      let newCurrentId = state.currentConversationId
+      let newMessages = state.messages
+      let newActivities = state.storedActivities
+
+      if (state.currentConversationId === id) {
+        const next = conversations[0]
+        if (next) {
+          newCurrentId = next.id
+          newMessages = next.messages
+          newActivities = next.activities || []
+        } else {
+          const newConv = createNewConversation()
+          if (serverProjectId) newConv.projectId = serverProjectId
+          conversations.push(newConv)
+          newCurrentId = newConv.id
+          newMessages = []
+          newActivities = []
+        }
+      }
+
+      // Remove from context if present
+      const contextConversationIds = state.contextConversationIds.filter((cid) => cid !== id)
+
+      saveConversationsToStorage(conversations)
+
+      return {
+        conversations,
+        currentConversationId: newCurrentId,
+        messages: newMessages,
+        storedActivities: newActivities,
+        contextConversationIds,
+      }
+    })
+    return removed
+  }
+
+  /** A tape deleted elsewhere (the server answered 410): forget it here. */
+  const dropDeletedTape = (id: string) => {
+    removeTape(id)
+    const timer = retryTimers.get(id)
+    if (timer) clearTimeout(timer)
+    retryTimers.delete(id)
+    retryAttempts.delete(id)
   }
 
   /** Send a delete, and keep it pending (persisted) until the server confirms. */
@@ -623,48 +706,7 @@ export const useStore = create<AppState>((set, get) => {
     },
 
     deleteConversation: (id: string) => {
-      const deleted = get().conversations.find((c) => c.id === id)
-      deletedIds.add(id)
-
-      set((state) => {
-        const conversations = state.conversations.filter((c) => c.id !== id)
-
-        // If deleting current conversation, switch to another or start a
-        // blank local-only tape (created on the server on its first message,
-        // like every other new tape)
-        let newCurrentId = state.currentConversationId
-        let newMessages = state.messages
-        let newActivities = state.storedActivities
-
-        if (state.currentConversationId === id) {
-          const next = conversations[0]
-          if (next) {
-            newCurrentId = next.id
-            newMessages = next.messages
-            newActivities = next.activities || []
-          } else {
-            const newConv = createNewConversation()
-            if (serverProjectId) newConv.projectId = serverProjectId
-            conversations.push(newConv)
-            newCurrentId = newConv.id
-            newMessages = []
-            newActivities = []
-          }
-        }
-
-        // Remove from context if present
-        const contextConversationIds = state.contextConversationIds.filter((cid) => cid !== id)
-
-        saveConversationsToStorage(conversations)
-
-        return {
-          conversations,
-          currentConversationId: newCurrentId,
-          messages: newMessages,
-          storedActivities: newActivities,
-          contextConversationIds,
-        }
-      })
+      const deleted = removeTape(id)
 
       // Always tell the server, queued behind any in-flight creation. Even a
       // "local-only" tape may exist there (a creation whose response was lost,
@@ -986,8 +1028,9 @@ export const useStore = create<AppState>((set, get) => {
         // content through POST /api/migrate rather than dropping them; that
         // matches what the old sync did, which kept every local tape.
         //
-        // The trade-off, chosen deliberately: such a tape that was in fact deleted
-        // on another device comes back. Keeping data beats that rare resurrection.
+        // A tape deleted since the server started keeping tombstones is refused
+        // (gone) and dropped. One deleted before that comes back: keeping data
+        // beats that rare resurrection.
         const listedIds = new Set(serverList.map((c) => c.id))
         const legacyOrphans = get().conversations.filter(
           (c) => c.localOnly === undefined && !listedIds.has(c.id) && uploadable(c),
@@ -1011,7 +1054,16 @@ export const useStore = create<AppState>((set, get) => {
           try {
             await api.getConversation(c.id)
           } catch (err) {
-            if (isNotFound(err)) confirmedGone.add(c.id)
+            if (isGone(err)) confirmedGone.add(c.id)
+            else if (isNotFound(err)) {
+              // Never deleted, but the server doesn't have it (it lost or
+              // swapped its database). Unsynced messages are uploaded again,
+              // tape and all, rather than silently dropped. A fully synced
+              // tape is dropped as before: it may predate tombstones.
+              if (c.messages.some((m) => m.unsynced)) {
+                updateConversations((t) => (t.id === c.id ? { ...t, localOnly: true } : t))
+              } else confirmedGone.add(c.id)
+            }
           }
         })
 

@@ -1,4 +1,4 @@
-import { Hono } from 'hono'
+import { Hono, type Context } from 'hono'
 import { streamSSE } from 'hono/streaming'
 import { spawn } from 'child_process'
 import { state, updateState, generateRequestId, type WtbState } from './state.js'
@@ -75,7 +75,7 @@ api.get('/conversations/:id', (c) => {
   const conv = conversations.getConversation(id)
 
   if (!conv) {
-    return c.json({ error: 'Conversation not found' }, 404)
+    return notFound(c, id)
   }
 
   const msgs = messages.getMessagesForConversation(id)
@@ -116,6 +116,17 @@ api.get('/conversations/:id', (c) => {
   })
 })
 
+// A conversation that was deleted is 410 Gone, so clients can tell "deleted
+// elsewhere — drop your copy" from "this server never had it" (404, e.g. the
+// server was pointed at another database — re-upload it).
+function gone(c: Context) {
+  return c.json({ error: 'Conversation was deleted' }, 410)
+}
+
+function notFound(c: Context, id: string) {
+  return conversations.isDeleted(id) ? gone(c) : c.json({ error: 'Conversation not found' }, 404)
+}
+
 // POST /api/conversations - Create conversation
 api.post('/conversations', async (c) => {
   const body = await c.req.json().catch(() => ({}))
@@ -125,6 +136,7 @@ api.post('/conversations', async (c) => {
   // Idempotent on a client-supplied id: a retry (or a second tab creating the
   // same tape) gets the existing conversation back instead of a 500.
   const existing = conversations.getConversation(id)
+  if (!existing && conversations.isDeleted(id)) return gone(c)
   const conv = existing ?? conversations.createConversation({ id, title, mode: body.mode })
 
   return c.json(
@@ -212,7 +224,7 @@ api.post('/conversations/:id/messages', async (c) => {
   // Check conversation exists
   const conv = conversations.getConversation(conversationId)
   if (!conv) {
-    return c.json({ error: 'Conversation not found' }, 404)
+    return notFound(c, conversationId)
   }
 
   // Idempotent on a client-supplied id, so a retry after a lost response is
@@ -231,14 +243,15 @@ api.post('/conversations/:id/messages', async (c) => {
     })
   }
 
+  const id = body.id || crypto.randomUUID()
   const msg = messages.createMessage({
-    id: body.id || crypto.randomUUID(),
+    id,
     conversationId,
     role: body.role,
     content: body.content,
     timestamp: body.timestamp,
     source: body.source || 'web',
-    images: body.images,
+    images: messages.withFreshImageIds(body.images, id),
   })
 
   // Update conversation title if first user message
@@ -523,10 +536,7 @@ api.post('/migrate', async (c) => {
         content: msg.content,
         timestamp: msg.timestamp,
         source: 'web',
-        // Image ids are global too; a new message never owns an existing one
-        images: msg.images?.map((img) =>
-          messages.imageExists(img.id) ? { ...img, id: `${img.id}~${id}` } : img,
-        ),
+        images: messages.withFreshImageIds(msg.images, id),
       })
       messagesAdded++
     }
@@ -553,6 +563,7 @@ api.post('/migrate', async (c) => {
   const results: Array<{
     id: string
     ok: boolean
+    gone?: boolean
     created?: boolean
     messagesAdded?: number
     remapped?: Record<string, string>
@@ -560,6 +571,11 @@ api.post('/migrate', async (c) => {
   }> = []
 
   for (const conv of localConversations) {
+    // Deleted elsewhere: the client drops its copy instead of re-creating it
+    if (!conversations.getConversation(conv.id) && conversations.isDeleted(conv.id)) {
+      results.push({ id: conv.id, ok: false, gone: true, error: 'Conversation was deleted' })
+      continue
+    }
     try {
       const { created, messagesAdded, remapped } = importOne(conv)
       if (created) imported++

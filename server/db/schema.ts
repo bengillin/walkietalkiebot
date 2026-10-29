@@ -4,7 +4,7 @@ import { createLogger } from '../logger.js'
 
 const log = createLogger('db')
 
-const SCHEMA_VERSION = 6
+const SCHEMA_VERSION = 7
 
 export function initSchema(db: Database.Database): void {
   // Create schema version table
@@ -43,6 +43,7 @@ function runMigrations(db: Database.Database, fromVersion: number): void {
     migrateV4,
     migrateV5,
     migrateV6,
+    migrateV7,
   ]
 
   for (let i = fromVersion; i < migrations.length; i++) {
@@ -198,4 +199,15 @@ function migrateV5(db: Database.Database): void {
 
 function migrateV6(db: Database.Database): void {
   db.exec(`ALTER TABLE conversations ADD COLUMN mode TEXT DEFAULT 'voice';`)
+}
+
+// Tombstones for deleted conversations, so a stale client (another tab's
+// retry, a laptop waking from sleep) can't re-create a tape deleted elsewhere
+function migrateV7(db: Database.Database): void {
+  db.exec(`
+    CREATE TABLE deleted_conversations (
+      id TEXT PRIMARY KEY,
+      deleted_at INTEGER NOT NULL
+    );
+  `)
 }

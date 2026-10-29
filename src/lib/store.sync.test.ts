@@ -46,6 +46,11 @@ function notFound() {
   return Object.assign(new Error('Conversation not found'), { status: 404 })
 }
 
+// ...and for a 410 (the tape was deleted)
+function gone() {
+  return Object.assign(new Error('Conversation was deleted'), { status: 410 })
+}
+
 function deferred<T>() {
   let resolve!: (v: T) => void
   const promise = new Promise<T>((r) => (resolve = r))
@@ -703,5 +708,91 @@ describe('review round 2: migration gives up on a tape the server keeps rejectin
     apiMock.migrateFromLocalStorage.mockRejectedValue(new TypeError('Failed to fetch'))
     for (let i = 0; i < 4; i++) expect(await useStore.getState().migrateToServer()).toBe(false)
     expect(localStorage.getItem('wtb_upload_failures')).toBeNull()
+  })
+})
+
+describe('tapes deleted elsewhere are not resurrected (#12)', () => {
+  it('drops a local-only tape whose import the server refuses as deleted', async () => {
+    setConversations([conv('t0', { localOnly: true }), conv('keep', { localOnly: false })], 't0')
+    apiMock.migrateFromLocalStorage.mockResolvedValue({
+      success: false,
+      imported: 0,
+      skipped: 0,
+      results: [{ id: 't0', ok: false, gone: true, error: 'Conversation was deleted' }],
+    })
+    useStore.getState().addMessage({ role: 'user', content: 'from a stale tab' })
+    await flushServerWrites()
+    const s = useStore.getState()
+    expect(s.conversations.map((c) => c.id)).toEqual(['keep'])
+    expect(s.currentConversationId).toBe('keep')
+    expect(apiMock.migrateFromLocalStorage).toHaveBeenCalledTimes(1) // no retry
+  })
+
+  it('drops a tape whose message post answers 410', async () => {
+    setConversations([conv('s', { localOnly: false }), conv('keep', { localOnly: false })], 's')
+    apiMock.addMessage.mockRejectedValue(gone())
+    useStore.getState().addMessage({ role: 'user', content: 'too late' })
+    await flushServerWrites()
+    expect(useStore.getState().conversations.map((c) => c.id)).toEqual(['keep'])
+    expect(apiMock.migrateFromLocalStorage).not.toHaveBeenCalled()
+  })
+
+  it('drops a gone tape found by migration', async () => {
+    localStorage.setItem(
+      'wtb_conversations',
+      JSON.stringify([conv('old', { localOnly: true, messages: [msg('m', 1)] })]),
+    )
+    setConversations([conv('old', { localOnly: true, messages: [msg('m', 1)] })], 'old')
+    apiMock.migrateFromLocalStorage.mockResolvedValue({
+      success: false,
+      imported: 0,
+      skipped: 0,
+      results: [{ id: 'old', ok: false, gone: true }],
+    })
+    expect(await useStore.getState().migrateToServer()).toBe(true)
+    expect(useStore.getState().conversations.map((c) => c.id)).not.toContain('old')
+  })
+})
+
+describe('unsynced messages survive a server that lost its database (#13)', () => {
+  it('re-uploads the whole tape when a message post answers 404', async () => {
+    setConversations([conv('s', { localOnly: false, messages: [msg('m1', 1000)] })], 's')
+    apiMock.addMessage.mockRejectedValueOnce(notFound())
+    apiMock.migrateFromLocalStorage.mockImplementation(async (convs: Conversation[]) => ({
+      success: true,
+      imported: 1,
+      skipped: 0,
+      results: [{ id: convs[0]!.id, ok: true, created: true }],
+    }))
+    useStore.getState().addMessage({ role: 'user', content: 'after restart' })
+    await flushServerWrites()
+    const uploaded = apiMock.migrateFromLocalStorage.mock.calls[0]?.[0] as Conversation[]
+    expect(uploaded[0]?.messages.map((m) => m.content)).toEqual(['m1', 'after restart'])
+    const s = useStore.getState()
+    expect(s.messages.some((m) => m.unsynced)).toBe(false)
+    expect(s.conversations[0]?.localOnly).toBe(false)
+  })
+
+  it('keeps and re-uploads an unlisted tape with unsynced messages on a 404', async () => {
+    const pending = { ...msg('p', 2), unsynced: true }
+    setConversations([conv('a', { localOnly: false, messages: [msg('x', 1), pending] })], 'a')
+    apiMock.listConversations.mockResolvedValue({ conversations: [], total: 0 })
+    apiMock.getConversation.mockRejectedValue(notFound())
+    await useStore.getState().syncFromServer()
+    await flushServerWrites()
+    expect(useStore.getState().conversations.map((c) => c.id)).toEqual(['a'])
+    const uploaded = apiMock.migrateFromLocalStorage.mock.calls[0]?.[0] as Conversation[]
+    expect(uploaded[0]?.messages.map((m) => m.id)).toEqual(['x', 'p'])
+  })
+
+  it('still drops an unlisted tape the server says was deleted', async () => {
+    const pending = { ...msg('p', 2), unsynced: true }
+    setConversations([conv('a', { localOnly: false, messages: [pending] })], 'a')
+    apiMock.listConversations.mockResolvedValue({ conversations: [], total: 0 })
+    apiMock.getConversation.mockRejectedValue(gone())
+    await useStore.getState().syncFromServer()
+    await flushServerWrites()
+    expect(useStore.getState().conversations.map((c) => c.id)).not.toContain('a')
+    expect(apiMock.migrateFromLocalStorage).not.toHaveBeenCalled()
   })
 })

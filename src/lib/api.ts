@@ -78,6 +78,8 @@ export interface MigrationResult {
   results?: Array<{
     id: string
     ok: boolean
+    // The tape was deleted (on the server, from anywhere): drop the local copy
+    gone?: boolean
     created?: boolean
     messagesAdded?: number
     // Messages stored under a new id (their id was taken by another tape)
