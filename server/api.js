@@ -159,6 +159,19 @@ api.post("/conversations/:id/messages", async (c) => {
   if (!conv) {
     return c.json({ error: "Conversation not found" }, 404);
   }
+  const existing = body.id ? messages.getMessage(body.id) : null;
+  if (existing) {
+    if (existing.conversation_id !== conversationId) {
+      return c.json({ error: "Message id belongs to another conversation" }, 409);
+    }
+    return c.json({
+      id: existing.id,
+      role: existing.role,
+      content: existing.content,
+      timestamp: existing.timestamp,
+      source: existing.source
+    });
+  }
   const msg = messages.createMessage({
     id: body.id || crypto.randomUUID(),
     conversationId,
@@ -342,16 +355,29 @@ api.post("/migrate", async (c) => {
     const created = !conversations.getConversation(conv.id);
     if (created) conversations.createConversation({ id: conv.id, title: conv.title });
     let messagesAdded = 0;
+    const remapped = {};
     for (const msg of conv.messages || []) {
-      if (messages.messageExists(msg.id)) continue;
+      let id = msg.id;
+      const owner = messages.getMessage(id)?.conversation_id;
+      if (owner === conv.id) continue;
+      if (owner !== void 0) {
+        id = `${msg.id}~${conv.id}`;
+        remapped[msg.id] = id;
+        const remappedOwner = messages.getMessage(id)?.conversation_id;
+        if (remappedOwner === conv.id) continue;
+        if (remappedOwner !== void 0) throw new Error(`message id conflict: ${msg.id}`);
+      }
       messages.createMessage({
-        id: msg.id,
+        id,
         conversationId: conv.id,
         role: msg.role,
         content: msg.content,
         timestamp: msg.timestamp,
         source: "web",
-        images: msg.images
+        // Image ids are global too; a new message never owns an existing one
+        images: msg.images?.map(
+          (img) => messages.imageExists(img.id) ? { ...img, id: `${img.id}~${id}` } : img
+        )
       });
       messagesAdded++;
     }
@@ -368,17 +394,23 @@ api.post("/migrate", async (c) => {
         error: a.error
       }))
     );
-    return { created, messagesAdded };
+    return { created, messagesAdded, remapped };
   });
   let imported = 0;
   let skipped = 0;
   const results = [];
   for (const conv of localConversations) {
     try {
-      const { created, messagesAdded } = importOne(conv);
+      const { created, messagesAdded, remapped } = importOne(conv);
       if (created) imported++;
       else skipped++;
-      results.push({ id: conv.id, ok: true, created, messagesAdded });
+      results.push({
+        id: conv.id,
+        ok: true,
+        created,
+        messagesAdded,
+        ...Object.keys(remapped).length > 0 && { remapped }
+      });
     } catch (err) {
       log.warn(`Migrate: failed to import conversation ${conv.id}; rolled back:`, err);
       results.push({ id: conv.id, ok: false, error: String(err) });

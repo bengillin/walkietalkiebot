@@ -210,6 +210,22 @@ api.post('/conversations/:id/messages', async (c) => {
     return c.json({ error: 'Conversation not found' }, 404)
   }
 
+  // Idempotent on a client-supplied id, so a retry after a lost response is
+  // safe. An id that belongs to another conversation is a conflict.
+  const existing = body.id ? messages.getMessage(body.id) : null
+  if (existing) {
+    if (existing.conversation_id !== conversationId) {
+      return c.json({ error: 'Message id belongs to another conversation' }, 409)
+    }
+    return c.json({
+      id: existing.id,
+      role: existing.role,
+      content: existing.content,
+      timestamp: existing.timestamp,
+      source: existing.source,
+    })
+  }
+
   const msg = messages.createMessage({
     id: body.id || crypto.randomUUID(),
     conversationId,
@@ -480,16 +496,32 @@ api.post('/migrate', async (c) => {
     if (created) conversations.createConversation({ id: conv.id, title: conv.title })
 
     let messagesAdded = 0
+    // Ids are global primary keys, but older builds copied a parent's message
+    // ids into branches. An id already used by another conversation is given
+    // a new id derived from (id, conversation), so retries map to the same row.
+    const remapped: Record<string, string> = {}
     for (const msg of conv.messages || []) {
-      if (messages.messageExists(msg.id)) continue
+      let id = msg.id
+      const owner = messages.getMessage(id)?.conversation_id
+      if (owner === conv.id) continue
+      if (owner !== undefined) {
+        id = `${msg.id}~${conv.id}`
+        remapped[msg.id] = id
+        const remappedOwner = messages.getMessage(id)?.conversation_id
+        if (remappedOwner === conv.id) continue
+        if (remappedOwner !== undefined) throw new Error(`message id conflict: ${msg.id}`)
+      }
       messages.createMessage({
-        id: msg.id,
+        id,
         conversationId: conv.id,
         role: msg.role,
         content: msg.content,
         timestamp: msg.timestamp,
         source: 'web',
-        images: msg.images,
+        // Image ids are global too; a new message never owns an existing one
+        images: msg.images?.map((img) =>
+          messages.imageExists(img.id) ? { ...img, id: `${img.id}~${id}` } : img,
+        ),
       })
       messagesAdded++
     }
@@ -508,7 +540,7 @@ api.post('/migrate', async (c) => {
       })),
     )
 
-    return { created, messagesAdded }
+    return { created, messagesAdded, remapped }
   })
 
   let imported = 0
@@ -518,16 +550,24 @@ api.post('/migrate', async (c) => {
     ok: boolean
     created?: boolean
     messagesAdded?: number
+    remapped?: Record<string, string>
     error?: string
   }> = []
 
   for (const conv of localConversations) {
     try {
-      const { created, messagesAdded } = importOne(conv)
+      const { created, messagesAdded, remapped } = importOne(conv)
       if (created) imported++
       else skipped++
-      // ok: every message in the request is now stored (added or already there)
-      results.push({ id: conv.id, ok: true, created, messagesAdded })
+      // ok: every message in the request is now stored in this conversation
+      // (added, or already there), under the id in `remapped` where one is given
+      results.push({
+        id: conv.id,
+        ok: true,
+        created,
+        messagesAdded,
+        ...(Object.keys(remapped).length > 0 && { remapped }),
+      })
     } catch (err) {
       log.warn(`Migrate: failed to import conversation ${conv.id}; rolled back:`, err)
       results.push({ id: conv.id, ok: false, error: String(err) })
