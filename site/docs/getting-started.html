@@ -278,6 +278,11 @@ walkietalkiebot</code></pre>
               <td>Set to <code>1</code> in the MCP server's environment to opt in to anonymous tool-usage telemetry. See <a href="#telemetry">Telemetry</a>.</td>
             </tr>
             <tr>
+              <td><code>WTB_URL</code></td>
+              <td><code>http://localhost:$WTB_PORT</code></td>
+              <td>MCP server only: where the server tools reach the Talkie server (for example an <code>https://</code> Tailscale URL). <code>launch_wtb</code> starts the server on this URL's port.</td>
+            </tr>
+            <tr>
               <td><code>WTB_MAX_BODY_BYTES</code></td>
               <td><code>52428800</code> (50 MB)</td>
               <td>Maximum request body size, which bounds image uploads.</td>
@@ -305,7 +310,7 @@ WTB_HOST=0.0.0.0 npx walkietalkiebot</code></pre>
         <!-- ── Telemetry ── -->
         <h2 id="telemetry">Telemetry</h2>
 
-        <p>The MCP server's usage telemetry is <strong>off by default</strong>. If you opt in with <code>WTB_TELEMETRY=1</code>, each MCP tool call sends one anonymous event to PostHog with the tool name, its category, and whether it succeeded. Nothing from your conversations, prompts, files, or messages is sent, and no user identifier is attached. The Talkie server and web UI send no telemetry.</p>
+        <p>The MCP server's usage telemetry is <strong>off by default</strong>. If you opt in with <code>WTB_TELEMETRY=1</code>, each MCP tool call sends one anonymous event to PostHog with the tool name, its category, and whether it succeeded. Nothing from your conversations, prompts, files, or messages is sent, and no user identifier is attached (PostHog does see the IP address the request comes from). The Talkie server and web UI send no telemetry.</p>
 
         <!-- ── Troubleshooting ── -->
         <h2 id="troubleshooting">Troubleshooting</h2>

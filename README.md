@@ -159,6 +159,7 @@ All configuration is through environment variables.
 | `WTB_AUTH_TOKEN` | unset (no auth) | Shared secret. When set, every `/api/*` request needs `Authorization: Bearer <token>`. Give the MCP server the same value so its server tools can authenticate. |
 | `WTB_LOG_LEVEL` | `info` | Server log level: `debug`, `info`, `warn`, `error`, `silent`. |
 | `WTB_TELEMETRY` | off | Set to `1` in the MCP server's environment to opt in to anonymous tool-usage telemetry. See [Telemetry](#telemetry). |
+| `WTB_URL` | `http://localhost:$WTB_PORT` | MCP server only: where the server tools reach the Talkie server (e.g. an `https://` Tailscale URL). `launch_wtb` starts the server on this URL's port. |
 | `WTB_MAX_BODY_BYTES` | `52428800` (50 MB) | Maximum request body size, which bounds image uploads. |
 
 **Server management:**
@@ -180,7 +181,7 @@ wtb-server uninstall     # Remove the launchd daemon
 Walkie Talkie Bot runs Claude Code via `claude -p --permission-mode bypassPermissions`: the agent reads and writes files and runs commands without asking. Anyone who can call the API can drive that agent, so **API access is equivalent to shell access** on the machine running the server. Only expose it to people you would hand a terminal to.
 
 - **Loopback by default.** The server binds to `127.0.0.1`, so only your machine can reach it.
-- **Web pages can't drive it.** Cross-origin requests to the API are rejected (no wildcard CORS) and the `Host` header is validated, so a website open in your browser cannot talk to your local server.
+- **Web pages can't drive it.** Cross-origin requests to the API are rejected (no wildcard CORS) so a website open in your browser cannot talk to your local server. Without a token, the server also answers only to `localhost` Host names, which blocks DNS-rebinding attacks; with a token set (the remote setup), the token is what protects it.
 - **Exposing it requires a token.** To reach Talkie from another device, set `WTB_AUTH_TOKEN`, then `WTB_HOST`. Binding to a non-loopback address without a token is refused at startup.
 - **HTTPS.** Localhost is a secure context, so no certificates are needed locally. For remote access, place Tailscale certs at `~/.wtb/tailscale.crt` and `~/.wtb/tailscale.key` (inside `WTB_DIR` if set) and HTTPS is enabled automatically.
 
@@ -193,7 +194,7 @@ Programmatic clients send `Authorization: Bearer <token>`. In the browser, open 
 
 ## Telemetry
 
-The MCP server's telemetry is **off by default**. If you opt in with `WTB_TELEMETRY=1`, each MCP tool call sends one anonymous event to PostHog with the tool name, its category, and whether it succeeded. Nothing from your conversations, prompts, files, or messages is sent, and no user identifier is attached. The Talkie server and web UI send no telemetry.
+The MCP server's telemetry is **off by default**. If you opt in with `WTB_TELEMETRY=1`, each MCP tool call sends one anonymous event to PostHog with the tool name, its category, and whether it succeeded. Nothing from your conversations, prompts, files, or messages is sent, and no user identifier is attached (PostHog does see the IP address the request comes from). The Talkie server and web UI send no telemetry.
 
 ## Development
 

@@ -39,7 +39,8 @@
   access to the API is equivalent to shell access on the host.
   - The server binds to 127.0.0.1 by default. WTB_HOST changes it; a non-loopback host requires WTB_AUTH_TOKEN
     or the server refuses to start.
-  - Cross-origin requests are rejected (no wildcard CORS) and the Host header is validated.
+  - Cross-origin requests are rejected (no wildcard CORS). Without a token, only localhost Host
+    names are answered (blocks DNS rebinding); with a token, the token protects remote access.
   - With WTB_AUTH_TOKEN set, send `Authorization: Bearer <token>` on every /api request.
 
 ## Configuration (environment variables)
@@ -51,6 +52,7 @@
   WTB_LOG_LEVEL       default info        debug | info | warn | error | silent
   WTB_TELEMETRY       default off         Set to 1 to opt in to MCP telemetry (tool name, category,
                                           success flag to PostHog; nothing from conversations)
+  WTB_URL             default http://localhost:$WTB_PORT   MCP only: where server tools reach Talkie
   WTB_MAX_BODY_BYTES  default 52428800    Max request body (50 MB)
 
 ## Documentation
