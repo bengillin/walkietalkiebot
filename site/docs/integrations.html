@@ -4,15 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Integrations — Walkie Talkie Bot</title>
-  <meta name="description" content="Connect Talkie to Claude Code CLI, the Anthropic API, MCP tools, Telegram, and manage your server." />
+  <meta name="description" content="Connect Talkie to the Claude Code CLI and MCP tools, and manage your server." />
   <meta property="og:title" content="Integrations — Walkie Talkie Bot" />
-  <meta property="og:description" content="Connect Talkie to Claude Code CLI, the Anthropic API, MCP tools, Telegram, and manage your server." />
+  <meta property="og:description" content="Connect Talkie to the Claude Code CLI and MCP tools, and manage your server." />
   <meta property="og:image" content="https://walkietalkie.bot/og.png" />
   <meta property="og:url" content="https://walkietalkie.bot/docs/integrations.html" />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Integrations — Walkie Talkie Bot" />
-  <meta name="twitter:description" content="Connect Talkie to Claude Code CLI, the Anthropic API, MCP tools, Telegram, and manage your server." />
+  <meta name="twitter:description" content="Connect Talkie to the Claude Code CLI and MCP tools, and manage your server." />
   <meta name="twitter:image" content="https://walkietalkie.bot/og.png" />
   <link rel="canonical" href="https://walkietalkie.bot/docs/integrations.html" />
     <!-- PostHog Analytics -->
@@ -50,13 +50,12 @@
       <aside class="docs-sidebar">
         <div class="docs-sidebar__title">On this page</div>
         <ul class="docs-sidebar__list">
-          <li class="docs-sidebar__item"><a href="#plugin">Plugin Installation</a></li>
-          <li class="docs-sidebar__item"><a href="#claude-code">Claude Code Mode</a></li>
+          <li class="docs-sidebar__item"><a href="#plugin">MCP Installation</a></li>
+          <li class="docs-sidebar__item"><a href="#claude-code">Claude Code</a></li>
           <li class="docs-sidebar__item"><a href="#tool-categories">Tool Categories</a></li>
-          <li class="docs-sidebar__item"><a href="#direct-api">Direct API Mode</a></li>
           <li class="docs-sidebar__item"><a href="#mcp">MCP Server</a></li>
-          <li class="docs-sidebar__item"><a href="#telegram">Telegram Bot</a></li>
           <li class="docs-sidebar__item"><a href="#server">Server Management</a></li>
+          <li class="docs-sidebar__item"><a href="/docs/getting-started#security">Security</a></li>
         </ul>
       </aside>
 
@@ -71,38 +70,47 @@
         </div>
 
         <h1>Integrations</h1>
-        <p class="docs-subtitle">Connect Talkie to Claude Code, the Anthropic API, MCP tools, Telegram, and manage your server.</p>
+        <p class="docs-subtitle">Connect Talkie to Claude Code and MCP tools, and manage your server.</p>
 
         <!-- ── Plugin Installation ── -->
-        <h2 id="plugin">Plugin Installation</h2>
+        <h2 id="plugin">MCP Installation</h2>
 
-        <p>Talkie is available as a Claude Code plugin, giving you 30 MCP tools and 5 skills without needing to run the full Talkie server. The 15 data tools work entirely offline by reading and writing directly to the SQLite database at <code>~/.wtb/wtb.db</code>. The other 15 server tools require the Talkie server to be running for voice, IPC, and UI interaction.</p>
+        <p>Talkie's MCP server gives Claude Code 30 tools without needing to run the full Talkie server. The 15 data tools work entirely offline by reading and writing directly to the SQLite database at <code>~/.wtb/wtb.db</code>. The other 15 server tools require the Talkie server to be running for voice, IPC, and UI interaction.</p>
 
-        <p>Add the following to your Claude Code MCP configuration (typically <code>~/.claude/settings.json</code> or your project's <code>.mcp.json</code>):</p>
+        <p>Register it for all your projects with the Claude Code CLI:</p>
+
+        <pre><code>claude mcp add --scope user wtb -- npx -y -p walkietalkiebot wtb-mcp</code></pre>
+
+        <p>Or, to share it with a project, add it to that project's <code>.mcp.json</code>:</p>
 
         <pre><code>{
   "mcpServers": {
     "wtb": {
       "command": "npx",
-      "args": ["wtb-mcp"]
+      "args": ["-y", "-p", "walkietalkiebot", "wtb-mcp"]
     }
   }
 }</code></pre>
 
-        <p>Once configured, Claude Code will automatically have access to all Walkie Walkie Talkie Bot tools and skills. Data tools like <code>list_conversations</code>, <code>search_conversations</code>, <code>create_plan</code>, and <code>export_conversation</code> work immediately with no server required. To use server tools like <code>launch_wtb</code>, <code>get_transcript</code>, or <code>respond_to_wtb</code>, start the WTB server with <code>npx walkietalkiebot</code>.</p>
+        <div class="docs-warning">
+          <strong>Use the full command</strong>
+          The <code>wtb-mcp</code> binary ships inside the <code>walkietalkiebot</code> package, so <code>npx</code> needs <code>-p walkietalkiebot</code>. A bare <code>npx wtb-mcp</code> downloads and runs an unrelated third-party package of the same name.
+        </div>
+
+        <p>Run <code>claude mcp list</code> to confirm it connected. Once configured, Claude Code has access to all Walkie Talkie Bot tools. Data tools like <code>list_conversations</code>, <code>search_conversations</code>, <code>create_plan</code>, and <code>export_conversation</code> work immediately with no server required. To use server tools like <code>launch_wtb</code>, <code>get_transcript</code>, or <code>respond_to_wtb</code>, start the WTB server with <code>npx walkietalkiebot</code>.</p>
 
         <!-- ── Claude Code Mode ── -->
-        <h2 id="claude-code">Claude Code Mode</h2>
+        <h2 id="claude-code">Claude Code</h2>
 
-        <p>Claude Code mode is the default integration. Each message you send spawns a fresh <code>claude -p</code> CLI process, giving Claude full access to tools like file editing, bash commands, web search, and more.</p>
+        <p>Talkie talks to Claude exclusively through the Claude Code CLI, so you need <code>claude</code> installed, logged in, and on your <code>PATH</code>. Each message runs <code>claude -p</code> in the server's working directory, giving Claude full access to tools like file editing, bash commands, web search, and more.</p>
 
         <p>The CLI is invoked with the following flags:</p>
 
         <ul>
           <li><code>--output-format stream-json</code> &mdash; Streams structured JSON events for real-time display</li>
           <li><code>--verbose</code> &mdash; Includes detailed tool usage information in the event stream</li>
-          <li><code>--permission-mode bypassPermissions</code> &mdash; Skips interactive permission prompts so the CLI can run non-interactively</li>
-          <li><code>--no-session-persistence</code> &mdash; Each request is a fresh one-shot process with no session state carried over</li>
+          <li><code>--permission-mode bypassPermissions</code> &mdash; Skips interactive permission prompts so the CLI can run non-interactively. Claude acts without asking, so start the server from the project you want it to work on and read <a href="/docs/getting-started#security">Security</a> before exposing it.</li>
+          <li><code>--session-id</code> / <code>--resume</code> &mdash; Each conversation runs inside a persistent Claude Code session: the first turn creates it, later turns resume it and send only the new message. Expired sessions recover automatically. Background jobs and image analysis stay one-shot (<code>--no-session-persistence</code>).</li>
         </ul>
 
         <h3>Real-time activity feed</h3>
@@ -112,7 +120,7 @@
         <ul>
           <li><strong>Tool icon and label</strong> &mdash; Each of 40+ tools has a unique emoji icon and human-readable label (e.g. "Reading file", "Running command")</li>
           <li><strong>Category color coding</strong> &mdash; Tools are grouped into 6 categories, each with a distinct accent color</li>
-          <li><strong>Clean display names</strong> &mdash; MCP tools like <code>mcp__talkie__list_conversations</code> display as "Conversations"</li>
+          <li><strong>Clean display names</strong> &mdash; MCP tools like <code>mcp__wtb__list_conversations</code> display as "Conversations"</li>
           <li><strong>Input parameters</strong> &mdash; The arguments passed to each tool</li>
           <li><strong>Status</strong> &mdash; Whether the tool call is in progress, succeeded, or failed</li>
           <li><strong>Duration</strong> &mdash; How long each tool call took to complete</li>
@@ -174,51 +182,12 @@
 
         <p>When using voice input, Talkie includes a system prompt optimized for spoken interactions. This encourages Claude to give concise, conversational responses that work well when read aloud by the text-to-speech engine.</p>
 
-        <!-- ── Direct API Mode ── -->
-        <h2 id="direct-api">Direct API Mode</h2>
-
-        <p>Direct API mode is an alternative to the Claude Code CLI. Instead of spawning a CLI process, it calls the Anthropic API directly. This mode requires an API key but offers faster response times and streaming TTS integration.</p>
-
-        <h3>Setup</h3>
-
-        <ol>
-          <li>Set the <code>ANTHROPIC_API_KEY</code> environment variable, or enter your API key in the settings drawer.</li>
-          <li>Open the settings drawer and enable Direct API mode.</li>
-        </ol>
-
-        <h3>Configuration options</h3>
-
-        <ul>
-          <li><strong>Model selection</strong> &mdash; Choose between Sonnet 4, Opus, and Haiku models depending on your speed and quality needs.</li>
-          <li><strong>Max tokens</strong> &mdash; Configure the maximum number of tokens in Claude's response.</li>
-          <li><strong>Custom system prompts</strong> &mdash; Override the default system prompt with your own instructions.</li>
-          <li><strong>Streaming TTS</strong> &mdash; In Direct API mode, text-to-speech starts reading the response as it streams in, rather than waiting for the complete response.</li>
-        </ul>
-
-        <div class="docs-note">
-          <strong>No tool access</strong>
-          Direct API mode does not give Claude access to tools like file editing or bash commands. If you need tool access, use Claude Code mode instead.
-        </div>
-
         <!-- ── MCP Server ── -->
         <h2 id="mcp">MCP Server</h2>
 
-        <p>Talkie includes an MCP (Model Context Protocol) server with 30 tools that allow Claude Code to interact with the Talkie interface. The MCP server uses stdio transport and is launched via the <code>wtb-mcp</code> command.</p>
+        <p>Talkie includes an MCP (Model Context Protocol) server with 30 tools that allow Claude Code to interact with the Talkie interface. The MCP server uses stdio transport and is the <code>wtb-mcp</code> binary from the <code>walkietalkiebot</code> package. See <a href="#plugin">MCP Installation</a> for setup.</p>
 
-        <h3>Setup</h3>
-
-        <p>Add the following to your Claude Code MCP configuration (typically in <code>~/.claude/settings.json</code> or your project's <code>.mcp.json</code>):</p>
-
-        <pre><code>{
-  "mcpServers": {
-    "wtb": {
-      "command": "npx",
-      "args": ["wtb-mcp"]
-    }
-  }
-}</code></pre>
-
-        <p>Once configured, Claude Code will have access to all 30 Talkie tools.</p>
+        <p>If the Talkie server runs with <code>WTB_AUTH_TOKEN</code>, give the MCP server the same variable so its server tools can authenticate. The MCP server sends no telemetry unless you set <code>WTB_TELEMETRY=1</code>; see <a href="/docs/getting-started#telemetry">Telemetry</a>.</p>
 
         <h3>Data tools (work offline)</h3>
 
@@ -326,7 +295,7 @@
 
         <div class="tool-card">
           <div class="tool-card__name">get_wtb_status</div>
-          <div class="tool-card__desc">Check if Walkie Walkie Talkie Bot is running and get its current state (idle, listening, thinking, speaking).</div>
+          <div class="tool-card__desc">Check if Walkie Talkie Bot is running and get its current state (idle, listening, thinking, speaking).</div>
           <div class="tool-card__params">Params: none</div>
         </div>
 
@@ -391,19 +360,19 @@
         </div>
 
         <div class="tool-card">
-          <div class="tool-card__name">create_talkie_job</div>
+          <div class="tool-card__name">create_wtb_job</div>
           <div class="tool-card__desc">Create a background job in Talkie. The task runs asynchronously and you get a job ID back immediately.</div>
           <div class="tool-card__params">Params: <code>conversationId</code> (string, required), <code>prompt</code> (string, required)</div>
         </div>
 
         <div class="tool-card">
-          <div class="tool-card__name">get_talkie_job</div>
+          <div class="tool-card__name">get_wtb_job</div>
           <div class="tool-card__desc">Get the status and result of a background job.</div>
           <div class="tool-card__params">Params: <code>jobId</code> (string, required)</div>
         </div>
 
         <div class="tool-card">
-          <div class="tool-card__name">list_talkie_jobs</div>
+          <div class="tool-card__name">list_wtb_jobs</div>
           <div class="tool-card__desc">List all background jobs, optionally filtered by status.</div>
           <div class="tool-card__params">Params: <code>status</code> (enum: queued, running, completed, failed, cancelled)</div>
         </div>
@@ -423,49 +392,6 @@
 
         <p>This workflow lets you use Talkie as a voice interface for Claude Code while Claude Code retains full access to file editing, bash commands, and all other tools.</p>
 
-        <!-- ── Telegram Bot ── -->
-        <h2 id="telegram">Telegram Bot</h2>
-
-        <p>Talkie includes a Telegram bot that lets you talk to Claude from any Telegram client. The bot auto-starts with the Talkie server when a bot token is configured.</p>
-
-        <h3>Setup</h3>
-
-        <ol>
-          <li>Create a new bot via <a href="https://t.me/BotFather" target="_blank" rel="noopener">@BotFather</a> on Telegram and copy the bot token.</li>
-          <li>Save the token as the <code>TELEGRAM_BOT_TOKEN</code> environment variable, or write it to <code>~/.wtb/telegram.token</code>.</li>
-          <li>Start (or restart) the Talkie server. The bot will connect automatically.</li>
-        </ol>
-
-        <pre><code># Option 1: Environment variable
-export TELEGRAM_BOT_TOKEN="123456:ABC-DEF..."
-
-# Option 2: Token file
-echo "123456:ABC-DEF..." > ~/.wtb/telegram.token</code></pre>
-
-        <h3>Bot commands</h3>
-
-        <ul>
-          <li><code>/start</code> &mdash; Welcome message and introduction</li>
-          <li><code>/help</code> &mdash; Show available commands</li>
-          <li><code>/conversations</code> &mdash; List recent conversations with inline selection buttons</li>
-          <li><code>/new &lt;name&gt;</code> &mdash; Create a new conversation with the given name</li>
-          <li><code>/current</code> &mdash; Show the currently active conversation</li>
-          <li><code>/status</code> &mdash; Check Talkie server status</li>
-        </ul>
-
-        <h3>Message handling</h3>
-
-        <ul>
-          <li><strong>Text messages</strong> &mdash; Sent to Claude Code for processing. Responses are returned as Telegram messages.</li>
-          <li><strong>Photos</strong> &mdash; Analyzed using Claude vision. Claude describes and responds to the image content.</li>
-          <li><strong>Voice messages</strong> &mdash; The bot suggests using the Talkie web UI for voice input, as Telegram voice messages require server-side transcription.</li>
-        </ul>
-
-        <div class="docs-note">
-          <strong>Message length limit</strong>
-          Telegram enforces a 4096-character limit per message. Long responses from Claude are automatically split across multiple messages.
-        </div>
-
         <!-- ── Server Management ── -->
         <h2 id="server">Server Management</h2>
 
@@ -483,38 +409,11 @@ echo "123456:ABC-DEF..." > ~/.wtb/telegram.token</code></pre>
           <li><code>wtb-server uninstall</code> &mdash; Remove the launchd daemon.</li>
         </ul>
 
-        <h3>Environment variables</h3>
+        <p>A background server started with <code>wtb-server start</code> or <code>install</code> runs from the package directory, so for Claude to work on a specific project, run <code>npx walkietalkiebot</code> or <code>wtb-server start -f</code> from that project instead.</p>
 
-        <table>
-          <thead>
-            <tr>
-              <th>Variable</th>
-              <th>Description</th>
-              <th>Default</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><code>WTB_PORT</code></td>
-              <td>Server port number</td>
-              <td>5173</td>
-            </tr>
-            <tr>
-              <td><code>ANTHROPIC_API_KEY</code></td>
-              <td>Anthropic API key for Direct API mode</td>
-              <td>none</td>
-            </tr>
-            <tr>
-              <td><code>TELEGRAM_BOT_TOKEN</code></td>
-              <td>Telegram bot token from @BotFather</td>
-              <td>none</td>
-            </tr>
-          </tbody>
-        </table>
+        <h3>Configuration and networking</h3>
 
-        <h3>Networking</h3>
-
-        <p>Talkie runs over plain HTTP on localhost, which is a secure context in all modern browsers. No certificates or HTTPS setup needed. For remote access (e.g., via Tailscale), place your own TLS certificates at <code>~/.wtb/cert.pem</code> and <code>~/.wtb/key.pem</code> and Talkie will automatically use HTTPS.</p>
+        <p>The server binds to <code>127.0.0.1:5173</code> by default. Port, bind address, data directory, auth token, log level, telemetry, and body-size limit are all set with environment variables; see <a href="/docs/getting-started#configuration">Configuration</a> for the full table and <a href="/docs/getting-started#security">Security</a> before binding to anything other than loopback.</p>
 
         <!-- ── Prev / Next ── -->
         <div class="docs-page-nav">

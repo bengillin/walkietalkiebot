@@ -6,46 +6,59 @@ A walkie talkie for Claude. Your voice is the interface.
 
 > **Website**: [walkietalkie.bot](https://walkietalkie.bot) -- **Docs**: [walkietalkie.bot/docs](https://walkietalkie.bot/docs/)
 
+## Requirements
+
+- **Node.js 20 or later**
+- **[Claude Code](https://code.claude.com/docs) CLI**, installed and logged in, with `claude` on your `PATH`. Every message goes through it; there is no API-key mode.
+- **Chrome or Edge** for voice (Web Speech API). Other browsers can still type.
+
 ## Install
 
 Two ways to use Walkie Talkie Bot. Pick one (or both).
 
-### Plugin (recommended)
+### MCP tools only (no server)
 
-Add Walkie Talkie Bot as a Claude Code plugin for 30 MCP tools + 5 skills, no server required. Data tools talk directly to SQLite.
+Register the MCP server with Claude Code for 30 tools. The 15 data tools talk directly to SQLite, so no server is required for them.
 
-Add to `~/.claude/settings.json`:
+```bash
+claude mcp add --scope user wtb -- npx -y -p walkietalkiebot wtb-mcp
+```
+
+Or, to share it with a project, add it to that project's `.mcp.json`:
 
 ```json
 {
   "mcpServers": {
     "wtb": {
       "command": "npx",
-      "args": ["wtb-mcp"]
+      "args": ["-y", "-p", "walkietalkiebot", "wtb-mcp"]
     }
   }
 }
 ```
 
-### Full Install
+> **Do not run `npx wtb-mcp`.** The `wtb-mcp` package on npm belongs to an unrelated third party. The Talkie binary ships inside the `walkietalkiebot` package, which is why the command needs `-p walkietalkiebot`.
 
-The full server gives you the web UI, voice interface, and everything.
+The five skills (below) ship with the Claude Code plugin manifest in this repository (`.claude-plugin/`, `skills/`).
+
+### Full install
+
+The full server gives you the web UI, voice interface, and everything. Run it **from the project directory you want Claude to work in**:
 
 ```bash
+cd ~/code/my-project
 npx walkietalkiebot
 ```
 
-This starts the server and opens `http://localhost:5173` in your browser.
-
-> Requires Chrome or Edge for voice (Web Speech API).
+This starts the server on `127.0.0.1:5173` and opens `http://localhost:5173` in your browser. Claude runs in that directory with `bypassPermissions`, so it can edit files and run commands there without asking. Read [Security](#security) before exposing the server to anything but your own machine.
 
 ## What You Get
 
-### Plugin
+### MCP tools
 
 - **15 data tools** -- conversations, messages, plans, search, liner notes, export. Always work via direct SQLite, no server needed.
 - **15 server tools** -- voice, IPC, sessions, jobs, image analysis, browser control. Require the Walkie Talkie Bot server to be running.
-- **5 skills** -- save-conversation, search-tapes, manage-plans, launch-voice, export-tape.
+- **5 skills** (with the Claude Code plugin) -- save-conversation, search-tapes, manage-plans, launch-voice, export-tape.
 
 ### Full Install
 
@@ -136,31 +149,52 @@ Require the Walkie Talkie Bot server to be running (`npx walkietalkiebot`).
 
 ## Configuration
 
-Set `WTB_PORT` to change the default port (5173).
+All configuration is through environment variables.
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `WTB_PORT` | `5173` | Server port. The MCP server also reads it to find the Talkie server. |
+| `WTB_HOST` | `127.0.0.1` | Address to bind, e.g. `0.0.0.0` or a Tailscale IP. A non-loopback host requires `WTB_AUTH_TOKEN`; without it the server refuses to start. |
+| `WTB_DIR` | `~/.wtb` | Data directory: SQLite database, custom modes, logs, pid file, TLS certificates. |
+| `WTB_AUTH_TOKEN` | unset (no auth) | Shared secret. When set, every `/api/*` request needs `Authorization: Bearer <token>`. Give the MCP server the same value so its server tools can authenticate. |
+| `WTB_LOG_LEVEL` | `info` | Server log level: `debug`, `info`, `warn`, `error`, `silent`. |
+| `WTB_TELEMETRY` | off | Set to `1` in the MCP server's environment to opt in to anonymous tool-usage telemetry. See [Telemetry](#telemetry). |
+| `WTB_URL` | `http://localhost:$WTB_PORT` | MCP server only: where the server tools reach the Talkie server (e.g. an `https://` Tailscale URL). `launch_wtb` starts the server on this URL's port. |
+| `WTB_MAX_BODY_BYTES` | `52428800` (50 MB) | Maximum request body size, which bounds image uploads. |
 
 **Server management:**
 
 ```bash
-wtb-server start [-f]    # Start (background or foreground)
-wtb-server stop           # Stop
-wtb-server status         # Show status
-wtb-server logs [-f]      # View logs
-wtb-server install        # Install as macOS launchd daemon
+wtb-server start [-f]    # Start (background, or -f for foreground)
+wtb-server stop          # Stop
+wtb-server restart       # Restart
+wtb-server status        # Show status
+wtb-server logs [-f]     # View logs
+wtb-server install       # Install as macOS launchd daemon
+wtb-server uninstall     # Remove the launchd daemon
 ```
 
-## Security & Networking
+`wtb-server start` (background) and `install` run the server from the package directory. For Claude to work on a specific project, use `npx walkietalkiebot` or `wtb-server start -f` from that project.
 
-Walkie Talkie Bot runs Claude Code with full agent capabilities on your machine, so treat the server like a shell — **only expose it to people you'd hand a terminal to.**
+## Security
 
-- **Localhost by default.** The server binds to `localhost`, which is a secure browser context (no HTTPS needed). HTTPS is auto-enabled only when Tailscale certs are found at `~/.wtb/`.
-- **Each request spawns a real agent.** Prompts are run via `claude -p` with `--permission-mode bypassPermissions`, meaning the agent can read/write files and run commands without prompting. Anyone who can reach the API can drive that agent.
-- **Optional shared-secret auth.** Set `WTB_AUTH_TOKEN` to require a bearer token on all `/api/*` requests. **Set this before exposing the server beyond localhost** (e.g. over Tailscale, a tunnel, or a LAN). Without it, the API is unauthenticated.
+Walkie Talkie Bot runs Claude Code via `claude -p --permission-mode bypassPermissions`: the agent reads and writes files and runs commands without asking. Anyone who can call the API can drive that agent, so **API access is equivalent to shell access** on the machine running the server. Only expose it to people you would hand a terminal to.
+
+- **Loopback by default.** The server binds to `127.0.0.1`, so only your machine can reach it.
+- **Web pages can't drive it.** Cross-origin requests to the API are rejected (no wildcard CORS) so a website open in your browser cannot talk to your local server. Without a token, the server also answers only to `localhost` Host names, which blocks DNS-rebinding attacks; with a token set (the remote setup), the token is what protects it.
+- **Exposing it requires a token.** To reach Talkie from another device, set `WTB_AUTH_TOKEN`, then `WTB_HOST`. Binding to a non-loopback address without a token is refused at startup.
+- **HTTPS.** Localhost is a secure context, so no certificates are needed locally. For remote access, place Tailscale certs at `~/.wtb/tailscale.crt` and `~/.wtb/tailscale.key` (inside `WTB_DIR` if set) and HTTPS is enabled automatically.
 
 ```bash
-export WTB_AUTH_TOKEN="$(openssl rand -hex 32)"   # require auth on every /api request
+export WTB_AUTH_TOKEN="$(openssl rand -hex 32)"
+WTB_HOST=0.0.0.0 npx walkietalkiebot
 ```
 
-Clients pass it as `Authorization: Bearer <token>`.
+Programmatic clients send `Authorization: Bearer <token>`. In the browser, open the UI once with `?token=<token>`; it stores the token in a `SameSite=Strict` cookie.
+
+## Telemetry
+
+The MCP server's telemetry is **off by default**. If you opt in with `WTB_TELEMETRY=1`, each MCP tool call sends one anonymous event to PostHog with the tool name, its category, and whether it succeeded. Nothing from your conversations, prompts, files, or messages is sent, and no user identifier is attached (PostHog does see the IP address the request comes from). The Talkie server and web UI send no telemetry.
 
 ## Development
 
@@ -168,7 +202,7 @@ Clients pass it as `Authorization: Bearer <token>`.
 npm install       # Install dependencies
 npm run dev       # Vite dev server (frontend only)
 npm run build     # TypeScript check + Vite build + server bundle + MCP server
-npm run test      # Run all unit tests (~170 across 13 files)
+npm run test      # Run all unit tests (322 across 22 files)
 npm run test:e2e  # Playwright end-to-end tests
 npm run lint      # ESLint
 npm run format    # Prettier
@@ -180,4 +214,4 @@ Full architecture, API reference, and integration guides at [walkietalkie.bot/do
 
 ## License
 
-MIT
+MIT. See [LICENSE](LICENSE).

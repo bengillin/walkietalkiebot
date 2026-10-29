@@ -168,6 +168,9 @@
   font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
   font-size: 0.9em;
   color: var(--accent);
+  /* Long identifiers (env vars, endpoint paths, CSS custom properties) must be
+     allowed to break, or they push the page wider than a phone viewport. */
+  overflow-wrap: anywhere;
 }
 
 /* Code blocks */
@@ -188,6 +191,7 @@
   color: var(--text-primary);
   font-size: 14px;
   line-height: 1.6;
+  overflow-wrap: normal;
 }
 
 .theme-mccallister .docs-content pre code {
@@ -505,5 +509,12 @@
 
   .docs-hub__grid {
     grid-template-columns: 1fr;
+  }
+
+  /* Wide tables scroll inside their own box instead of widening the page. */
+  .docs-content table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
   }
 }

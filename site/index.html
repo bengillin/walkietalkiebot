@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Walkie Talkie Bot — Voice Interface for Claude Code</title>
-  <meta name="description" content="A voice-first AI assistant for Claude Code. Talk instead of type. 30 MCP tools, 6 retro themes, Telegram bot, and a REST API. Open source." />
+  <meta name="description" content="A voice-first AI assistant for Claude Code. Talk instead of type. 30 MCP tools, 6 retro themes, background jobs, and a REST API. Open source." />
   <meta property="og:title" content="Walkie Talkie Bot — Voice Interface for Claude Code" />
   <meta property="og:description" content="A voice-first AI assistant for Claude Code. Talk instead of type. 30 MCP tools, 6 retro themes, and a cassette tape UI." />
   <meta property="og:image" content="https://walkietalkie.bot/og.png" />
@@ -23,7 +23,7 @@
     "applicationCategory": "DeveloperApplication",
     "operatingSystem": "macOS, Linux, Windows",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-    "description": "A voice-first AI assistant for Claude Code. Talk instead of type. 30 MCP tools, 6 retro themes, Telegram bot, and a REST API.",
+    "description": "A voice-first AI assistant for Claude Code. Talk instead of type. 30 MCP tools, 6 retro themes, background jobs, and a REST API.",
     "url": "https://walkietalkie.bot",
     "softwareVersion": "0.3.8",
     "installUrl": "https://www.npmjs.com/package/walkietalkiebot",
@@ -92,7 +92,7 @@
       <div class="hero__columns">
         <div class="hero__column">
           <p class="hero__column-label">For humans</p>
-          <p class="hero__column-text">Voice-first AI assistant with 6 retro themes. One command to get the full web UI with voice, cassette tapes, and Telegram bot.</p>
+          <p class="hero__column-text">Voice-first AI assistant with 6 retro themes. One command to get the full web UI with voice, cassette tapes, and Claude Code at your fingertips. Needs Node 20+ and the Claude Code CLI.</p>
           <div class="hero__cta">
             <div class="hero__install" data-copy="npx walkietalkiebot">
               <span class="hero__install-cmd">npx walkietalkiebot</span>
@@ -106,13 +106,11 @@
         </div>
         <div class="hero__column">
           <p class="hero__column-label">For bots</p>
-          <p class="hero__column-text">30 MCP tools, 40+ REST endpoints, and machine-readable docs at <a href="/llms.txt">/llms.txt</a>. Add the plugin to Claude Code:</p>
+          <p class="hero__column-text">30 MCP tools, 40+ REST endpoints, and machine-readable docs at <a href="/llms.txt">/llms.txt</a>. Add the MCP server to Claude Code:</p>
           <div class="hero__cta hero__cta--vertical">
-            <div class="hero__install hero__install--mcp" data-copy='{ "wtb": { "command": "npx", "args": ["wtb-mcp"] } }'>
-              <pre class="hero__install-cmd hero__install-cmd--block"><code>"wtb": {
-  "command": "npx",
-  "args": ["wtb-mcp"]
-}</code></pre>
+            <div class="hero__install hero__install--mcp" data-copy="claude mcp add --scope user wtb -- npx -y -p walkietalkiebot wtb-mcp">
+              <pre class="hero__install-cmd hero__install-cmd--block"><code>claude mcp add --scope user wtb -- \
+  npx -y -p walkietalkiebot wtb-mcp</code></pre>
               <span class="hero__install-copy" title="Copy to clipboard">&#x2398;</span>
             </div>
             <a class="hero__github" href="/docs/">View Docs</a>
@@ -266,9 +264,9 @@
           <div class="feature-card__desc">30 MCP tools let Claude Code talk to Talkie. Create jobs, manage conversations, and bridge IPC.</div>
         </div>
         <div class="feature-card">
-          <div class="feature-card__icon">&#x2708;&#xFE0F;</div>
-          <div class="feature-card__title">Telegram Bot</div>
-          <div class="feature-card__desc">Talk to Claude from Telegram. Voice messages, images, and conversation syncing across devices.</div>
+          <div class="feature-card__icon">&#x2699;&#xFE0F;</div>
+          <div class="feature-card__title">Background Jobs</div>
+          <div class="feature-card__desc">Run up to three Claude Code jobs in parallel, each in its own mode, streaming progress as they work.</div>
         </div>
       </div>
     </section>
