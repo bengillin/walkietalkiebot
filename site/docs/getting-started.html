@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Getting Started — Walkie Walkie Talkie Bot</title>
+  <title>Getting Started — Walkie Talkie Bot</title>
   <meta name="description" content="Install Talkie, configure your environment, and start talking to Claude in minutes." />
   <meta property="og:title" content="Getting Started — Walkie Talkie Bot" />
   <meta property="og:description" content="Install Talkie, configure your environment, and start talking to Claude in minutes." />
@@ -55,6 +55,9 @@
           <li class="docs-sidebar__item"><a href="#first-launch">First Launch</a></li>
           <li class="docs-sidebar__item"><a href="#onboarding">Onboarding</a></li>
           <li class="docs-sidebar__item"><a href="#basic-usage">Basic Usage</a></li>
+          <li class="docs-sidebar__item"><a href="#configuration">Configuration</a></li>
+          <li class="docs-sidebar__item"><a href="#security">Security</a></li>
+          <li class="docs-sidebar__item"><a href="#telemetry">Telemetry</a></li>
           <li class="docs-sidebar__item"><a href="#troubleshooting">Troubleshooting</a></li>
         </ul>
       </aside>
@@ -76,35 +79,29 @@
         <h2 id="installation">Installation</h2>
 
         <div class="docs-tip">
-          <strong>Plugin alternative</strong>
-          If you just want MCP tools and skills without running a server, you can install Talkie as a Claude Code plugin. Add this to your MCP configuration:
-          <pre><code>{
-  "mcpServers": {
-    "wtb": {
-      "command": "npx",
-      "args": ["wtb-mcp"]
-    }
-  }
-}</code></pre>
-          This gives you 15 data tools that work offline via direct SQLite access (conversations, plans, search, export) plus 15 server tools for when the Talkie server is running. See <a href="/docs/integrations#plugin">Plugin Installation</a> for details.
+          <strong>MCP tools only</strong>
+          If you just want the MCP tools without running a server, register Talkie's MCP server with Claude Code:
+          <pre><code>claude mcp add --scope user wtb -- npx -y -p walkietalkiebot wtb-mcp</code></pre>
+          This gives you 15 data tools that work offline via direct SQLite access (conversations, plans, search, export) plus 15 server tools for when the Talkie server is running. See <a href="/docs/integrations#plugin">MCP Installation</a> for details.
         </div>
 
-        <p>Talkie is distributed as an npm package. A single command downloads the package, starts a server, and opens your browser:</p>
+        <p>Talkie is distributed as an npm package. A single command downloads the package, starts a server, and opens your browser. Run it from the project directory you want Claude to work in:</p>
 
-        <pre><code>npx walkietalkiebot</code></pre>
+        <pre><code>cd ~/code/my-project
+npx walkietalkiebot</code></pre>
 
         <p>That is all you need. The <code>npx walkietalkiebot</code> command handles everything:</p>
 
         <ul>
           <li>Downloads and installs the <code>walkietalkiebot</code> package from npm</li>
-          <li>Initializes an SQLite database at <code>~/.wtb/wtb.db</code></li>
-          <li>Starts the server on port 5173 (configurable via <code>WTB_PORT</code>)</li>
+          <li>Initializes an SQLite database at <code>~/.wtb/wtb.db</code> (the directory is configurable via <code>WTB_DIR</code>)</li>
+          <li>Starts the server on <code>127.0.0.1:5173</code> (configurable via <code>WTB_HOST</code> and <code>WTB_PORT</code>)</li>
           <li>Opens your default browser to the Talkie interface</li>
         </ul>
 
         <div class="docs-note">
-          <strong>Node.js 18+ required</strong>
-          Talkie requires Node.js version 18 or later. Check your version with <code>node --version</code>. Download the latest LTS release from <a href="https://nodejs.org" target="_blank" rel="noopener">nodejs.org</a> if needed.
+          <strong>Claude works in the directory you start from</strong>
+          Every message is handled by the Claude Code CLI (<code>claude -p</code>) with <code>--permission-mode bypassPermissions</code>, in the server's working directory. Claude can read and write files and run commands there without asking, so start the server from the project you want it to work on. See <a href="#security">Security</a>.
         </div>
 
         <p>If you prefer a global install:</p>
@@ -129,7 +126,11 @@ walkietalkiebot</code></pre>
             </tr>
             <tr>
               <td><strong>Node.js</strong></td>
-              <td>Version 18 or later</td>
+              <td>Version 20 or later (check with <code>node --version</code>)</td>
+            </tr>
+            <tr>
+              <td><strong>Claude Code</strong></td>
+              <td>The <a href="https://code.claude.com/docs" target="_blank" rel="noopener">Claude Code CLI</a>, installed and logged in, with <code>claude</code> on your <code>PATH</code>. Every message goes through it; there is no API-key mode.</td>
             </tr>
             <tr>
               <td><strong>OS</strong></td>
@@ -147,25 +148,22 @@ walkietalkiebot</code></pre>
 
         <ol>
           <li><strong>Database creation</strong> &mdash; An SQLite database is initialized at <code>~/.wtb/wtb.db</code> with WAL mode enabled for concurrent reads.</li>
-          <li><strong>Server start</strong> &mdash; The HTTP server starts on port 5173 (or the port set by <code>WTB_PORT</code>).</li>
+          <li><strong>Server start</strong> &mdash; The HTTP server starts on <code>127.0.0.1</code>, port 5173 (or the port set by <code>WTB_PORT</code>).</li>
           <li><strong>Browser opens</strong> &mdash; Your default browser navigates to <code>http://localhost:5173</code>.</li>
-          <li><strong>Onboarding wizard</strong> &mdash; On your first visit, a 7-step setup wizard walks you through configuration.</li>
+          <li><strong>Onboarding wizard</strong> &mdash; On your first visit, a 6-step setup wizard walks you through configuration.</li>
         </ol>
 
         <!-- ── Onboarding ── -->
         <h2 id="onboarding">Onboarding</h2>
 
-        <p>The onboarding wizard runs automatically on your first visit. It consists of seven steps that configure your Talkie experience:</p>
+        <p>The onboarding wizard runs automatically on your first visit. It consists of six steps that configure your Talkie experience:</p>
 
         <ol>
           <li>
             <strong>Welcome &amp; theme selection</strong> &mdash; Meet Talkie and learn what it does. Choose from 6 retro themes: TalkBoy, Bubble, Dial-Up, Finder, Guestbook, or 1984. Each theme completely reskins the entire interface.
           </li>
           <li>
-            <strong>Choose your mode</strong> &mdash; Pick between Claude Code mode (recommended, full tool use, auto-detected) and Direct API mode (uses your Anthropic API key, no tools).
-          </li>
-          <li>
-            <strong>Text-to-speech</strong> &mdash; Toggle TTS on or off. Claude's responses will be read aloud when TTS is enabled. You can pick a specific voice in settings later.
+            <strong>Speak responses</strong> &mdash; Toggle text-to-speech on or off. Claude's responses will be read aloud when TTS is enabled. You can pick a specific voice in settings later.
           </li>
           <li>
             <strong>Sound effects</strong> &mdash; Enable or disable cassette tape sounds when recording starts and stops.
@@ -234,6 +232,80 @@ walkietalkiebot</code></pre>
             </tr>
           </tbody>
         </table>
+
+        <!-- ── Configuration ── -->
+        <h2 id="configuration">Configuration</h2>
+
+        <p>Talkie is configured with environment variables, set in the shell that starts the server (or in the MCP server's environment, where noted).</p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Variable</th>
+              <th>Default</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>WTB_PORT</code></td>
+              <td><code>5173</code></td>
+              <td>Server port. The MCP server also reads it to find the Talkie server.</td>
+            </tr>
+            <tr>
+              <td><code>WTB_HOST</code></td>
+              <td><code>127.0.0.1</code></td>
+              <td>Address to bind, e.g. <code>0.0.0.0</code> or a Tailscale IP to reach Talkie from other devices. A non-loopback host requires <code>WTB_AUTH_TOKEN</code>; without it the server refuses to start.</td>
+            </tr>
+            <tr>
+              <td><code>WTB_DIR</code></td>
+              <td><code>~/.wtb</code></td>
+              <td>Data directory: SQLite database, custom modes, logs, pid file, and TLS certificates.</td>
+            </tr>
+            <tr>
+              <td><code>WTB_AUTH_TOKEN</code></td>
+              <td>unset (no auth)</td>
+              <td>Shared secret. When set, every <code>/api/*</code> request needs <code>Authorization: Bearer &lt;token&gt;</code>. Set the same value in the MCP server's environment so its server tools can authenticate.</td>
+            </tr>
+            <tr>
+              <td><code>WTB_LOG_LEVEL</code></td>
+              <td><code>info</code></td>
+              <td>Server log level: <code>debug</code>, <code>info</code>, <code>warn</code>, <code>error</code>, or <code>silent</code>.</td>
+            </tr>
+            <tr>
+              <td><code>WTB_TELEMETRY</code></td>
+              <td>off</td>
+              <td>Set to <code>1</code> in the MCP server's environment to opt in to anonymous tool-usage telemetry. See <a href="#telemetry">Telemetry</a>.</td>
+            </tr>
+            <tr>
+              <td><code>WTB_MAX_BODY_BYTES</code></td>
+              <td><code>52428800</code> (50 MB)</td>
+              <td>Maximum request body size, which bounds image uploads.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- ── Security ── -->
+        <h2 id="security">Security</h2>
+
+        <p>Talkie runs Claude Code with <code>--permission-mode bypassPermissions</code>: the agent reads and writes files and runs shell commands without asking. Anyone who can call the API can drive that agent, so <strong>access to the Talkie API is equivalent to shell access</strong> on the machine running the server.</p>
+
+        <ul>
+          <li><strong>Loopback by default.</strong> The server binds to <code>127.0.0.1</code>, so only your own machine can reach it.</li>
+          <li><strong>Web pages can't drive it.</strong> Cross-origin requests to the API are rejected (there is no wildcard CORS) and the <code>Host</code> header is validated, so a website open in your browser cannot send requests to your local server.</li>
+          <li><strong>Exposing it.</strong> To reach Talkie from another device, set <code>WTB_AUTH_TOKEN</code> and then <code>WTB_HOST</code>. Binding to a non-loopback address without a token is refused at startup.</li>
+          <li><strong>HTTPS.</strong> Localhost is a secure context, so no certificates are needed locally. For remote access, put Tailscale certificates at <code>~/.wtb/tailscale.crt</code> and <code>~/.wtb/tailscale.key</code> (inside <code>WTB_DIR</code> if you set it) and Talkie serves HTTPS automatically.</li>
+        </ul>
+
+        <pre><code>export WTB_AUTH_TOKEN="$(openssl rand -hex 32)"
+WTB_HOST=0.0.0.0 npx walkietalkiebot</code></pre>
+
+        <p>Open the web UI once with <code>?token=&lt;token&gt;</code> on the URL; it stores the token in a <code>SameSite=Strict</code> cookie. Programmatic clients send <code>Authorization: Bearer &lt;token&gt;</code>. Only share the token with people you would hand a terminal to.</p>
+
+        <!-- ── Telemetry ── -->
+        <h2 id="telemetry">Telemetry</h2>
+
+        <p>The MCP server's usage telemetry is <strong>off by default</strong>. If you opt in with <code>WTB_TELEMETRY=1</code>, each MCP tool call sends one anonymous event to PostHog with the tool name, its category, and whether it succeeded. Nothing from your conversations, prompts, files, or messages is sent, and no user identifier is attached. The Talkie server and web UI send no telemetry.</p>
 
         <!-- ── Troubleshooting ── -->
         <h2 id="troubleshooting">Troubleshooting</h2>

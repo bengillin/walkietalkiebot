@@ -39,6 +39,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Optional shared-secret API auth via the `WTB_AUTH_TOKEN` environment variable;
   when set, all `/api/*` requests require an `Authorization: Bearer <token>` header.
 - Request body size limit on the HTTP server to prevent memory-exhaustion DoS.
+- README and site: a Configuration table (`WTB_PORT`, `WTB_HOST`, `WTB_DIR`,
+  `WTB_AUTH_TOKEN`, `WTB_LOG_LEVEL`, `WTB_TELEMETRY`, `WTB_MAX_BODY_BYTES`),
+  a rewritten Security section, and a Telemetry disclosure.
+- `LICENSE` file (MIT); `package.json` already declared the license.
 
 ### Changed
 
@@ -83,6 +87,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Documentation drift: corrected the test count (181 unit tests across 15 files),
   the custom-hook count (8), and removed stale references to the long-removed
   Direct API mode and Telegram integration.
+- Docs and marketing site brought in line with the code:
+  - **MCP install command** (README, site hero, getting-started, integrations,
+    `llms.txt`) said `npx wtb-mcp`. `wtb-mcp` on npm is an unrelated third-party
+    package, so that command downloaded and ran someone else's code. It is now
+    `claude mcp add --scope user wtb -- npx -y -p walkietalkiebot wtb-mcp` (or
+    `"args": ["-y", "-p", "walkietalkiebot", "wtb-mcp"]` in `.mcp.json`), and the
+    README no longer points at `~/.claude/settings.json`, where Claude Code does
+    not read user MCP servers.
+  - Removed the Telegram bot and Direct API / `ANTHROPIC_API_KEY` content that
+    the site still advertised (homepage, integrations page, docs hub,
+    `llms.txt`, API reference).
+  - Getting started: Node 20+ (was 18+), Claude Code CLI listed as a
+    requirement, onboarding is 6 steps (there is no "choose your mode" step),
+    and the server should be started from the project Claude should work on.
+  - API reference: removed the nonexistent `/api/analyze-image`, fixed the
+    `/api/claude-code` and `/api/jobs` request bodies (`message`,
+    `conversationId`), renamed `/api/jobs/:id/stream` to the real
+    `/api/jobs/:id/events`, added `/api/jobs/orchestrate`, and replaced the
+    "one-shot processes" note with the session-resumption behavior.
+  - Integrations: job tool names (`*_wtb_job`, not `*_talkie_job`), TLS cert
+    paths (`tailscale.crt` / `tailscale.key`, not `cert.pem` / `key.pem`).
+  - README test count (322 across 22 files).
+  - Docs pages no longer scroll sideways on phones (themes, integrations, and
+    API pages overflowed a 390px viewport by up to 294px).
+
+### Removed
+
+- Stale planning docs `INTERFACE_PLAN.md` and `LAYOUT_SKETCH.md`; everything
+  they proposed has shipped.
+
+### Security
+
+- The server binds to `127.0.0.1` by default. `WTB_HOST` binds elsewhere, and a
+  non-loopback host is refused unless `WTB_AUTH_TOKEN` is set.
+- Cross-origin API requests are rejected (no wildcard CORS) and the `Host`
+  header is validated, so a web page can no longer drive a local server that
+  runs Claude Code with `bypassPermissions`.
+- MCP telemetry is opt-in (`WTB_TELEMETRY=1`) instead of opt-out. When enabled
+  it sends only the tool name, category, and success flag to PostHog.
+- The documented MCP install command no longer runs an unrelated npm package
+  (see Fixed).
 
 ## [0.3.8]
 

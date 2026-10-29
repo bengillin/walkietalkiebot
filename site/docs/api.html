@@ -79,6 +79,11 @@
 
         <p>Base URL is <code>http://localhost:5173/api</code> (port configurable via the <code>WTB_PORT</code> environment variable). All responses are JSON unless otherwise noted. SSE endpoints return <code>text/event-stream</code>.</p>
 
+        <div class="docs-warning">
+          <strong>This API can run commands on your machine</strong>
+          <code>/api/claude-code</code> and <code>/api/jobs</code> run Claude Code with <code>bypassPermissions</code>, so API access is equivalent to shell access. The server binds to <code>127.0.0.1</code> and rejects cross-origin browser requests. If <code>WTB_AUTH_TOKEN</code> is set, send <code>Authorization: Bearer &lt;token&gt;</code> with every request. See <a href="/docs/getting-started#security">Security</a>.
+        </div>
+
 
         <!-- ── Status & Health ── -->
         <h2 id="status">Status &amp; Health</h2>
@@ -92,7 +97,7 @@
         <div class="endpoint">
           <span class="endpoint__method endpoint__method--get">GET</span>
           <span class="endpoint__path">/api/integrations</span>
-          <p class="endpoint__desc">Returns the status of MCP server and Telegram bot integrations, including whether each is connected and active.</p>
+          <p class="endpoint__desc">Returns the status of the MCP integration, including the list of available MCP tools.</p>
         </div>
 
         <!-- ── Conversations ── -->
@@ -197,7 +202,13 @@
         <div class="endpoint">
           <span class="endpoint__method endpoint__method--post">POST</span>
           <span class="endpoint__path">/api/jobs</span>
-          <p class="endpoint__desc">Create a new background job. Body: <code>{ "conversation_id": "string", "prompt": "string" }</code></p>
+          <p class="endpoint__desc">Create a new background job. Body: <code>{ "conversationId": "string", "prompt": "string", "mode": "string" }</code> (<code>mode</code> optional). Up to 3 jobs run concurrently.</p>
+        </div>
+
+        <div class="endpoint">
+          <span class="endpoint__method endpoint__method--post">POST</span>
+          <span class="endpoint__path">/api/jobs/orchestrate</span>
+          <p class="endpoint__desc">Create several jobs at once, each with its own mode. Body: <code>{ "conversationId": "string", "tasks": [{ "prompt": "string", "mode": "string" }] }</code></p>
         </div>
 
         <div class="endpoint">
@@ -208,7 +219,7 @@
 
         <div class="endpoint">
           <span class="endpoint__method endpoint__method--get">GET</span>
-          <span class="endpoint__path">/api/jobs/:id/stream</span>
+          <span class="endpoint__path">/api/jobs/:id/events</span>
           <p class="endpoint__desc">SSE stream for real-time job events. Returns <code>text/event-stream</code> with JSON-encoded events as the job progresses.</p>
         </div>
 
@@ -277,12 +288,12 @@
         <div class="endpoint">
           <span class="endpoint__method endpoint__method--post">POST</span>
           <span class="endpoint__path">/api/claude-code</span>
-          <p class="endpoint__desc">Spawn a fresh <code>claude -p</code> CLI process and stream the response as SSE. Body: <code>{ "prompt": "string", "conversation_id": "string", "images": [] }</code>. Returns a stream of JSON events with types: <code>assistant</code> (text chunks), <code>activity</code> (tool usage), <code>result</code> (final response), and <code>error</code>.</p>
+          <p class="endpoint__desc">Run Claude Code on a message and stream the response as SSE. Body: <code>{ "message": "string", "conversationId": "string", "mode": "string", "images": [] }</code> (only <code>message</code> is required). Each event is a JSON object carrying one of <code>text</code> (a text chunk), <code>activity</code> (tool usage), <code>plan</code> (a detected plan), <code>error</code>, or <code>done</code>.</p>
         </div>
 
         <div class="docs-note">
-          <strong>One-shot processes</strong>
-          Each request to <code>/api/claude-code</code> spawns a fresh CLI process with the flags <code>--no-session-persistence</code> and <code>--permission-mode bypassPermissions</code>. There is no persistent session between requests.
+          <strong>Sessions</strong>
+          With a <code>conversationId</code>, the turn runs inside a persistent Claude Code session (<code>--session-id</code> on the first turn, <code>--resume</code> after that), so only the new message is sent. Without one, the call is a one-shot <code>--no-session-persistence</code> process. Either way Claude runs with <code>--permission-mode bypassPermissions</code> in the server's working directory.
         </div>
 
         <!-- ── Media ── -->
@@ -290,14 +301,8 @@
 
         <div class="endpoint">
           <span class="endpoint__method endpoint__method--post">POST</span>
-          <span class="endpoint__path">/api/analyze-image</span>
-          <p class="endpoint__desc">Analyze an image using Claude vision via the Anthropic API key. Body: image data URL (base64-encoded).</p>
-        </div>
-
-        <div class="endpoint">
-          <span class="endpoint__method endpoint__method--post">POST</span>
           <span class="endpoint__path">/api/analyze-image-cc</span>
-          <p class="endpoint__desc">Analyze an image using Claude vision via the Claude Code CLI. Same input format as the API key variant, but routes through the CLI.</p>
+          <p class="endpoint__desc">Analyze an image with Claude vision via the Claude Code CLI. Body: <code>{ "dataUrl": "string", "fileName": "string" }</code>, where <code>dataUrl</code> is a base64 image data URL.</p>
         </div>
 
         <div class="endpoint">
@@ -318,37 +323,33 @@
         <!-- ── Examples ── -->
         <h2 id="examples">Examples</h2>
 
+        <p>If the server runs with <code>WTB_AUTH_TOKEN</code>, add <code>-H "Authorization: Bearer $WTB_AUTH_TOKEN"</code> to each command.</p>
+
         <p>Create a new conversation using <code>curl</code>:</p>
 
         <pre><code>curl -X POST http://localhost:5173/api/conversations \
   -H "Content-Type: application/json" \
-  -d '{"title": "My First Tape"}' \
-</code></pre>
-
+  -d '{"title": "My First Tape"}'</code></pre>
 
         <p>List all conversations with pagination:</p>
 
-        <pre><code>curl http://localhost:5173/api/conversations?limit=10&amp;offset=0 \
-</code></pre>
+        <pre><code>curl "http://localhost:5173/api/conversations?limit=10&amp;offset=0"</code></pre>
 
         <p>Search across all messages:</p>
 
-        <pre><code>curl "http://localhost:5173/api/search?q=cassette&amp;limit=5" \
-</code></pre>
+        <pre><code>curl "http://localhost:5173/api/search?q=cassette&amp;limit=5"</code></pre>
 
         <p>Create a background job:</p>
 
         <pre><code>curl -X POST http://localhost:5173/api/jobs \
   -H "Content-Type: application/json" \
-  -d '{"conversation_id": "abc-123", "prompt": "Summarize this conversation"}' \
-</code></pre>
+  -d '{"conversationId": "abc-123", "prompt": "Summarize this conversation"}'</code></pre>
 
         <p>Stream Claude Code output with SSE:</p>
 
         <pre><code>curl -N -X POST http://localhost:5173/api/claude-code \
   -H "Content-Type: application/json" \
-  -d '{"prompt": "Hello, Claude!", "conversation_id": "abc-123"}' \
-</code></pre>
+  -d '{"message": "Hello, Claude!"}'</code></pre>
 
         <div class="docs-tip">
           <strong>Tip</strong>

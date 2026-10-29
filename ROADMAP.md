@@ -6,9 +6,9 @@ Walkie Talkie Bot is a voice-first, cassette tape-themed interface for Claude Co
 
 ### Architecture highlights
 - **Frontend**: React 18 + Zustand, decomposed into 8 custom hooks (`useVoiceIO`, `useClaudeChat`, `useKeyboardControl`, `useDraggableFab`, `useImageAnalysis`, `useServerSync`, `useKeyboardShortcuts`, `useSoundEffects`)
-- **Server**: Hono HTTPS server with better-sqlite3, full test coverage for all repositories and API endpoints
+- **Server**: Hono HTTP server (HTTPS only when Tailscale certs are present) with better-sqlite3, bound to `127.0.0.1` by default; full test coverage for all repositories and API endpoints
 - **MCP server**: TypeScript, compiled via esbuild, 30 tools (15 data + 15 server)
-- **Onboarding**: 7-step wizard (welcome, how-it-works, TTS, sound effects, wake word, continuous listening, done)
+- **Onboarding**: 6-step wizard (welcome + theme, speak responses, sound effects, wake word, continuous listening, done)
 
 ---
 
@@ -46,7 +46,7 @@ Walkie Talkie Bot is a voice-first, cassette tape-themed interface for Claude Co
 ### UI/UX
 - [x] 6 retro themes (TalkBoy, Bubble, Dial-Up, Finder, Guestbook, 1984)
 - [x] Animated CSS robot avatar with 6 states
-- [x] 7-step onboarding wizard
+- [x] 6-step onboarding wizard
 - [x] Keyboard shortcuts (Spacebar, Cmd+K, Cmd+E, Escape, ?)
 - [x] Image lightbox with analysis sidebar
 - [x] Floating action button (draggable, resizable)
@@ -56,6 +56,13 @@ Walkie Talkie Bot is a voice-first, cassette tape-themed interface for Claude Co
 - [x] npm package (`npx walkietalkiebot`)
 - [x] Claude Code plugin (MCP tools + skills)
 - [x] Marketing site (walkietalkie.bot) with docs
+- [x] Interface overhaul from the original `INTERFACE_PLAN.md` / `LAYOUT_SKETCH.md` (liner notes, input-bar actions, tape search, context picker, avatar, export, shortcuts); those planning docs are retired
+
+### Security
+- [x] Loopback (`127.0.0.1`) bind by default; `WTB_HOST` to bind elsewhere, refused without `WTB_AUTH_TOKEN`
+- [x] No wildcard CORS; `Host` header validation
+- [x] Optional shared-secret auth (`WTB_AUTH_TOKEN`)
+- [x] MCP telemetry opt-in only (`WTB_TELEMETRY=1`)
 
 ### Testing & Quality
 - [x] 322 unit tests across 22 files + Playwright E2E and visual regression
