@@ -1,6 +1,6 @@
 {
   "name": "walkietalkiebot",
-  "version": "0.3.8",
+  "version": "0.4.0",
   "description": "Walkie Talkie Bot — a voice-first AI assistant for Claude Code. Use as a Claude Code plugin (30 MCP tools + 5 skills, offline SQLite) or full server (web UI, 6 retro themes, voice)",
   "homepage": "https://walkietalkie.bot",
   "repository": {
@@ -8,6 +8,9 @@
     "url": "https://github.com/bengillin/walkietalkiebot"
   },
   "type": "module",
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
   "bin": {
     "walkietalkiebot": "bin/wtb.js",
     "wtb": "bin/wtb.js",
@@ -65,7 +68,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@hono/node-server": "^1.12.0",
+    "@hono/node-server": "^2.1.5",
     "@modelcontextprotocol/sdk": "^1.0.0",
     "better-sqlite3": "^11.0.0",
     "hono": "^4.4.0",

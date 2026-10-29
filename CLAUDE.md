@@ -14,7 +14,7 @@ A voice-first, cassette tape-themed interface for Claude Code with 6 retro theme
 
 - `npm run dev` — Start Vite dev server (frontend only, no API)
 - `npm run build` — TypeScript check + Vite build + esbuild server bundle
-- `npm run test` — Run all tests (client + server, 322 unit tests across 22 files)
+- `npm run test` — Run all tests (client + server, 469 unit tests across 31 files, plus 12 MCP smoke tests)
 - `npm run test:client` — Run frontend tests only (vitest, jsdom)
 - `npm run test:server` — Run server tests only (vitest, node, in-memory SQLite)
 - `wtb-server start -f` — Start server in foreground (serves API + built frontend)

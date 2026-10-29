@@ -17,6 +17,13 @@ const replacements = [
     replace: `"version": "${version}"`,
   },
   {
+    // Pin the npm package the plugin runs its MCP server from, so a plugin
+    // install never pairs these skills with a different release's tools.
+    file: '.claude-plugin/plugin.json',
+    pattern: /"walkietalkiebot(@[^"]*)?"/,
+    replace: `"walkietalkiebot@${version}"`,
+  },
+  {
     file: 'mcp-server/package.json',
     pattern: /"version":\s*"[^"]+"/,
     replace: `"version": "${version}"`,

@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-29
+
 ### Added
 
 - Claude Code **session resumption** for conversations: turns now run inside a
@@ -58,6 +60,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enabled `noImplicitReturns` in `tsconfig.json` and made conditional `useEffect`
   cleanups explicit.
 
+- `@hono/node-server` 1.x → 2.x, plus in-range updates to hono, the MCP SDK,
+  zod and transitive dependencies. `npm audit --omit=dev` now reports 0
+  advisories (was 9, including a `serveStatic` path-decoding bug that could
+  bypass middleware).
+- `package.json` declares `engines.node` `^20.19.0 || >=22.12.0`, Vite 7's
+  range.
+- The plugin manifest pins `walkietalkiebot@<version>` in its `npx` args, and
+  `scripts/sync-version.js` keeps that pin current, so a plugin install runs
+  the MCP server from the same release as its skills.
+- `npm run test:e2e` / `test:visual` start their server with a temporary
+  `WTB_DIR` and never reuse an already-running server, so they no longer write
+  to `~/.wtb`.
+- MCP server: a `WTB_URL` override (default `http://localhost:${WTB_PORT}`);
+  arguments are validated against each tool's schema before dispatch.
+
 ### Fixed
 
 - A failed search rendered "No results found" — identical to a genuine empty
@@ -105,7 +122,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Removed the Telegram bot and Direct API / `ANTHROPIC_API_KEY` content that
     the site still advertised (homepage, integrations page, docs hub,
     `llms.txt`, API reference).
-  - Getting started: Node 20+ (was 18+), Claude Code CLI listed as a
+  - Getting started: Node 20.19+ (was 18+), Claude Code CLI listed as a
     requirement, onboarding is 6 steps (there is no "choose your mode" step),
     and the server should be started from the project Claude should work on.
   - API reference: removed the nonexistent `/api/analyze-image`, fixed the
@@ -115,9 +132,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     "one-shot processes" note with the session-resumption behavior.
   - Integrations: job tool names (`*_wtb_job`, not `*_talkie_job`), TLS cert
     paths (`tailscale.crt` / `tailscale.key`, not `cert.pem` / `key.pem`).
-  - README test count (322 across 22 files).
+  - Test counts in README, CONTRIBUTING, ROADMAP and CLAUDE.md (469 unit
+    tests across 31 files, plus 12 MCP smoke tests).
   - Docs pages no longer scroll sideways on phones (themes, integrations, and
     API pages overflowed a 390px viewport by up to 294px).
+- Web UI:
+  - A message sent in the first second or two after page load could vanish:
+    the startup sync replaced local state with a snapshot taken before the
+    message. Sync now merges against current state, fetches full messages only
+    for the open tape, and keeps local tapes that haven't reached the server.
+  - New conversations sent their client id to the server, so early
+    `addMessage` calls no longer 404 while ids were swapped. Server writes are
+    queued per conversation, and messages that fail to save are retried with
+    backoff instead of being dropped.
+  - Every page load created an empty tape on the server. Tapes now stay local
+    until their first message.
+  - On a fresh browser profile, `migrateLocalStorageKeys` deleted every
+    `wtb_*` key, including cached conversations.
+  - Escape closes the topmost open layer, one per press.
+  - At phone widths the header pushed Settings, Plans, Liner Notes and Media
+    Library off screen; below 720px they move into a ⋯ menu.
+  - Wake word and continuous listening retried forever when the microphone
+    was blocked. Fatal speech errors now stop with one message; transient
+    ones back off.
+  - Header icon buttons have accessible labels, the Settings voice list hides
+    macOS novelty voices and groups the rest by language, and the Guestbook
+    empty state meets contrast.
+- Server: `POST /api/conversations`, `POST /api/conversations/:id/messages`
+  and `POST /api/migrate` are idempotent, so a retried request no longer
+  duplicates or fails. Migration runs one transaction per conversation.
+- Agents (`claude -p`):
+  - Closing the tab mid-turn left the agent running. A client disconnect now
+    kills it.
+  - Killing an agent missed the processes its tools had started. Each agent
+    runs in its own process group: SIGTERM, then SIGKILL after 5 s.
+  - Shutdown closed the database while agents were still writing. It now
+    stops agents, closes connections, then closes the database.
+  - A killed or timed-out job was reported as completed, and a timeout freed
+    its slot early and started a second job. Slots free only when the process
+    exits, and a final status is never overwritten.
+- CLI: `wtb-server start` no longer hangs, or loses logs once the CLI exits.
+  Background and launchd starts run Claude in the directory you started from,
+  not the npm package directory. `stop` checks the pid belongs to Talkie,
+  `status` sends the auth token, and `wtb` no longer opens whatever app owns
+  the port.
+- MCP server:
+  - Data tools never reached SQLite because the module path was resolved
+    from `mcp-server/dist`, so "works offline" tools failed when the server was
+    down.
+  - The repo's `.mcp.json` used `${CLAUDE_PLUGIN_ROOT}`, which isn't set for a
+    project config, so opening the repo in Claude Code broke the MCP server.
+    The plugin manifest now declares its own `npx` entry.
+  - `launch_wtb` ran `npx wtb` (an unrelated npm package); it now runs this
+    package's own launcher and reports why a launch failed.
+  - `analyze_image` posted to a route that doesn't exist.
+  - Debug logging wrote to stdout and corrupted the JSON-RPC stream.
+  - Every server-tool failure said "server not running"; 401, 404 and 400 now
+    get their own messages, and errors are flagged `isError`.
+  - Ids in proxied paths are URL-encoded, and `update_wtb_state` forwards
+    only `avatarState` and `transcript`.
+  - Skills reference the plugin's tool names (`mcp__plugin_wtb_wtb__*`).
 
 ### Removed
 
@@ -126,7 +200,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
-- The server binds to `127.0.0.1` by default. `WTB_HOST` binds elsewhere, and a
+- The server binds to loopback (`127.0.0.1` and `::1`) by default. `WTB_HOST` binds elsewhere, and a
   non-loopback host is refused unless `WTB_AUTH_TOKEN` is set.
 - Cross-origin API requests are rejected (no wildcard CORS) and the `Host`
   header is validated, so a web page can no longer drive a local server that
@@ -135,6 +209,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   it sends only the tool name, category, and success flag to PostHog.
 - The documented MCP install command no longer runs an unrelated npm package
   (see Fixed).
+- At most 4 concurrent chat turns; more get a 429 instead of spawning
+  unbounded agents.
+- Non-JSON write requests (415), `Origin: null` and `Sec-Fetch-Site:
+  cross-site` are rejected, and without a token only loopback `Host` headers
+  are accepted (DNS rebinding).
+- The Vite dev server proxies `/api` to the real server instead of embedding a
+  second API with wildcard CORS.
 
 ## [0.3.8]
 
@@ -163,5 +244,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - IPC race conditions; state is now hydrated from SQLite on server restart.
 
-[Unreleased]: https://github.com/bengillin/walkietalkiebot/compare/v0.3.8...HEAD
+[Unreleased]: https://github.com/bengillin/walkietalkiebot/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/bengillin/walkietalkiebot/compare/v0.3.8...v0.4.0
 [0.3.8]: https://github.com/bengillin/walkietalkiebot/releases/tag/v0.3.8

@@ -8,7 +8,7 @@ A walkie talkie for Claude. Your voice is the interface.
 
 ## Requirements
 
-- **Node.js 20 or later**
+- **Node.js 20.19 or later** (or 22.12+)
 - **[Claude Code](https://code.claude.com/docs) CLI**, installed and logged in, with `claude` on your `PATH`. Every message goes through it; there is no API-key mode.
 - **Chrome or Edge** for voice (Web Speech API). Other browsers can still type.
 
@@ -202,7 +202,7 @@ The MCP server's telemetry is **off by default**. If you opt in with `WTB_TELEME
 npm install       # Install dependencies
 npm run dev       # Vite dev server (frontend only)
 npm run build     # TypeScript check + Vite build + server bundle + MCP server
-npm run test      # Run all unit tests (322 across 22 files)
+npm run test      # Run all unit tests (469 across 31 files)
 npm run test:e2e  # Playwright end-to-end tests
 npm run lint      # ESLint
 npm run format    # Prettier

@@ -960,7 +960,7 @@ function validateArgs(tool: Tool, args: Record<string, unknown>): void {
 }
 
 // ─── MCP Server ───
-const server = new Server({ name: 'wtb', version: '0.3.8' }, { capabilities: { tools: {} } })
+const server = new Server({ name: 'wtb', version: '0.4.0' }, { capabilities: { tools: {} } })
 
 server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: TOOLS }))
 
