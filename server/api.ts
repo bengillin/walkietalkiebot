@@ -1,8 +1,7 @@
 import { Hono } from 'hono'
-import { cors } from 'hono/cors'
 import { streamSSE } from 'hono/streaming'
 import { spawn } from 'child_process'
-import { state, updateState, generateRequestId } from './state.js'
+import { state, updateState, generateRequestId, type WtbState } from './state.js'
 import { isDbConnected } from './db/index.js'
 import * as conversations from './db/repositories/conversations.js'
 import * as messages from './db/repositories/messages.js'
@@ -19,8 +18,14 @@ const log = createLogger('api')
 
 export const api = new Hono()
 
-// Enable CORS for all routes
-api.use('*', cors())
+// No CORS: the web UI is served from this same origin, and the MCP proxy isn't a
+// browser. Cross-origin access would let any web page drive Claude (see security.ts).
+
+/** Parse a pagination query param, clamped to [min, max]; bad input falls back to `fallback`. */
+function intParam(value: string | undefined, fallback: number, min: number, max: number): number {
+  const n = Number.parseInt(value ?? '', 10)
+  return Number.isFinite(n) ? Math.min(Math.max(n, min), max) : fallback
+}
 
 // Mount job routes
 api.route('/jobs', jobRoutes)
@@ -42,8 +47,8 @@ api.get('/status', (c) => {
 
 // GET /api/conversations - List conversations (paginated)
 api.get('/conversations', (c) => {
-  const limit = parseInt(c.req.query('limit') || '50', 10)
-  const offset = parseInt(c.req.query('offset') || '0', 10)
+  const limit = intParam(c.req.query('limit'), 50, 1, 500)
+  const offset = intParam(c.req.query('offset'), 0, 0, Number.MAX_SAFE_INTEGER)
 
   const convos = conversations.listConversations(limit, offset)
   const total = conversations.countConversations()
@@ -284,8 +289,8 @@ api.patch('/images/:id', async (c) => {
 
 // GET /api/plans - List all plans (optionally filtered by conversation)
 api.get('/plans', (c) => {
-  const limit = parseInt(c.req.query('limit') || '50', 10)
-  const offset = parseInt(c.req.query('offset') || '0', 10)
+  const limit = intParam(c.req.query('limit'), 50, 1, 500)
+  const offset = intParam(c.req.query('offset'), 0, 0, Number.MAX_SAFE_INTEGER)
   const conversationId = c.req.query('conversationId') || undefined
   const planList = plans.listPlans(limit, offset, conversationId)
 
@@ -382,7 +387,7 @@ api.delete('/plans/:id', (c) => {
 // GET /api/search - Full-text search
 api.get('/search', (c) => {
   const query = c.req.query('q') || ''
-  const limit = parseInt(c.req.query('limit') || '50', 10)
+  const limit = intParam(c.req.query('limit'), 50, 1, 500)
 
   if (!query.trim()) {
     return c.json({ results: [] })
@@ -604,9 +609,56 @@ api.get('/history', (c) => {
   })
 })
 
+const AVATAR_STATES = new Set(['idle', 'listening', 'thinking', 'speaking', 'happy', 'confused'])
+
+/**
+ * Pick the fields a client may set on the shared state, rejecting wrong types.
+ * Spreading the raw body used to let `{"pendingRequests":{}}` replace the IPC queue
+ * and crash the server.
+ */
+export function parseStateUpdate(body: unknown): Partial<Omit<WtbState, 'pendingRequests'>> | null {
+  if (typeof body !== 'object' || body === null || Array.isArray(body)) return null
+  const b = body as Record<string, unknown>
+  const update: Partial<Omit<WtbState, 'pendingRequests'>> = {}
+  if ('avatarState' in b) {
+    if (typeof b.avatarState !== 'string' || !AVATAR_STATES.has(b.avatarState)) return null
+    update.avatarState = b.avatarState
+  }
+  for (const key of ['transcript', 'lastUserMessage', 'lastAssistantMessage'] as const) {
+    if (key in b) {
+      const value = b[key]
+      if (typeof value !== 'string') return null
+      update[key] = value
+    }
+  }
+  if ('messages' in b) {
+    const msgs = b.messages
+    if (
+      !Array.isArray(msgs) ||
+      !msgs.every(
+        (m) =>
+          typeof m === 'object' &&
+          m !== null &&
+          typeof m.role === 'string' &&
+          typeof m.content === 'string' &&
+          typeof m.timestamp === 'number',
+      )
+    ) {
+      return null
+    }
+    update.messages = msgs.map((m) => ({
+      role: m.role,
+      content: m.content,
+      timestamp: m.timestamp,
+    }))
+  }
+  return update
+}
+
 // POST /api/state - Update state from browser
 api.post('/state', async (c) => {
-  const update = await c.req.json()
+  const update = parseStateUpdate(await c.req.json().catch(() => null))
+  if (!update) return c.json({ error: 'Invalid state update' }, 400)
   updateState(update)
   return c.json({ success: true })
 })

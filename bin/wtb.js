@@ -34,7 +34,7 @@ async function main() {
         await open(URL)
       }
     } else {
-      console.error('Failed to start Walkie Talkie Bot:', err)
+      console.error('Failed to start Walkie Talkie Bot:', err instanceof Error ? err.message : err)
       process.exit(1)
     }
   }

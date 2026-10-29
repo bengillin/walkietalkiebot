@@ -1,31 +1,17 @@
 import Database from 'better-sqlite3'
-import { existsSync, mkdirSync, renameSync } from 'fs'
+import { existsSync, mkdirSync } from 'fs'
 import { dirname, join } from 'path'
-import { homedir } from 'os'
 import { initSchema } from './schema.js'
+import { getWtbDir, migrateLegacyDataDir } from '../paths.js'
 
 import { createLogger } from '../logger.js'
 
 const log = createLogger('db')
 
-// One-time migration: rename ~/.talkboy/ or ~/.talkie/ → ~/.wtb/
-function migrateDataDir() {
-  const wtbDir = join(homedir(), '.wtb')
-  const oldDir2 = join(homedir(), '.talkie')
-  const oldDir1 = join(homedir(), '.talkboy')
-  if (existsSync(oldDir2) && !existsSync(wtbDir)) {
-    log.debug(`Migrating ${oldDir2} → ${wtbDir}`)
-    renameSync(oldDir2, wtbDir)
-  } else if (existsSync(oldDir1) && !existsSync(wtbDir)) {
-    log.debug(`Migrating ${oldDir1} → ${wtbDir}`)
-    renameSync(oldDir1, wtbDir)
-  }
-}
-
 let db: Database.Database | null = null
 
 export function getDbPath(): string {
-  return join(homedir(), '.wtb', 'wtb.db')
+  return join(getWtbDir(), 'wtb.db')
 }
 
 export function getDb(): Database.Database {
@@ -40,7 +26,7 @@ export function initDb(): Database.Database {
     return db
   }
 
-  migrateDataDir()
+  migrateLegacyDataDir()
 
   const dbPath = getDbPath()
   const dbDir = dirname(dbPath)

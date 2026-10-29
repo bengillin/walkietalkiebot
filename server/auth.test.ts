@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { Hono } from 'hono'
-import { authMiddleware, getAuthToken } from './auth.js'
+import { authMiddleware, getAuthToken, hasValidCredentials } from './auth.js'
 
 function makeApp() {
   const app = new Hono()
@@ -81,5 +81,42 @@ describe('authMiddleware', () => {
       headers: { Cookie: `wtb_token=${TOKEN}` },
     })
     expect(res.status).toBe(200)
+  })
+})
+
+describe('hasValidCredentials', () => {
+  afterEach(() => {
+    delete process.env.WTB_AUTH_TOKEN
+  })
+
+  it('passes everything when auth is off', () => {
+    expect(hasValidCredentials(undefined, undefined)).toBe(true)
+  })
+
+  it('checks bearer tokens and the wtb_token cookie', () => {
+    process.env.WTB_AUTH_TOKEN = TOKEN
+    expect(hasValidCredentials(undefined, undefined)).toBe(false)
+    expect(hasValidCredentials(`Bearer ${TOKEN}`, undefined)).toBe(true)
+    expect(hasValidCredentials('Bearer nope', undefined)).toBe(false)
+    expect(hasValidCredentials(undefined, `a=1; wtb_token=${TOKEN}; b=2`)).toBe(true)
+    expect(hasValidCredentials(undefined, 'wtb_token=nope')).toBe(false)
+  })
+})
+
+describe('auth cookie', () => {
+  afterEach(() => {
+    delete process.env.WTB_AUTH_TOKEN
+  })
+
+  it('is Secure when served over HTTPS', async () => {
+    process.env.WTB_AUTH_TOKEN = TOKEN
+    const res = await makeApp().request(`https://box.example/?token=${TOKEN}`)
+    expect(res.headers.get('set-cookie')).toMatch(/Secure/)
+  })
+
+  it('is not Secure over plain-HTTP localhost, where browsers would drop it', async () => {
+    process.env.WTB_AUTH_TOKEN = TOKEN
+    const res = await makeApp().request(`http://localhost/?token=${TOKEN}`)
+    expect(res.headers.get('set-cookie')).not.toMatch(/Secure/)
   })
 })

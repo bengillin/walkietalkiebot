@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from "fs";
-import { homedir } from "os";
 import { join } from "path";
 import { createLogger } from "./logger.js";
+import { getWtbDir } from "./paths.js";
 const log = createLogger("modes");
 const BUILT_IN_MODES = [
   {
@@ -45,20 +45,20 @@ const BUILT_IN_MODES = [
     planDetection: false
   }
 ];
-const MODES_DIR = join(homedir(), ".wtb", "modes");
 function loadCustomModes() {
-  if (!existsSync(MODES_DIR)) return [];
+  const modesDir = join(getWtbDir(), "modes");
+  if (!existsSync(modesDir)) return [];
   const modes = [];
   let files;
   try {
-    files = readdirSync(MODES_DIR).filter((f) => f.endsWith(".json"));
+    files = readdirSync(modesDir).filter((f) => f.endsWith(".json"));
   } catch (err) {
-    log.warn(`Could not read custom modes from ${MODES_DIR}:`, err);
+    log.warn(`Could not read custom modes from ${modesDir}:`, err);
     return [];
   }
   for (const file of files) {
     try {
-      const content = readFileSync(join(MODES_DIR, file), "utf-8");
+      const content = readFileSync(join(modesDir, file), "utf-8");
       const mode = JSON.parse(content);
       if (mode.name && mode.label && mode.instruction) {
         modes.push({

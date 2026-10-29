@@ -18,6 +18,34 @@ export function getAuthToken(): string | null {
   return token && token.length > 0 ? token : null
 }
 
+/** Value of the `wtb_token` cookie in a raw `Cookie` header, if present. */
+function cookieValue(cookieHeader: string | undefined): string | undefined {
+  if (!cookieHeader) return undefined
+  for (const part of cookieHeader.split(';')) {
+    const [name, ...rest] = part.trim().split('=')
+    if (name === AUTH_COOKIE) return decodeURIComponent(rest.join('='))
+  }
+  return undefined
+}
+
+/**
+ * Whether raw request headers carry a valid credential (bearer token or cookie).
+ * Used by the Node handler to turn away unauthenticated uploads *before* buffering
+ * their bodies; the full gate (login page, ?token=) still runs in authMiddleware.
+ */
+export function hasValidCredentials(
+  authorization: string | undefined,
+  cookieHeader: string | undefined,
+): boolean {
+  const token = getAuthToken()
+  if (!token) return true
+  if (authorization?.startsWith('Bearer ') && tokensMatch(authorization.slice(7), token)) {
+    return true
+  }
+  const cookie = cookieValue(cookieHeader)
+  return cookie !== undefined && tokensMatch(cookie, token)
+}
+
 const LOGIN_PAGE = (error: boolean) => `<!doctype html>
 <html><head><meta charset="utf-8"><title>Walkie Talkie Bot — Sign in</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -66,6 +94,7 @@ export async function authMiddleware(c: Context, next: Next) {
     setCookie(c, AUTH_COOKIE, token, {
       httpOnly: true,
       sameSite: 'Strict',
+      secure: new URL(c.req.url).protocol === 'https:',
       path: '/',
       maxAge: 60 * 60 * 24 * 30,
     })

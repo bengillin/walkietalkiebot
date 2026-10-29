@@ -14,7 +14,8 @@ import { updateState } from "./state.js";
 import { getNotificationDispatcher } from "./notifications/dispatcher.js";
 import { MacOSNotificationChannel } from "./notifications/macos.js";
 import { getJobManager } from "./jobs/manager.js";
-import { authMiddleware, getAuthToken } from "./auth.js";
+import { authMiddleware, getAuthToken, hasValidCredentials } from "./auth.js";
+import { assertSafeBind, isLoopbackHost, requestGuard, resolveBindHost } from "./security.js";
 import { createLogger } from "./logger.js";
 const log = createLogger("server");
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -23,6 +24,13 @@ const MAX_BODY_BYTES = Number(process.env.WTB_MAX_BODY_BYTES) || 50 * 1024 * 102
 let server = null;
 function startServer(port = 5173) {
   return new Promise((resolve, reject) => {
+    const host = resolveBindHost();
+    try {
+      assertSafeBind(host);
+    } catch (err) {
+      reject(err);
+      return;
+    }
     if (!existsSync(distPath)) {
       reject(new Error(`dist/ not found at ${distPath}. Run 'npm run build' first.`));
       return;
@@ -58,8 +66,10 @@ function startServer(port = 5173) {
     const jobManager = getJobManager();
     jobManager.init();
     const app = new Hono();
+    app.use("*", requestGuard);
     app.use("*", authMiddleware);
     app.route("/api", api);
+    app.all("/api/*", (c) => c.json({ error: "Not found" }, 404));
     app.use("/*", serveStatic({ root: distPath.replace(process.cwd(), ".") }));
     app.get("*", (c) => {
       const indexPath = join(distPath, "index.html");
@@ -86,6 +96,12 @@ function startServer(port = 5173) {
       }
       let body = null;
       if (req.method && ["POST", "PUT", "PATCH"].includes(req.method)) {
+        if (!hasValidCredentials(req.headers.authorization, req.headers.cookie)) {
+          req.resume();
+          res.writeHead(401, { "content-type": "application/json" });
+          res.end(JSON.stringify({ error: "Unauthorized" }));
+          return;
+        }
         const chunks = [];
         let total = 0;
         let tooLarge = false;
@@ -134,12 +150,16 @@ function startServer(port = 5173) {
     } else {
       server = createHttpServer(handler);
     }
-    server.listen(port, () => {
-      const url = `${protocol}://localhost:${port}`;
-      log.debug(`Talkie server running at ${url}`);
-      const authToken = getAuthToken();
-      if (authToken) {
-        log.debug(`Auth enabled. Open the UI with: ${url}/?token=${authToken}`);
+    server.listen(port, host, () => {
+      const loopback = isLoopbackHost(host);
+      const shownHost = loopback ? "localhost" : host;
+      const url = `${protocol}://${shownHost}:${port}`;
+      log.info(`Talkie server running at ${url}`);
+      if (!loopback) {
+        log.info(`Listening on ${host}, so other machines can reach it. Auth is required.`);
+      }
+      if (getAuthToken()) {
+        log.info(`Auth enabled. Sign in once with: ${url}/?token=<your WTB_AUTH_TOKEN>`);
       }
       resolve();
     });
@@ -174,7 +194,10 @@ Received ${signal}, shutting down gracefully...`);
 if (import.meta.url === `file://${process.argv[1]}`) {
   setupShutdownHandlers();
   const port = parseInt(process.env.PORT || "5173", 10);
-  startServer(port).catch((err) => log.error("Server failed to start:", err));
+  startServer(port).catch((err) => {
+    log.error("Server failed to start:", err instanceof Error ? err.message : err);
+    process.exitCode = 1;
+  });
 }
 export {
   startServer,

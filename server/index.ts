@@ -14,7 +14,8 @@ import { updateState } from './state.js'
 import { getNotificationDispatcher } from './notifications/dispatcher.js'
 import { MacOSNotificationChannel } from './notifications/macos.js'
 import { getJobManager } from './jobs/manager.js'
-import { authMiddleware, getAuthToken } from './auth.js'
+import { authMiddleware, getAuthToken, hasValidCredentials } from './auth.js'
+import { assertSafeBind, isLoopbackHost, requestGuard, resolveBindHost } from './security.js'
 
 import { createLogger } from './logger.js'
 
@@ -31,6 +32,14 @@ let server: Server | import('https').Server | null = null
 
 export function startServer(port: number = 5173): Promise<void> {
   return new Promise((resolve, reject) => {
+    const host = resolveBindHost()
+    try {
+      assertSafeBind(host)
+    } catch (err) {
+      reject(err)
+      return
+    }
+
     // Verify dist exists
     if (!existsSync(distPath)) {
       reject(new Error(`dist/ not found at ${distPath}. Run 'npm run build' first.`))
@@ -78,12 +87,18 @@ export function startServer(port: number = 5173): Promise<void> {
 
     const app = new Hono()
 
+    // Host / Origin / content-type checks that keep other web pages from driving the
+    // API. Runs first so a rejected request never reaches auth or a route.
+    app.use('*', requestGuard)
+
     // Optional shared-secret auth (no-op unless WTB_AUTH_TOKEN is set). Gates both
     // the API and the web UI; must run before any route.
     app.use('*', authMiddleware)
 
     // Mount API routes
     app.route('/api', api)
+    // Unknown API routes are a client bug; don't answer them with the SPA's index.html.
+    app.all('/api/*', (c) => c.json({ error: 'Not found' }, 404))
 
     // Serve static files from dist/
     app.use('/*', serveStatic({ root: distPath.replace(process.cwd(), '.') }))
@@ -121,6 +136,14 @@ export function startServer(port: number = 5173): Promise<void> {
       // Collect request body for POST/PUT/PATCH, bounded to avoid memory-exhaustion DoS.
       let body: Buffer | null = null
       if (req.method && ['POST', 'PUT', 'PATCH'].includes(req.method)) {
+        // Turn away unauthenticated uploads before reading them, so a client without
+        // the token can't make the server buffer MAX_BODY_BYTES per connection.
+        if (!hasValidCredentials(req.headers.authorization, req.headers.cookie)) {
+          req.resume()
+          res.writeHead(401, { 'content-type': 'application/json' })
+          res.end(JSON.stringify({ error: 'Unauthorized' }))
+          return
+        }
         const chunks: Buffer[] = []
         let total = 0
         let tooLarge = false
@@ -178,12 +201,16 @@ export function startServer(port: number = 5173): Promise<void> {
       server = createHttpServer(handler)
     }
 
-    server.listen(port, () => {
-      const url = `${protocol}://localhost:${port}`
-      log.debug(`Talkie server running at ${url}`)
-      const authToken = getAuthToken()
-      if (authToken) {
-        log.debug(`Auth enabled. Open the UI with: ${url}/?token=${authToken}`)
+    server.listen(port, host, () => {
+      const loopback = isLoopbackHost(host)
+      const shownHost = loopback ? 'localhost' : host
+      const url = `${protocol}://${shownHost}:${port}`
+      log.info(`Talkie server running at ${url}`)
+      if (!loopback) {
+        log.info(`Listening on ${host}, so other machines can reach it. Auth is required.`)
+      }
+      if (getAuthToken()) {
+        log.info(`Auth enabled. Sign in once with: ${url}/?token=<your WTB_AUTH_TOKEN>`)
       }
       resolve()
     })
@@ -225,5 +252,8 @@ function setupShutdownHandlers(): void {
 if (import.meta.url === `file://${process.argv[1]}`) {
   setupShutdownHandlers()
   const port = parseInt(process.env.PORT || '5173', 10)
-  startServer(port).catch((err) => log.error('Server failed to start:', err))
+  startServer(port).catch((err) => {
+    log.error('Server failed to start:', err instanceof Error ? err.message : err)
+    process.exitCode = 1
+  })
 }

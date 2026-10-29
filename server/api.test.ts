@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { createTestDb } from './test/helpers.js'
 import { resetState } from './state.js'
-import { api } from './api.js'
+import { api, parseStateUpdate } from './api.js'
 
 beforeEach(() => {
   createTestDb()
@@ -269,5 +269,43 @@ describe('Plan CRUD', () => {
       conversationId: conv.id,
     })
     expect(json.conversationId).toBe(conv.id)
+  })
+})
+
+describe('POST /api/state', () => {
+  it('accepts the fields the web UI sends', async () => {
+    const { status } = await req('POST', '/state', {
+      avatarState: 'thinking',
+      transcript: 'hi',
+      lastUserMessage: 'q',
+      lastAssistantMessage: 'a',
+      messages: [{ role: 'user', content: 'q', timestamp: 1 }],
+    })
+    expect(status).toBe(200)
+    const { json } = await req('GET', '/status')
+    expect(json.avatarState).toBe('thinking')
+  })
+
+  it('cannot replace the IPC queue (used to crash the server)', async () => {
+    const { status } = await req('POST', '/state', { pendingRequests: {}, messages: 'x' })
+    expect(status).toBe(400)
+    const pending = await req('GET', '/pending')
+    expect(pending.status).toBe(200)
+  })
+
+  it('ignores unknown keys and rejects bad types', () => {
+    expect(parseStateUpdate({ pendingRequests: {} })).toEqual({})
+    expect(parseStateUpdate({ avatarState: 'bogus' })).toBeNull()
+    expect(parseStateUpdate({ transcript: 42 })).toBeNull()
+    expect(parseStateUpdate([])).toBeNull()
+    expect(parseStateUpdate(null)).toBeNull()
+  })
+})
+
+describe('pagination params', () => {
+  it('falls back on non-numeric limits instead of a 500', async () => {
+    expect((await req('GET', '/conversations?limit=abc&offset=xyz')).status).toBe(200)
+    expect((await req('GET', '/plans?limit=abc')).status).toBe(200)
+    expect((await req('GET', '/search?q=x&limit=-1')).status).toBe(200)
   })
 })
