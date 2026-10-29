@@ -196,11 +196,14 @@ const DEFAULT_IDENTITY: ToolIdentity = {
 /**
  * Strip MCP prefix from tool name.
  * "mcp__wtb__launch_wtb" → "launch_wtb"
+ * "mcp__plugin_wtb_wtb__launch_wtb" → "launch_wtb"
  * "Read" → "Read"
  */
 export function parseToolName(rawName: string): string {
   if (!rawName) return ''
-  return rawName.match(/^mcp__[^_]+__(.+)$/)?.[1] ?? rawName
+  // Server names may contain single underscores (plugin servers are named
+  // `plugin_<plugin>_<server>`), so match up to the double-underscore separator.
+  return rawName.match(/^mcp__.+?__(.+)$/)?.[1] ?? rawName
 }
 
 /**

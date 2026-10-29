@@ -188,6 +188,15 @@ describe('MCP server with the WTB server down', () => {
   it('flags not-found data results as errors', async () => {
     const r = await client.call('get_conversation', { conversationId: 'nope' })
     expect(r.isError).toBe(true)
+    // Writes to ids that don't exist used to report success.
+    for (const [tool, args] of [
+      ['delete_conversation', { conversationId: 'nope' }],
+      ['set_liner_notes', { conversationId: 'nope', linerNotes: 'x' }],
+      ['update_plan', { planId: 'nope', title: 'x' }],
+      ['delete_plan', { planId: 'nope' }],
+    ] as const) {
+      expect((await client.call(tool, args)).isError, tool).toBe(true)
+    }
   })
 
   it('rejects missing required arguments', async () => {

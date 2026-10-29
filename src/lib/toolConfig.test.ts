@@ -11,6 +11,7 @@ import {
 describe('parseToolName', () => {
   it('strips mcp__wtb__ prefix', () => {
     expect(parseToolName('mcp__wtb__launch_wtb')).toBe('launch_wtb')
+    expect(parseToolName('mcp__plugin_wtb_wtb__launch_wtb')).toBe('launch_wtb')
   })
 
   it('strips any mcp server prefix', () => {

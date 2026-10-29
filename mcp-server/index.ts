@@ -3,7 +3,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js'
 import type { CallToolResult, Tool } from '@modelcontextprotocol/sdk/types.js'
 import { spawn, exec } from 'child_process'
-import { closeSync, existsSync, openSync, readFileSync } from 'fs'
+import { closeSync, existsSync, mkdtempSync, openSync, readFileSync } from 'fs'
 import { tmpdir } from 'os'
 import { fileURLToPath, pathToFileURL } from 'url'
 import { dirname, join } from 'path'
@@ -20,8 +20,15 @@ console.info = console.error
 console.debug = console.error
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const WTB_PORT = parseInt(process.env.WTB_PORT || '5173', 10)
-const WTB_URL = (process.env.WTB_URL || `http://localhost:${WTB_PORT}`).replace(/\/+$/, '')
+const WTB_URL = (
+  process.env.WTB_URL || `http://localhost:${process.env.WTB_PORT || '5173'}`
+).replace(/\/+$/, '')
+// The port launch_wtb starts the server on. Derived from WTB_URL so the two can
+// never disagree (they used to: launch on WTB_PORT, probe WTB_URL, time out).
+const WTB_PORT = (() => {
+  const url = new URL(WTB_URL)
+  return Number(url.port) || (url.protocol === 'https:' ? 443 : 80)
+})()
 
 // When the server is started with WTB_AUTH_TOKEN, server-dependent tools must
 // present it as a bearer token.
@@ -509,9 +516,11 @@ async function launchWtb(): Promise<LaunchResult> {
   // The server is detached so it outlives this MCP process, which means it
   // can't inherit a pipe from us (a closed pipe would kill it with EPIPE).
   // Capture its output in a log file instead, and quote it back on failure.
-  const logPath = join(tmpdir(), `wtb-launch-${WTB_PORT}.log`)
+  // A fresh private directory, not a fixed name in the shared tmp dir, where a
+  // pre-planted symlink would make us truncate whatever it points at.
+  const logPath = join(mkdtempSync(join(tmpdir(), 'wtb-launch-')), 'server.log')
   const { command, args } = launchCommand()
-  const logFd = openSync(logPath, 'w')
+  const logFd = openSync(logPath, 'wx')
 
   return new Promise((resolve) => {
     let settled = false
@@ -1184,8 +1193,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
       case 'delete_conversation': {
         const a = typedArgs as DeleteConversationArgs
-        const ok = d.convos.deleteConversation(a.conversationId)
-        return jsonResult({ success: ok })
+        if (!d.convos.deleteConversation(a.conversationId)) {
+          return jsonResult({ error: 'Conversation not found' })
+        }
+        return jsonResult({ success: true })
       }
       case 'search_conversations': {
         const a = typedArgs as SearchConversationsArgs
@@ -1230,11 +1241,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         if (a.title !== undefined) updates.title = a.title
         if (a.content !== undefined) updates.content = a.content
         if (a.status !== undefined) updates.status = a.status
+        if (!d.plans.getPlan(a.planId)) return jsonResult({ error: 'Plan not found' })
         d.plans.updatePlan(a.planId, updates)
         return jsonResult({ success: true })
       }
       case 'delete_plan': {
         const a = typedArgs as DeletePlanArgs
+        if (!d.plans.getPlan(a.planId)) return jsonResult({ error: 'Plan not found' })
         d.plans.deletePlan(a.planId)
         return jsonResult({ success: true })
       }
@@ -1245,6 +1258,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
       case 'set_liner_notes': {
         const a = typedArgs as SetLinerNotesArgs
+        if (!d.convos.getConversation(a.conversationId)) {
+          return jsonResult({ error: 'Conversation not found' })
+        }
         d.convos.updateLinerNotes(a.conversationId, a.linerNotes ?? null)
         return jsonResult({ success: true })
       }
