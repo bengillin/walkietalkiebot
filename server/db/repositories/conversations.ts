@@ -112,10 +112,25 @@ export function updateConversation(
   return getConversation(id)
 }
 
+/**
+ * Delete a conversation and leave a tombstone, so the id can't be re-created
+ * by a client that hasn't heard about the delete. The tombstone is written even
+ * when the row is missing: a create may still be in flight.
+ */
 export function deleteConversation(id: string): boolean {
   const db = getDb()
-  const result = db.prepare('DELETE FROM conversations WHERE id = ?').run(id)
-  return result.changes > 0
+  return db.transaction(() => {
+    db.prepare('INSERT OR IGNORE INTO deleted_conversations (id, deleted_at) VALUES (?, ?)').run(
+      id,
+      Date.now(),
+    )
+    return db.prepare('DELETE FROM conversations WHERE id = ?').run(id).changes > 0
+  })()
+}
+
+/** Whether a conversation with this id was deleted (and must not come back). */
+export function isDeleted(id: string): boolean {
+  return getDb().prepare('SELECT 1 FROM deleted_conversations WHERE id = ?').get(id) !== undefined
 }
 
 export function touchConversation(id: string): void {

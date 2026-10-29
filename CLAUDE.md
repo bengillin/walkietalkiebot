@@ -62,7 +62,7 @@ server/                 Hono HTTP server (HTTPS only with Tailscale certs)
   index.ts              Server startup (HTTP/HTTPS, DB init)
   state.ts              In-memory state for IPC callbacks
   ssl.ts                Tailscale cert detection (no self-signed generation)
-  db/schema.ts          SQLite schema with versioned migrations (v1–v6)
+  db/schema.ts          SQLite schema with versioned migrations (v1–v7)
   db/repositories/      CRUD: conversations, messages, activities, search, plans, jobs
   test/helpers.ts       Test utilities (in-memory SQLite via initDbForTesting)
   jobs/                 Async job execution
@@ -118,7 +118,7 @@ site/                   Marketing site (walkietalkie.bot)
 
 ## Database
 
-SQLite at `~/.wtb/wtb.db`. Schema version tracked in `schema_version` table (currently v6). Tables:
+SQLite at `~/.wtb/wtb.db`. Schema version tracked in `schema_version` table (currently v7). Tables:
 - `conversations` — id, title, timestamps, project_id, parent_id, liner_notes, mode
 - `messages` — role, content, position, source
 - `message_images` — base64 data URLs with descriptions
@@ -126,3 +126,4 @@ SQLite at `~/.wtb/wtb.db`. Schema version tracked in `schema_version` table (cur
 - `plans` — title, content, status (draft/approved/in_progress/completed/archived), conversation_id
 - `jobs` — async background tasks with status, result, error
 - `messages_fts` — FTS5 full-text search with sync triggers
+- `deleted_conversations` — tombstones: a deleted id answers 410 Gone and can't be re-created (404 means the server never had it)

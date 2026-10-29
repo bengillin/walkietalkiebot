@@ -102,7 +102,26 @@ export function imageExists(id: string): boolean {
   return getDb().prepare('SELECT 1 FROM message_images WHERE id = ?').get(id) !== undefined
 }
 
+/**
+ * Image ids are global primary keys, and a new message never owns an existing
+ * image (a resent attachment reuses its ids): give those a new id derived from
+ * (image, message), so a retry of the same message maps to the same row.
+ */
+export function withFreshImageIds<T extends { id: string }>(
+  images: T[] | undefined,
+  messageId: string,
+): T[] | undefined {
+  return images?.map((img) =>
+    imageExists(img.id) ? { ...img, id: `${img.id}~${messageId}` } : img,
+  )
+}
+
+/** Insert a message and its images (all-or-nothing; nests as a savepoint). */
 export function createMessage(input: CreateMessageInput): MessageRow {
+  return getDb().transaction(() => insertMessage(input))()
+}
+
+function insertMessage(input: CreateMessageInput): MessageRow {
   const db = getDb()
   const timestamp = input.timestamp || Date.now()
   const source = input.source || 'web'

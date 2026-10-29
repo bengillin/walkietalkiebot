@@ -86,7 +86,7 @@ describe('Conversation CRUD', () => {
     expect(json.success).toBe(true)
 
     const { status: getStatus } = await req('GET', `/conversations/${created.id}`)
-    expect(getStatus).toBe(404)
+    expect(getStatus).toBe(410)
   })
 
   it('paginates conversations', async () => {
@@ -264,6 +264,84 @@ describe('Messages', () => {
     expect(json.messages).toHaveLength(2)
     expect(json.messages[0].role).toBe('user')
     expect(json.messages[1].role).toBe('assistant')
+  })
+})
+
+describe('Deleted conversations stay deleted (tombstones)', () => {
+  async function deletedTape() {
+    const { json } = await req('POST', '/conversations', { id: 'tomb', title: 'Doomed' })
+    await req('DELETE', `/conversations/${json.id}`)
+    return json.id as string
+  }
+
+  it('refuses to re-create a deleted id', async () => {
+    const id = await deletedTape()
+    const { status } = await req('POST', '/conversations', { id, title: 'Back again' })
+    expect(status).toBe(410)
+    expect((await req('GET', `/conversations/${id}`)).status).toBe(410)
+  })
+
+  it('refuses to re-import a deleted id, without failing the rest of the batch', async () => {
+    const id = await deletedTape()
+    const tape = (cid: string) => ({
+      id: cid,
+      title: cid,
+      messages: [{ id: `${cid}-m`, role: 'user', content: 'hi', timestamp: 1 }],
+      createdAt: 1,
+      updatedAt: 1,
+    })
+    const { json } = await req('POST', '/migrate', { conversations: [tape(id), tape('fresh')] })
+    expect(json.results).toEqual([
+      expect.objectContaining({ id, ok: false, gone: true }),
+      expect.objectContaining({ id: 'fresh', ok: true, created: true }),
+    ])
+    expect((await req('GET', `/conversations/${id}`)).status).toBe(410)
+  })
+
+  it('answers 410 to a message for a deleted tape, 404 for an unknown one', async () => {
+    const id = await deletedTape()
+    const body = { role: 'user', content: 'late' }
+    expect((await req('POST', `/conversations/${id}/messages`, body)).status).toBe(410)
+    expect((await req('POST', '/conversations/never/messages', body)).status).toBe(404)
+  })
+
+  it('tombstones an id deleted before its create landed', async () => {
+    await req('DELETE', '/conversations/early')
+    expect((await req('POST', '/conversations', { id: 'early' })).status).toBe(410)
+  })
+})
+
+describe('Resending an image attachment', () => {
+  const image = { id: 'img-1', dataUrl: 'data:image/png;base64,AAAA', fileName: 'a.png' }
+
+  it('stores the image again under a fresh id instead of failing', async () => {
+    const { json: conv } = await req('POST', '/conversations', { title: 'Pics' })
+    const first = { id: 'm1', role: 'user', content: 'look', images: [image] }
+    expect((await req('POST', `/conversations/${conv.id}/messages`, first)).status).toBe(201)
+
+    // The Claude call failed, so the attachment was kept and sent again
+    const resend = { id: 'm2', role: 'user', content: 'look again', images: [image] }
+    expect((await req('POST', `/conversations/${conv.id}/messages`, resend)).status).toBe(201)
+    // An idempotent retry of the resend maps to the same row
+    expect((await req('POST', `/conversations/${conv.id}/messages`, resend)).status).toBe(200)
+
+    const { json } = await req('GET', `/conversations/${conv.id}`)
+    expect(json.messages.map((m: { images: unknown[] }) => m.images.length)).toEqual([1, 1])
+    expect(json.messages[1].images[0].id).toBe('img-1~m2')
+  })
+
+  it('never leaves a message behind without its images', async () => {
+    const { json: conv } = await req('POST', '/conversations', { title: 'Pics' })
+    // Two images with the same id in one message: the second insert fails
+    const bad = { id: 'm1', role: 'user', content: 'dup', images: [image, image] }
+    const res = await api.request(`/conversations/${conv.id}/messages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(bad),
+    })
+    expect(res.status).toBe(500)
+    const { json } = await req('GET', `/conversations/${conv.id}`)
+    expect(json.messages).toHaveLength(0)
   })
 })
 
