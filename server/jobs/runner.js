@@ -131,12 +131,7 @@ function spawnClaude(options) {
     });
     return {
       pid: proc.child.pid || 0,
-      kill: () => {
-        try {
-          proc.child.kill("SIGTERM");
-        } catch {
-        }
-      },
+      kill: () => killProcessTree(proc.child),
       promise: proc.promise
     };
   }
@@ -146,6 +141,7 @@ function spawnClaude(options) {
     resolveFinal = res;
   });
   let current;
+  let killed = false;
   const launch = (strategy, isRetry) => {
     const sessionArgs = strategy === "create" ? ["--session-id", convId] : ["--resume", convId];
     const fullPrompt = buildFullPrompt(strategy === "create");
@@ -180,7 +176,7 @@ function spawnClaude(options) {
         callbacks.onError(msg);
       },
       onComplete: (code) => {
-        if (sessionFault && !sawContent && !isRetry) {
+        if (sessionFault && !sawContent && !isRetry && !killed) {
           launch(strategy === "create" ? "resume" : "create", true);
           return;
         }
@@ -196,21 +192,44 @@ function spawnClaude(options) {
   return {
     pid: current.child.pid || 0,
     kill: () => {
-      try {
-        current?.child.kill("SIGTERM");
-      } catch {
-      }
+      killed = true;
+      if (current) killProcessTree(current.child);
     },
     promise
   };
+}
+const liveChildren = /* @__PURE__ */ new Set();
+const KILL_GRACE_MS = 5e3;
+function killProcessTree(child) {
+  const pid = child.pid;
+  if (!pid || child.exitCode != null || child.signalCode != null) return;
+  const signalGroup = (signal) => {
+    try {
+      process.kill(-pid, signal);
+    } catch {
+      try {
+        child.kill(signal);
+      } catch {
+      }
+    }
+  };
+  signalGroup("SIGTERM");
+  const escalate = setTimeout(() => signalGroup("SIGKILL"), KILL_GRACE_MS);
+  escalate.unref();
+  child.once("close", () => clearTimeout(escalate));
+}
+function killAllClaudeProcesses() {
+  for (const child of liveChildren) killProcessTree(child);
 }
 function runClaudeProcess(claudePath, args, env, callbacks) {
   const claude = spawn(claudePath, args, {
     cwd: process.cwd(),
     env,
     stdio: ["ignore", "pipe", "pipe"],
-    detached: false
+    // Own process group, so killProcessTree can take down Bash-tool grandchildren.
+    detached: true
   });
+  liveChildren.add(claude);
   let buffer = "";
   const toolInputs = {};
   const toolNames = {};
@@ -340,14 +359,21 @@ function runClaudeProcess(claudePath, args, env, callbacks) {
     callbacks.onError(text);
   });
   const promise = new Promise((resolve) => {
-    claude.on("close", (code) => {
-      callbacks.onComplete(code || 0);
-      resolve(code || 0);
+    let settled = false;
+    const finish = (code) => {
+      liveChildren.delete(claude);
+      if (settled) return;
+      settled = true;
+      callbacks.onComplete(code);
+      resolve(code);
+    };
+    claude.on("close", (code, signal) => {
+      if (signal) log.debug(`claude exited on ${signal}`);
+      finish(code ?? 1);
     });
     claude.on("error", (err) => {
       callbacks.onError(err.message);
-      callbacks.onComplete(1);
-      resolve(1);
+      finish(1);
     });
   });
   return { child: claude, promise };
@@ -355,5 +381,7 @@ function runClaudeProcess(claudePath, args, env, callbacks) {
 export {
   _resetSessionTracking,
   isClaudeCliAvailable,
+  killAllClaudeProcesses,
+  killProcessTree,
   spawnClaude
 };

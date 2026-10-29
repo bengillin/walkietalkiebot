@@ -14,6 +14,7 @@ import { updateState } from './state.js'
 import { getNotificationDispatcher } from './notifications/dispatcher.js'
 import { MacOSNotificationChannel } from './notifications/macos.js'
 import { getJobManager } from './jobs/manager.js'
+import { killAllClaudeProcesses } from './jobs/runner.js'
 import { authMiddleware, getAuthToken, hasValidCredentials } from './auth.js'
 import { assertSafeBind, isLoopbackHost, requestGuard, resolveBindHost } from './security.js'
 
@@ -181,6 +182,11 @@ export function startServer(port: number = 5173): Promise<void> {
       // Write response body
       if (response.body) {
         const reader = response.body.getReader()
+        // If the client disconnects mid-stream, cancel the body so the route's
+        // abort handler runs (for /api/claude-code, that kills the agent).
+        res.on('close', () => {
+          if (!res.writableFinished) reader.cancel().catch(() => {})
+        })
         try {
           while (true) {
             const { done, value } = await reader.read()
@@ -226,18 +232,27 @@ export function startServer(port: number = 5173): Promise<void> {
 }
 
 export async function stopServer(): Promise<void> {
-  closeDb()
+  // Stop running agents first; they'd otherwise outlive the server and their
+  // callbacks would write to a closed database.
+  killAllClaudeProcesses()
 
   if (server) {
-    await new Promise<void>((resolve) => {
+    const closing = new Promise<void>((resolve) => {
       server!.close(() => resolve())
     })
+    // close() waits for open connections, and SSE streams stay open; don't hang.
+    server.closeAllConnections?.()
+    await closing
     server = null
   }
+
+  closeDb()
 }
 
-// Graceful shutdown handlers
-function setupShutdownHandlers(): void {
+// Graceful shutdown handlers. Every entry point (bin/wtb.js, `wtb-server start -f`,
+// running this file directly) must install them: `claude` children run in their own
+// process groups, so a terminal's Ctrl+C no longer reaches them on its own.
+export function setupShutdownHandlers(): void {
   const shutdown = async (signal: string) => {
     log.debug(`\nReceived ${signal}, shutting down gracefully...`)
     await stopServer()

@@ -233,13 +233,7 @@ export function spawnClaude(options: RunnerOptions): RunnerHandle {
     })
     return {
       pid: proc.child.pid || 0,
-      kill: () => {
-        try {
-          proc.child.kill('SIGTERM')
-        } catch {
-          /* already dead */
-        }
-      },
+      kill: () => killProcessTree(proc.child),
       promise: proc.promise,
     }
   }
@@ -253,6 +247,7 @@ export function spawnClaude(options: RunnerOptions): RunnerHandle {
     resolveFinal = res
   })
   let current!: { child: ChildProcess; promise: Promise<number> }
+  let killed = false
 
   const launch = (strategy: 'create' | 'resume', isRetry: boolean) => {
     const sessionArgs = strategy === 'create' ? ['--session-id', convId] : ['--resume', convId]
@@ -291,7 +286,7 @@ export function spawnClaude(options: RunnerOptions): RunnerHandle {
         callbacks.onError(msg)
       },
       onComplete: (code) => {
-        if (sessionFault && !sawContent && !isRetry) {
+        if (sessionFault && !sawContent && !isRetry && !killed) {
           // In-process tracking disagrees with on-disk sessions: flip strategy
           // and try once more.
           launch(strategy === 'create' ? 'resume' : 'create', true)
@@ -311,14 +306,48 @@ export function spawnClaude(options: RunnerOptions): RunnerHandle {
   return {
     pid: current.child.pid || 0,
     kill: () => {
-      try {
-        current?.child.kill('SIGTERM')
-      } catch {
-        /* already dead */
-      }
+      killed = true
+      if (current) killProcessTree(current.child)
     },
     promise,
   }
+}
+
+// Every live `claude` child, so shutdown can stop them instead of leaving
+// bypass-permissions agents running with nobody listening.
+const liveChildren = new Set<ChildProcess>()
+
+/** How long a killed process group gets to exit after SIGTERM before SIGKILL. */
+const KILL_GRACE_MS = 5000
+
+/**
+ * Stop a `claude` process and everything it started. Children are spawned as
+ * process-group leaders (detached), so signalling the negative pid reaches the
+ * shell commands Claude's Bash tool launched, not just the CLI itself.
+ */
+export function killProcessTree(child: ChildProcess): void {
+  const pid = child.pid
+  if (!pid || child.exitCode != null || child.signalCode != null) return
+  const signalGroup = (signal: NodeJS.Signals) => {
+    try {
+      process.kill(-pid, signal)
+    } catch {
+      try {
+        child.kill(signal)
+      } catch {
+        /* already gone */
+      }
+    }
+  }
+  signalGroup('SIGTERM')
+  const escalate = setTimeout(() => signalGroup('SIGKILL'), KILL_GRACE_MS)
+  escalate.unref()
+  child.once('close', () => clearTimeout(escalate))
+}
+
+/** Kill every running `claude` process. Called on server shutdown. */
+export function killAllClaudeProcesses(): void {
+  for (const child of liveChildren) killProcessTree(child)
 }
 
 /**
@@ -336,8 +365,10 @@ function runClaudeProcess(
     cwd: process.cwd(),
     env,
     stdio: ['ignore', 'pipe', 'pipe'],
-    detached: false,
+    // Own process group, so killProcessTree can take down Bash-tool grandchildren.
+    detached: true,
   })
+  liveChildren.add(claude)
 
   let buffer = ''
   const toolInputs: Record<string, string> = {}
@@ -479,15 +510,26 @@ function runClaudeProcess(
   })
 
   const promise = new Promise<number>((resolve) => {
-    claude.on('close', (code) => {
-      callbacks.onComplete(code || 0)
-      resolve(code || 0)
+    // 'error' and 'close' can both fire for one process; report the outcome once.
+    let settled = false
+    const finish = (code: number) => {
+      liveChildren.delete(claude)
+      if (settled) return
+      settled = true
+      callbacks.onComplete(code)
+      resolve(code)
+    }
+
+    claude.on('close', (code, signal) => {
+      // A process killed by a signal has code null. Treating that as 0 reported
+      // killed and timed-out jobs as "completed".
+      if (signal) log.debug(`claude exited on ${signal}`)
+      finish(code ?? 1)
     })
 
     claude.on('error', (err) => {
       callbacks.onError(err.message)
-      callbacks.onComplete(1)
-      resolve(1)
+      finish(1)
     })
   })
 

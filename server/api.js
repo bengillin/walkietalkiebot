@@ -649,11 +649,22 @@ api.post("/open-url", async (c) => {
     });
   });
 });
+const MAX_CONCURRENT_CHATS = 4;
+let activeChats = 0;
 api.post("/claude-code", async (c) => {
   const { message, history, images, mode, conversationId } = await c.req.json();
   if (!message) {
     return c.json({ error: "Message required" }, 400);
   }
+  if (activeChats >= MAX_CONCURRENT_CHATS) {
+    return c.json(
+      {
+        error: `Too many Claude turns running (limit ${MAX_CONCURRENT_CHATS}). Try again shortly.`
+      },
+      429
+    );
+  }
+  activeChats++;
   return streamSSE(c, async (stream) => {
     const handle = spawnClaude({
       prompt: message,
@@ -679,7 +690,12 @@ api.post("/claude-code", async (c) => {
         }
       }
     });
-    await handle.promise;
+    stream.onAbort(() => handle.kill());
+    try {
+      await handle.promise;
+    } finally {
+      activeChats--;
+    }
   });
 });
 export {

@@ -476,13 +476,33 @@ describe('process failures', () => {
     expect(cb.onComplete).toHaveBeenCalledWith(3)
   })
 
-  it('kill() sends SIGTERM to the child', () => {
-    nextProcess(() => {})
-    const handle = spawnClaude({ prompt: 'hi', callbacks: callbacks() })
-    handle.kill()
+  it('kill() sends SIGTERM to the whole process group', () => {
+    const groupKill = vi.spyOn(process, 'kill').mockImplementation(() => true)
+    try {
+      nextProcess(() => {})
+      const handle = spawnClaude({ prompt: 'hi', callbacks: callbacks() })
+      handle.kill()
 
-    const child = spawnMock.mock.results[0]?.value as FakeChild
-    expect(child.kill).toHaveBeenCalledWith('SIGTERM')
+      expect(groupKill).toHaveBeenCalledWith(-4321, 'SIGTERM')
+    } finally {
+      groupKill.mockRestore()
+    }
+  })
+
+  it('kill() falls back to the child itself when the group is gone', () => {
+    const groupKill = vi.spyOn(process, 'kill').mockImplementation(() => {
+      throw new Error('ESRCH')
+    })
+    try {
+      nextProcess(() => {})
+      const handle = spawnClaude({ prompt: 'hi', callbacks: callbacks() })
+      handle.kill()
+
+      const child = spawnMock.mock.results[0]?.value as FakeChild
+      expect(child.kill).toHaveBeenCalledWith('SIGTERM')
+    } finally {
+      groupKill.mockRestore()
+    }
   })
 
   it('exposes the child pid on the handle', () => {
@@ -570,5 +590,39 @@ describe('CLI availability', () => {
 
     vi.doUnmock('child_process')
     vi.resetModules()
+  })
+})
+
+describe('process exit', () => {
+  beforeEach(() => {
+    spawnMock.mockReset()
+    _resetSessionTracking()
+  })
+
+  it('reports a process killed by a signal as a failure, not exit 0', async () => {
+    nextProcess((c) => c.emit('close', null, 'SIGTERM'))
+    const cb = callbacks()
+    const code = await spawnClaude({ prompt: 'hi', callbacks: cb }).promise
+
+    expect(code).not.toBe(0)
+    expect(cb.onComplete).toHaveBeenCalledWith(code)
+  })
+
+  it('completes once when both error and close fire', async () => {
+    nextProcess((c) => {
+      c.emit('error', new Error('spawn EACCES'))
+      c.emit('close', 1, null)
+    })
+    const cb = callbacks()
+    await spawnClaude({ prompt: 'hi', callbacks: cb }).promise
+
+    expect(cb.onComplete).toHaveBeenCalledTimes(1)
+  })
+
+  it('spawns claude in its own process group so its children can be killed with it', async () => {
+    nextProcess((c) => c.emit('close', 0, null))
+    await spawnClaude({ prompt: 'hi', callbacks: callbacks() }).promise
+
+    expect(spawnMock.mock.calls[0]?.[2]).toMatchObject({ detached: true })
   })
 })

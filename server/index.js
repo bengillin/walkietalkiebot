@@ -14,6 +14,7 @@ import { updateState } from "./state.js";
 import { getNotificationDispatcher } from "./notifications/dispatcher.js";
 import { MacOSNotificationChannel } from "./notifications/macos.js";
 import { getJobManager } from "./jobs/manager.js";
+import { killAllClaudeProcesses } from "./jobs/runner.js";
 import { authMiddleware, getAuthToken, hasValidCredentials } from "./auth.js";
 import { assertSafeBind, isLoopbackHost, requestGuard, resolveBindHost } from "./security.js";
 import { createLogger } from "./logger.js";
@@ -132,6 +133,10 @@ function startServer(port = 5173) {
       res.writeHead(response.status, Object.fromEntries(response.headers.entries()));
       if (response.body) {
         const reader = response.body.getReader();
+        res.on("close", () => {
+          if (!res.writableFinished) reader.cancel().catch(() => {
+          });
+        });
         try {
           while (true) {
             const { done, value } = await reader.read();
@@ -173,13 +178,16 @@ function startServer(port = 5173) {
   });
 }
 async function stopServer() {
-  closeDb();
+  killAllClaudeProcesses();
   if (server) {
-    await new Promise((resolve) => {
+    const closing = new Promise((resolve) => {
       server.close(() => resolve());
     });
+    server.closeAllConnections?.();
+    await closing;
     server = null;
   }
+  closeDb();
 }
 function setupShutdownHandlers() {
   const shutdown = async (signal) => {
@@ -200,6 +208,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   });
 }
 export {
+  setupShutdownHandlers,
   startServer,
   stopServer
 };
