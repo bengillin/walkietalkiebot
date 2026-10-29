@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, type APIRequestContext, type Page } from '@playwright/test'
 import { skipOnboarding, setTheme } from './helpers'
 
 test.describe('Onboarding', () => {
@@ -254,10 +254,108 @@ test.describe('Mobile header', () => {
       await page.click('.app__header-more-btn')
       const menu = page.locator('.app__header-menu')
       for (const label of ['Settings', 'Plans', 'Liner Notes', 'Media Library']) {
-        await expect(menu.getByRole('menuitem', { name: label })).toBeInViewport()
+        await expect(menu.getByRole('button', { name: label })).toBeInViewport()
       }
-      await menu.getByRole('menuitem', { name: 'Settings' }).click()
+      await menu.getByRole('button', { name: 'Settings' }).click()
       await expect(page.locator('.settings__drawer')).toBeVisible()
     })
   }
+})
+
+test.describe('No message is lost', () => {
+  // Every stored message on the server, across all tapes
+  async function serverMessages(request: APIRequestContext): Promise<string[]> {
+    const list = await (await request.get('/api/conversations?limit=1000')).json()
+    const all: string[] = []
+    for (const c of list.conversations as Array<{ id: string }>) {
+      const full = await (await request.get(`/api/conversations/${c.id}`)).json()
+      all.push(...(full.messages as Array<{ content: string }>).map((m) => m.content))
+    }
+    return all
+  }
+
+  async function openApp(page: Page) {
+    // Don't run Claude: these tests are about what the tape keeps
+    await page.route('**/api/claude-code', (r) => r.fulfill({ status: 500, body: 'stubbed' }))
+    await skipOnboarding(page)
+  }
+
+  async function send(page: Page, text: string) {
+    await page.locator('.tape-deck__input').fill(text)
+    await page.locator('.tape-deck__input').press('Enter')
+  }
+
+  test('a message sent while the tape list is still loading survives the sync', async ({
+    page,
+    request,
+  }) => {
+    const text = `slow list ${Date.now()}`
+    await openApp(page)
+    // Hold the list response until after the message has created its tape
+    await page.route(/\/api\/conversations\?limit=/, async (r) => {
+      const response = await r.fetch()
+      await new Promise((resolve) => setTimeout(resolve, 3000))
+      await r.fulfill({ response })
+    })
+    await page.reload()
+    await page.waitForSelector('.app__header')
+    await send(page, text)
+    await page.waitForTimeout(4500)
+
+    await expect(page.locator('.app__main')).toContainText(text)
+    expect(await serverMessages(request)).toContain(text)
+  })
+
+  test('a send whose creation response was lost is not dropped by the next one', async ({
+    page,
+    request,
+  }) => {
+    const one = `lost response one ${Date.now()}`
+    const two = `lost response two ${Date.now()}`
+    await openApp(page)
+    let dropped = false
+    await page.route('**/api/migrate', async (r) => {
+      if (dropped) return r.continue()
+      dropped = true
+      await r.fetch() // the server commits...
+      await r.abort('failed') // ...and the response never arrives
+    })
+    await send(page, one)
+    await page.waitForTimeout(1000)
+    await send(page, two)
+    await page.waitForTimeout(1500)
+
+    const stored = await serverMessages(request)
+    expect(stored).toContain(one)
+    expect(stored).toContain(two)
+  })
+
+  test('two tabs sending on the same blank tape both reach the server', async ({
+    context,
+    request,
+  }) => {
+    const a = await context.newPage()
+    await openApp(a)
+    const b = await context.newPage()
+    await b.route('**/api/claude-code', (r) => r.fulfill({ status: 500, body: 'stubbed' }))
+    await b.goto('/')
+    await b.waitForSelector('.app__header')
+
+    const fromA = `tab A ${Date.now()}`
+    const fromB = `tab B ${Date.now()}`
+    await send(a, fromA)
+    await a.waitForTimeout(1000)
+    await send(b, fromB)
+    await b.waitForTimeout(1500)
+
+    const stored = await serverMessages(request)
+    expect(stored).toContain(fromA)
+    expect(stored).toContain(fromB)
+
+    // ...and tab B still shows its message after reloading
+    await b.reload()
+    await b.waitForSelector('.app__header')
+    await b.waitForTimeout(1500)
+    await expect(b.locator('.app__main')).toContainText(fromB)
+  })
 })

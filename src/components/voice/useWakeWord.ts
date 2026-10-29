@@ -18,6 +18,10 @@ interface UseWakeWordOptions {
   // repeated failures), with a message for the user
   onError?: (message: string) => void
   enabled?: boolean
+  // The user's wake word setting. `enabled` also drops during every
+  // push-to-talk turn; this one only changes when the user flips the toggle,
+  // and turning it back on gives a blocked detector a fresh try.
+  userEnabled?: boolean
   language?: string
 }
 
@@ -39,6 +43,7 @@ export function useWakeWord({
   onWakeWord,
   onError,
   enabled = false,
+  userEnabled,
   language = 'en-US',
 }: UseWakeWordOptions = {}): UseWakeWordResult {
   const [isListening, setIsListening] = useState(false)
@@ -51,8 +56,9 @@ export function useWakeWord({
   const onErrorRef = useRef(onError)
   const restartTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   // Persist across effect re-runs (which happen on every push-to-talk turn):
-  // once the mic is blocked, stop trying until the page reloads or the wake
-  // word / language changes, instead of hammering a denied permission.
+  // once the mic is blocked, stop trying until the page reloads, the wake
+  // word / language changes, or the user toggles the wake word off and on,
+  // instead of hammering a denied permission.
   const blockedRef = useRef(false)
   const failuresRef = useRef(0)
 
@@ -68,7 +74,7 @@ export function useWakeWord({
     blockedRef.current = false
     failuresRef.current = 0
     setError(null)
-  }, [wakeWord, language])
+  }, [wakeWord, language, userEnabled])
 
   const isSupported =
     typeof window !== 'undefined' &&

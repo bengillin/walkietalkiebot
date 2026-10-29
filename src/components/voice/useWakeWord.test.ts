@@ -148,4 +148,20 @@ describe('useWakeWord restart behaviour', () => {
     expect(FakeRecognition.instances).toHaveLength(2)
     expect(current().start).toHaveBeenCalledTimes(1)
   })
+
+  it('turning the wake word off and on again gives a blocked detector a fresh try', () => {
+    const onError = vi.fn()
+    const { result, rerender } = renderHook(
+      ({ on }) => useWakeWord({ enabled: on, userEnabled: on, onError }),
+      { initialProps: { on: true } },
+    )
+    current().fail('not-allowed')
+    expect(result.current.error).not.toBeNull()
+
+    rerender({ on: false })
+    rerender({ on: true })
+    expect(result.current.error).toBeNull()
+    expect(FakeRecognition.instances).toHaveLength(2)
+    expect(current().start).toHaveBeenCalledTimes(1)
+  })
 })

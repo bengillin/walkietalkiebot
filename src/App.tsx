@@ -468,7 +468,7 @@ function App() {
             onClick={() => setShowHeaderMenu((prev) => !prev)}
             title="More"
             aria-label="More actions"
-            aria-haspopup="menu"
+            aria-controls="app-header-menu"
             aria-expanded={showHeaderMenu}
           >
             {HEADER_ICONS.more}
@@ -480,15 +480,17 @@ function App() {
               className="app__mobile-menu-backdrop app__header-menu-backdrop"
               onClick={() => setShowHeaderMenu(false)}
             />
+            {/* A disclosure (list of buttons), not an ARIA menu: Tab moves through
+                it and Escape closes it, with no roving focus to implement. */}
             <div
+              id="app-header-menu"
               className="app__mobile-menu app__header-menu"
-              role="menu"
+              role="group"
               aria-label="More actions"
             >
               {headerActions.map((action) => (
                 <button
                   key={action.key}
-                  role="menuitem"
                   className="app__mobile-menu-item"
                   onClick={() => {
                     setShowHeaderMenu(false)

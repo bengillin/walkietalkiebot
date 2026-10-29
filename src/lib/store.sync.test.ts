@@ -21,6 +21,7 @@ import {
   enableServerSync,
   flushServerWrites,
   mergeMessages,
+  migrateLocalStorageKeys,
   resetSyncStateForTesting,
 } from './store'
 
@@ -278,7 +279,7 @@ describe('lazy conversation creation', () => {
     useStore.getState().addMessage({ role: 'assistant', content: 'two' })
     await Promise.resolve()
     expect(apiMock.addMessage).not.toHaveBeenCalled()
-    create.resolve({ success: true })
+    create.resolve({ success: true, imported: 1, skipped: 0 })
     await flushServerWrites()
     // 'one' went with the creation; 'two' was added after it
     expect(apiMock.addMessage).toHaveBeenCalledTimes(1)
@@ -321,5 +322,147 @@ describe('lazy conversation creation', () => {
     useStore.getState().addMessage({ role: 'user', content: 'hi' })
     await flushServerWrites()
     expect(apiMock.updateConversationMode).toHaveBeenCalledWith('new', 'architect')
+  })
+})
+
+// Data-loss bugs found in review of the first-message fix
+describe('review: no lost messages or tapes', () => {
+  it('keeps a tape created while the conversation list was in flight', async () => {
+    setConversations([conv('t0', { localOnly: true })], 't0')
+    const list = deferred<{ conversations: unknown[]; total: number }>()
+    apiMock.listConversations.mockReturnValue(list.promise)
+    const sync = useStore.getState().syncFromServer()
+    await vi.waitFor(() => expect(apiMock.listConversations).toHaveBeenCalled())
+
+    useStore.getState().addMessage({ role: 'user', content: 'hello' })
+    await flushServerWrites() // the creation lands: t0 is no longer local-only
+    list.resolve({ conversations: [], total: 0 }) // ...but the snapshot predates it
+    await sync
+
+    const s = useStore.getState()
+    expect(s.currentConversationId).toBe('t0')
+    expect(s.messages.map((m) => m.content)).toEqual(['hello'])
+    expect(s.conversations.map((c) => c.id)).toEqual(['t0'])
+  })
+
+  it('still drops a synced tape missing from a list requested after our last write', async () => {
+    setConversations([conv('t0', { localOnly: true }), conv('gone', { localOnly: false })], 't0')
+    useStore.getState().addMessage({ role: 'user', content: 'hello' })
+    await flushServerWrites()
+    apiMock.listConversations.mockResolvedValue({ conversations: [meta('t0', 5)], total: 1 })
+    apiMock.getConversation.mockResolvedValue(serverConv('t0', [], 5))
+    await useStore.getState().syncFromServer()
+    expect(useStore.getState().conversations.map((c) => c.id)).toEqual(['t0'])
+  })
+
+  it('does not treat a "skipped" import as stored (lost response on the first send)', async () => {
+    setConversations([conv('t0', { localOnly: true })], 't0')
+    apiMock.migrateFromLocalStorage
+      .mockRejectedValueOnce(new Error('network: response lost (server committed)'))
+      // An older server answers a repeat with "already exists" and stores nothing
+      .mockResolvedValueOnce({ success: true, imported: 0, skipped: 1 })
+    useStore.getState().addMessage({ role: 'user', content: 'first' })
+    await flushServerWrites()
+    useStore.getState().addMessage({ role: 'user', content: 'second' })
+    await flushServerWrites()
+
+    const posted = apiMock.addMessage.mock.calls.map((c) => (c[1] as { content: string }).content)
+    expect(posted).toContain('second')
+  })
+
+  it('retries the import with every message after a lost response, and trusts its per-tape result', async () => {
+    setConversations([conv('t0', { localOnly: true })], 't0')
+    apiMock.migrateFromLocalStorage
+      .mockRejectedValueOnce(new Error('network: response lost'))
+      .mockResolvedValueOnce({
+        success: true,
+        imported: 0,
+        skipped: 1,
+        results: [{ id: 't0', ok: true, created: false, messagesAdded: 1 }],
+      })
+    useStore.getState().addMessage({ role: 'user', content: 'first' })
+    await flushServerWrites()
+    expect(useStore.getState().conversations[0]?.localOnly).toBe(true)
+    useStore.getState().addMessage({ role: 'user', content: 'second' })
+    await flushServerWrites()
+
+    const retry = apiMock.migrateFromLocalStorage.mock.calls[1]?.[0] as Conversation[]
+    expect(retry[0]?.messages.map((m) => m.content)).toEqual(['first', 'second'])
+    expect(apiMock.addMessage).not.toHaveBeenCalled()
+    expect(useStore.getState().conversations[0]?.localOnly).toBe(false)
+  })
+
+  it('keeps a tape local-only when the server reports its import failed', async () => {
+    setConversations([conv('t0', { localOnly: true })], 't0')
+    apiMock.migrateFromLocalStorage.mockResolvedValueOnce({
+      success: false,
+      imported: 0,
+      skipped: 0,
+      results: [{ id: 't0', ok: false, error: 'boom' }],
+    })
+    useStore.getState().addMessage({ role: 'user', content: 'first' })
+    await flushServerWrites()
+    expect(useStore.getState().conversations[0]?.localOnly).toBe(true)
+    expect(apiMock.addMessage).not.toHaveBeenCalled()
+  })
+
+  it('deleting a tape while its creation is in flight deletes it on the server', async () => {
+    setConversations(
+      [conv('t0', { localOnly: true }), conv('t1', { localOnly: false, messages: [msg('x', 1)] })],
+      't0',
+    )
+    const create = deferred<unknown>()
+    apiMock.migrateFromLocalStorage.mockReturnValue(create.promise)
+    useStore.getState().addMessage({ role: 'user', content: 'oops' })
+    await vi.waitFor(() => expect(apiMock.migrateFromLocalStorage).toHaveBeenCalled())
+    useStore.getState().deleteConversation('t0')
+    create.resolve({ success: true, imported: 1, skipped: 0 })
+    await flushServerWrites()
+    expect(apiMock.deleteConversation).toHaveBeenCalledWith('t0')
+  })
+
+  it('a queued send for a deleted tape does not create it', async () => {
+    setConversations([conv('t0', { localOnly: true }), conv('t1', { localOnly: false })], 't0')
+    // Liner notes create the (empty) tape first; the send queues behind that
+    const create = deferred<unknown>()
+    apiMock.createConversation.mockReturnValueOnce(create.promise)
+    void useStore.getState().saveLinerNotes('t0', 'notes')
+    await vi.waitFor(() => expect(apiMock.createConversation).toHaveBeenCalled())
+    useStore.getState().addMessage({ role: 'user', content: 'queued' })
+    useStore.getState().deleteConversation('t0')
+    create.resolve({})
+    await flushServerWrites()
+    expect(apiMock.migrateFromLocalStorage).not.toHaveBeenCalled()
+    expect(apiMock.addMessage).not.toHaveBeenCalled()
+    expect(apiMock.deleteConversation).toHaveBeenCalledWith('t0')
+  })
+
+  it('"New tape" on an unhydrated server tape starts a new one', () => {
+    setConversations([conv('old', { localOnly: false, stale: true, title: 'Important' })], 'old')
+    useStore.getState().createConversation()
+    expect(useStore.getState().currentConversationId).not.toBe('old')
+  })
+
+  it('the first message seen on an unhydrated server tape does not retitle it', async () => {
+    setConversations([conv('old', { localOnly: false, stale: true, title: 'Important' })], 'old')
+    useStore.getState().addMessage({ role: 'user', content: 'unrelated new topic' })
+    await flushServerWrites()
+    expect(apiMock.updateConversation).not.toHaveBeenCalled()
+    expect(useStore.getState().conversations[0]?.title).toBe('Important')
+  })
+})
+
+describe('migrateLocalStorageKeys', () => {
+  it('keeps wtb_* data and renames legacy talkboy_/talkie_ keys', () => {
+    localStorage.clear()
+    localStorage.setItem('wtb_conversations', '[{"id":"keep"}]')
+    localStorage.setItem('talkie_tts_voice', 'Samantha')
+    localStorage.setItem('talkboy_theme', 'aol')
+    migrateLocalStorageKeys()
+    expect(localStorage.getItem('wtb_conversations')).toBe('[{"id":"keep"}]')
+    expect(localStorage.getItem('wtb_tts_voice')).toBe('Samantha')
+    expect(localStorage.getItem('wtb_theme')).toBe('aol')
+    expect(localStorage.getItem('talkie_tts_voice')).toBeNull()
+    expect(localStorage.getItem('_wtb_keys_migrated')).toBe('1')
   })
 })

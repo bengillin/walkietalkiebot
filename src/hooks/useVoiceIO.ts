@@ -182,6 +182,7 @@ export function useVoiceIO({
   useWakeWord({
     wakeWord: customWakeWord || 'hey talkie',
     enabled: wakeWordEnabled && !isListening && !isSpeaking && avatarState !== 'thinking',
+    userEnabled: wakeWordEnabled,
     onWakeWord: () => {
       log.debug('Wake word detected, starting recording')
       handleTalkStart()

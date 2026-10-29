@@ -71,6 +71,17 @@ export interface MigrationResult {
   imported: number
   skipped: number
   total: number
+  /**
+   * Per conversation. `ok` means every message sent for it is now stored
+   * (added, or already there). Missing from servers older than this field.
+   */
+  results?: Array<{
+    id: string
+    ok: boolean
+    created?: boolean
+    messagesAdded?: number
+    error?: string
+  }>
 }
 
 const API_BASE = '/api'
@@ -132,10 +143,16 @@ export async function updateConversation(
   })
 }
 
+// Deleting is idempotent from the client's side: a tape that is already gone
+// (deleted in another tab, or never created) is a success, not an error.
 export async function deleteConversation(id: string): Promise<{ success: boolean }> {
-  return fetchJson(`${API_BASE}/conversations/${id}`, {
-    method: 'DELETE',
-  })
+  const response = await fetch(`${API_BASE}/conversations/${id}`, { method: 'DELETE' })
+  if (response.status === 404) return { success: true }
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: response.statusText }))
+    throw new Error(error.error || `API error: ${response.status}`)
+  }
+  return response.json()
 }
 
 export async function importConversation(data: {

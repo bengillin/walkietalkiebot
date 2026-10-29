@@ -31,13 +31,15 @@ function activityToStored(activity: Activity): StoredActivity | null {
   }
 }
 
-// One-time migration: rename talkboy_*/talkie_* localStorage keys → wtb_*
-function migrateLocalStorageKeys() {
+// One-time migration: rename talkboy_*/talkie_* localStorage keys → wtb_*.
+// Only legacy-prefixed keys are touched: a wtb_* key maps to itself, and
+// removing it would delete the very data being migrated to.
+export function migrateLocalStorageKeys() {
   if (localStorage.getItem('_wtb_keys_migrated')) return
   const keysToMigrate: string[] = []
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i)
-    if (key?.startsWith('talkboy_') || key?.startsWith('wtb_')) keysToMigrate.push(key)
+    if (key?.startsWith('talkboy_') || key?.startsWith('talkie_')) keysToMigrate.push(key)
   }
   for (const oldKey of keysToMigrate) {
     const newKey = oldKey.replace(/^talkboy_|^talkie_/, 'wtb_')
@@ -149,14 +151,30 @@ const deletedIds = new Set<string>()
 // Per-conversation server write queue: keeps creation → messages → title in
 // order, so the server never sees a message for a conversation it lacks.
 const writeQueues = new Map<string, Promise<unknown>>()
+
+// When each conversation's writes last settled, on a counter shared with
+// syncFromServer (Infinity while a write is queued or in flight). A server list
+// requested before that point can't reflect our writes, so a tape missing from
+// it was not "deleted elsewhere" — it may have been created after the snapshot.
+let writeClock = 0
+const lastWriteSettled = new Map<string, number>()
+
 function enqueueWrite(id: string, label: string, task: () => Promise<unknown>): Promise<void> {
   const prev = writeQueues.get(id) ?? Promise.resolve()
-  const next = prev.then(task).then(
+  lastWriteSettled.set(id, Infinity)
+  const next: Promise<void> = prev.then(task).then(
     () => undefined,
     (err) => log.warn(`${label}:`, err),
   )
   writeQueues.set(id, next)
+  void next.then(() => {
+    if (writeQueues.get(id) === next) lastWriteSettled.set(id, ++writeClock)
+  })
   return next
+}
+
+function hasPendingWrite(id: string): boolean {
+  return lastWriteSettled.get(id) === Infinity
 }
 
 /** Test hook: wait for all queued server writes to settle. */
@@ -170,6 +188,8 @@ export function resetSyncStateForTesting() {
   serverProjectId = null
   deletedIds.clear()
   writeQueues.clear()
+  lastWriteSettled.clear()
+  writeClock = 0
 }
 
 export const useStore = create<AppState>((set, get) => {
@@ -194,18 +214,32 @@ export const useStore = create<AppState>((set, get) => {
 
   /**
    * Make sure a conversation exists on the server. Resolves to the ids of the
-   * messages the creation itself carried (so callers don't re-post them).
+   * messages the server confirmed it now stores (so callers don't re-post them).
    * Must be called from inside the conversation's write queue.
+   *
+   * Both server calls are idempotent: creating an existing id returns it, and
+   * the import adds only the messages the server lacks. That matters because a
+   * "local-only" tape may already exist server-side — the creation's response
+   * was lost, or another tab created the same blank tape first.
    */
   const ensureServerConversation = async (id: string): Promise<Set<string>> => {
     const conv = get().conversations.find((c) => c.id === id)
     if (!conv || !conv.localOnly) return new Set()
 
+    let stored = new Set<string>()
     if (conv.messages.length === 0) {
       await api.createConversation({ id, title: conv.title, mode: conv.mode })
     } else {
       // Branches arrive with copied messages: create them in one go.
-      await api.migrateFromLocalStorage([conv])
+      const result = await api.migrateFromLocalStorage([conv])
+      const outcome = result.results?.find((r) => r.id === id)
+      if (outcome ? !outcome.ok : !result.success) {
+        throw new Error(`Server did not store conversation ${id}: ${outcome?.error ?? 'unknown'}`)
+      }
+      // Only a confirmed outcome (or a fresh import) proves the messages are
+      // stored. A bare "skipped" from an older server means it already had the
+      // tape, not that it has these messages — those get posted one by one.
+      if (outcome || result.imported > 0) stored = new Set(conv.messages.map((m) => m.id))
       if (conv.mode) await api.updateConversationMode(id, conv.mode)
     }
     if (conv.projectId || conv.parentId) {
@@ -217,7 +251,7 @@ export const useStore = create<AppState>((set, get) => {
         .catch((err) => log.warn('Failed to set conversation project/parent:', err))
     }
     updateConversations((c) => (c.id === id ? { ...c, localOnly: false } : c))
-    return new Set(conv.messages.map((m) => m.id))
+    return stored
   }
 
   return {
@@ -239,7 +273,11 @@ export const useStore = create<AppState>((set, get) => {
       }
 
       const newMessages = [...state.messages, newMessage]
-      const isFirstMessage = state.messages.length === 0
+      // Only a tape that has never reached the server is known to be empty.
+      // An unhydrated (stale) tape has no local messages but may have plenty
+      // on the server, and its title must not be overwritten.
+      const currentConv = state.conversations.find((c) => c.id === state.currentConversationId)
+      const isFirstMessage = state.messages.length === 0 && currentConv?.localOnly === true
 
       // Update local state immediately
       const conversations = state.conversations.map((conv) => {
@@ -265,6 +303,7 @@ export const useStore = create<AppState>((set, get) => {
       const conversationId = state.currentConversationId
       if (serverSyncEnabled && conversationId) {
         enqueueWrite(conversationId, 'Failed to sync message to server', async () => {
+          if (deletedIds.has(conversationId)) return
           const seeded = await ensureServerConversation(conversationId)
           if (seeded.has(newMessage.id)) return
           await api.addMessage(conversationId, {
@@ -299,10 +338,10 @@ export const useStore = create<AppState>((set, get) => {
         // A blank tape is already loaded (or sitting unused): reuse it rather
         // than piling up empty tapes.
         const current = state.conversations.find((c) => c.id === state.currentConversationId)
-        const blank =
-          current && current.messages.length === 0
-            ? current
-            : state.conversations.find((c) => c.localOnly && c.messages.length === 0)
+        // Only local-only tapes are known to be blank: an unhydrated server
+        // tape has no local messages either.
+        const isBlank = (c: Conversation) => c.localOnly === true && c.messages.length === 0
+        const blank = current && isBlank(current) ? current : state.conversations.find(isBlank)
         if (blank) {
           set({
             currentConversationId: blank.id,
@@ -443,8 +482,10 @@ export const useStore = create<AppState>((set, get) => {
       })
 
       // Sync to server — queued so it lands after any in-flight creation.
-      // A tape the server never had needs no delete.
-      if (serverSyncEnabled && deleted && !deleted.localOnly) {
+      // A tape the server never had needs no delete, but "local-only" is only
+      // known once pending writes settle: a creation may be on its way. Deleting
+      // a tape the server doesn't have is a no-op (404 counts as success).
+      if (serverSyncEnabled && deleted && (!deleted.localOnly || hasPendingWrite(id))) {
         enqueueWrite(id, 'Failed to delete conversation on server', () =>
           api.deleteConversation(id),
         )
@@ -715,6 +756,7 @@ export const useStore = create<AppState>((set, get) => {
       // Sync to server (notes are content: they bring a local-only tape into being)
       if (serverSyncEnabled) {
         enqueueWrite(conversationId, 'Failed to save liner notes to server', async () => {
+          if (deletedIds.has(conversationId)) return
           await ensureServerConversation(conversationId)
           await api.saveLinerNotes(conversationId, notes)
         })
@@ -733,6 +775,8 @@ export const useStore = create<AppState>((set, get) => {
       if (!serverSyncEnabled) return
 
       try {
+        // Writes that settle after this point may be missing from the list
+        const listRequestedAt = ++writeClock
         // Metadata only — one cheap request per page of 100, instead of a full
         // fetch (messages + base64 images) for every tape.
         const serverList: api.Conversation[] = []
@@ -746,16 +790,20 @@ export const useStore = create<AppState>((set, get) => {
         // Tapes cached by a build before `localOnly` existed have no marker, so we
         // can't tell "deleted on the server" from "never reached it" (the old
         // create-id race left messages only in localStorage). Upload the ones with
-        // content through the import endpoint rather than dropping them; that
+        // content through POST /api/migrate rather than dropping them; that
         // matches what the old sync did, which kept every local tape.
         const listedIds = new Set(serverList.map((c) => c.id))
         const legacyOrphans = get().conversations.filter(
           (c) => c.localOnly === undefined && !listedIds.has(c.id) && c.messages.length > 0,
         )
-        let rescued = false
+        const rescued = new Set<string>()
         if (legacyOrphans.length > 0) {
           try {
-            rescued = (await api.migrateFromLocalStorage(legacyOrphans)).success
+            const result = await api.migrateFromLocalStorage(legacyOrphans)
+            for (const c of legacyOrphans) {
+              const outcome = result.results?.find((r) => r.id === c.id)
+              if (outcome ? outcome.ok : result.success) rescued.add(c.id)
+            }
           } catch (err) {
             log.warn('Could not upload tapes that only exist in this browser; will retry:', err)
           }
@@ -813,15 +861,18 @@ export const useStore = create<AppState>((set, get) => {
             merged.push(conv)
           }
 
-          // Local tapes the server doesn't list: keep only ones that were never
-          // synced. Anything else was deleted elsewhere — don't resurrect it.
+          // Local tapes the server doesn't list: keep ones that were never
+          // synced, and ones we wrote to after the list was requested (created
+          // while it was in flight, so the snapshot couldn't include them).
+          // Anything else was deleted elsewhere — don't resurrect it.
           for (const local of state.conversations) {
             if (serverIds.has(local.id) || deletedIds.has(local.id)) continue
-            if (local.localOnly) merged.push(local)
+            const writtenSinceList = (lastWriteSettled.get(local.id) ?? -1) > listRequestedAt
+            if (local.localOnly || writtenSinceList) merged.push(local)
             // Uploaded: now on the server. Upload failed: keep it unmarked so the
             // next sync tries again.
             else if (legacyIds.has(local.id))
-              merged.push(rescued ? { ...local, localOnly: false } : local)
+              merged.push(rescued.has(local.id) ? { ...local, localOnly: false } : local)
           }
 
           merged.sort((a, b) => b.updatedAt - a.updatedAt)
