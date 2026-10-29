@@ -6,6 +6,7 @@ import {
   isLoopbackHost,
   requestGuard,
   resolveBindHost,
+  resolveBindHosts,
 } from './security.js'
 
 function makeApp() {
@@ -65,6 +66,16 @@ describe('bind host', () => {
   it('allows a non-loopback bind once a token is set', () => {
     process.env.WTB_AUTH_TOKEN = 'secret'
     expect(() => assertSafeBind('0.0.0.0')).not.toThrow()
+  })
+
+  it('listens on both loopback addresses by default, so nothing can sit on ::1', () => {
+    expect(resolveBindHosts()).toEqual(['127.0.0.1', '::1'])
+    process.env.WTB_HOST = '100.64.0.1'
+    expect(resolveBindHosts()).toEqual(['100.64.0.1'])
+  })
+
+  it('does not trust *.localhost names as bind addresses (they can map anywhere)', () => {
+    expect(() => assertSafeBind('box.localhost')).toThrow(/WTB_AUTH_TOKEN/)
   })
 
   it('always allows loopback', () => {

@@ -14,9 +14,9 @@ import { updateState } from './state.js'
 import { getNotificationDispatcher } from './notifications/dispatcher.js'
 import { MacOSNotificationChannel } from './notifications/macos.js'
 import { getJobManager } from './jobs/manager.js'
-import { killAllClaudeProcesses } from './jobs/runner.js'
+import { killAllClaudeProcesses, waitForClaudeProcesses } from './jobs/runner.js'
 import { authMiddleware, getAuthToken, hasValidCredentials } from './auth.js'
-import { assertSafeBind, isLoopbackHost, requestGuard, resolveBindHost } from './security.js'
+import { assertSafeBind, isLoopbackHost, requestGuard, resolveBindHosts } from './security.js'
 
 import { createLogger } from './logger.js'
 
@@ -29,13 +29,15 @@ const distPath = join(__dirname, '..', 'dist')
 // override with WTB_MAX_BODY_BYTES.
 const MAX_BODY_BYTES = Number(process.env.WTB_MAX_BODY_BYTES) || 50 * 1024 * 1024
 
-let server: Server | import('https').Server | null = null
+type AnyServer = Server | import('https').Server
+// One listener per bound address (loopback by default means both 127.0.0.1 and ::1).
+let servers: AnyServer[] = []
 
 export function startServer(port: number = 5173): Promise<void> {
   return new Promise((resolve, reject) => {
-    const host = resolveBindHost()
+    const hosts = resolveBindHosts()
     try {
-      assertSafeBind(host)
+      hosts.forEach(assertSafeBind)
     } catch (err) {
       reject(err)
       return
@@ -120,7 +122,7 @@ export function startServer(port: number = 5173): Promise<void> {
     const certs = getSSLCerts()
     const protocol = certs ? 'https' : 'http'
 
-    const handler = async (req: IncomingMessage, res: ServerResponse) => {
+    const handleRequest = async (req: IncomingMessage, res: ServerResponse) => {
       // Convert Node request to Web Request
       const url = new URL(req.url || '/', `${protocol}://localhost:${port}`)
       const headers = new Headers()
@@ -162,7 +164,8 @@ export function startServer(port: number = 5173): Promise<void> {
           res.end(JSON.stringify({ error: 'Payload too large' }))
           return
         }
-        body = Buffer.concat(chunks)
+        // An empty POST (e.g. /api/modes/reload) has no body, not an empty one.
+        body = chunks.length > 0 ? Buffer.concat(chunks) : null
       }
 
       const request = new Request(url.toString(), {
@@ -200,35 +203,85 @@ export function startServer(port: number = 5173): Promise<void> {
       res.end()
     }
 
-    if (certs) {
-      const serverOptions: ServerOptions = { key: certs.key, cert: certs.cert }
-      server = createHttpsServer(serverOptions, handler)
-    } else {
-      server = createHttpServer(handler)
+    // An exception in one request (a malformed header, a bug in a route) must
+    // answer that request with a 500, not take the whole process down.
+    const handler = (req: IncomingMessage, res: ServerResponse) => {
+      handleRequest(req, res).catch((err) => {
+        log.error('Request failed:', err)
+        if (!res.headersSent) {
+          res.writeHead(500, { 'content-type': 'application/json' })
+          res.end(JSON.stringify({ error: 'Internal server error' }))
+        } else {
+          res.destroy()
+        }
+      })
     }
 
-    server.listen(port, host, () => {
-      const loopback = isLoopbackHost(host)
-      const shownHost = loopback ? 'localhost' : host
-      const url = `${protocol}://${shownHost}:${port}`
-      log.info(`Talkie server running at ${url}`)
-      if (!loopback) {
-        log.info(`Listening on ${host}, so other machines can reach it. Auth is required.`)
-      }
-      if (getAuthToken()) {
-        log.info(`Auth enabled. Sign in once with: ${url}/?token=<your WTB_AUTH_TOKEN>`)
-      }
-      resolve()
-    })
+    const createServer = () =>
+      certs
+        ? createHttpsServer({ key: certs.key, cert: certs.cert } satisfies ServerOptions, handler)
+        : createHttpServer(handler)
 
-    server.on('error', (err: NodeJS.ErrnoException) => {
-      if (err.code === 'EADDRINUSE') {
-        reject(new Error(`Port ${port} is already in use`))
-      } else {
-        reject(err)
-      }
-    })
+    listenAll(createServer, port, hosts)
+      .then((bound) => {
+        servers = bound
+        const loopback = hosts.every(isLoopbackHost)
+        const shownHost = loopback ? 'localhost' : hosts[0]
+        const url = `${protocol}://${shownHost}:${port}`
+        log.info(`Talkie server running at ${url}`)
+        if (!loopback) {
+          log.info(
+            `Listening on ${hosts.join(', ')}, so other machines can reach it. Auth is required.`,
+          )
+        }
+        if (getAuthToken()) {
+          log.info(`Auth enabled. Sign in once with: ${url}/?token=<your WTB_AUTH_TOKEN>`)
+        }
+        resolve()
+      })
+      .catch(reject)
   })
+}
+
+/**
+ * Listen on every host, or on none. Loopback means both 127.0.0.1 and ::1: binding
+ * only one leaves the other free for another program (Vite binds ::1 on macOS), and
+ * `localhost` would then quietly reach that program instead of this one. A missing
+ * IPv6 stack is fine; a port taken on either address is an error.
+ */
+async function listenAll(
+  createServer: () => AnyServer,
+  port: number,
+  hosts: string[],
+): Promise<AnyServer[]> {
+  const bound: AnyServer[] = []
+  try {
+    for (const host of hosts) {
+      const srv = createServer()
+      try {
+        await new Promise<void>((resolve, reject) => {
+          srv.once('error', reject)
+          srv.listen(port, host, () => {
+            srv.off('error', reject)
+            resolve()
+          })
+        })
+        bound.push(srv)
+      } catch (err) {
+        const code = (err as NodeJS.ErrnoException).code
+        if (code === 'EADDRINUSE') throw new Error(`Port ${port} is already in use`)
+        if (host === '::1' && (code === 'EADDRNOTAVAIL' || code === 'EAFNOSUPPORT')) {
+          log.debug('IPv6 loopback unavailable; listening on 127.0.0.1 only')
+          continue
+        }
+        throw err
+      }
+    }
+    return bound
+  } catch (err) {
+    bound.forEach((srv) => srv.close())
+    throw err
+  }
 }
 
 export async function stopServer(): Promise<void> {
@@ -236,15 +289,20 @@ export async function stopServer(): Promise<void> {
   // callbacks would write to a closed database.
   killAllClaudeProcesses()
 
-  if (server) {
-    const closing = new Promise<void>((resolve) => {
-      server!.close(() => resolve())
-    })
-    // close() waits for open connections, and SSE streams stay open; don't hang.
-    server.closeAllConnections?.()
-    await closing
-    server = null
-  }
+  await Promise.all(
+    servers.map(
+      (srv) =>
+        new Promise<void>((resolve) => {
+          srv.close(() => resolve())
+          // close() waits for open connections, and SSE streams stay open; don't hang.
+          srv.closeAllConnections?.()
+        }),
+    ),
+  )
+  servers = []
+
+  // Give agents the grace period to exit on SIGTERM, then SIGKILL what's left.
+  await waitForClaudeProcesses()
 
   closeDb()
 }

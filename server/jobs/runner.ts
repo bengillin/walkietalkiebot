@@ -152,9 +152,14 @@ export function spawnClaude(options: RunnerOptions): RunnerHandle {
     const tempDir = join(tmpdir(), 'wtb-images')
     mkdirSync(tempDir, { recursive: true })
     for (const img of images) {
+      // Request bodies are untrusted JSON; skip anything that isn't a data URL.
+      if (typeof img?.dataUrl !== 'string') continue
       const base64Data = img.dataUrl.split(',')[1]
       if (!base64Data) continue
-      const ext = img.fileName.split('.').pop() || 'png'
+      const named = typeof img.fileName === 'string' ? img.fileName : ''
+      const ext = /^[a-z0-9]{1,8}$/i.test(named.split('.').pop() ?? '')
+        ? (named.split('.').pop() as string)
+        : 'png'
       const tempPath = join(tempDir, `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`)
       writeFileSync(tempPath, Buffer.from(base64Data, 'base64'))
       tempImagePaths.push(tempPath)
@@ -313,42 +318,89 @@ export function spawnClaude(options: RunnerOptions): RunnerHandle {
   }
 }
 
-// Every live `claude` child, so shutdown can stop them instead of leaving
-// bypass-permissions agents running with nobody listening.
-const liveChildren = new Set<ChildProcess>()
+// Process groups of `claude` children we started and haven't seen fully exit.
+// Tracked by group, not by child: when the CLI itself exits, shell commands its
+// Bash tool started can still be running in the group.
+const liveGroups = new Set<number>()
 
 /** How long a killed process group gets to exit after SIGTERM before SIGKILL. */
 const KILL_GRACE_MS = 5000
 
+/** Whether any process is left in group `pgid` (pruning it from liveGroups if not). */
+function groupAlive(pgid: number): boolean {
+  try {
+    process.kill(-pgid, 0)
+    return true
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === 'EPERM') return true
+    liveGroups.delete(pgid)
+    return false
+  }
+}
+
+function signalGroup(pgid: number, signal: NodeJS.Signals): boolean {
+  try {
+    process.kill(-pgid, signal)
+    return true
+  } catch {
+    return false
+  }
+}
+
 /**
  * Stop a `claude` process and everything it started. Children are spawned as
  * process-group leaders (detached), so signalling the negative pid reaches the
- * shell commands Claude's Bash tool launched, not just the CLI itself.
+ * shell commands Claude's Bash tool launched, not just the CLI itself. Whatever
+ * in the group ignores SIGTERM gets SIGKILL after the grace period, even if the
+ * CLI itself already exited. (A pgid can't be reused while any member is alive,
+ * so the delayed signal can't hit an unrelated group.)
  */
 export function killProcessTree(child: ChildProcess): void {
   const pid = child.pid
-  if (!pid || child.exitCode != null || child.signalCode != null) return
-  const signalGroup = (signal: NodeJS.Signals) => {
+  if (!pid) return
+  if (!signalGroup(pid, 'SIGTERM')) {
     try {
-      process.kill(-pid, signal)
+      child.kill('SIGTERM')
     } catch {
-      try {
-        child.kill(signal)
-      } catch {
-        /* already gone */
-      }
+      /* already gone */
     }
+    return
   }
-  signalGroup('SIGTERM')
-  const escalate = setTimeout(() => signalGroup('SIGKILL'), KILL_GRACE_MS)
+  const escalate = setTimeout(() => {
+    if (groupAlive(pid)) signalGroup(pid, 'SIGKILL')
+  }, KILL_GRACE_MS)
   escalate.unref()
-  child.once('close', () => clearTimeout(escalate))
 }
 
-/** Kill every running `claude` process. Called on server shutdown. */
+/** SIGTERM every agent group we started. Called on server shutdown. */
 export function killAllClaudeProcesses(): void {
-  for (const child of liveChildren) killProcessTree(child)
+  for (const pgid of liveGroups) signalGroup(pgid, 'SIGTERM')
 }
+
+/**
+ * Wait up to the grace period for every agent group to exit, then SIGKILL the
+ * rest. Shutdown awaits this; the escalation timers in killProcessTree are
+ * unref'd and would otherwise die with the process.
+ */
+export async function waitForClaudeProcesses(timeoutMs = KILL_GRACE_MS): Promise<void> {
+  const deadline = Date.now() + timeoutMs
+  while ([...liveGroups].some(groupAlive) && Date.now() < deadline) {
+    await new Promise((r) => setTimeout(r, 100))
+  }
+  for (const pgid of liveGroups) signalGroup(pgid, 'SIGKILL')
+  liveGroups.clear()
+}
+
+/** Test-only: forget tracked groups (fake children use made-up pids). */
+export function _resetProcessTrackingForTesting(): void {
+  liveGroups.clear()
+}
+
+// Last resort if the process exits any other way (crash, process.exit elsewhere):
+// don't leave bypass-permissions agents running with nobody supervising them.
+process.on('exit', () => {
+  for (const pgid of liveGroups) signalGroup(pgid, 'SIGKILL')
+})
 
 /**
  * Low-level: spawn a single `claude -p` process for the given args and stream
@@ -368,7 +420,7 @@ function runClaudeProcess(
     // Own process group, so killProcessTree can take down Bash-tool grandchildren.
     detached: true,
   })
-  liveChildren.add(claude)
+  if (claude.pid) liveGroups.add(claude.pid)
 
   let buffer = ''
   const toolInputs: Record<string, string> = {}
@@ -513,7 +565,8 @@ function runClaudeProcess(
     // 'error' and 'close' can both fire for one process; report the outcome once.
     let settled = false
     const finish = (code: number) => {
-      liveChildren.delete(claude)
+      // Stop tracking the group once nothing in it is left running.
+      if (claude.pid) groupAlive(claude.pid)
       if (settled) return
       settled = true
       callbacks.onComplete(code)

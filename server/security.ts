@@ -23,6 +23,24 @@ export function resolveBindHost(): string {
   return host && host.length > 0 ? host : DEFAULT_BIND_HOST
 }
 
+/**
+ * Addresses to listen on. The default is both loopback addresses, since clients
+ * resolving `localhost` may pick either (see listenAll in index.ts).
+ */
+export function resolveBindHosts(): string[] {
+  const host = resolveBindHost()
+  return process.env.WTB_HOST?.trim() ? [host] : [DEFAULT_BIND_HOST, '::1']
+}
+
+/**
+ * Stricter than isLoopbackHost: a bind address must be literally loopback. A name
+ * like `box.localhost` could map anywhere via /etc/hosts.
+ */
+function isLoopbackBindAddress(host: string): boolean {
+  const h = host.toLowerCase().replace(/^\[|\]$/g, '')
+  return h === 'localhost' || h === '::1' || /^127(\.\d{1,3}){3}$/.test(h)
+}
+
 /** True for names and addresses that only this machine can reach. */
 export function isLoopbackHost(hostname: string): boolean {
   const h = hostname.toLowerCase().replace(/^\[|\]$/g, '')
@@ -36,7 +54,7 @@ export function isLoopbackHost(hostname: string): boolean {
  * The message is shown to the user as-is, so it says how to fix it.
  */
 export function assertSafeBind(host: string): void {
-  if (isLoopbackHost(host) || getAuthToken()) return
+  if (isLoopbackBindAddress(host) || getAuthToken()) return
   throw new Error(
     `Refusing to listen on ${host} without authentication. Anyone who can reach this ` +
       `address could run commands on this machine through Claude Code.\n` +

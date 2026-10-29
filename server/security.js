@@ -4,12 +4,20 @@ function resolveBindHost() {
   const host = process.env.WTB_HOST?.trim();
   return host && host.length > 0 ? host : DEFAULT_BIND_HOST;
 }
+function resolveBindHosts() {
+  const host = resolveBindHost();
+  return process.env.WTB_HOST?.trim() ? [host] : [DEFAULT_BIND_HOST, "::1"];
+}
+function isLoopbackBindAddress(host) {
+  const h = host.toLowerCase().replace(/^\[|\]$/g, "");
+  return h === "localhost" || h === "::1" || /^127(\.\d{1,3}){3}$/.test(h);
+}
 function isLoopbackHost(hostname) {
   const h = hostname.toLowerCase().replace(/^\[|\]$/g, "");
   return h === "localhost" || h.endsWith(".localhost") || h === "::1" || /^127(\.\d{1,3}){3}$/.test(h);
 }
 function assertSafeBind(host) {
-  if (isLoopbackHost(host) || getAuthToken()) return;
+  if (isLoopbackBindAddress(host) || getAuthToken()) return;
   throw new Error(
     `Refusing to listen on ${host} without authentication. Anyone who can reach this address could run commands on this machine through Claude Code.
 Set WTB_AUTH_TOKEN (e.g. export WTB_AUTH_TOKEN="$(openssl rand -hex 32)"), or unset WTB_HOST to listen on ${DEFAULT_BIND_HOST} only.`
@@ -68,5 +76,6 @@ export {
   hostnameOf,
   isLoopbackHost,
   requestGuard,
-  resolveBindHost
+  resolveBindHost,
+  resolveBindHosts
 };

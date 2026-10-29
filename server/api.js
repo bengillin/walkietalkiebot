@@ -653,8 +653,14 @@ const MAX_CONCURRENT_CHATS = 4;
 let activeChats = 0;
 api.post("/claude-code", async (c) => {
   const { message, history, images, mode, conversationId } = await c.req.json();
-  if (!message) {
+  if (!message || typeof message !== "string") {
     return c.json({ error: "Message required" }, 400);
+  }
+  if (history !== void 0 && !Array.isArray(history)) {
+    return c.json({ error: "history must be an array" }, 400);
+  }
+  if (images !== void 0 && (!Array.isArray(images) || !images.every((img) => typeof img === "object" && img && typeof img.dataUrl === "string"))) {
+    return c.json({ error: "images must be an array of { dataUrl, fileName }" }, 400);
   }
   if (activeChats >= MAX_CONCURRENT_CHATS) {
     return c.json(
@@ -666,32 +672,32 @@ api.post("/claude-code", async (c) => {
   }
   activeChats++;
   return streamSSE(c, async (stream) => {
-    const handle = spawnClaude({
-      prompt: message,
-      history: history || state.messages || [],
-      images,
-      mode,
-      conversationId,
-      callbacks: {
-        onText: (text) => {
-          stream.writeSSE({ data: JSON.stringify({ text }) });
-        },
-        onActivity: (event) => {
-          stream.writeSSE({ data: JSON.stringify({ activity: event }) });
-        },
-        onPlan: (plan) => {
-          stream.writeSSE({ data: JSON.stringify({ plan }) });
-        },
-        onError: (error) => {
-          stream.writeSSE({ data: JSON.stringify({ error }) });
-        },
-        onComplete: (code) => {
-          stream.writeSSE({ data: JSON.stringify({ done: true, code }) });
-        }
-      }
-    });
-    stream.onAbort(() => handle.kill());
     try {
+      const handle = spawnClaude({
+        prompt: message,
+        history: history || state.messages || [],
+        images,
+        mode,
+        conversationId,
+        callbacks: {
+          onText: (text) => {
+            stream.writeSSE({ data: JSON.stringify({ text }) });
+          },
+          onActivity: (event) => {
+            stream.writeSSE({ data: JSON.stringify({ activity: event }) });
+          },
+          onPlan: (plan) => {
+            stream.writeSSE({ data: JSON.stringify({ plan }) });
+          },
+          onError: (error) => {
+            stream.writeSSE({ data: JSON.stringify({ error }) });
+          },
+          onComplete: (code) => {
+            stream.writeSSE({ data: JSON.stringify({ done: true, code }) });
+          }
+        }
+      });
+      stream.onAbort(() => handle.kill());
       await handle.promise;
     } finally {
       activeChats--;

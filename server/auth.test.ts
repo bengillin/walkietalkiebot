@@ -101,6 +101,12 @@ describe('hasValidCredentials', () => {
     expect(hasValidCredentials(undefined, `a=1; wtb_token=${TOKEN}; b=2`)).toBe(true)
     expect(hasValidCredentials(undefined, 'wtb_token=nope')).toBe(false)
   })
+
+  it('treats a malformed cookie as missing instead of throwing (used to crash the server)', () => {
+    process.env.WTB_AUTH_TOKEN = TOKEN
+    expect(() => hasValidCredentials(undefined, 'wtb_token=%E0%A4%A')).not.toThrow()
+    expect(hasValidCredentials(undefined, 'wtb_token=%E0%A4%A')).toBe(false)
+  })
 })
 
 describe('auth cookie', () => {

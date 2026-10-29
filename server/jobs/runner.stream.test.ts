@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { EventEmitter } from 'events'
 
 // Mock child_process so no real `claude` process is spawned. execFileSync backs
@@ -20,7 +20,12 @@ vi.mock('fs', async (importOriginal) => ({
 
 import { spawn } from 'child_process'
 import { writeFileSync, unlinkSync } from 'fs'
-import { spawnClaude, _resetSessionTracking, type ActivityEvent } from './runner.js'
+import {
+  spawnClaude,
+  _resetSessionTracking,
+  _resetProcessTrackingForTesting,
+  type ActivityEvent,
+} from './runner.js'
 
 const spawnMock = spawn as unknown as ReturnType<typeof vi.fn>
 
@@ -476,16 +481,39 @@ describe('process failures', () => {
     expect(cb.onComplete).toHaveBeenCalledWith(3)
   })
 
-  it('kill() sends SIGTERM to the whole process group', () => {
+  it('kill() sends SIGTERM to the whole process group, then SIGKILL to survivors', () => {
+    vi.useFakeTimers()
     const groupKill = vi.spyOn(process, 'kill').mockImplementation(() => true)
     try {
       nextProcess(() => {})
       const handle = spawnClaude({ prompt: 'hi', callbacks: callbacks() })
       handle.kill()
-
       expect(groupKill).toHaveBeenCalledWith(-4321, 'SIGTERM')
+
+      // The group is still alive (signal 0 succeeds) after the grace period.
+      vi.advanceTimersByTime(5000)
+      expect(groupKill).toHaveBeenCalledWith(-4321, 0)
+      expect(groupKill).toHaveBeenCalledWith(-4321, 'SIGKILL')
     } finally {
       groupKill.mockRestore()
+      vi.useRealTimers()
+    }
+  })
+
+  it('does not SIGKILL a group that exited within the grace period', () => {
+    vi.useFakeTimers()
+    const groupKill = vi.spyOn(process, 'kill').mockImplementation((_pid, signal) => {
+      if (signal === 0) throw Object.assign(new Error('ESRCH'), { code: 'ESRCH' })
+      return true
+    })
+    try {
+      nextProcess(() => {})
+      spawnClaude({ prompt: 'hi', callbacks: callbacks() }).kill()
+      vi.advanceTimersByTime(5000)
+      expect(groupKill).not.toHaveBeenCalledWith(-4321, 'SIGKILL')
+    } finally {
+      groupKill.mockRestore()
+      vi.useRealTimers()
     }
   })
 
@@ -625,4 +653,10 @@ describe('process exit', () => {
 
     expect(spawnMock.mock.calls[0]?.[2]).toMatchObject({ detached: true })
   })
+})
+
+// Fake children use made-up pids; never let the runner's exit hook or a
+// delayed SIGKILL target a real process group with that id.
+afterEach(() => {
+  _resetProcessTrackingForTesting()
 })

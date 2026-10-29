@@ -309,3 +309,19 @@ describe('pagination params', () => {
     expect((await req('GET', '/search?q=x&limit=-1')).status).toBe(200)
   })
 })
+
+describe('POST /api/claude-code input validation', () => {
+  it('rejects malformed images and history before starting an agent', async () => {
+    expect((await req('POST', '/claude-code', { message: 'hi', images: [{}] })).status).toBe(400)
+    expect((await req('POST', '/claude-code', { message: 'hi', images: 'x' })).status).toBe(400)
+    expect((await req('POST', '/claude-code', { message: 'hi', history: 'x' })).status).toBe(400)
+  })
+
+  it('does not leak chat slots on rejected requests', async () => {
+    for (let i = 0; i < 6; i++) {
+      await req('POST', '/claude-code', { message: 'hi', images: [{}] })
+    }
+    // Still 400 (validation), not 429 (slots exhausted).
+    expect((await req('POST', '/claude-code', { message: 'hi', images: [{}] })).status).toBe(400)
+  })
+})
