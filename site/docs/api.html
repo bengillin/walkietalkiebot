@@ -143,7 +143,7 @@
         <div class="endpoint">
           <span class="endpoint__method endpoint__method--post">POST</span>
           <span class="endpoint__path">/api/conversations/:id/messages</span>
-          <p class="endpoint__desc">Add a message to a conversation. Body: <code>{ "role": "user|assistant", "content": "string", "images": [], "activities": [] }</code></p>
+          <p class="endpoint__desc">Add a message to a conversation. Body: <code>{ "id"?: "string", "timestamp"?: number, "role": "user|assistant", "content": "string", "images": [], "activities": [] }</code>. Returns 201 when added. Repeating a request with an <code>id</code> already stored in this conversation returns that message with 200, so retries are safe. An <code>id</code> that belongs to another conversation returns 409.</p>
         </div>
 
         <div class="endpoint">
@@ -312,7 +312,7 @@
         <div class="endpoint">
           <span class="endpoint__method endpoint__method--post">POST</span>
           <span class="endpoint__path">/api/migrate</span>
-          <p class="endpoint__desc">Import conversations in the browser's localStorage format into the SQLite database. The web UI uses it for older cached tapes and to create a tape together with its first messages. Each conversation is imported in its own transaction: messages and activities that already exist (by id) are skipped and the rest are added, so repeating a request is safe. Response: <code>{ success, imported, skipped, total, results: [{ id, ok, created, messagesAdded, error? }] }</code>. A conversation that fails is rolled back whole and reported with <code>ok: false</code>.</p>
+          <p class="endpoint__desc">Import conversations in the browser's localStorage format into the SQLite database. The web UI uses it for older cached tapes and to create a tape together with its first messages. Each conversation is imported in its own transaction: messages and activities already stored (by id) are skipped and the rest are added, so repeating a request is safe. A message or image whose id another conversation already uses is stored under a new id derived from the original id and the conversation, reported in <code>remapped</code>. The derived id is deterministic, so a retry finds the stored copy instead of adding a duplicate. Response: <code>{ success, imported, skipped, total, results: [{ id, ok, created, messagesAdded, remapped?, error? }] }</code>. A conversation that fails is rolled back whole and reported with <code>ok: false</code>.</p>
         </div>
 
         <!-- ── Examples ── -->
