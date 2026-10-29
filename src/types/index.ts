@@ -58,6 +58,9 @@ export interface Message {
   timestamp: number
   source?: string
   images?: MessageImage[]
+  // Not yet confirmed by the server. Persisted with the cached tape, so a
+  // reload or a server restart retries it instead of losing it.
+  unsynced?: boolean
 }
 
 export interface Conversation {

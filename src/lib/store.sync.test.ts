@@ -41,6 +41,11 @@ function serverConv(id: string, messages: Message[], updatedAt = 100) {
   return { ...meta(id, updatedAt), messages, activities: [] }
 }
 
+// What the API client throws for a 404
+function notFound() {
+  return Object.assign(new Error('Conversation not found'), { status: 404 })
+}
+
 function deferred<T>() {
   let resolve!: (v: T) => void
   const promise = new Promise<T>((r) => (resolve = r))
@@ -151,6 +156,7 @@ describe('syncFromServer', () => {
       'keep',
     )
     apiMock.listConversations.mockResolvedValue({ conversations: [meta('keep', 50)], total: 1 })
+    apiMock.getConversation.mockRejectedValue(notFound())
     await useStore.getState().syncFromServer()
     expect(useStore.getState().conversations.map((c) => c.id)).toEqual(['keep'])
   })
@@ -166,6 +172,7 @@ describe('syncFromServer', () => {
   it('falls back to a blank tape when the open one was deleted elsewhere', async () => {
     setConversations([conv('gone', { messages: [msg('x', 1)], localOnly: false })], 'gone')
     apiMock.listConversations.mockResolvedValue({ conversations: [meta('s1', 50)], total: 1 })
+    apiMock.getConversation.mockRejectedValue(notFound())
     await useStore.getState().syncFromServer()
     const state = useStore.getState()
     expect(state.currentConversationId).not.toBe('gone')
@@ -281,9 +288,11 @@ describe('lazy conversation creation', () => {
     expect(apiMock.addMessage).not.toHaveBeenCalled()
     create.resolve({ success: true, imported: 1, skipped: 0 })
     await flushServerWrites()
-    // 'one' went with the creation; 'two' was added after it
-    expect(apiMock.addMessage).toHaveBeenCalledTimes(1)
-    expect((apiMock.addMessage.mock.calls[0]?.[1] as { content: string }).content).toBe('two')
+    // Both were on the tape when it was created, so both went with the creation
+    const created = apiMock.migrateFromLocalStorage.mock.calls[0]?.[0] as Conversation[]
+    expect(created[0]?.messages.map((m) => m.content)).toEqual(['one', 'two'])
+    expect(apiMock.addMessage).not.toHaveBeenCalled()
+    expect(useStore.getState().messages.every((m) => !m.unsynced)).toBe(true)
   })
 
   it('deleting the last tape leaves a local-only blank one, without a server create', async () => {
@@ -297,11 +306,12 @@ describe('lazy conversation creation', () => {
     expect(useStore.getState().currentConversationId).toBe(replacement?.id)
   })
 
-  it('deleting a never-synced tape makes no server call', async () => {
+  it('deleting a never-synced tape still tells the server (it may exist there)', async () => {
+    // e.g. another tab created this blank tape, or our creation's response was lost
     setConversations([conv('a', { messages: [msg('x', 1)] }), conv('b', { localOnly: true })], 'a')
     useStore.getState().deleteConversation('b')
     await flushServerWrites()
-    expect(apiMock.deleteConversation).not.toHaveBeenCalled()
+    expect(apiMock.deleteConversation).toHaveBeenCalledWith('b')
   })
 
   it('migration skips empty tapes', async () => {
@@ -350,7 +360,10 @@ describe('review: no lost messages or tapes', () => {
     useStore.getState().addMessage({ role: 'user', content: 'hello' })
     await flushServerWrites()
     apiMock.listConversations.mockResolvedValue({ conversations: [meta('t0', 5)], total: 1 })
-    apiMock.getConversation.mockResolvedValue(serverConv('t0', [], 5))
+    apiMock.getConversation.mockImplementation(async (id: string) => {
+      if (id === 'gone') throw notFound()
+      return serverConv('t0', [], 5)
+    })
     await useStore.getState().syncFromServer()
     expect(useStore.getState().conversations.map((c) => c.id)).toEqual(['t0'])
   })
@@ -464,5 +477,231 @@ describe('migrateLocalStorageKeys', () => {
     expect(localStorage.getItem('wtb_theme')).toBe('aol')
     expect(localStorage.getItem('talkie_tts_voice')).toBeNull()
     expect(localStorage.getItem('_wtb_keys_migrated')).toBe('1')
+  })
+})
+
+// Second review round
+describe('review round 2: deletes always reach the server', () => {
+  it('deleting a tape whose creation committed but whose response was lost sends the DELETE', async () => {
+    setConversations([conv('t', { localOnly: true })], 't')
+    apiMock.migrateFromLocalStorage.mockRejectedValueOnce(new TypeError('Failed to fetch'))
+    useStore.getState().addMessage({ role: 'user', content: 'hello' })
+    await flushServerWrites()
+    expect(useStore.getState().conversations.find((c) => c.id === 't')?.localOnly).toBe(true)
+
+    useStore.getState().deleteConversation('t')
+    await flushServerWrites()
+    expect(apiMock.deleteConversation).toHaveBeenCalledWith('t')
+  })
+
+  it('a delete that fails is retried on the next sync, and the tape is not merged back', async () => {
+    setConversations([conv('a', { localOnly: false }), conv('t', { localOnly: false })], 'a')
+    apiMock.deleteConversation.mockRejectedValueOnce(new TypeError('Failed to fetch'))
+    useStore.getState().deleteConversation('t')
+    await flushServerWrites()
+    expect(localStorage.getItem('wtb_pending_deletes')).toBe('["t"]')
+
+    // A reload: in-memory state is gone, the server still lists the tape
+    resetSyncStateForTesting()
+    enableServerSync()
+    apiMock.listConversations.mockResolvedValue({
+      conversations: [meta('a', 5), meta('t', 5)],
+      total: 2,
+    })
+    apiMock.getConversation.mockResolvedValue(serverConv('a', [], 5))
+    await useStore.getState().syncFromServer()
+    await flushServerWrites()
+    expect(apiMock.deleteConversation).toHaveBeenCalledTimes(2)
+    expect(useStore.getState().conversations.map((c) => c.id)).toEqual(['a'])
+    expect(localStorage.getItem('wtb_pending_deletes')).toBeNull()
+  })
+})
+
+describe('review round 2: unconfirmed messages are kept and retried', () => {
+  it('mergeMessages keeps an unsynced local message however old it is', () => {
+    const local = [msg('a', 1), { ...msg('lost', 2), unsynced: true }, msg('b', 3)]
+    const server = [msg('a', 1), msg('b', 3)]
+    expect(mergeMessages(local, server).map((m) => m.id)).toEqual(['a', 'b', 'lost'])
+  })
+
+  it('a failed post is retried, in order, on the next send, and survives a reload of the tape', async () => {
+    setConversations([conv('s', { localOnly: false, messages: [msg('m1', 1000)] })], 's')
+    apiMock.addMessage.mockRejectedValueOnce(new TypeError('Failed to fetch')) // server restarting
+    useStore.getState().addMessage({ role: 'user', content: 'lost one' })
+    await flushServerWrites()
+    expect(useStore.getState().messages[1]?.unsynced).toBe(true)
+
+    useStore.getState().addMessage({ role: 'user', content: 'later one' })
+    await flushServerWrites()
+    const posted = apiMock.addMessage.mock.calls.map((c) => (c[1] as { content: string }).content)
+    expect(posted).toEqual(['lost one', 'lost one', 'later one'])
+    expect(useStore.getState().messages.some((m) => m.unsynced)).toBe(false)
+  })
+
+  it('an unconfirmed message is not dropped when the server copy has newer messages', async () => {
+    setConversations([conv('s', { localOnly: false, messages: [msg('m1', 1000)] })], 's')
+    apiMock.addMessage.mockRejectedValue(new TypeError('Failed to fetch'))
+    useStore.getState().addMessage({ role: 'user', content: 'lost one' })
+    await flushServerWrites()
+    // Another client added a newer message; ours never landed
+    apiMock.getConversation.mockResolvedValue(
+      serverConv('s', [msg('m1', 1000), msg('other', Date.now() + 1000, 'from elsewhere')]),
+    )
+    useStore.getState().loadConversation('s')
+    await vi.waitFor(() =>
+      expect(useStore.getState().messages.map((m) => m.content)).toContain('from elsewhere'),
+    )
+    expect(useStore.getState().messages.map((m) => m.content)).toContain('lost one')
+  })
+
+  it('persists the unsynced flag in the local cache', async () => {
+    setConversations([conv('s', { localOnly: false })], 's')
+    apiMock.addMessage.mockRejectedValue(new TypeError('Failed to fetch'))
+    useStore.getState().addMessage({ role: 'user', content: 'queued' })
+    await flushServerWrites()
+    const cached = JSON.parse(localStorage.getItem('wtb_conversations')!) as Conversation[]
+    expect(cached[0]?.messages[0]).toMatchObject({ content: 'queued', unsynced: true })
+  })
+
+  it('retries a failed post on its own, with backoff', async () => {
+    vi.useFakeTimers()
+    try {
+      setConversations([conv('s', { localOnly: false })], 's')
+      apiMock.addMessage.mockRejectedValueOnce(new TypeError('Failed to fetch'))
+      useStore.getState().addMessage({ role: 'user', content: 'retry me' })
+      await vi.advanceTimersByTimeAsync(0)
+      expect(apiMock.addMessage).toHaveBeenCalledTimes(1)
+      await vi.advanceTimersByTimeAsync(2000)
+      expect(apiMock.addMessage).toHaveBeenCalledTimes(2)
+      expect(useStore.getState().messages[0]?.unsynced).toBeUndefined()
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('messages written while the server was unreachable are posted once sync starts', async () => {
+    resetSyncStateForTesting() // sync never enabled: the server was down at load
+    setConversations([conv('t0', { localOnly: true }), conv('s', { localOnly: false })], 't0')
+    useStore.getState().addMessage({ role: 'user', content: 'offline new tape' })
+    useStore.getState().loadConversation('s')
+    useStore.getState().addMessage({ role: 'user', content: 'offline old tape' })
+    expect(apiMock.migrateFromLocalStorage).not.toHaveBeenCalled()
+
+    enableServerSync()
+    apiMock.listConversations.mockResolvedValue({ conversations: [meta('s', 5)], total: 1 })
+    apiMock.getConversation.mockResolvedValue(serverConv('s', [], 5))
+    await useStore.getState().syncFromServer()
+    await flushServerWrites()
+
+    const created = apiMock.migrateFromLocalStorage.mock.calls[0]?.[0] as Conversation[]
+    expect(created[0]?.messages.map((m) => m.content)).toEqual(['offline new tape'])
+    const posted = apiMock.addMessage.mock.calls.map((c) => (c[1] as { content: string }).content)
+    expect(posted).toEqual(['offline old tape'])
+    const all = useStore.getState().conversations.flatMap((c) => c.messages)
+    expect(all.map((m) => m.content).sort()).toEqual(['offline new tape', 'offline old tape'])
+  })
+
+  it('a message whose id the server says is taken is posted under a new id', async () => {
+    setConversations([conv('s', { localOnly: false })], 's')
+    apiMock.addMessage.mockRejectedValueOnce(Object.assign(new Error('taken'), { status: 409 }))
+    useStore.getState().addMessage({ role: 'user', content: 'collide' })
+    const original = useStore.getState().messages[0]!.id
+    await flushServerWrites()
+    const ids = apiMock.addMessage.mock.calls.map((c) => (c[1] as { id: string }).id)
+    expect(ids).toHaveLength(2)
+    expect(ids[0]).toBe(original)
+    expect(ids[1]).not.toBe(original)
+    expect(useStore.getState().messages[0]).toMatchObject({ id: ids[1], content: 'collide' })
+    expect(useStore.getState().messages[0]?.unsynced).toBeUndefined()
+  })
+
+  it('adopts ids the server remapped on import', async () => {
+    setConversations([conv('t0', { localOnly: true })], 't0')
+    apiMock.migrateFromLocalStorage.mockImplementationOnce(async (convs: Conversation[]) => {
+      const id = convs[0]!.messages[0]!.id
+      return {
+        success: true,
+        imported: 1,
+        skipped: 0,
+        results: [
+          { id: 't0', ok: true, created: true, messagesAdded: 1, remapped: { [id]: 'new' } },
+        ],
+      }
+    })
+    useStore.getState().addMessage({ role: 'user', content: 'hi' })
+    await flushServerWrites()
+    expect(useStore.getState().messages[0]).toMatchObject({ id: 'new', content: 'hi' })
+  })
+})
+
+describe('review round 2: tapes the list missed', () => {
+  it('keeps a synced tape that offset paging skipped (it moved up a page)', async () => {
+    const others = Array.from({ length: 100 }, (_, i) =>
+      conv(`o${i}`, { localOnly: false, updatedAt: 500 - i }),
+    )
+    const open = conv('X', { localOnly: false, messages: [msg('x1', 10)], updatedAt: 10 })
+    setConversations([...others, open], 'X')
+    // Page 1 was read before X was touched elsewhere; page 2 after it moved to the top
+    apiMock.listConversations.mockImplementation(async (_limit: number, offset: number) =>
+      offset === 0
+        ? { conversations: others.map((c) => meta(c.id, c.updatedAt)), total: 101 }
+        : { conversations: [meta('o99', 401)], total: 101 },
+    )
+    apiMock.getConversation.mockResolvedValue(serverConv('X', [msg('x1', 10)], 600))
+    await useStore.getState().syncFromServer()
+    const s = useStore.getState()
+    expect(s.currentConversationId).toBe('X')
+    expect(s.messages.map((m) => m.id)).toEqual(['x1'])
+  })
+
+  it('keeps an unlisted tape when the server cannot be asked (not a 404)', async () => {
+    setConversations([conv('a', { localOnly: false, messages: [msg('x', 1)] })], 'a')
+    apiMock.listConversations.mockResolvedValue({ conversations: [], total: 0 })
+    apiMock.getConversation.mockRejectedValue(new TypeError('Failed to fetch'))
+    await useStore.getState().syncFromServer()
+    expect(useStore.getState().conversations.map((c) => c.id)).toEqual(['a'])
+  })
+})
+
+describe('review round 2: migration gives up on a tape the server keeps rejecting', () => {
+  it('stores the good tapes, and stops re-sending a rejected one after 3 tries', async () => {
+    localStorage.setItem(
+      'wtb_conversations',
+      JSON.stringify([
+        conv('good', { messages: [msg('g', 1)] }),
+        conv('bad', { messages: [msg('b', 1)] }),
+      ]),
+    )
+    setConversations(JSON.parse(localStorage.getItem('wtb_conversations')!), 'good')
+    apiMock.migrateFromLocalStorage.mockImplementation(async (convs: Conversation[]) => ({
+      success: false,
+      imported: 1,
+      skipped: 0,
+      results: convs.map((c) =>
+        c.id === 'bad' ? { id: 'bad', ok: false, error: 'boom' } : { id: c.id, ok: true },
+      ),
+    }))
+
+    expect(await useStore.getState().migrateToServer()).toBe(false)
+    expect(useStore.getState().conversations.find((c) => c.id === 'good')?.localOnly).toBe(false)
+    expect(apiMock.markMigrationComplete).not.toHaveBeenCalled()
+
+    expect(await useStore.getState().migrateToServer()).toBe(false)
+    expect(await useStore.getState().migrateToServer()).toBe(true) // third strike: given up
+    expect(apiMock.markMigrationComplete).toHaveBeenCalled()
+    // ...and it is not sent again
+    const calls = apiMock.migrateFromLocalStorage.mock.calls.length
+    await useStore.getState().migrateToServer()
+    expect(apiMock.migrateFromLocalStorage.mock.calls.length).toBe(calls)
+  })
+
+  it('a network failure does not count against a tape', async () => {
+    localStorage.setItem(
+      'wtb_conversations',
+      JSON.stringify([conv('t', { messages: [msg('x', 1)] })]),
+    )
+    apiMock.migrateFromLocalStorage.mockRejectedValue(new TypeError('Failed to fetch'))
+    for (let i = 0; i < 4; i++) expect(await useStore.getState().migrateToServer()).toBe(false)
+    expect(localStorage.getItem('wtb_upload_failures')).toBeNull()
   })
 })

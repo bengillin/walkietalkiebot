@@ -80,14 +80,32 @@ export interface MigrationResult {
     ok: boolean
     created?: boolean
     messagesAdded?: number
+    // Messages stored under a new id (their id was taken by another tape)
+    remapped?: Record<string, string>
     error?: string
   }>
 }
 
 const API_BASE = '/api'
 
+/** An HTTP error response; `status` lets callers tell "gone" from "failed". */
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message)
+    this.name = 'ApiError'
+  }
+}
+
+// A hung request (server restarting, sleeping laptop) must fail eventually so
+// the write behind it can be retried. Generous: imports can carry images.
+const REQUEST_TIMEOUT_MS = 30_000
+
 async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(url, {
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     ...options,
     headers: {
       'Content-Type': 'application/json',
@@ -97,7 +115,7 @@ async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: response.statusText }))
-    throw new Error(error.error || `API error: ${response.status}`)
+    throw new ApiError(error.error || `API error: ${response.status}`, response.status)
   }
 
   return response.json()
@@ -146,13 +164,12 @@ export async function updateConversation(
 // Deleting is idempotent from the client's side: a tape that is already gone
 // (deleted in another tab, or never created) is a success, not an error.
 export async function deleteConversation(id: string): Promise<{ success: boolean }> {
-  const response = await fetch(`${API_BASE}/conversations/${id}`, { method: 'DELETE' })
-  if (response.status === 404) return { success: true }
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: response.statusText }))
-    throw new Error(error.error || `API error: ${response.status}`)
+  try {
+    return await fetchJson(`${API_BASE}/conversations/${id}`, { method: 'DELETE' })
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) return { success: true }
+    throw err
   }
-  return response.json()
 }
 
 export async function importConversation(data: {

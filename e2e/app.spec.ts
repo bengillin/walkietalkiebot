@@ -1,4 +1,4 @@
-import { test, expect, type APIRequestContext, type Page } from '@playwright/test'
+import { test, expect, type APIRequestContext, type Page, type Route } from '@playwright/test'
 import { skipOnboarding, setTheme } from './helpers'
 
 test.describe('Onboarding', () => {
@@ -357,5 +357,73 @@ test.describe('No message is lost', () => {
     await b.waitForSelector('.app__header')
     await b.waitForTimeout(1500)
     await expect(b.locator('.app__main')).toContainText(fromB)
+  })
+
+  test('messages sent while the server is unreachable are posted once it is back', async ({
+    page,
+    request,
+  }) => {
+    const stamp = Date.now()
+    const [one, two, three] = ['one', 'two', 'three'].map((n) => `outage ${n} ${stamp}`)
+    await openApp(page)
+    await send(page, one!)
+    await page.waitForTimeout(1000)
+
+    // The server goes away (a restart): every API call fails to connect
+    const down = (r: Route) => r.abort('connectionrefused')
+    await page.route(/\/api\/(?!claude-code)/, down)
+    await send(page, two!)
+    await page.waitForTimeout(1000)
+    await expect(page.locator('.app__main')).toContainText(two!)
+    await page.unroute(/\/api\/(?!claude-code)/, down)
+
+    // Back up: the queued message is retried on its own...
+    await expect.poll(() => serverMessages(request), { timeout: 10_000 }).toContain(two)
+    // ...and later sends land after it, in order
+    await send(page, three!)
+    await expect
+      .poll(async () => (await serverMessages(request)).filter((m) => m.includes(String(stamp))))
+      .toEqual([one, two, three])
+
+    await page.reload()
+    await page.waitForSelector('.app__header')
+    for (const text of [one!, two!, three!]) {
+      await expect(page.locator('.app__main')).toContainText(text)
+    }
+  })
+
+  test('a tape deleted after its creation response was lost stays deleted', async ({
+    page,
+    request,
+  }) => {
+    const text = `doomed ${Date.now()}`
+    await openApp(page)
+    let dropped = false
+    await page.route('**/api/migrate', async (r) => {
+      if (dropped) return r.continue()
+      dropped = true
+      await r.fetch() // the server stores the tape...
+      await r.abort('failed') // ...and the response is lost
+    })
+    await send(page, text)
+    await page.waitForTimeout(1000)
+    expect(await serverMessages(request)).toContain(text)
+
+    // Start another tape, then delete this one from the collection
+    await page.click('.app__header-btn--eject')
+    await page.click('.tape-collection__new-btn')
+    await page.click('.app__header-btn--eject')
+    await page
+      .locator('.tape-collection__item', { hasText: text })
+      .locator('.tape-collection__delete-btn')
+      .click()
+    await expect(page.locator('.tape-collection__item', { hasText: text })).toHaveCount(0)
+
+    await expect.poll(() => serverMessages(request)).not.toContain(text)
+    await page.reload()
+    await page.waitForSelector('.app__header')
+    await page.click('.app__header-btn--eject')
+    await page.waitForTimeout(1000)
+    await expect(page.locator('.tape-collection__item', { hasText: text })).toHaveCount(0)
   })
 })
