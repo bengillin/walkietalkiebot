@@ -107,7 +107,7 @@
         <div class="endpoint">
           <span class="endpoint__method endpoint__method--post">POST</span>
           <span class="endpoint__path">/api/conversations</span>
-          <p class="endpoint__desc">Create a new conversation. Body: <code>{ "title": "string" }</code></p>
+          <p class="endpoint__desc">Create a new conversation. Body: <code>{ "id"?: "string", "title"?: "string", "mode"?: "string" }</code>. Returns 201 when created. If a conversation with that <code>id</code> already exists, it is returned unchanged with 200, so retries are safe.</p>
         </div>
 
         <div class="endpoint">
@@ -312,7 +312,7 @@
         <div class="endpoint">
           <span class="endpoint__method endpoint__method--post">POST</span>
           <span class="endpoint__path">/api/migrate</span>
-          <p class="endpoint__desc">Import conversations from localStorage format into the SQLite database. Used for migrating data from older versions of Talkie that stored conversations in the browser.</p>
+          <p class="endpoint__desc">Import conversations in the browser's localStorage format into the SQLite database. The web UI uses it for older cached tapes and to create a tape together with its first messages. Each conversation is imported in its own transaction: messages and activities that already exist (by id) are skipped and the rest are added, so repeating a request is safe. Response: <code>{ success, imported, skipped, total, results: [{ id, ok, created, messagesAdded, error? }] }</code>. A conversation that fails is rolled back whole and reported with <code>ok: false</code>.</p>
         </div>
 
         <!-- ── Examples ── -->
