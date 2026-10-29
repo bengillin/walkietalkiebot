@@ -87,6 +87,10 @@ export function createActivity(input: CreateActivityInput): ActivityRow {
   }
 }
 
+export function activityExists(id: string): boolean {
+  return getDb().prepare('SELECT 1 FROM activities WHERE id = ?').get(id) !== undefined
+}
+
 export function createActivitiesBatch(activities: CreateActivityInput[]): void {
   if (activities.length === 0) return
 

@@ -92,7 +92,8 @@ api.post("/conversations", async (c) => {
   const body = await c.req.json().catch(() => ({}));
   const id = body.id || crypto.randomUUID();
   const title = body.title || "New conversation";
-  const conv = conversations.createConversation({ id, title, mode: body.mode });
+  const existing = conversations.getConversation(id);
+  const conv = existing ?? conversations.createConversation({ id, title, mode: body.mode });
   return c.json(
     {
       id: conv.id,
@@ -101,7 +102,7 @@ api.post("/conversations", async (c) => {
       updatedAt: conv.updated_at,
       mode: conv.mode || "voice"
     },
-    201
+    existing ? 200 : 201
   );
 });
 api.patch("/conversations/:id", async (c) => {
@@ -337,18 +338,12 @@ api.post("/migrate", async (c) => {
   if (!localConversations || !Array.isArray(localConversations)) {
     return c.json({ error: "Invalid conversations data" }, 400);
   }
-  let imported = 0;
-  let skipped = 0;
-  for (const conv of localConversations) {
-    if (conversations.getConversation(conv.id)) {
-      skipped++;
-      continue;
-    }
-    conversations.createConversation({
-      id: conv.id,
-      title: conv.title
-    });
+  const importOne = conversations.transaction((conv) => {
+    const created = !conversations.getConversation(conv.id);
+    if (created) conversations.createConversation({ id: conv.id, title: conv.title });
+    let messagesAdded = 0;
     for (const msg of conv.messages || []) {
+      if (messages.messageExists(msg.id)) continue;
       messages.createMessage({
         id: msg.id,
         conversationId: conv.id,
@@ -358,28 +353,43 @@ api.post("/migrate", async (c) => {
         source: "web",
         images: msg.images
       });
+      messagesAdded++;
     }
-    if (conv.activities && conv.activities.length > 0) {
-      activities.createActivitiesBatch(
-        conv.activities.map((a) => ({
-          id: a.id,
-          conversationId: conv.id,
-          tool: a.tool,
-          input: a.input,
-          status: a.status,
-          timestamp: a.timestamp,
-          duration: a.duration,
-          error: a.error
-        }))
-      );
+    const newActivities = (conv.activities || []).filter((a) => !activities.activityExists(a.id));
+    activities.createActivitiesBatch(
+      newActivities.map((a) => ({
+        id: a.id,
+        conversationId: conv.id,
+        tool: a.tool,
+        input: a.input,
+        status: a.status,
+        timestamp: a.timestamp,
+        duration: a.duration,
+        error: a.error
+      }))
+    );
+    return { created, messagesAdded };
+  });
+  let imported = 0;
+  let skipped = 0;
+  const results = [];
+  for (const conv of localConversations) {
+    try {
+      const { created, messagesAdded } = importOne(conv);
+      if (created) imported++;
+      else skipped++;
+      results.push({ id: conv.id, ok: true, created, messagesAdded });
+    } catch (err) {
+      log.warn(`Migrate: failed to import conversation ${conv.id}; rolled back:`, err);
+      results.push({ id: conv.id, ok: false, error: String(err) });
     }
-    imported++;
   }
   return c.json({
-    success: true,
+    success: results.every((r) => r.ok),
     imported,
     skipped,
-    total: localConversations.length
+    total: localConversations.length,
+    results
   });
 });
 api.get("/modes", (c) => {

@@ -89,6 +89,10 @@ export function getImagesForMessages(messageIds: string[]): Map<string, MessageI
   return imageMap
 }
 
+export function messageExists(id: string): boolean {
+  return getDb().prepare('SELECT 1 FROM messages WHERE id = ?').get(id) !== undefined
+}
+
 export function createMessage(input: CreateMessageInput): MessageRow {
   const db = getDb()
   const timestamp = input.timestamp || Date.now()

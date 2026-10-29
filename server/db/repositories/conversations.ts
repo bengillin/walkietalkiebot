@@ -52,6 +52,11 @@ export function getConversation(id: string): ConversationRow | null {
   return row || null
 }
 
+/** Wrap fn in a database transaction (all-or-nothing; nests as a savepoint). */
+export function transaction<A extends unknown[], R>(fn: (...args: A) => R): (...args: A) => R {
+  return getDb().transaction(fn)
+}
+
 export function createConversation(input: CreateConversationInput): ConversationRow {
   const db = getDb()
   const now = Date.now()

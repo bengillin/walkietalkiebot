@@ -103,6 +103,69 @@ describe('Conversation CRUD', () => {
   })
 })
 
+describe('Idempotent creation and import', () => {
+  const m = (id: string, content: string, role = 'user') => ({ id, role, content, timestamp: 1 })
+  const tape = (id: string, msgs: ReturnType<typeof m>[]) => ({
+    id,
+    title: 'Tape',
+    messages: msgs,
+    createdAt: 1,
+    updatedAt: 1,
+  })
+  const contents = async (id: string) =>
+    (await req('GET', `/conversations/${id}`)).json.messages.map(
+      (x: { content: string }) => x.content,
+    )
+
+  it('POST /conversations with an existing id returns the existing tape', async () => {
+    const first = await req('POST', '/conversations', { id: 'dup', title: 'Original' })
+    expect(first.status).toBe(201)
+
+    const again = await req('POST', '/conversations', { id: 'dup', title: 'Retry' })
+    expect(again.status).toBe(200)
+    expect(again.json.id).toBe('dup')
+    expect(again.json.title).toBe('Original')
+    expect((await req('GET', '/conversations')).json.total).toBe(1)
+  })
+
+  it('migrate retry adds only the messages the server is missing', async () => {
+    const one = await req('POST', '/migrate', { conversations: [tape('t', [m('a', 'first')])] })
+    expect(one.json).toMatchObject({ success: true, imported: 1, skipped: 0 })
+
+    // Same tape again (lost response, or a second tab) with one new message
+    const two = await req('POST', '/migrate', {
+      conversations: [tape('t', [m('a', 'first'), m('b', 'second')])],
+    })
+    expect(two.status).toBe(200)
+    expect(two.json.success).toBe(true)
+    expect(two.json.results).toEqual([{ id: 't', ok: true, created: false, messagesAdded: 1 }])
+    expect(await contents('t')).toEqual(['first', 'second'])
+  })
+
+  it('migrate rolls back a conversation that fails part-way, and keeps the others', async () => {
+    const { json } = await req('POST', '/migrate', {
+      conversations: [
+        tape('good', [m('g1', 'fine')]),
+        // The second message violates the role CHECK constraint
+        tape('bad', [m('b1', 'lands first'), m('b2', 'boom', 'system')]),
+      ],
+    })
+    expect(json.success).toBe(false)
+    expect(json.results.map((r: { id: string; ok: boolean }) => [r.id, r.ok])).toEqual([
+      ['good', true],
+      ['bad', false],
+    ])
+    expect(await contents('good')).toEqual(['fine'])
+    // Nothing of the failed tape is left behind: not the tape, not its first message
+    expect((await req('GET', '/conversations/bad')).status).toBe(404)
+
+    // A corrected retry imports it whole
+    const retry = await req('POST', '/migrate', { conversations: [tape('bad', [m('b1', 'ok')])] })
+    expect(retry.json.success).toBe(true)
+    expect(await contents('bad')).toEqual(['ok'])
+  })
+})
+
 describe('Messages', () => {
   it('adds a message to a conversation', async () => {
     const { json: conv } = await req('POST', '/conversations', { title: 'Chat' })

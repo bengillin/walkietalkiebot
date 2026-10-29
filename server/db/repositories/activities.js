@@ -53,6 +53,9 @@ function createActivity(input) {
     error: input.error || null
   };
 }
+function activityExists(id) {
+  return getDb().prepare("SELECT 1 FROM activities WHERE id = ?").get(id) !== void 0;
+}
 function createActivitiesBatch(activities) {
   if (activities.length === 0) return;
   const db = getDb();
@@ -83,6 +86,7 @@ function deleteActivitiesForConversation(conversationId) {
   return result.changes;
 }
 export {
+  activityExists,
   createActivitiesBatch,
   createActivity,
   deleteActivitiesForConversation,
