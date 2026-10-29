@@ -15,7 +15,12 @@ function cookieValue(cookieHeader) {
   if (!cookieHeader) return void 0;
   for (const part of cookieHeader.split(";")) {
     const [name, ...rest] = part.trim().split("=");
-    if (name === AUTH_COOKIE) return decodeURIComponent(rest.join("="));
+    if (name !== AUTH_COOKIE) continue;
+    try {
+      return decodeURIComponent(rest.join("="));
+    } catch {
+      return void 0;
+    }
   }
   return void 0;
 }

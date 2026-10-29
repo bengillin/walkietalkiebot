@@ -23,7 +23,12 @@ function cookieValue(cookieHeader: string | undefined): string | undefined {
   if (!cookieHeader) return undefined
   for (const part of cookieHeader.split(';')) {
     const [name, ...rest] = part.trim().split('=')
-    if (name === AUTH_COOKIE) return decodeURIComponent(rest.join('='))
+    if (name !== AUTH_COOKIE) continue
+    try {
+      return decodeURIComponent(rest.join('='))
+    } catch {
+      return undefined // malformed escape: treat as no cookie, never throw
+    }
   }
   return undefined
 }
