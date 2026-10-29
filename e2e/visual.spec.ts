@@ -3,6 +3,16 @@ import { skipOnboarding, setTheme } from './helpers'
 
 const themes = ['mccallister', 'imessage', 'aol', 'classic-mac', 'geocities', 'apple-1984'] as const
 
+// Screenshots must not depend on what earlier tests (or a developer) left in the
+// server's database: serve an empty conversation list, so every run starts from
+// the same single blank tape.
+test.beforeEach(async ({ page }) => {
+  await page.route(/\/api\/conversations(\?.*)?$/, async (route) => {
+    if (route.request().method() !== 'GET') return route.fallback()
+    await route.fulfill({ json: { conversations: [], total: 0, limit: 100, offset: 0 } })
+  })
+})
+
 test.describe('Visual regression — main app per theme', () => {
   for (const theme of themes) {
     test(`${theme} — main view`, async ({ page }) => {
