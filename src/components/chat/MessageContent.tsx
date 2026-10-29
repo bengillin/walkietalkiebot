@@ -1,3 +1,4 @@
+import type React from 'react'
 import { openUrl } from '../../lib/claude'
 
 // Segment types for structured content rendering
@@ -115,8 +116,8 @@ function parseSegments(content: string): Segment[] {
 const URL_REGEX = /(https?:\/\/[^\s<>"{}|\\^`[\]]*[^\s<>"{}|\\^`[\].,:;!?)])/g
 
 // Render inline markdown: **bold**, `code`, *italic*, and URLs
-function renderInline(text: string): (string | JSX.Element)[] {
-  const parts: (string | JSX.Element)[] = []
+function renderInline(text: string): (string | React.JSX.Element)[] {
+  const parts: (string | React.JSX.Element)[] = []
   // First split by inline patterns, then handle URLs within text chunks
   const inlineRegex = /(\*\*(.+?)\*\*|`(.+?)`|\*(.+?)\*)/g
   let lastIndex = 0
@@ -153,8 +154,8 @@ function renderInline(text: string): (string | JSX.Element)[] {
   return parts.length > 0 ? parts : [text]
 }
 
-function renderUrls(text: string, keyOffset: number): (string | JSX.Element)[] {
-  const parts: (string | JSX.Element)[] = []
+function renderUrls(text: string, keyOffset: number): (string | React.JSX.Element)[] {
+  const parts: (string | React.JSX.Element)[] = []
   let lastIndex = 0
   let key = keyOffset
 

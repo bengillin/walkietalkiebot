@@ -5,7 +5,7 @@
 Walkie Talkie Bot is a voice-first, cassette tape-themed interface for Claude Code with dual distribution (Claude Code plugin + full server with web UI). The codebase is TypeScript throughout, with 322 unit tests across 22 test files (plus Playwright E2E + visual regression) covering the frontend (store, exports, components, plan detection) and server (5 database repositories + HTTP API layer + prompt builder + auth).
 
 ### Architecture highlights
-- **Frontend**: React 18 + Zustand, decomposed into 8 custom hooks (`useVoiceIO`, `useClaudeChat`, `useKeyboardControl`, `useDraggableFab`, `useImageAnalysis`, `useServerSync`, `useKeyboardShortcuts`, `useSoundEffects`)
+- **Frontend**: React 19 + Zustand, decomposed into 8 custom hooks (`useVoiceIO`, `useClaudeChat`, `useKeyboardControl`, `useDraggableFab`, `useImageAnalysis`, `useServerSync`, `useKeyboardShortcuts`, `useSoundEffects`)
 - **Server**: Hono HTTP server (HTTPS only when Tailscale certs are present) with better-sqlite3, bound to `127.0.0.1` by default; full test coverage for all repositories and API endpoints
 - **MCP server**: TypeScript, compiled via esbuild, 30 tools (15 data + 15 server)
 - **Onboarding**: 6-step wizard (welcome + theme, speak responses, sound effects, wake word, continuous listening, done)
@@ -106,8 +106,11 @@ These came out of an audit and are the recommended next foundation work:
   most are deliberate control flow ("not JSON, treat as plain string", "already
   dead" on kill); the ones that were genuinely hiding failures now log, and two
   that misled the user are fixed — see the CHANGELOG.
-- **Dependency upgrades**: React 18→19 still pending. Vite 5→8 and Vitest 2→4 are
-  done (and cleared all 16 npm audit advisories) now that CI covers them.
+- ~~**Dependency upgrades**~~ Done. React 18→19 (plus Vite 5→8 and Vitest 2→4
+  earlier). zustand stays on 4.x — it works with React 19 through the
+  `use-sync-external-store` shim, so v5 is an optional follow-up rather than a
+  requirement. Validated with 322 unit tests, 20 E2E, and 20 per-theme visual
+  snapshots that came back pixel-identical.
 
 ### Tier 2: Nice to Have
 
