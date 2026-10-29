@@ -275,6 +275,68 @@ describe('recognition errors', () => {
 
     expect(onSendMessage).not.toHaveBeenCalled()
   })
+
+  it('marks the mic blocked on a permission error and shows one message', () => {
+    const { result } = setup()
+
+    act(() => recognition().onError('not-allowed'))
+    expect(result.current.micBlocked).toBe(true)
+    const message = result.current.voiceError
+    expect(message).toMatch(/Microphone access is blocked/)
+
+    // A second failure does not stack or replace the message
+    act(() => recognition().onError('audio-capture'))
+    expect(result.current.voiceError).toBe(message)
+
+    act(() => result.current.dismissVoiceError())
+    expect(result.current.voiceError).toBeNull()
+  })
+
+  it('counts transient failures, but not silence', () => {
+    const { result } = setup()
+    act(() => recognition().onError('no-speech'))
+    expect(result.current.recognitionFailures).toBe(0)
+    act(() => recognition().onError('network'))
+    act(() => recognition().onError('network'))
+    expect(result.current.recognitionFailures).toBe(2)
+    expect(result.current.micBlocked).toBe(false)
+  })
+
+  it('surfaces a message once transient failures hit the retry limit', () => {
+    const { result } = setup()
+    for (let i = 0; i < 4; i++) act(() => recognition().onError('network'))
+    expect(result.current.voiceError).toBeNull()
+    act(() => recognition().onError('network'))
+    expect(result.current.voiceError).toMatch(/paused after repeated errors/)
+  })
+
+  it('resets on hearing speech, and on an explicit talk start', () => {
+    const { result } = setup()
+    act(() => recognition().onError('network'))
+    act(() => recognition().onInterimResult('hi'))
+    expect(result.current.recognitionFailures).toBe(0)
+
+    act(() => recognition().onError('not-allowed'))
+    act(() => recognition().onError('network'))
+    act(() => result.current.handleTalkStart())
+    expect(result.current.micBlocked).toBe(false)
+    expect(result.current.recognitionFailures).toBe(0)
+  })
+
+  it('an automatic start does not reset the failure state', () => {
+    const { result } = setup()
+    act(() => recognition().onError('not-allowed'))
+    act(() => result.current.autoTalkStart())
+    expect(result.current.micBlocked).toBe(true)
+  })
+
+  it('reports wake word failures through the same single message', () => {
+    const { result } = setup()
+    const onError = (wakeWord() as unknown as { onError: (m: string) => void }).onError
+    act(() => onError('Microphone access is blocked.'))
+    act(() => onError('something else'))
+    expect(result.current.voiceError).toBe('Microphone access is blocked.')
+  })
 })
 
 describe('speech synthesis wiring', () => {

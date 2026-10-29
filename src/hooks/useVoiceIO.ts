@@ -1,7 +1,13 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSpeechRecognition } from '../components/voice/useSpeechRecognition'
 import { useSpeechSynthesis } from '../components/voice/useSpeechSynthesis'
 import { useWakeWord } from '../components/voice/useWakeWord'
+import {
+  MAX_SPEECH_RETRIES,
+  describeSpeechError,
+  isBenignSpeechError,
+  isFatalSpeechError,
+} from '../components/voice/speechErrors'
 import { useSoundEffects } from './useSoundEffects'
 import type { AvatarState } from '../types'
 
@@ -43,6 +49,22 @@ export function useVoiceIO({
   const triggerWordUsedRef = useRef(false)
   const isAvatarHoverHappy = useRef(false)
 
+  // Recognition health, so automatic (re)starts — continuous listening, wake
+  // word — can stop instead of looping on a mic that will never work.
+  const [voiceError, setVoiceError] = useState<string | null>(null)
+  const [micBlocked, setMicBlocked] = useState(false)
+  const [recognitionFailures, setRecognitionFailuresState] = useState(0)
+  const failuresRef = useRef(0)
+  const setRecognitionFailures = useCallback((n: number) => {
+    failuresRef.current = n
+    setRecognitionFailuresState(n)
+  }, [])
+  const reportVoiceError = useCallback((message: string) => {
+    // One message, not one per attempt
+    setVoiceError((prev) => prev ?? message)
+  }, [])
+  const dismissVoiceError = useCallback(() => setVoiceError(null), [])
+
   // Speech recognition
   const {
     isListening,
@@ -52,6 +74,7 @@ export function useVoiceIO({
     clearTranscript: clearSpeechTranscript,
   } = useSpeechRecognition({
     onInterimResult: (text) => {
+      setRecognitionFailures(0)
       setTranscript(text)
       finalTranscriptRef.current = text
     },
@@ -82,9 +105,24 @@ export function useVoiceIO({
       }
     },
     onError: (err) => {
-      setTranscript(`Speech recognition error: ${err}`)
-      setAvatarState('confused')
       finalTranscriptRef.current = ''
+      if (isFatalSpeechError(err)) {
+        setMicBlocked(true)
+        reportVoiceError(describeSpeechError(err))
+        setTranscript('')
+      } else {
+        if (!isBenignSpeechError(err)) {
+          const failures = failuresRef.current + 1
+          setRecognitionFailures(failures)
+          if (failures >= MAX_SPEECH_RETRIES) {
+            reportVoiceError(
+              `Voice input paused after repeated errors. ${describeSpeechError(err)}`,
+            )
+          }
+        }
+        setTranscript(`Speech recognition error: ${err}`)
+      }
+      setAvatarState('confused')
       setTimeout(() => setAvatarState('idle'), 2000)
     },
     triggerWord: customTriggerWord || 'over',
@@ -148,15 +186,24 @@ export function useVoiceIO({
       log.debug('Wake word detected, starting recording')
       handleTalkStart()
     },
+    onError: reportVoiceError,
   })
 
   // Talk handlers
-  const handleTalkStart = useCallback(() => {
+  // Automatic start (continuous listening): respects the failure state
+  const autoTalkStart = useCallback(() => {
     finalTranscriptRef.current = ''
     triggerWordUsedRef.current = false
     playSound('startListening')
     startListening()
   }, [startListening, playSound])
+
+  // Explicit start (button, spacebar, wake word): always gets to try again
+  const handleTalkStart = useCallback(() => {
+    setMicBlocked(false)
+    setRecognitionFailures(0)
+    autoTalkStart()
+  }, [autoTalkStart, setRecognitionFailures])
 
   const handleTalkEnd = useCallback(() => {
     playSound('stopListening')
@@ -171,6 +218,7 @@ export function useVoiceIO({
     speak,
     speakStreaming,
     handleTalkStart,
+    autoTalkStart,
     handleTalkEnd,
     clearSpeechTranscript,
     isAvatarHoverHappy,
@@ -178,5 +226,9 @@ export function useVoiceIO({
     startListening,
     stopListening,
     finalTranscriptRef,
+    voiceError,
+    dismissVoiceError,
+    micBlocked,
+    recognitionFailures,
   }
 }

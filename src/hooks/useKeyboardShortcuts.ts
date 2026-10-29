@@ -1,7 +1,8 @@
 import { useEffect, useCallback } from 'react'
 
 interface KeyboardShortcutsOptions {
-  onEscape?: () => void
+  // Return true if Escape did something (closed a layer, cancelled recording)
+  onEscape?: () => boolean | void
   onCmdK?: () => void
   onCmdE?: () => void
   onArrowUp?: () => void
@@ -30,12 +31,11 @@ export function useKeyboardShortcuts({
     const handleKeyDown = (e: KeyboardEvent) => {
       const isMod = e.metaKey || e.ctrlKey
 
-      // Escape - cancel recording (works globally)
+      // Escape - cancel recording, or close the topmost open layer (works
+      // globally). Layers that handle their own Escape stop propagation.
       if (e.key === 'Escape') {
-        if (isRecording && onEscape) {
-          e.preventDefault()
-          onEscape()
-        }
+        if (e.defaultPrevented) return
+        if (onEscape?.()) e.preventDefault()
         return
       }
 
