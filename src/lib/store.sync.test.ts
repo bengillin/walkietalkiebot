@@ -143,7 +143,10 @@ describe('syncFromServer', () => {
 
   it('does not resurrect a conversation deleted on the server', async () => {
     setConversations(
-      [conv('keep', { updatedAt: 999 }), conv('gone', { messages: [msg('x', 1)] })],
+      [
+        conv('keep', { updatedAt: 999, localOnly: false }),
+        conv('gone', { messages: [msg('x', 1)], localOnly: false }),
+      ],
       'keep',
     )
     apiMock.listConversations.mockResolvedValue({ conversations: [meta('keep', 50)], total: 1 })
@@ -160,7 +163,7 @@ describe('syncFromServer', () => {
   })
 
   it('falls back to a blank tape when the open one was deleted elsewhere', async () => {
-    setConversations([conv('gone', { messages: [msg('x', 1)] })], 'gone')
+    setConversations([conv('gone', { messages: [msg('x', 1)], localOnly: false })], 'gone')
     apiMock.listConversations.mockResolvedValue({ conversations: [meta('s1', 50)], total: 1 })
     await useStore.getState().syncFromServer()
     const state = useStore.getState()
@@ -169,6 +172,42 @@ describe('syncFromServer', () => {
     expect(state.conversations.find((c) => c.id === state.currentConversationId)?.localOnly).toBe(
       true,
     )
+  })
+
+  it('uploads tapes cached before the localOnly marker existed instead of dropping them', async () => {
+    // A pre-upgrade cache: no marker, and messages that never reached the server
+    // because of the old create-id race.
+    const legacy = conv('legacy', { messages: [msg('m', 5)], updatedAt: 999 })
+    setConversations([legacy], 'legacy')
+    apiMock.listConversations.mockResolvedValue({ conversations: [], total: 0 })
+    await useStore.getState().syncFromServer()
+
+    expect(apiMock.migrateFromLocalStorage).toHaveBeenCalledWith([legacy])
+    const kept = useStore.getState().conversations.find((c) => c.id === 'legacy')
+    expect(kept?.messages).toHaveLength(1)
+    expect(kept?.localOnly).toBe(false)
+  })
+
+  it('keeps legacy tapes unmarked when the upload fails, so the next sync retries', async () => {
+    setConversations([conv('legacy', { messages: [msg('m', 5)], updatedAt: 999 })], 'legacy')
+    apiMock.listConversations.mockResolvedValue({ conversations: [], total: 0 })
+    apiMock.migrateFromLocalStorage.mockRejectedValueOnce(new Error('offline'))
+    await useStore.getState().syncFromServer()
+
+    const kept = useStore.getState().conversations.find((c) => c.id === 'legacy')
+    expect(kept).toBeDefined()
+    expect(kept?.localOnly).toBeUndefined()
+
+    await useStore.getState().syncFromServer()
+    expect(apiMock.migrateFromLocalStorage).toHaveBeenCalledTimes(2)
+    expect(useStore.getState().conversations.find((c) => c.id === 'legacy')?.localOnly).toBe(false)
+  })
+
+  it('does not upload empty legacy tapes', async () => {
+    setConversations([conv('blank', { updatedAt: 999 })], 'blank')
+    apiMock.listConversations.mockResolvedValue({ conversations: [], total: 0 })
+    await useStore.getState().syncFromServer()
+    expect(apiMock.migrateFromLocalStorage).not.toHaveBeenCalled()
   })
 
   it('does not resurrect a conversation deleted locally during the sync', async () => {

@@ -743,6 +743,25 @@ export const useStore = create<AppState>((set, get) => {
           if (page.conversations.length === 0 || offset >= page.total) break
         }
 
+        // Tapes cached by a build before `localOnly` existed have no marker, so we
+        // can't tell "deleted on the server" from "never reached it" (the old
+        // create-id race left messages only in localStorage). Upload the ones with
+        // content through the import endpoint rather than dropping them; that
+        // matches what the old sync did, which kept every local tape.
+        const listedIds = new Set(serverList.map((c) => c.id))
+        const legacyOrphans = get().conversations.filter(
+          (c) => c.localOnly === undefined && !listedIds.has(c.id) && c.messages.length > 0,
+        )
+        let rescued = false
+        if (legacyOrphans.length > 0) {
+          try {
+            rescued = (await api.migrateFromLocalStorage(legacyOrphans)).success
+          } catch (err) {
+            log.warn('Could not upload tapes that only exist in this browser; will retry:', err)
+          }
+        }
+        const legacyIds = new Set(legacyOrphans.map((c) => c.id))
+
         // Full messages only for the open tape, and only if our copy is behind
         const before = get()
         const currentId = before.currentConversationId
@@ -797,7 +816,12 @@ export const useStore = create<AppState>((set, get) => {
           // Local tapes the server doesn't list: keep only ones that were never
           // synced. Anything else was deleted elsewhere — don't resurrect it.
           for (const local of state.conversations) {
-            if (!serverIds.has(local.id) && local.localOnly) merged.push(local)
+            if (serverIds.has(local.id) || deletedIds.has(local.id)) continue
+            if (local.localOnly) merged.push(local)
+            // Uploaded: now on the server. Upload failed: keep it unmarked so the
+            // next sync tries again.
+            else if (legacyIds.has(local.id))
+              merged.push(rescued ? { ...local, localOnly: false } : local)
           }
 
           merged.sort((a, b) => b.updatedAt - a.updatedAt)
