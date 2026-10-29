@@ -2,7 +2,7 @@
 
 ## Current State
 
-Walkie Talkie Bot is a voice-first, cassette tape-themed interface for Claude Code with dual distribution (Claude Code plugin + full server with web UI). The codebase is TypeScript throughout, with 322 unit tests across 22 test files (plus Playwright E2E + visual regression) covering the frontend (store, exports, components, plan detection) and server (5 database repositories + HTTP API layer + prompt builder + auth).
+Walkie Talkie Bot is a voice-first, cassette tape-themed interface for Claude Code with dual distribution (Claude Code plugin + full server with web UI). The codebase is TypeScript throughout, with 469 unit tests across 31 test files (plus 12 MCP smoke tests) (plus Playwright E2E + visual regression) covering the frontend (store, exports, components, plan detection) and server (5 database repositories + HTTP API layer + prompt builder + auth).
 
 ### Architecture highlights
 - **Frontend**: React 19 + Zustand, decomposed into 8 custom hooks (`useVoiceIO`, `useClaudeChat`, `useKeyboardControl`, `useDraggableFab`, `useImageAnalysis`, `useServerSync`, `useKeyboardShortcuts`, `useSoundEffects`)
@@ -65,7 +65,7 @@ Walkie Talkie Bot is a voice-first, cassette tape-themed interface for Claude Co
 - [x] MCP telemetry opt-in only (`WTB_TELEMETRY=1`)
 
 ### Testing & Quality
-- [x] 322 unit tests across 22 files + Playwright E2E and visual regression
+- [x] 469 unit tests across 31 files + Playwright E2E and visual regression
 - [x] Client tests: store, exports, plan detection, tool config, components (ModeSelector, MediaLibrary), core hooks (useClaudeChat, useVoiceIO)
 - [x] Server tests: conversations, messages, plans, search, activities repositories + HTTP API + prompt builder + auth + job runner/manager
 - [x] TypeScript throughout (including MCP server)

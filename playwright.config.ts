@@ -1,4 +1,10 @@
+import { mkdtempSync } from 'fs'
+import { tmpdir } from 'os'
+import { join } from 'path'
 import { defineConfig, devices } from '@playwright/test'
+
+// The server under test gets its own data dir, so e2e runs never touch ~/.wtb.
+const wtbDir = mkdtempSync(join(tmpdir(), 'wtb-e2e-'))
 
 export default defineConfig({
   testDir: './e2e',
@@ -21,8 +27,9 @@ export default defineConfig({
   webServer: {
     command: 'node server/index.js',
     port: 5174,
-    env: { PORT: '5174' },
-    reuseExistingServer: !process.env.CI,
+    env: { PORT: '5174', WTB_PORT: '5174', WTB_DIR: wtbDir },
+    // A server already on this port would be using someone's real data dir.
+    reuseExistingServer: false,
     timeout: 15000,
   },
 })
