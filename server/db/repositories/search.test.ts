@@ -109,3 +109,32 @@ describe('rebuildSearchIndex', () => {
     expect(() => rebuildSearchIndex()).not.toThrow()
   })
 })
+
+describe('search hardening', () => {
+  it('HTML-escapes message content in snippets, keeping only the <mark> tags', () => {
+    createMessage({
+      id: 'x1',
+      conversationId: 'c1',
+      role: 'assistant',
+      content: 'weather <img src=x onerror=alert(document.domain)> today',
+    })
+    const [hit] = searchMessages('weather')
+    expect(hit).toBeDefined()
+    expect(hit!.snippet).not.toContain('<img')
+    expect(hit!.snippet).toContain('&lt;img')
+    expect(hit!.snippet).toContain('<mark>weather</mark>')
+  })
+
+  it('finds words containing apostrophes', () => {
+    createMessage({ id: 'a1', conversationId: 'c1', role: 'user', content: "it's broken again" })
+    expect(searchMessages("it's")).toHaveLength(1)
+  })
+
+  it('treats FTS operators and punctuation as plain text instead of throwing', () => {
+    createMessage({ id: 'o1', conversationId: 'c1', role: 'user', content: 'cats OR dogs' })
+    for (const q of ['*', 'a OR', 'NEAR(', 'col:val', '"', '""', '^', 'cats AND']) {
+      expect(() => searchMessages(q)).not.toThrow()
+    }
+    expect(searchMessages('cats OR')).toHaveLength(1)
+  })
+})

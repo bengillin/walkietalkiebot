@@ -14,15 +14,23 @@ import { updateState } from "./state.js";
 import { getNotificationDispatcher } from "./notifications/dispatcher.js";
 import { MacOSNotificationChannel } from "./notifications/macos.js";
 import { getJobManager } from "./jobs/manager.js";
-import { authMiddleware, getAuthToken } from "./auth.js";
+import { authMiddleware, getAuthToken, hasValidCredentials } from "./auth.js";
+import { assertSafeBind, isLoopbackHost, requestGuard, resolveBindHosts } from "./security.js";
 import { createLogger } from "./logger.js";
 const log = createLogger("server");
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const distPath = join(__dirname, "..", "dist");
 const MAX_BODY_BYTES = Number(process.env.WTB_MAX_BODY_BYTES) || 50 * 1024 * 1024;
-let server = null;
+let servers = [];
 function startServer(port = 5173) {
   return new Promise((resolve, reject) => {
+    const hosts = resolveBindHosts();
+    try {
+      hosts.forEach(assertSafeBind);
+    } catch (err) {
+      reject(err);
+      return;
+    }
     if (!existsSync(distPath)) {
       reject(new Error(`dist/ not found at ${distPath}. Run 'npm run build' first.`));
       return;
@@ -58,8 +66,10 @@ function startServer(port = 5173) {
     const jobManager = getJobManager();
     jobManager.init();
     const app = new Hono();
+    app.use("*", requestGuard);
     app.use("*", authMiddleware);
     app.route("/api", api);
+    app.all("/api/*", (c) => c.json({ error: "Not found" }, 404));
     app.use("/*", serveStatic({ root: distPath.replace(process.cwd(), ".") }));
     app.get("*", (c) => {
       const indexPath = join(distPath, "index.html");
@@ -72,7 +82,7 @@ function startServer(port = 5173) {
     ensureWtbDir();
     const certs = getSSLCerts();
     const protocol = certs ? "https" : "http";
-    const handler = async (req, res) => {
+    const handleRequest = async (req, res) => {
       const url = new URL(req.url || "/", `${protocol}://localhost:${port}`);
       const headers = new Headers();
       for (const [key, value] of Object.entries(req.headers)) {
@@ -86,6 +96,12 @@ function startServer(port = 5173) {
       }
       let body = null;
       if (req.method && ["POST", "PUT", "PATCH"].includes(req.method)) {
+        if (!hasValidCredentials(req.headers.authorization, req.headers.cookie)) {
+          req.resume();
+          res.writeHead(401, { "content-type": "application/json" });
+          res.end(JSON.stringify({ error: "Unauthorized" }));
+          return;
+        }
         const chunks = [];
         let total = 0;
         let tooLarge = false;
@@ -103,7 +119,7 @@ function startServer(port = 5173) {
           res.end(JSON.stringify({ error: "Payload too large" }));
           return;
         }
-        body = Buffer.concat(chunks);
+        body = chunks.length > 0 ? Buffer.concat(chunks) : null;
       }
       const request = new Request(url.toString(), {
         method: req.method || "GET",
@@ -128,38 +144,72 @@ function startServer(port = 5173) {
       }
       res.end();
     };
-    if (certs) {
-      const serverOptions = { key: certs.key, cert: certs.cert };
-      server = createHttpsServer(serverOptions, handler);
-    } else {
-      server = createHttpServer(handler);
-    }
-    server.listen(port, () => {
-      const url = `${protocol}://localhost:${port}`;
-      log.debug(`Talkie server running at ${url}`);
-      const authToken = getAuthToken();
-      if (authToken) {
-        log.debug(`Auth enabled. Open the UI with: ${url}/?token=${authToken}`);
+    const handler = (req, res) => {
+      handleRequest(req, res).catch((err) => {
+        log.error("Request failed:", err);
+        if (!res.headersSent) {
+          res.writeHead(500, { "content-type": "application/json" });
+          res.end(JSON.stringify({ error: "Internal server error" }));
+        } else {
+          res.destroy();
+        }
+      });
+    };
+    const createServer = () => certs ? createHttpsServer({ key: certs.key, cert: certs.cert }, handler) : createHttpServer(handler);
+    listenAll(createServer, port, hosts).then((bound) => {
+      servers = bound;
+      const loopback = hosts.every(isLoopbackHost);
+      const shownHost = loopback ? "localhost" : hosts[0];
+      const url = `${protocol}://${shownHost}:${port}`;
+      log.info(`Talkie server running at ${url}`);
+      if (!loopback) {
+        log.info(
+          `Listening on ${hosts.join(", ")}, so other machines can reach it. Auth is required.`
+        );
+      }
+      if (getAuthToken()) {
+        log.info(`Auth enabled. Sign in once with: ${url}/?token=<your WTB_AUTH_TOKEN>`);
       }
       resolve();
-    });
-    server.on("error", (err) => {
-      if (err.code === "EADDRINUSE") {
-        reject(new Error(`Port ${port} is already in use`));
-      } else {
-        reject(err);
-      }
-    });
+    }).catch(reject);
   });
+}
+async function listenAll(createServer, port, hosts) {
+  const bound = [];
+  try {
+    for (const host of hosts) {
+      const srv = createServer();
+      try {
+        await new Promise((resolve, reject) => {
+          srv.once("error", reject);
+          srv.listen(port, host, () => {
+            srv.off("error", reject);
+            resolve();
+          });
+        });
+        bound.push(srv);
+      } catch (err) {
+        const code = err.code;
+        if (code === "EADDRINUSE") throw new Error(`Port ${port} is already in use`);
+        if (host === "::1" && (code === "EADDRNOTAVAIL" || code === "EAFNOSUPPORT")) {
+          log.debug("IPv6 loopback unavailable; listening on 127.0.0.1 only");
+          continue;
+        }
+        throw err;
+      }
+    }
+    return bound;
+  } catch (err) {
+    bound.forEach((srv) => srv.close());
+    throw err;
+  }
 }
 async function stopServer() {
   closeDb();
-  if (server) {
-    await new Promise((resolve) => {
-      server.close(() => resolve());
-    });
-    server = null;
-  }
+  await Promise.all(
+    servers.map((srv) => new Promise((resolve) => srv.close(() => resolve())))
+  );
+  servers = [];
 }
 function setupShutdownHandlers() {
   const shutdown = async (signal) => {
@@ -174,7 +224,10 @@ Received ${signal}, shutting down gracefully...`);
 if (import.meta.url === `file://${process.argv[1]}`) {
   setupShutdownHandlers();
   const port = parseInt(process.env.PORT || "5173", 10);
-  startServer(port).catch((err) => log.error("Server failed to start:", err));
+  startServer(port).catch((err) => {
+    log.error("Server failed to start:", err instanceof Error ? err.message : err);
+    process.exitCode = 1;
+  });
 }
 export {
   startServer,

@@ -1,22 +1,23 @@
 #!/usr/bin/env node
 
 import { spawn, execSync } from 'child_process'
-import { existsSync, mkdirSync, writeFileSync, readFileSync, unlinkSync } from 'fs'
-import { join, dirname } from 'path'
+import { chmodSync, existsSync, mkdirSync, writeFileSync, readFileSync, unlinkSync } from 'fs'
+import { join, dirname, resolve } from 'path'
 import { homedir } from 'os'
 import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const PLIST_NAME = 'com.wtb.server'
 const PLIST_PATH = join(homedir(), 'Library', 'LaunchAgents', `${PLIST_NAME}.plist`)
-const LOG_DIR = join(homedir(), '.wtb', 'logs')
-const PID_FILE = join(homedir(), '.wtb', 'server.pid')
+// Mirrors server/paths.ts getWtbDir(); this CLI is plain JS and can't import the TS source.
+const WTB_DIR = process.env.WTB_DIR ? resolve(process.env.WTB_DIR) : join(homedir(), '.wtb')
+const LOG_DIR = join(WTB_DIR, 'logs')
+const PID_FILE = join(WTB_DIR, 'server.pid')
 const PORT = parseInt(process.env.WTB_PORT || '5173', 10)
 
 function ensureDirs() {
-  const wtbDir = join(homedir(), '.wtb')
-  if (!existsSync(wtbDir)) {
-    mkdirSync(wtbDir, { recursive: true })
+  if (!existsSync(WTB_DIR)) {
+    mkdirSync(WTB_DIR, { recursive: true })
   }
   if (!existsSync(LOG_DIR)) {
     mkdirSync(LOG_DIR, { recursive: true })
@@ -25,6 +26,41 @@ function ensureDirs() {
   if (!existsSync(launchAgentsDir)) {
     mkdirSync(launchAgentsDir, { recursive: true })
   }
+}
+
+// Settings the daemon must inherit from the shell that ran `install`. Without
+// WTB_AUTH_TOKEN in particular, a daemon with WTB_HOST set would refuse to start.
+const PASSTHROUGH_ENV = [
+  'WTB_AUTH_TOKEN',
+  'WTB_HOST',
+  'WTB_DIR',
+  'WTB_LOG_LEVEL',
+  'WTB_MAX_BODY_BYTES',
+]
+
+function xmlEscape(value) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
+function plistEnv() {
+  // launchd starts with a bare PATH; keep the installing shell's so `node` and
+  // `claude` (often in ~/.local/bin or a version manager's dir) resolve.
+  const path = [process.env.PATH, '/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin']
+    .filter(Boolean)
+    .join(':')
+  const env = { PORT: String(PORT), WTB_PORT: String(PORT), PATH: path }
+  for (const key of PASSTHROUGH_ENV) {
+    if (process.env[key]) env[key] = process.env[key]
+  }
+  return Object.entries(env)
+    .map(
+      ([key, value]) => `        <key>${key}</key>\n        <string>${xmlEscape(value)}</string>`,
+    )
+    .join('\n')
 }
 
 function generatePlist() {
@@ -44,10 +80,7 @@ function generatePlist() {
     </array>
     <key>EnvironmentVariables</key>
     <dict>
-        <key>PORT</key>
-        <string>${PORT}</string>
-        <key>PATH</key>
-        <string>/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin</string>
+${plistEnv()}
     </dict>
     <key>WorkingDirectory</key>
     <string>${join(__dirname, '..')}</string>
@@ -282,7 +315,9 @@ async function installDaemon() {
   ensureDirs()
 
   const plist = generatePlist()
-  writeFileSync(PLIST_PATH, plist)
+  // 0600: the plist may carry WTB_AUTH_TOKEN.
+  writeFileSync(PLIST_PATH, plist, { mode: 0o600 })
+  chmodSync(PLIST_PATH, 0o600) // mode above only applies when the file is new
   console.log(`Installed plist to ${PLIST_PATH}`)
 
   // Load the daemon
@@ -322,11 +357,20 @@ Commands:
   uninstall       Remove launchd daemon
 
 Environment:
-  WTB_PORT    Server port (default: 5173)
+  WTB_PORT        Server port (default: 5173)
+  WTB_HOST        Address to listen on (default: 127.0.0.1). Anything other than
+                  loopback requires WTB_AUTH_TOKEN.
+  WTB_AUTH_TOKEN  Shared secret required on every request
+  WTB_DIR         Data directory: database, modes, logs (default: ~/.wtb)
 `)
 }
 
 // Import createWriteStream for logging
 import { createWriteStream } from 'fs'
 
-commands().catch(console.error)
+commands().catch((err) => {
+  // Startup errors (port in use, refusing an unauthenticated bind) are written for
+  // the user; a stack trace would bury them.
+  console.error(err instanceof Error ? err.message : err)
+  process.exit(1)
+})

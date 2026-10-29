@@ -1,5 +1,4 @@
 import { Hono } from "hono";
-import { cors } from "hono/cors";
 import { streamSSE } from "hono/streaming";
 import { spawn } from "child_process";
 import { state, updateState, generateRequestId } from "./state.js";
@@ -15,7 +14,10 @@ import { getModeInfoList, reloadModes } from "./modes.js";
 import { createLogger } from "./logger.js";
 const log = createLogger("api");
 const api = new Hono();
-api.use("*", cors());
+function intParam(value, fallback, min, max) {
+  const n = Number.parseInt(value ?? "", 10);
+  return Number.isFinite(n) ? Math.min(Math.max(n, min), max) : fallback;
+}
 api.route("/jobs", jobRoutes);
 api.get("/status", (c) => {
   return c.json({
@@ -27,8 +29,8 @@ api.get("/status", (c) => {
   });
 });
 api.get("/conversations", (c) => {
-  const limit = parseInt(c.req.query("limit") || "50", 10);
-  const offset = parseInt(c.req.query("offset") || "0", 10);
+  const limit = intParam(c.req.query("limit"), 50, 1, 500);
+  const offset = intParam(c.req.query("offset"), 0, 0, Number.MAX_SAFE_INTEGER);
   const convos = conversations.listConversations(limit, offset);
   const total = conversations.countConversations();
   return c.json({
@@ -212,8 +214,8 @@ api.patch("/images/:id", async (c) => {
   return c.json({ success: true });
 });
 api.get("/plans", (c) => {
-  const limit = parseInt(c.req.query("limit") || "50", 10);
-  const offset = parseInt(c.req.query("offset") || "0", 10);
+  const limit = intParam(c.req.query("limit"), 50, 1, 500);
+  const offset = intParam(c.req.query("offset"), 0, 0, Number.MAX_SAFE_INTEGER);
   const conversationId = c.req.query("conversationId") || void 0;
   const planList = plans.listPlans(limit, offset, conversationId);
   return c.json({
@@ -291,7 +293,7 @@ api.delete("/plans/:id", (c) => {
 });
 api.get("/search", (c) => {
   const query = c.req.query("q") || "";
-  const limit = parseInt(c.req.query("limit") || "50", 10);
+  const limit = intParam(c.req.query("limit"), 50, 1, 500);
   if (!query.trim()) {
     return c.json({ results: [] });
   }
@@ -450,8 +452,40 @@ api.get("/history", (c) => {
     messages: state.messages
   });
 });
+const AVATAR_STATES = /* @__PURE__ */ new Set(["idle", "listening", "thinking", "speaking", "happy", "confused"]);
+function parseStateUpdate(body) {
+  if (typeof body !== "object" || body === null || Array.isArray(body)) return null;
+  const b = body;
+  const update = {};
+  if ("avatarState" in b) {
+    if (typeof b.avatarState !== "string" || !AVATAR_STATES.has(b.avatarState)) return null;
+    update.avatarState = b.avatarState;
+  }
+  for (const key of ["transcript", "lastUserMessage", "lastAssistantMessage"]) {
+    if (key in b) {
+      const value = b[key];
+      if (typeof value !== "string") return null;
+      update[key] = value;
+    }
+  }
+  if ("messages" in b) {
+    const msgs = b.messages;
+    if (!Array.isArray(msgs) || !msgs.every(
+      (m) => typeof m === "object" && m !== null && typeof m.role === "string" && typeof m.content === "string" && typeof m.timestamp === "number"
+    )) {
+      return null;
+    }
+    update.messages = msgs.map((m) => ({
+      role: m.role,
+      content: m.content,
+      timestamp: m.timestamp
+    }));
+  }
+  return update;
+}
 api.post("/state", async (c) => {
-  const update = await c.req.json();
+  const update = parseStateUpdate(await c.req.json().catch(() => null));
+  if (!update) return c.json({ error: "Invalid state update" }, 400);
   updateState(update);
   return c.json({ success: true });
 });
@@ -649,5 +683,6 @@ api.post("/claude-code", async (c) => {
   });
 });
 export {
-  api
+  api,
+  parseStateUpdate
 };

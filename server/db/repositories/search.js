@@ -1,9 +1,16 @@
 import { getDb } from "../index.js";
+const MATCH_START = "";
+const MATCH_END = "";
+function escapeHtml(text) {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+function renderSnippet(raw) {
+  return escapeHtml(raw).split(MATCH_START).join("<mark>").split(MATCH_END).join("</mark>");
+}
 function searchMessages(query, limit = 50) {
   if (!query.trim()) return [];
   const db = getDb();
-  const escapedQuery = query.replace(/['"]/g, "").trim();
-  const searchTerms = escapedQuery.split(/\s+/).map((term) => `"${term}"*`).join(" ");
+  const searchTerms = query.trim().split(/\s+/).map((term) => `"${term.replace(/"/g, '""')}"*`).join(" ");
   const results = db.prepare(
     `
     SELECT
@@ -13,7 +20,7 @@ function searchMessages(query, limit = 50) {
       m.role,
       m.content,
       m.timestamp,
-      snippet(messages_fts, 0, '<mark>', '</mark>', '...', 32) as snippet
+      snippet(messages_fts, 0, char(1), char(2), '...', 32) as snippet
     FROM messages_fts
     JOIN messages m ON messages_fts.rowid = m.rowid
     JOIN conversations c ON m.conversation_id = c.id
@@ -22,7 +29,7 @@ function searchMessages(query, limit = 50) {
     LIMIT ?
   `
   ).all(searchTerms, limit);
-  return results;
+  return results.map((r) => ({ ...r, snippet: renderSnippet(r.snippet) }));
 }
 function rebuildSearchIndex() {
   const db = getDb();
@@ -32,5 +39,6 @@ function rebuildSearchIndex() {
 }
 export {
   rebuildSearchIndex,
+  renderSnippet,
   searchMessages
 };
