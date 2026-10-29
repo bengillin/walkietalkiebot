@@ -109,14 +109,16 @@ export async function getConversation(id: string): Promise<ConversationWithMessa
   return fetchJson(`${API_BASE}/conversations/${id}`)
 }
 
-export async function createConversation(
-  title?: string,
-  projectId?: string,
-  parentId?: string,
-): Promise<Conversation> {
+// The client generates conversation ids, and the server honours `id` in the
+// body, so local and server ids always agree (no async id swap).
+export async function createConversation(conv: {
+  id: string
+  title?: string
+  mode?: string
+}): Promise<Conversation> {
   return fetchJson(`${API_BASE}/conversations`, {
     method: 'POST',
-    body: JSON.stringify({ title, projectId, parentId }),
+    body: JSON.stringify(conv),
   })
 }
 
@@ -152,6 +154,9 @@ export async function importConversation(data: {
 export async function addMessage(
   conversationId: string,
   message: {
+    // Client-generated id/timestamp, so the server row matches the local one
+    id?: string
+    timestamp?: number
     role: 'user' | 'assistant'
     content: string
     source?: string
