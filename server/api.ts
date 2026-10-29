@@ -864,39 +864,73 @@ api.post('/open-url', async (c) => {
   })
 })
 
+// Each chat turn is a full bypass-permissions agent. One user has no reason to
+// run more than a few at once; past this, something is looping or abusing the API.
+const MAX_CONCURRENT_CHATS = 4
+let activeChats = 0
+
 // POST /api/claude-code - Execute claude CLI and stream response
 api.post('/claude-code', async (c) => {
   const { message, history, images, mode, conversationId } = await c.req.json()
-  if (!message) {
+  if (!message || typeof message !== 'string') {
     return c.json({ error: 'Message required' }, 400)
   }
-
-  return streamSSE(c, async (stream) => {
-    const handle = spawnClaude({
-      prompt: message,
-      history: history || state.messages || [],
-      images,
-      mode,
-      conversationId,
-      callbacks: {
-        onText: (text) => {
-          stream.writeSSE({ data: JSON.stringify({ text }) })
-        },
-        onActivity: (event) => {
-          stream.writeSSE({ data: JSON.stringify({ activity: event }) })
-        },
-        onPlan: (plan) => {
-          stream.writeSSE({ data: JSON.stringify({ plan }) })
-        },
-        onError: (error) => {
-          stream.writeSSE({ data: JSON.stringify({ error }) })
-        },
-        onComplete: (code) => {
-          stream.writeSSE({ data: JSON.stringify({ done: true, code }) })
-        },
+  if (history !== undefined && !Array.isArray(history)) {
+    return c.json({ error: 'history must be an array' }, 400)
+  }
+  if (
+    images !== undefined &&
+    (!Array.isArray(images) ||
+      !images.every((img) => typeof img === 'object' && img && typeof img.dataUrl === 'string'))
+  ) {
+    return c.json({ error: 'images must be an array of { dataUrl, fileName }' }, 400)
+  }
+  if (activeChats >= MAX_CONCURRENT_CHATS) {
+    return c.json(
+      {
+        error: `Too many Claude turns running (limit ${MAX_CONCURRENT_CHATS}). Try again shortly.`,
       },
-    })
+      429,
+    )
+  }
 
-    await handle.promise
+  activeChats++
+  return streamSSE(c, async (stream) => {
+    // Everything below is inside the finally: a throw anywhere (even before the
+    // agent starts) must give the slot back, or four bad requests lock chat.
+    try {
+      const handle = spawnClaude({
+        prompt: message,
+        history: history || state.messages || [],
+        images,
+        mode,
+        conversationId,
+        callbacks: {
+          onText: (text) => {
+            stream.writeSSE({ data: JSON.stringify({ text }) })
+          },
+          onActivity: (event) => {
+            stream.writeSSE({ data: JSON.stringify({ activity: event }) })
+          },
+          onPlan: (plan) => {
+            stream.writeSSE({ data: JSON.stringify({ plan }) })
+          },
+          onError: (error) => {
+            stream.writeSSE({ data: JSON.stringify({ error }) })
+          },
+          onComplete: (code) => {
+            stream.writeSSE({ data: JSON.stringify({ done: true, code }) })
+          },
+        },
+      })
+
+      // The client went away (tab closed, request cancelled): stop the agent
+      // rather than letting it keep running with nobody reading.
+      stream.onAbort(() => handle.kill())
+
+      await handle.promise
+    } finally {
+      activeChats--
+    }
   })
 })

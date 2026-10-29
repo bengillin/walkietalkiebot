@@ -259,10 +259,14 @@ describe('cancellation', () => {
     expect(jobsRepo.getJob(job.id)?.status).toBe('cancelled')
   })
 
-  it('frees the slot so a queued job can start', () => {
+  it('frees the slot once the killed process exits, not before', () => {
     const jobs = createJobs(4)
     manager.cancelJob(jobs[0].id)
 
+    // Still dying: starting another now would put four agents in flight.
+    expect(runner.runs).toHaveLength(3)
+
+    runner.finish(0, 1)
     expect(runner.runs).toHaveLength(4)
     expect(jobsRepo.getJob(jobs[3].id)?.status).toBe('running')
   })
@@ -351,6 +355,31 @@ describe('timeouts', () => {
     const row = jobsRepo.getJob(job.id)
     expect(row?.status).toBe('failed')
     expect(row?.error).toContain('Timed out')
+  })
+
+  it('keeps a timed-out job failed when the killed process then exits', () => {
+    vi.useFakeTimers()
+    const job = create()
+    runner.at(0).callbacks.onText('partial output')
+
+    vi.advanceTimersByTime(10 * 60 * 1000 + 1)
+    runner.finish(0, 0)
+
+    expect(jobsRepo.getJob(job.id)?.status).toBe('failed')
+    expect(messagesRepo.getMessagesForConversation(CONV)).toHaveLength(0)
+  })
+
+  it('starts the next queued job exactly once after a timeout', () => {
+    vi.useFakeTimers()
+    const jobs = createJobs(5)
+
+    vi.advanceTimersByTime(10 * 60 * 1000 + 1)
+    // All three timed out; slots free only as each killed process exits.
+    expect(runner.runs).toHaveLength(3)
+    runner.finish(0, 1)
+    expect(runner.runs).toHaveLength(4)
+    expect(jobsRepo.getJob(jobs[3].id)?.status).toBe('running')
+    expect(jobsRepo.getJob(jobs[4].id)?.status).toBe('queued')
   })
 
   it('leaves an already-finished job alone when its timer fires', () => {

@@ -103,22 +103,15 @@ class JobManager {
     }
 
     if (job.status === 'running') {
-      const handle = this.activeHandles.get(id)
-      if (handle) {
-        handle.kill()
-        this.activeHandles.delete(id)
-        const timeout = this.activeTimeouts.get(id)
-        if (timeout) {
-          clearTimeout(timeout)
-          this.activeTimeouts.delete(id)
-        }
-      }
+      // Mark cancelled first so onComplete leaves the status alone, then kill.
+      // The slot is freed in onComplete once the process has actually exited,
+      // so a slow-dying job can't push us past MAX_CONCURRENT_JOBS.
       jobsRepo.updateJob(id, { status: 'cancelled', completed_at: Date.now() })
       this.emitEvent(id, {
         type: 'status_change',
         data: JSON.stringify({ status: 'cancelled' }),
       })
-      this.processNext()
+      this.activeHandles.get(id)?.kill()
       return true
     }
 
@@ -220,8 +213,14 @@ class JobManager {
           this.emitEvent(jobId, { type: 'error', data: JSON.stringify({ error }) })
         },
         onComplete: (code) => {
+          this.releaseSlot(jobId)
+          // Cancelled or timed out: the status is already final. Don't overwrite
+          // it with the killed process's exit, or save its partial output.
           const currentJob = jobsRepo.getJob(jobId)
-          if (currentJob?.status === 'cancelled') return
+          if (currentJob?.status !== 'running') {
+            this.processNext()
+            return
+          }
 
           const now = Date.now()
           const status = code === 0 ? 'completed' : 'failed'
@@ -273,13 +272,6 @@ class JobManager {
             .dispatch(notification)
             .catch((e) => log.error('Notification dispatch failed:', e))
 
-          // Clean up and process next queued jobs
-          this.activeHandles.delete(jobId)
-          const timeout = this.activeTimeouts.get(jobId)
-          if (timeout) {
-            clearTimeout(timeout)
-            this.activeTimeouts.delete(jobId)
-          }
           this.processNext()
         },
       },
@@ -293,7 +285,7 @@ class JobManager {
       const currentJob = jobsRepo.getJob(jobId)
       if (currentJob?.status === 'running') {
         log.warn(`Job ${jobId} timed out after ${JobManager.JOB_TIMEOUT_MS / 1000}s, killing`)
-        handle.kill()
+        // Final status first, then kill; onComplete frees the slot on exit.
         jobsRepo.updateJob(jobId, {
           status: 'failed',
           error: `Timed out after ${JobManager.JOB_TIMEOUT_MS / 60000} minutes`,
@@ -303,21 +295,19 @@ class JobManager {
           type: 'status_change',
           data: JSON.stringify({ status: 'failed', error: 'Job timed out' }),
         })
-        this.activeHandles.delete(jobId)
-        this.activeTimeouts.delete(jobId)
-        this.processNext()
+        handle.kill()
       }
     }, JobManager.JOB_TIMEOUT_MS)
     this.activeTimeouts.set(jobId, timeout)
+  }
 
-    // Clear timeout when job completes naturally
-    handle.promise.then(() => {
-      const t = this.activeTimeouts.get(jobId)
-      if (t) {
-        clearTimeout(t)
-        this.activeTimeouts.delete(jobId)
-      }
-    })
+  private releaseSlot(jobId: string): void {
+    this.activeHandles.delete(jobId)
+    const timeout = this.activeTimeouts.get(jobId)
+    if (timeout) {
+      clearTimeout(timeout)
+      this.activeTimeouts.delete(jobId)
+    }
   }
 }
 

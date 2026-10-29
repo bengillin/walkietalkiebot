@@ -68,9 +68,11 @@ function spawnClaude(options) {
     const tempDir = join(tmpdir(), "wtb-images");
     mkdirSync(tempDir, { recursive: true });
     for (const img of images) {
+      if (typeof img?.dataUrl !== "string") continue;
       const base64Data = img.dataUrl.split(",")[1];
       if (!base64Data) continue;
-      const ext = img.fileName.split(".").pop() || "png";
+      const named = typeof img.fileName === "string" ? img.fileName : "";
+      const ext = /^[a-z0-9]{1,8}$/i.test(named.split(".").pop() ?? "") ? named.split(".").pop() : "png";
       const tempPath = join(tempDir, `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`);
       writeFileSync(tempPath, Buffer.from(base64Data, "base64"));
       tempImagePaths.push(tempPath);
@@ -131,12 +133,7 @@ function spawnClaude(options) {
     });
     return {
       pid: proc.child.pid || 0,
-      kill: () => {
-        try {
-          proc.child.kill("SIGTERM");
-        } catch {
-        }
-      },
+      kill: () => killProcessTree(proc.child),
       promise: proc.promise
     };
   }
@@ -146,6 +143,7 @@ function spawnClaude(options) {
     resolveFinal = res;
   });
   let current;
+  let killed = false;
   const launch = (strategy, isRetry) => {
     const sessionArgs = strategy === "create" ? ["--session-id", convId] : ["--resume", convId];
     const fullPrompt = buildFullPrompt(strategy === "create");
@@ -180,7 +178,7 @@ function spawnClaude(options) {
         callbacks.onError(msg);
       },
       onComplete: (code) => {
-        if (sessionFault && !sawContent && !isRetry) {
+        if (sessionFault && !sawContent && !isRetry && !killed) {
           launch(strategy === "create" ? "resume" : "create", true);
           return;
         }
@@ -196,21 +194,73 @@ function spawnClaude(options) {
   return {
     pid: current.child.pid || 0,
     kill: () => {
-      try {
-        current?.child.kill("SIGTERM");
-      } catch {
-      }
+      killed = true;
+      if (current) killProcessTree(current.child);
     },
     promise
   };
 }
+const liveGroups = /* @__PURE__ */ new Set();
+const KILL_GRACE_MS = 5e3;
+function groupAlive(pgid) {
+  try {
+    process.kill(-pgid, 0);
+    return true;
+  } catch (err) {
+    if (err.code === "EPERM") return true;
+    liveGroups.delete(pgid);
+    return false;
+  }
+}
+function signalGroup(pgid, signal) {
+  try {
+    process.kill(-pgid, signal);
+    return true;
+  } catch {
+    return false;
+  }
+}
+function killProcessTree(child) {
+  const pid = child.pid;
+  if (!pid) return;
+  if (!signalGroup(pid, "SIGTERM")) {
+    try {
+      child.kill("SIGTERM");
+    } catch {
+    }
+    return;
+  }
+  const escalate = setTimeout(() => {
+    if (groupAlive(pid)) signalGroup(pid, "SIGKILL");
+  }, KILL_GRACE_MS);
+  escalate.unref();
+}
+function killAllClaudeProcesses() {
+  for (const pgid of liveGroups) signalGroup(pgid, "SIGTERM");
+}
+async function waitForClaudeProcesses(timeoutMs = KILL_GRACE_MS) {
+  const deadline = Date.now() + timeoutMs;
+  while ([...liveGroups].some(groupAlive) && Date.now() < deadline) {
+    await new Promise((r) => setTimeout(r, 100));
+  }
+  for (const pgid of liveGroups) signalGroup(pgid, "SIGKILL");
+  liveGroups.clear();
+}
+function _resetProcessTrackingForTesting() {
+  liveGroups.clear();
+}
+process.on("exit", () => {
+  for (const pgid of liveGroups) signalGroup(pgid, "SIGKILL");
+});
 function runClaudeProcess(claudePath, args, env, callbacks) {
   const claude = spawn(claudePath, args, {
     cwd: process.cwd(),
     env,
     stdio: ["ignore", "pipe", "pipe"],
-    detached: false
+    // Own process group, so killProcessTree can take down Bash-tool grandchildren.
+    detached: true
   });
+  if (claude.pid) liveGroups.add(claude.pid);
   let buffer = "";
   const toolInputs = {};
   const toolNames = {};
@@ -340,20 +390,31 @@ function runClaudeProcess(claudePath, args, env, callbacks) {
     callbacks.onError(text);
   });
   const promise = new Promise((resolve) => {
-    claude.on("close", (code) => {
-      callbacks.onComplete(code || 0);
-      resolve(code || 0);
+    let settled = false;
+    const finish = (code) => {
+      if (claude.pid) groupAlive(claude.pid);
+      if (settled) return;
+      settled = true;
+      callbacks.onComplete(code);
+      resolve(code);
+    };
+    claude.on("close", (code, signal) => {
+      if (signal) log.debug(`claude exited on ${signal}`);
+      finish(code ?? 1);
     });
     claude.on("error", (err) => {
       callbacks.onError(err.message);
-      callbacks.onComplete(1);
-      resolve(1);
+      finish(1);
     });
   });
   return { child: claude, promise };
 }
 export {
+  _resetProcessTrackingForTesting,
   _resetSessionTracking,
   isClaudeCliAvailable,
-  spawnClaude
+  killAllClaudeProcesses,
+  killProcessTree,
+  spawnClaude,
+  waitForClaudeProcesses
 };
