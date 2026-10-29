@@ -3,9 +3,9 @@
   "version": "0.3.8",
   "description": "MCP server for Walkie Talkie Bot — 30 tools for voice, conversations, sessions, jobs, and image analysis in Claude Code",
   "type": "module",
-  "main": "index.js",
+  "main": "dist/index.js",
   "bin": {
-    "wtb-mcp": "./index.js"
+    "wtb-mcp": "./dist/index.js"
   },
   "keywords": [
     "mcp",

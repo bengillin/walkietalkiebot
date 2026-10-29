@@ -1,7 +1,7 @@
 ---
 name: export-tape
 description: Export a Walkie Talkie Bot conversation as markdown or JSON. Use when the user wants to export or share a conversation.
-allowed-tools: list_conversations, export_conversation
+allowed-tools: mcp__plugin_wtb_wtb__list_conversations, mcp__plugin_wtb_wtb__export_conversation
 ---
 
 # Export Conversation

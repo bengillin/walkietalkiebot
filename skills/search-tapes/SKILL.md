@@ -1,7 +1,7 @@
 ---
 name: search-tapes
 description: Search across all Walkie Talkie Bot conversations for specific content. Use when the user wants to find something they discussed before.
-allowed-tools: search_conversations, get_conversation
+allowed-tools: mcp__plugin_wtb_wtb__search_conversations, mcp__plugin_wtb_wtb__get_conversation
 ---
 
 # Search Tapes
