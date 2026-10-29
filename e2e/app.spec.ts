@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, type APIRequestContext, type Page, type Route } from '@playwright/test'
 import { skipOnboarding, setTheme } from './helpers'
 
 test.describe('Onboarding', () => {
@@ -154,4 +154,276 @@ test.describe('Theme switching', () => {
       await expect(page.locator('.app__header')).toBeVisible()
     })
   }
+})
+
+test.describe('Escape closes the topmost layer', () => {
+  test.beforeEach(async ({ page }) => {
+    await skipOnboarding(page)
+  })
+
+  test('closes the tape collection', async ({ page }) => {
+    await page.click('.app__header-btn--eject')
+    await expect(page.locator('.tape-collection__drawer')).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(page.locator('.tape-collection__drawer')).not.toBeVisible()
+  })
+
+  test('closes one layer per press, top first', async ({ page }) => {
+    await page.click('.app__header-btn--eject')
+    await expect(page.locator('.tape-collection__drawer')).toBeVisible()
+    // The drawer's backdrop covers the header; dispatch directly to stack layers
+    await page.locator('[title="Settings"]').dispatchEvent('click')
+    await expect(page.locator('.settings__drawer')).toBeVisible()
+
+    await page.keyboard.press('Escape')
+    await expect(page.locator('.settings__drawer')).not.toBeVisible()
+    await expect(page.locator('.tape-collection__drawer')).toBeVisible()
+
+    await page.keyboard.press('Escape')
+    await expect(page.locator('.tape-collection__drawer')).not.toBeVisible()
+  })
+
+  test('closes the mode dropdown only', async ({ page }) => {
+    await page.waitForSelector('.mode-selector', { timeout: 5000 })
+    await page.click('[title="Plans"]')
+    await expect(page.locator('.plans__panel')).toBeVisible()
+    await page.locator('.mode-selector__trigger').dispatchEvent('click')
+    await expect(page.locator('.mode-selector__dropdown')).toBeVisible()
+
+    await page.keyboard.press('Escape')
+    await expect(page.locator('.mode-selector__dropdown')).not.toBeVisible()
+    await expect(page.locator('.plans__panel')).toBeVisible()
+  })
+
+  test('search still closes itself, and only itself', async ({ page }) => {
+    await page.click('.app__header-btn--eject')
+    await expect(page.locator('.tape-collection__drawer')).toBeVisible()
+    await page.keyboard.press('Meta+k')
+    await expect(page.locator('.search-overlay')).toBeVisible()
+
+    await page.keyboard.press('Escape')
+    await expect(page.locator('.search-overlay')).not.toBeVisible()
+    await expect(page.locator('.tape-collection__drawer')).toBeVisible()
+  })
+})
+
+test.describe('Conversations are created lazily', () => {
+  test('loading the app and starting a new tape create nothing on the server', async ({
+    page,
+    request,
+  }) => {
+    const total = async () =>
+      (await (await request.get('/api/conversations?limit=1')).json()).total as number
+    const before = await total()
+
+    await skipOnboarding(page)
+    await page.click('.app__header-btn--eject')
+    await page.click('.tape-collection__new-btn')
+    await page.waitForTimeout(1000)
+
+    expect(await total()).toBe(before)
+  })
+})
+
+test.describe('Mobile header', () => {
+  const themes = ['mccallister', 'imessage', 'aol', 'classic-mac', 'geocities', 'apple-1984']
+  test.use({ viewport: { width: 390, height: 844 } })
+
+  for (const theme of themes) {
+    test(`${theme}: every header control is on screen`, async ({ page }) => {
+      await skipOnboarding(page)
+      await setTheme(page, theme)
+      await page.waitForSelector('.mode-selector', { timeout: 5000 })
+
+      const boxes = await page.$$eval('.app__header button', (els) =>
+        els
+          .map((el) => el.getBoundingClientRect())
+          .filter((r) => r.width > 0 && r.height > 0)
+          .map((r) => ({ left: r.left, right: r.right }))
+          .sort((a, b) => a.left - b.left),
+      )
+      expect(boxes.length).toBeGreaterThanOrEqual(4)
+      boxes.forEach((box, i) => {
+        expect(box.left).toBeGreaterThanOrEqual(0)
+        expect(box.right).toBeLessThanOrEqual(390)
+        const prev = boxes[i - 1]
+        if (prev) expect(box.left).toBeGreaterThanOrEqual(prev.right) // no overlap
+      })
+
+      // Secondary actions live in the overflow menu
+      await page.click('.app__header-more-btn')
+      const menu = page.locator('.app__header-menu')
+      for (const label of ['Settings', 'Plans', 'Liner Notes', 'Media Library']) {
+        await expect(menu.getByRole('button', { name: label })).toBeInViewport()
+      }
+      await menu.getByRole('button', { name: 'Settings' }).click()
+      await expect(page.locator('.settings__drawer')).toBeVisible()
+    })
+  }
+})
+
+test.describe('No message is lost', () => {
+  // Every stored message on the server, across all tapes
+  async function serverMessages(request: APIRequestContext): Promise<string[]> {
+    const list = await (await request.get('/api/conversations?limit=1000')).json()
+    const all: string[] = []
+    for (const c of list.conversations as Array<{ id: string }>) {
+      const full = await (await request.get(`/api/conversations/${c.id}`)).json()
+      all.push(...(full.messages as Array<{ content: string }>).map((m) => m.content))
+    }
+    return all
+  }
+
+  async function openApp(page: Page) {
+    // Don't run Claude: these tests are about what the tape keeps
+    await page.route('**/api/claude-code', (r) => r.fulfill({ status: 500, body: 'stubbed' }))
+    await skipOnboarding(page)
+  }
+
+  async function send(page: Page, text: string) {
+    await page.locator('.tape-deck__input').fill(text)
+    await page.locator('.tape-deck__input').press('Enter')
+  }
+
+  test('a message sent while the tape list is still loading survives the sync', async ({
+    page,
+    request,
+  }) => {
+    const text = `slow list ${Date.now()}`
+    await openApp(page)
+    // Hold the list response until after the message has created its tape
+    await page.route(/\/api\/conversations\?limit=/, async (r) => {
+      const response = await r.fetch()
+      await new Promise((resolve) => setTimeout(resolve, 3000))
+      await r.fulfill({ response })
+    })
+    await page.reload()
+    await page.waitForSelector('.app__header')
+    await send(page, text)
+    await page.waitForTimeout(4500)
+
+    await expect(page.locator('.app__main')).toContainText(text)
+    expect(await serverMessages(request)).toContain(text)
+  })
+
+  test('a send whose creation response was lost is not dropped by the next one', async ({
+    page,
+    request,
+  }) => {
+    const one = `lost response one ${Date.now()}`
+    const two = `lost response two ${Date.now()}`
+    await openApp(page)
+    let dropped = false
+    await page.route('**/api/migrate', async (r) => {
+      if (dropped) return r.continue()
+      dropped = true
+      await r.fetch() // the server commits...
+      await r.abort('failed') // ...and the response never arrives
+    })
+    await send(page, one)
+    await page.waitForTimeout(1000)
+    await send(page, two)
+    await page.waitForTimeout(1500)
+
+    const stored = await serverMessages(request)
+    expect(stored).toContain(one)
+    expect(stored).toContain(two)
+  })
+
+  test('two tabs sending on the same blank tape both reach the server', async ({
+    context,
+    request,
+  }) => {
+    const a = await context.newPage()
+    await openApp(a)
+    const b = await context.newPage()
+    await b.route('**/api/claude-code', (r) => r.fulfill({ status: 500, body: 'stubbed' }))
+    await b.goto('/')
+    await b.waitForSelector('.app__header')
+
+    const fromA = `tab A ${Date.now()}`
+    const fromB = `tab B ${Date.now()}`
+    await send(a, fromA)
+    await a.waitForTimeout(1000)
+    await send(b, fromB)
+    await b.waitForTimeout(1500)
+
+    const stored = await serverMessages(request)
+    expect(stored).toContain(fromA)
+    expect(stored).toContain(fromB)
+
+    // ...and tab B still shows its message after reloading
+    await b.reload()
+    await b.waitForSelector('.app__header')
+    await b.waitForTimeout(1500)
+    await expect(b.locator('.app__main')).toContainText(fromB)
+  })
+
+  test('messages sent while the server is unreachable are posted once it is back', async ({
+    page,
+    request,
+  }) => {
+    const stamp = Date.now()
+    const [one, two, three] = ['one', 'two', 'three'].map((n) => `outage ${n} ${stamp}`)
+    await openApp(page)
+    await send(page, one!)
+    await page.waitForTimeout(1000)
+
+    // The server goes away (a restart): every API call fails to connect
+    const down = (r: Route) => r.abort('connectionrefused')
+    await page.route(/\/api\/(?!claude-code)/, down)
+    await send(page, two!)
+    await page.waitForTimeout(1000)
+    await expect(page.locator('.app__main')).toContainText(two!)
+    await page.unroute(/\/api\/(?!claude-code)/, down)
+
+    // Back up: the queued message is retried on its own...
+    await expect.poll(() => serverMessages(request), { timeout: 10_000 }).toContain(two)
+    // ...and later sends land after it, in order
+    await send(page, three!)
+    await expect
+      .poll(async () => (await serverMessages(request)).filter((m) => m.includes(String(stamp))))
+      .toEqual([one, two, three])
+
+    await page.reload()
+    await page.waitForSelector('.app__header')
+    for (const text of [one!, two!, three!]) {
+      await expect(page.locator('.app__main')).toContainText(text)
+    }
+  })
+
+  test('a tape deleted after its creation response was lost stays deleted', async ({
+    page,
+    request,
+  }) => {
+    const text = `doomed ${Date.now()}`
+    await openApp(page)
+    let dropped = false
+    await page.route('**/api/migrate', async (r) => {
+      if (dropped) return r.continue()
+      dropped = true
+      await r.fetch() // the server stores the tape...
+      await r.abort('failed') // ...and the response is lost
+    })
+    await send(page, text)
+    await page.waitForTimeout(1000)
+    expect(await serverMessages(request)).toContain(text)
+
+    // Start another tape, then delete this one from the collection
+    await page.click('.app__header-btn--eject')
+    await page.click('.tape-collection__new-btn')
+    await page.click('.app__header-btn--eject')
+    await page
+      .locator('.tape-collection__item', { hasText: text })
+      .locator('.tape-collection__delete-btn')
+      .click()
+    await expect(page.locator('.tape-collection__item', { hasText: text })).toHaveCount(0)
+
+    await expect.poll(() => serverMessages(request)).not.toContain(text)
+    await page.reload()
+    await page.waitForSelector('.app__header')
+    await page.click('.app__header-btn--eject')
+    await page.waitForTimeout(1000)
+    await expect(page.locator('.tape-collection__item', { hasText: text })).toHaveCount(0)
+  })
 })

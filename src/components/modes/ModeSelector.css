@@ -27,8 +27,48 @@
   line-height: 1;
 }
 
+/* "MODE" eyebrow over the label, mirroring the theme button's "THEME", so the
+   mic icon of Voice mode doesn't read as a microphone toggle */
+.mode-selector__text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+}
+
+.mode-selector__eyebrow {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.6;
+  line-height: 1;
+}
+
 .mode-selector__label {
   letter-spacing: 0.03em;
+  line-height: 1.1;
+}
+
+/* Narrow screens: icon + "MODE" + chevron (the accessible name keeps "Mode: …") */
+@media (max-width: 720px) {
+  .mode-selector__label {
+    display: none;
+  }
+
+  .mode-selector__trigger {
+    padding: 4px 6px;
+    gap: 2px;
+  }
+
+  .mode-selector__dropdown {
+    position: fixed;
+    top: auto;
+    left: 12px;
+    right: 12px;
+    min-width: 0;
+    margin-top: 6px;
+  }
 }
 
 .mode-selector__chevron {

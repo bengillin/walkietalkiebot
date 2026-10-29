@@ -122,7 +122,10 @@ api.post('/conversations', async (c) => {
   const id = body.id || crypto.randomUUID()
   const title = body.title || 'New conversation'
 
-  const conv = conversations.createConversation({ id, title, mode: body.mode })
+  // Idempotent on a client-supplied id: a retry (or a second tab creating the
+  // same tape) gets the existing conversation back instead of a 500.
+  const existing = conversations.getConversation(id)
+  const conv = existing ?? conversations.createConversation({ id, title, mode: body.mode })
 
   return c.json(
     {
@@ -132,7 +135,7 @@ api.post('/conversations', async (c) => {
       updatedAt: conv.updated_at,
       mode: conv.mode || 'voice',
     },
-    201,
+    existing ? 200 : 201,
   )
 })
 
@@ -210,6 +213,22 @@ api.post('/conversations/:id/messages', async (c) => {
   const conv = conversations.getConversation(conversationId)
   if (!conv) {
     return c.json({ error: 'Conversation not found' }, 404)
+  }
+
+  // Idempotent on a client-supplied id, so a retry after a lost response is
+  // safe. An id that belongs to another conversation is a conflict.
+  const existing = body.id ? messages.getMessage(body.id) : null
+  if (existing) {
+    if (existing.conversation_id !== conversationId) {
+      return c.json({ error: 'Message id belongs to another conversation' }, 409)
+    }
+    return c.json({
+      id: existing.id,
+      role: existing.role,
+      content: existing.content,
+      timestamp: existing.timestamp,
+      source: existing.source,
+    })
   }
 
   const msg = messages.createMessage({
@@ -472,59 +491,100 @@ api.post('/migrate', async (c) => {
     return c.json({ error: 'Invalid conversations data' }, 400)
   }
 
-  let imported = 0
-  let skipped = 0
+  // Each conversation is imported in its own transaction, and messages and
+  // activities already on the server are skipped by id rather than skipping the
+  // whole conversation. So a retry after a lost response, or a second tab
+  // sending on the same tape, adds exactly the missing rows, and a failure
+  // never leaves a half-imported conversation behind.
+  const importOne = conversations.transaction((conv: (typeof localConversations)[number]) => {
+    const created = !conversations.getConversation(conv.id)
+    if (created) conversations.createConversation({ id: conv.id, title: conv.title })
 
-  for (const conv of localConversations) {
-    // Skip if already exists
-    if (conversations.getConversation(conv.id)) {
-      skipped++
-      continue
-    }
-
-    // Create conversation
-    conversations.createConversation({
-      id: conv.id,
-      title: conv.title,
-    })
-
-    // Import messages with images
+    let messagesAdded = 0
+    // Ids are global primary keys, but older builds copied a parent's message
+    // ids into branches. An id already used by another conversation is given
+    // a new id derived from (id, conversation), so retries map to the same row.
+    const remapped: Record<string, string> = {}
     for (const msg of conv.messages || []) {
+      let id = msg.id
+      const owner = messages.getMessage(id)?.conversation_id
+      if (owner === conv.id) continue
+      if (owner !== undefined) {
+        id = `${msg.id}~${conv.id}`
+        remapped[msg.id] = id
+        const remappedOwner = messages.getMessage(id)?.conversation_id
+        if (remappedOwner === conv.id) continue
+        if (remappedOwner !== undefined) throw new Error(`message id conflict: ${msg.id}`)
+      }
       messages.createMessage({
-        id: msg.id,
+        id,
         conversationId: conv.id,
         role: msg.role,
         content: msg.content,
         timestamp: msg.timestamp,
         source: 'web',
-        images: msg.images,
+        // Image ids are global too; a new message never owns an existing one
+        images: msg.images?.map((img) =>
+          messages.imageExists(img.id) ? { ...img, id: `${img.id}~${id}` } : img,
+        ),
       })
+      messagesAdded++
     }
 
-    // Import activities
-    if (conv.activities && conv.activities.length > 0) {
-      activities.createActivitiesBatch(
-        conv.activities.map((a) => ({
-          id: a.id,
-          conversationId: conv.id,
-          tool: a.tool,
-          input: a.input,
-          status: a.status,
-          timestamp: a.timestamp,
-          duration: a.duration,
-          error: a.error,
-        })),
-      )
-    }
+    const newActivities = (conv.activities || []).filter((a) => !activities.activityExists(a.id))
+    activities.createActivitiesBatch(
+      newActivities.map((a) => ({
+        id: a.id,
+        conversationId: conv.id,
+        tool: a.tool,
+        input: a.input,
+        status: a.status,
+        timestamp: a.timestamp,
+        duration: a.duration,
+        error: a.error,
+      })),
+    )
 
-    imported++
+    return { created, messagesAdded, remapped }
+  })
+
+  let imported = 0
+  let skipped = 0
+  const results: Array<{
+    id: string
+    ok: boolean
+    created?: boolean
+    messagesAdded?: number
+    remapped?: Record<string, string>
+    error?: string
+  }> = []
+
+  for (const conv of localConversations) {
+    try {
+      const { created, messagesAdded, remapped } = importOne(conv)
+      if (created) imported++
+      else skipped++
+      // ok: every message in the request is now stored in this conversation
+      // (added, or already there), under the id in `remapped` where one is given
+      results.push({
+        id: conv.id,
+        ok: true,
+        created,
+        messagesAdded,
+        ...(Object.keys(remapped).length > 0 && { remapped }),
+      })
+    } catch (err) {
+      log.warn(`Migrate: failed to import conversation ${conv.id}; rolled back:`, err)
+      results.push({ id: conv.id, ok: false, error: String(err) })
+    }
   }
 
   return c.json({
-    success: true,
+    success: results.every((r) => r.ok),
     imported,
     skipped,
     total: localConversations.length,
+    results,
   })
 })
 

@@ -89,6 +89,19 @@ export function getImagesForMessages(messageIds: string[]): Map<string, MessageI
   return imageMap
 }
 
+export function getMessage(id: string): MessageRow | null {
+  const row = getDb()
+    .prepare(
+      'SELECT id, conversation_id, role, content, timestamp, position, source FROM messages WHERE id = ?',
+    )
+    .get(id) as MessageRow | undefined
+  return row ?? null
+}
+
+export function imageExists(id: string): boolean {
+  return getDb().prepare('SELECT 1 FROM message_images WHERE id = ?').get(id) !== undefined
+}
+
 export function createMessage(input: CreateMessageInput): MessageRow {
   const db = getDb()
   const timestamp = input.timestamp || Date.now()

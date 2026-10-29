@@ -1954,6 +1954,13 @@
   color: #999999;
 }
 
+/* Empty chat: the default muted grey is ~2.6:1 on the navy screen; this
+   light periwinkle is ~11:1 and still reads as secondary text */
+[data-theme='geocities'] .timeline-empty {
+  color: #99ccff;
+  font-family: 'Comic Sans MS', cursive;
+}
+
 [data-theme='geocities'] .media-library__empty p {
   color: #999999;
   font-family: 'Comic Sans MS', cursive;
