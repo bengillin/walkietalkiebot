@@ -9,7 +9,7 @@ import { ImageLightbox } from './components/media/ImageLightbox'
 import { MediaLibrary } from './components/media/MediaLibrary'
 import { Settings } from './components/settings/Settings'
 import { useStore } from './lib/store'
-import { useTheme } from './contexts/ThemeContext'
+import { useTheme, type ThemeName } from './contexts/ThemeContext'
 import { JobStatusBar } from './components/jobs/JobStatusBar'
 import { LinerNotes } from './components/linernotes/LinerNotes'
 import { KeyboardShortcuts } from './components/shortcuts/KeyboardShortcuts'
@@ -26,6 +26,48 @@ import type { ModeInfo } from './lib/api'
 import * as api from './lib/api'
 import './App.css'
 
+// Header icons. Plans (clipboard + check) and Liner Notes (sticky note) are
+// deliberately distinct shapes.
+const HEADER_ICONS = {
+  conversations: (
+    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" aria-hidden="true">
+      <path d="M5 17h14v2H5zm7-12L5.33 15h13.34z" />
+    </svg>
+  ),
+  settings: (
+    <svg viewBox="0 0 24 24" fill="none" width="20" height="20" aria-hidden="true">
+      <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="currentColor" strokeWidth="2" />
+      <path
+        d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+    </svg>
+  ),
+  plans: (
+    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" aria-hidden="true">
+      <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1s-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm-2 14l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z" />
+    </svg>
+  ),
+  linerNotes: (
+    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" aria-hidden="true">
+      <path d="M19 3H4.99C3.89 3 3 3.9 3 5l.01 14c0 1.1.89 2 1.99 2h10l6-6V5c0-1.1-.9-2-2-2zM7 8h10v2H7V8zm5 6H7v-2h5v2zm2 5.5V14h5.5L14 19.5z" />
+    </svg>
+  ),
+  media: (
+    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" aria-hidden="true">
+      <path d="M22 16V4c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2zm-11-4l2.03 2.71L16 11l4 5H8l3-4zM2 6v14c0 1.1.9 2 2 2h14v-2H4V6H2z" />
+    </svg>
+  ),
+  more: (
+    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" aria-hidden="true">
+      <circle cx="5" cy="12" r="2" />
+      <circle cx="12" cy="12" r="2" />
+      <circle cx="19" cy="12" r="2" />
+    </svg>
+  ),
+}
+
 function App() {
   // --- Local UI state ---
   const [hasOnboarded, setHasOnboarded] = useState(
@@ -39,6 +81,7 @@ function App() {
   const [showPlans, setShowPlans] = useState(false)
   const [isTapeEjected, setIsTapeEjected] = useState(false)
   const [showThemePicker, setShowThemePicker] = useState(false)
+  const [showHeaderMenu, setShowHeaderMenu] = useState(false)
   const [themeBeforePicker, setThemeBeforePicker] = useState<string | null>(null)
   const [lightboxImage, setLightboxImage] = useState<{
     dataUrl: string
@@ -67,6 +110,8 @@ function App() {
     createConversation,
     loadConversation,
     deleteConversation,
+    setConversationMode,
+    hydrateConversations,
     contextConversationIds,
     toggleContextConversation,
     activities,
@@ -145,11 +190,9 @@ function App() {
   const handleModeChange = useCallback(
     (mode: string) => {
       setCurrentMode(mode)
-      if (currentConversationId) {
-        api.updateConversationMode(currentConversationId, mode).catch(() => {})
-      }
+      if (currentConversationId) setConversationMode(currentConversationId, mode)
     },
-    [currentConversationId],
+    [currentConversationId, setConversationMode],
   )
 
   // Ref to break circular dependency: voice needs handleSendMessage, chat needs voice methods
@@ -196,15 +239,85 @@ function App() {
   // Wire voice → chat: update the ref so voice callbacks invoke the real handleSendMessage
   sendMessageRef.current = chat.handleSendMessage
 
+  const cancelThemePicker = () => {
+    if (themeBeforePicker) setTheme(themeBeforePicker as ThemeName)
+    setShowThemePicker(false)
+    setThemeBeforePicker(null)
+  }
+
+  // Escape closes the topmost open layer, one per press. Order is top to
+  // bottom of the visual stack. (The mode dropdown closes itself first.)
+  const closeTopmostLayer = (): boolean => {
+    const layers: Array<[boolean, () => void]> = [
+      [
+        lightboxImage !== null,
+        () => {
+          setLightboxImage(null)
+          setLightboxGallery(undefined)
+        },
+      ],
+      [showSearch, () => setShowSearch(false)],
+      [showShortcuts, () => setShowShortcuts(false)],
+      [showThemePicker, cancelThemePicker],
+      [showHeaderMenu, () => setShowHeaderMenu(false)],
+      [showSettings, () => setShowSettings(false)],
+      [showMediaLibrary, () => setShowMediaLibrary(false)],
+      [showPlans, () => setShowPlans(false)],
+      [showLinerNotes, () => setShowLinerNotes(false)],
+      [isTapeEjected, () => setIsTapeEjected(false)],
+    ]
+    const open = layers.find(([isOpen]) => isOpen)
+    if (!open) return false
+    open[1]()
+    return true
+  }
+
+  // Secondary header actions; collapse into the overflow menu on narrow screens
+  const headerActions: Array<{
+    key: string
+    label: string
+    icon: React.ReactNode
+    onSelect: () => void
+    className?: string
+  }> = [
+    {
+      key: 'settings',
+      label: 'Settings',
+      icon: HEADER_ICONS.settings,
+      onSelect: () => setShowSettings(true),
+    },
+    { key: 'plans', label: 'Plans', icon: HEADER_ICONS.plans, onSelect: () => setShowPlans(true) },
+    {
+      key: 'liner-notes',
+      label: 'Liner Notes',
+      icon: HEADER_ICONS.linerNotes,
+      onSelect: () => setShowLinerNotes(true),
+      className: linerNotes ? 'app__header-btn--has-notes' : undefined,
+    },
+    {
+      key: 'media',
+      label: 'Media Library',
+      icon: HEADER_ICONS.media,
+      onSelect: () => {
+        setShowMediaLibrary(true)
+        // The library scans every tape's images: load ones not cached yet
+        void hydrateConversations()
+      },
+    },
+  ]
+
   const { showTapToTalk } = useKeyboardControl({
+    closeTopmostLayer,
     isListening: voiceIO.isListening,
     isSpeaking: voiceIO.isSpeaking,
     avatarState,
     continuousListeningEnabled,
     handleTalkStart: voiceIO.handleTalkStart,
+    autoTalkStart: voiceIO.autoTalkStart,
     handleTalkEnd: voiceIO.handleTalkEnd,
+    micBlocked: voiceIO.micBlocked,
+    recognitionFailures: voiceIO.recognitionFailures,
     stopListening: voiceIO.stopListening,
-    startListening: voiceIO.startListening,
     setTranscript,
     setAvatarState,
     playSound: voiceIO.playSound,
@@ -333,49 +446,64 @@ function App() {
             className={`app__header-btn app__header-btn--eject ${isTapeEjected ? 'app__header-btn--active' : ''}`}
             onClick={() => setIsTapeEjected((prev) => !prev)}
             title={isTapeEjected ? 'Close conversations' : 'Conversations'}
+            aria-label={isTapeEjected ? 'Close conversations' : 'Conversations'}
+            aria-expanded={isTapeEjected}
           >
-            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-              <path d="M5 17h14v2H5zm7-12L5.33 15h13.34z" />
-            </svg>
+            {HEADER_ICONS.conversations}
           </button>
+          {/* Secondary actions: inline on wide screens, in the overflow menu on narrow ones */}
+          {headerActions.map((action) => (
+            <button
+              key={action.key}
+              className={`app__header-btn app__header-btn--secondary ${action.className ?? ''}`}
+              onClick={action.onSelect}
+              title={action.label}
+              aria-label={action.label}
+            >
+              {action.icon}
+            </button>
+          ))}
           <button
-            className="app__header-btn"
-            onClick={() => setShowSettings(true)}
-            title="Settings"
+            className={`app__header-btn app__header-more-btn ${linerNotes ? 'app__header-btn--has-notes' : ''}`}
+            onClick={() => setShowHeaderMenu((prev) => !prev)}
+            title="More"
+            aria-label="More actions"
+            aria-controls="app-header-menu"
+            aria-expanded={showHeaderMenu}
           >
-            <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
-              <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="currentColor" strokeWidth="2" />
-              <path
-                d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"
-                stroke="currentColor"
-                strokeWidth="2"
-              />
-            </svg>
-          </button>
-          <button className="app__header-btn" onClick={() => setShowPlans(true)} title="Plans">
-            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
-            </svg>
-          </button>
-          <button
-            className={`app__header-btn ${linerNotes ? 'app__header-btn--has-notes' : ''}`}
-            onClick={() => setShowLinerNotes(true)}
-            title="Liner Notes"
-          >
-            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-              <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
-            </svg>
-          </button>
-          <button
-            className="app__header-btn"
-            onClick={() => setShowMediaLibrary(true)}
-            title="Media Library"
-          >
-            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-              <path d="M22 16V4c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2zm-11-4l2.03 2.71L16 11l4 5H8l3-4zM2 6v14c0 1.1.9 2 2 2h14v-2H4V6H2z" />
-            </svg>
+            {HEADER_ICONS.more}
           </button>
         </div>
+        {showHeaderMenu && (
+          <>
+            <div
+              className="app__mobile-menu-backdrop app__header-menu-backdrop"
+              onClick={() => setShowHeaderMenu(false)}
+            />
+            {/* A disclosure (list of buttons), not an ARIA menu: Tab moves through
+                it and Escape closes it, with no roving focus to implement. */}
+            <div
+              id="app-header-menu"
+              className="app__mobile-menu app__header-menu"
+              role="group"
+              aria-label="More actions"
+            >
+              {headerActions.map((action) => (
+                <button
+                  key={action.key}
+                  className="app__mobile-menu-item"
+                  onClick={() => {
+                    setShowHeaderMenu(false)
+                    action.onSelect()
+                  }}
+                >
+                  {action.icon}
+                  <span>{action.label}</span>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
       </header>
 
       <JobStatusBar />
@@ -403,6 +531,19 @@ function App() {
 
         {chat.error && <div className="app__error">{chat.error}</div>}
 
+        {voiceIO.voiceError && (
+          <div className="app__error app__error--voice" role="alert">
+            <span>{voiceIO.voiceError}</span>
+            <button
+              className="app__error-dismiss"
+              onClick={voiceIO.dismissVoiceError}
+              aria-label="Dismiss"
+            >
+              ×
+            </button>
+          </div>
+        )}
+
         {chat.planNotification && (
           <button
             className="app__plan-notification"
@@ -417,15 +558,7 @@ function App() {
       </main>
 
       {showThemePicker && (
-        <div
-          className="app__theme-modal-overlay"
-          onClick={() => {
-            if (themeBeforePicker)
-              setTheme(themeBeforePicker as import('./contexts/ThemeContext').ThemeName)
-            setShowThemePicker(false)
-            setThemeBeforePicker(null)
-          }}
-        >
+        <div className="app__theme-modal-overlay" onClick={cancelThemePicker}>
           <div className="app__theme-modal" onClick={(e) => e.stopPropagation()}>
             <div className="app__theme-modal-bubble">
               <h2 className="app__theme-modal-title">Choose a theme</h2>
@@ -445,15 +578,7 @@ function App() {
               ))}
             </div>
             <div className="app__theme-modal-actions">
-              <button
-                className="app__theme-modal-cancel"
-                onClick={() => {
-                  if (themeBeforePicker)
-                    setTheme(themeBeforePicker as import('./contexts/ThemeContext').ThemeName)
-                  setShowThemePicker(false)
-                  setThemeBeforePicker(null)
-                }}
-              >
+              <button className="app__theme-modal-cancel" onClick={cancelThemePicker}>
                 Cancel
               </button>
               <button

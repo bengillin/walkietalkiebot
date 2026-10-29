@@ -20,6 +20,16 @@ export function initSchema(db: Database.Database): void {
     .get() as { version: number } | undefined
   const currentVersion = row?.version || 0
 
+  if (currentVersion > SCHEMA_VERSION) {
+    // A newer Talkie (or MCP server) already upgraded this database. Running
+    // older code against it could misread or corrupt data.
+    throw new Error(
+      `Database schema is v${currentVersion}, but this version of Walkie Talkie Bot ` +
+        `only understands up to v${SCHEMA_VERSION}. Update walkietalkiebot ` +
+        `(e.g. npx -y walkietalkiebot@latest).`,
+    )
+  }
+
   if (currentVersion < SCHEMA_VERSION) {
     runMigrations(db, currentVersion)
   }
@@ -39,8 +49,12 @@ function runMigrations(db: Database.Database, fromVersion: number): void {
     const migrate = migrations[i]
     if (!migrate) continue
     log.debug(`Running migration to version ${i + 1}...`)
-    migrate(db)
-    db.prepare('INSERT INTO schema_version (version) VALUES (?)').run(i + 1)
+    // One transaction per step: a crash mid-migration used to leave the schema
+    // changed but unrecorded, and every later start failed re-running it.
+    db.transaction(() => {
+      migrate(db)
+      db.prepare('INSERT INTO schema_version (version) VALUES (?)').run(i + 1)
+    })()
   }
 
   log.debug(`Schema migrated to version ${SCHEMA_VERSION}`)

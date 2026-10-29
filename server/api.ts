@@ -1,8 +1,7 @@
 import { Hono } from 'hono'
-import { cors } from 'hono/cors'
 import { streamSSE } from 'hono/streaming'
 import { spawn } from 'child_process'
-import { state, updateState, generateRequestId } from './state.js'
+import { state, updateState, generateRequestId, type WtbState } from './state.js'
 import { isDbConnected } from './db/index.js'
 import * as conversations from './db/repositories/conversations.js'
 import * as messages from './db/repositories/messages.js'
@@ -19,8 +18,14 @@ const log = createLogger('api')
 
 export const api = new Hono()
 
-// Enable CORS for all routes
-api.use('*', cors())
+// No CORS: the web UI is served from this same origin, and the MCP proxy isn't a
+// browser. Cross-origin access would let any web page drive Claude (see security.ts).
+
+/** Parse a pagination query param, clamped to [min, max]; bad input falls back to `fallback`. */
+function intParam(value: string | undefined, fallback: number, min: number, max: number): number {
+  const n = Number.parseInt(value ?? '', 10)
+  return Number.isFinite(n) ? Math.min(Math.max(n, min), max) : fallback
+}
 
 // Mount job routes
 api.route('/jobs', jobRoutes)
@@ -42,8 +47,8 @@ api.get('/status', (c) => {
 
 // GET /api/conversations - List conversations (paginated)
 api.get('/conversations', (c) => {
-  const limit = parseInt(c.req.query('limit') || '50', 10)
-  const offset = parseInt(c.req.query('offset') || '0', 10)
+  const limit = intParam(c.req.query('limit'), 50, 1, 500)
+  const offset = intParam(c.req.query('offset'), 0, 0, Number.MAX_SAFE_INTEGER)
 
   const convos = conversations.listConversations(limit, offset)
   const total = conversations.countConversations()
@@ -117,7 +122,10 @@ api.post('/conversations', async (c) => {
   const id = body.id || crypto.randomUUID()
   const title = body.title || 'New conversation'
 
-  const conv = conversations.createConversation({ id, title, mode: body.mode })
+  // Idempotent on a client-supplied id: a retry (or a second tab creating the
+  // same tape) gets the existing conversation back instead of a 500.
+  const existing = conversations.getConversation(id)
+  const conv = existing ?? conversations.createConversation({ id, title, mode: body.mode })
 
   return c.json(
     {
@@ -127,7 +135,7 @@ api.post('/conversations', async (c) => {
       updatedAt: conv.updated_at,
       mode: conv.mode || 'voice',
     },
-    201,
+    existing ? 200 : 201,
   )
 })
 
@@ -207,6 +215,22 @@ api.post('/conversations/:id/messages', async (c) => {
     return c.json({ error: 'Conversation not found' }, 404)
   }
 
+  // Idempotent on a client-supplied id, so a retry after a lost response is
+  // safe. An id that belongs to another conversation is a conflict.
+  const existing = body.id ? messages.getMessage(body.id) : null
+  if (existing) {
+    if (existing.conversation_id !== conversationId) {
+      return c.json({ error: 'Message id belongs to another conversation' }, 409)
+    }
+    return c.json({
+      id: existing.id,
+      role: existing.role,
+      content: existing.content,
+      timestamp: existing.timestamp,
+      source: existing.source,
+    })
+  }
+
   const msg = messages.createMessage({
     id: body.id || crypto.randomUUID(),
     conversationId,
@@ -284,8 +308,8 @@ api.patch('/images/:id', async (c) => {
 
 // GET /api/plans - List all plans (optionally filtered by conversation)
 api.get('/plans', (c) => {
-  const limit = parseInt(c.req.query('limit') || '50', 10)
-  const offset = parseInt(c.req.query('offset') || '0', 10)
+  const limit = intParam(c.req.query('limit'), 50, 1, 500)
+  const offset = intParam(c.req.query('offset'), 0, 0, Number.MAX_SAFE_INTEGER)
   const conversationId = c.req.query('conversationId') || undefined
   const planList = plans.listPlans(limit, offset, conversationId)
 
@@ -382,7 +406,7 @@ api.delete('/plans/:id', (c) => {
 // GET /api/search - Full-text search
 api.get('/search', (c) => {
   const query = c.req.query('q') || ''
-  const limit = parseInt(c.req.query('limit') || '50', 10)
+  const limit = intParam(c.req.query('limit'), 50, 1, 500)
 
   if (!query.trim()) {
     return c.json({ results: [] })
@@ -467,59 +491,100 @@ api.post('/migrate', async (c) => {
     return c.json({ error: 'Invalid conversations data' }, 400)
   }
 
-  let imported = 0
-  let skipped = 0
+  // Each conversation is imported in its own transaction, and messages and
+  // activities already on the server are skipped by id rather than skipping the
+  // whole conversation. So a retry after a lost response, or a second tab
+  // sending on the same tape, adds exactly the missing rows, and a failure
+  // never leaves a half-imported conversation behind.
+  const importOne = conversations.transaction((conv: (typeof localConversations)[number]) => {
+    const created = !conversations.getConversation(conv.id)
+    if (created) conversations.createConversation({ id: conv.id, title: conv.title })
 
-  for (const conv of localConversations) {
-    // Skip if already exists
-    if (conversations.getConversation(conv.id)) {
-      skipped++
-      continue
-    }
-
-    // Create conversation
-    conversations.createConversation({
-      id: conv.id,
-      title: conv.title,
-    })
-
-    // Import messages with images
+    let messagesAdded = 0
+    // Ids are global primary keys, but older builds copied a parent's message
+    // ids into branches. An id already used by another conversation is given
+    // a new id derived from (id, conversation), so retries map to the same row.
+    const remapped: Record<string, string> = {}
     for (const msg of conv.messages || []) {
+      let id = msg.id
+      const owner = messages.getMessage(id)?.conversation_id
+      if (owner === conv.id) continue
+      if (owner !== undefined) {
+        id = `${msg.id}~${conv.id}`
+        remapped[msg.id] = id
+        const remappedOwner = messages.getMessage(id)?.conversation_id
+        if (remappedOwner === conv.id) continue
+        if (remappedOwner !== undefined) throw new Error(`message id conflict: ${msg.id}`)
+      }
       messages.createMessage({
-        id: msg.id,
+        id,
         conversationId: conv.id,
         role: msg.role,
         content: msg.content,
         timestamp: msg.timestamp,
         source: 'web',
-        images: msg.images,
+        // Image ids are global too; a new message never owns an existing one
+        images: msg.images?.map((img) =>
+          messages.imageExists(img.id) ? { ...img, id: `${img.id}~${id}` } : img,
+        ),
       })
+      messagesAdded++
     }
 
-    // Import activities
-    if (conv.activities && conv.activities.length > 0) {
-      activities.createActivitiesBatch(
-        conv.activities.map((a) => ({
-          id: a.id,
-          conversationId: conv.id,
-          tool: a.tool,
-          input: a.input,
-          status: a.status,
-          timestamp: a.timestamp,
-          duration: a.duration,
-          error: a.error,
-        })),
-      )
-    }
+    const newActivities = (conv.activities || []).filter((a) => !activities.activityExists(a.id))
+    activities.createActivitiesBatch(
+      newActivities.map((a) => ({
+        id: a.id,
+        conversationId: conv.id,
+        tool: a.tool,
+        input: a.input,
+        status: a.status,
+        timestamp: a.timestamp,
+        duration: a.duration,
+        error: a.error,
+      })),
+    )
 
-    imported++
+    return { created, messagesAdded, remapped }
+  })
+
+  let imported = 0
+  let skipped = 0
+  const results: Array<{
+    id: string
+    ok: boolean
+    created?: boolean
+    messagesAdded?: number
+    remapped?: Record<string, string>
+    error?: string
+  }> = []
+
+  for (const conv of localConversations) {
+    try {
+      const { created, messagesAdded, remapped } = importOne(conv)
+      if (created) imported++
+      else skipped++
+      // ok: every message in the request is now stored in this conversation
+      // (added, or already there), under the id in `remapped` where one is given
+      results.push({
+        id: conv.id,
+        ok: true,
+        created,
+        messagesAdded,
+        ...(Object.keys(remapped).length > 0 && { remapped }),
+      })
+    } catch (err) {
+      log.warn(`Migrate: failed to import conversation ${conv.id}; rolled back:`, err)
+      results.push({ id: conv.id, ok: false, error: String(err) })
+    }
   }
 
   return c.json({
-    success: true,
+    success: results.every((r) => r.ok),
     imported,
     skipped,
     total: localConversations.length,
+    results,
   })
 })
 
@@ -604,9 +669,56 @@ api.get('/history', (c) => {
   })
 })
 
+const AVATAR_STATES = new Set(['idle', 'listening', 'thinking', 'speaking', 'happy', 'confused'])
+
+/**
+ * Pick the fields a client may set on the shared state, rejecting wrong types.
+ * Spreading the raw body used to let `{"pendingRequests":{}}` replace the IPC queue
+ * and crash the server.
+ */
+export function parseStateUpdate(body: unknown): Partial<Omit<WtbState, 'pendingRequests'>> | null {
+  if (typeof body !== 'object' || body === null || Array.isArray(body)) return null
+  const b = body as Record<string, unknown>
+  const update: Partial<Omit<WtbState, 'pendingRequests'>> = {}
+  if ('avatarState' in b) {
+    if (typeof b.avatarState !== 'string' || !AVATAR_STATES.has(b.avatarState)) return null
+    update.avatarState = b.avatarState
+  }
+  for (const key of ['transcript', 'lastUserMessage', 'lastAssistantMessage'] as const) {
+    if (key in b) {
+      const value = b[key]
+      if (typeof value !== 'string') return null
+      update[key] = value
+    }
+  }
+  if ('messages' in b) {
+    const msgs = b.messages
+    if (
+      !Array.isArray(msgs) ||
+      !msgs.every(
+        (m) =>
+          typeof m === 'object' &&
+          m !== null &&
+          typeof m.role === 'string' &&
+          typeof m.content === 'string' &&
+          typeof m.timestamp === 'number',
+      )
+    ) {
+      return null
+    }
+    update.messages = msgs.map((m) => ({
+      role: m.role,
+      content: m.content,
+      timestamp: m.timestamp,
+    }))
+  }
+  return update
+}
+
 // POST /api/state - Update state from browser
 api.post('/state', async (c) => {
-  const update = await c.req.json()
+  const update = parseStateUpdate(await c.req.json().catch(() => null))
+  if (!update) return c.json({ error: 'Invalid state update' }, 400)
   updateState(update)
   return c.json({ success: true })
 })
@@ -812,39 +924,73 @@ api.post('/open-url', async (c) => {
   })
 })
 
+// Each chat turn is a full bypass-permissions agent. One user has no reason to
+// run more than a few at once; past this, something is looping or abusing the API.
+const MAX_CONCURRENT_CHATS = 4
+let activeChats = 0
+
 // POST /api/claude-code - Execute claude CLI and stream response
 api.post('/claude-code', async (c) => {
   const { message, history, images, mode, conversationId } = await c.req.json()
-  if (!message) {
+  if (!message || typeof message !== 'string') {
     return c.json({ error: 'Message required' }, 400)
   }
-
-  return streamSSE(c, async (stream) => {
-    const handle = spawnClaude({
-      prompt: message,
-      history: history || state.messages || [],
-      images,
-      mode,
-      conversationId,
-      callbacks: {
-        onText: (text) => {
-          stream.writeSSE({ data: JSON.stringify({ text }) })
-        },
-        onActivity: (event) => {
-          stream.writeSSE({ data: JSON.stringify({ activity: event }) })
-        },
-        onPlan: (plan) => {
-          stream.writeSSE({ data: JSON.stringify({ plan }) })
-        },
-        onError: (error) => {
-          stream.writeSSE({ data: JSON.stringify({ error }) })
-        },
-        onComplete: (code) => {
-          stream.writeSSE({ data: JSON.stringify({ done: true, code }) })
-        },
+  if (history !== undefined && !Array.isArray(history)) {
+    return c.json({ error: 'history must be an array' }, 400)
+  }
+  if (
+    images !== undefined &&
+    (!Array.isArray(images) ||
+      !images.every((img) => typeof img === 'object' && img && typeof img.dataUrl === 'string'))
+  ) {
+    return c.json({ error: 'images must be an array of { dataUrl, fileName }' }, 400)
+  }
+  if (activeChats >= MAX_CONCURRENT_CHATS) {
+    return c.json(
+      {
+        error: `Too many Claude turns running (limit ${MAX_CONCURRENT_CHATS}). Try again shortly.`,
       },
-    })
+      429,
+    )
+  }
 
-    await handle.promise
+  activeChats++
+  return streamSSE(c, async (stream) => {
+    // Everything below is inside the finally: a throw anywhere (even before the
+    // agent starts) must give the slot back, or four bad requests lock chat.
+    try {
+      const handle = spawnClaude({
+        prompt: message,
+        history: history || state.messages || [],
+        images,
+        mode,
+        conversationId,
+        callbacks: {
+          onText: (text) => {
+            stream.writeSSE({ data: JSON.stringify({ text }) })
+          },
+          onActivity: (event) => {
+            stream.writeSSE({ data: JSON.stringify({ activity: event }) })
+          },
+          onPlan: (plan) => {
+            stream.writeSSE({ data: JSON.stringify({ plan }) })
+          },
+          onError: (error) => {
+            stream.writeSSE({ data: JSON.stringify({ error }) })
+          },
+          onComplete: (code) => {
+            stream.writeSSE({ data: JSON.stringify({ done: true, code }) })
+          },
+        },
+      })
+
+      // The client went away (tab closed, request cancelled): stop the agent
+      // rather than letting it keep running with nobody reading.
+      stream.onAbort(() => handle.kill())
+
+      await handle.promise
+    } finally {
+      activeChats--
+    }
   })
 })

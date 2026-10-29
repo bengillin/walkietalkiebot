@@ -71,12 +71,41 @@ export interface MigrationResult {
   imported: number
   skipped: number
   total: number
+  /**
+   * Per conversation. `ok` means every message sent for it is now stored
+   * (added, or already there). Missing from servers older than this field.
+   */
+  results?: Array<{
+    id: string
+    ok: boolean
+    created?: boolean
+    messagesAdded?: number
+    // Messages stored under a new id (their id was taken by another tape)
+    remapped?: Record<string, string>
+    error?: string
+  }>
 }
 
 const API_BASE = '/api'
 
+/** An HTTP error response; `status` lets callers tell "gone" from "failed". */
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message)
+    this.name = 'ApiError'
+  }
+}
+
+// A hung request (server restarting, sleeping laptop) must fail eventually so
+// the write behind it can be retried. Generous: imports can carry images.
+const REQUEST_TIMEOUT_MS = 30_000
+
 async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(url, {
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     ...options,
     headers: {
       'Content-Type': 'application/json',
@@ -86,7 +115,7 @@ async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: response.statusText }))
-    throw new Error(error.error || `API error: ${response.status}`)
+    throw new ApiError(error.error || `API error: ${response.status}`, response.status)
   }
 
   return response.json()
@@ -109,14 +138,16 @@ export async function getConversation(id: string): Promise<ConversationWithMessa
   return fetchJson(`${API_BASE}/conversations/${id}`)
 }
 
-export async function createConversation(
-  title?: string,
-  projectId?: string,
-  parentId?: string,
-): Promise<Conversation> {
+// The client generates conversation ids, and the server honours `id` in the
+// body, so local and server ids always agree (no async id swap).
+export async function createConversation(conv: {
+  id: string
+  title?: string
+  mode?: string
+}): Promise<Conversation> {
   return fetchJson(`${API_BASE}/conversations`, {
     method: 'POST',
-    body: JSON.stringify({ title, projectId, parentId }),
+    body: JSON.stringify(conv),
   })
 }
 
@@ -130,10 +161,15 @@ export async function updateConversation(
   })
 }
 
+// Deleting is idempotent from the client's side: a tape that is already gone
+// (deleted in another tab, or never created) is a success, not an error.
 export async function deleteConversation(id: string): Promise<{ success: boolean }> {
-  return fetchJson(`${API_BASE}/conversations/${id}`, {
-    method: 'DELETE',
-  })
+  try {
+    return await fetchJson(`${API_BASE}/conversations/${id}`, { method: 'DELETE' })
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) return { success: true }
+    throw err
+  }
 }
 
 export async function importConversation(data: {
@@ -152,6 +188,9 @@ export async function importConversation(data: {
 export async function addMessage(
   conversationId: string,
   message: {
+    // Client-generated id/timestamp, so the server row matches the local one
+    id?: string
+    timestamp?: number
     role: 'user' | 'assistant'
     content: string
     source?: string

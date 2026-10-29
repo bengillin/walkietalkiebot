@@ -1,16 +1,10 @@
-import { existsSync, mkdirSync, readFileSync, renameSync } from 'fs'
-import { homedir } from 'os'
+import { existsSync, mkdirSync, readFileSync } from 'fs'
 import { join } from 'path'
 
 import { createLogger } from './logger.js'
+import { getWtbDir, migrateLegacyDataDir } from './paths.js'
 
 const log = createLogger('ssl')
-
-const WTB_DIR = join(homedir(), '.wtb')
-const OLD_DIR_2 = join(homedir(), '.talkie')
-const OLD_DIR_1 = join(homedir(), '.talkboy')
-const TAILSCALE_CERT_PATH = join(WTB_DIR, 'tailscale.crt')
-const TAILSCALE_KEY_PATH = join(WTB_DIR, 'tailscale.key')
 
 export interface SSLCerts {
   cert: string
@@ -18,19 +12,16 @@ export interface SSLCerts {
 }
 
 /**
- * Ensure the ~/.wtb directory exists, migrating from legacy paths if needed.
+ * Ensure the data directory (see getWtbDir) exists, migrating from legacy paths if needed.
  */
 export function ensureWtbDir(): void {
-  if (existsSync(OLD_DIR_2) && !existsSync(WTB_DIR)) {
-    renameSync(OLD_DIR_2, WTB_DIR)
-  } else if (existsSync(OLD_DIR_1) && !existsSync(WTB_DIR)) {
-    renameSync(OLD_DIR_1, WTB_DIR)
-  }
-  if (!existsSync(WTB_DIR)) {
-    mkdirSync(WTB_DIR, { recursive: true })
+  migrateLegacyDataDir()
+  const wtbDir = getWtbDir()
+  if (!existsSync(wtbDir)) {
+    mkdirSync(wtbDir, { recursive: true })
   }
   // Ensure modes directory exists for custom mode definitions
-  const modesDir = join(WTB_DIR, 'modes')
+  const modesDir = join(wtbDir, 'modes')
   if (!existsSync(modesDir)) {
     mkdirSync(modesDir, { recursive: true })
   }
@@ -44,11 +35,13 @@ export function ensureWtbDir(): void {
 export function getSSLCerts(): SSLCerts | null {
   ensureWtbDir()
 
-  if (existsSync(TAILSCALE_CERT_PATH) && existsSync(TAILSCALE_KEY_PATH)) {
+  const certPath = join(getWtbDir(), 'tailscale.crt')
+  const keyPath = join(getWtbDir(), 'tailscale.key')
+  if (existsSync(certPath) && existsSync(keyPath)) {
     log.debug('Using Tailscale HTTPS certificates')
     return {
-      cert: readFileSync(TAILSCALE_CERT_PATH, 'utf-8'),
-      key: readFileSync(TAILSCALE_KEY_PATH, 'utf-8'),
+      cert: readFileSync(certPath, 'utf-8'),
+      key: readFileSync(keyPath, 'utf-8'),
     }
   }
 

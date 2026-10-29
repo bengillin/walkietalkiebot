@@ -9,6 +9,11 @@ function initSchema(db) {
   `);
   const row = db.prepare("SELECT version FROM schema_version ORDER BY version DESC LIMIT 1").get();
   const currentVersion = row?.version || 0;
+  if (currentVersion > SCHEMA_VERSION) {
+    throw new Error(
+      `Database schema is v${currentVersion}, but this version of Walkie Talkie Bot only understands up to v${SCHEMA_VERSION}. Update walkietalkiebot (e.g. npx -y walkietalkiebot@latest).`
+    );
+  }
   if (currentVersion < SCHEMA_VERSION) {
     runMigrations(db, currentVersion);
   }
@@ -26,8 +31,10 @@ function runMigrations(db, fromVersion) {
     const migrate = migrations[i];
     if (!migrate) continue;
     log.debug(`Running migration to version ${i + 1}...`);
-    migrate(db);
-    db.prepare("INSERT INTO schema_version (version) VALUES (?)").run(i + 1);
+    db.transaction(() => {
+      migrate(db);
+      db.prepare("INSERT INTO schema_version (version) VALUES (?)").run(i + 1);
+    })();
   }
   log.debug(`Schema migrated to version ${SCHEMA_VERSION}`);
 }

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { EventEmitter } from 'events'
 
 // Mock child_process so no real `claude` process is spawned. execFileSync backs
@@ -9,7 +9,7 @@ vi.mock('child_process', () => ({
 }))
 
 import { spawn } from 'child_process'
-import { spawnClaude, _resetSessionTracking } from './runner.js'
+import { spawnClaude, _resetSessionTracking, _resetProcessTrackingForTesting } from './runner.js'
 
 const spawnMock = spawn as unknown as ReturnType<typeof vi.fn>
 
@@ -172,4 +172,10 @@ describe('spawnClaude session strategy', () => {
     expect(args).not.toContain('--session-id')
     expect(args).not.toContain('--resume')
   })
+})
+
+// Fake children use made-up pids; never let the runner's exit hook or a
+// delayed SIGKILL target a real process group with that id.
+afterEach(() => {
+  _resetProcessTrackingForTesting()
 })

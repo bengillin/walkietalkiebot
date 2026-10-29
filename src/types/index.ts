@@ -58,6 +58,9 @@ export interface Message {
   timestamp: number
   source?: string
   images?: MessageImage[]
+  // Not yet confirmed by the server. Persisted with the cached tape, so a
+  // reload or a server restart retries it instead of losing it.
+  unsynced?: boolean
 }
 
 export interface Conversation {
@@ -69,6 +72,12 @@ export interface Conversation {
   mode?: string // Active mode for this conversation
   projectId?: string | null // Project/directory grouping
   parentId?: string | null // Parent conversation (branching)
+  // Exists only in this browser: not yet created on the server. Tapes are
+  // created lazily on the first message so opening the app never leaves an
+  // empty tape behind.
+  localOnly?: boolean
+  // The server has newer messages than this cached copy; refreshed on open.
+  stale?: boolean
   createdAt: number
   updatedAt: number
 }
@@ -91,6 +100,9 @@ export interface AppState {
   loadConversation: (id: string) => void
   deleteConversation: (id: string) => void
   renameConversation: (id: string, title: string) => void
+  setConversationMode: (id: string, mode: string) => void
+  // Fetch full messages for conversations whose cached copy is stale/missing
+  hydrateConversations: (ids?: string[]) => Promise<void>
 
   // Context from past conversations
   contextConversationIds: string[]

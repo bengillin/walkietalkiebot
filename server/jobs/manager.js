@@ -71,22 +71,12 @@ class JobManager {
       return true;
     }
     if (job.status === "running") {
-      const handle = this.activeHandles.get(id);
-      if (handle) {
-        handle.kill();
-        this.activeHandles.delete(id);
-        const timeout = this.activeTimeouts.get(id);
-        if (timeout) {
-          clearTimeout(timeout);
-          this.activeTimeouts.delete(id);
-        }
-      }
       jobsRepo.updateJob(id, { status: "cancelled", completed_at: Date.now() });
       this.emitEvent(id, {
         type: "status_change",
         data: JSON.stringify({ status: "cancelled" })
       });
-      this.processNext();
+      this.activeHandles.get(id)?.kill();
       return true;
     }
     return false;
@@ -171,8 +161,12 @@ class JobManager {
           this.emitEvent(jobId, { type: "error", data: JSON.stringify({ error }) });
         },
         onComplete: (code) => {
+          this.releaseSlot(jobId);
           const currentJob = jobsRepo.getJob(jobId);
-          if (currentJob?.status === "cancelled") return;
+          if (currentJob?.status !== "running") {
+            this.processNext();
+            return;
+          }
           const now = Date.now();
           const status = code === 0 ? "completed" : "failed";
           const error = code !== 0 ? `Process exited with code ${code}` : void 0;
@@ -213,12 +207,6 @@ class JobManager {
             body: error || "Unknown error"
           };
           dispatcher.dispatch(notification).catch((e) => log.error("Notification dispatch failed:", e));
-          this.activeHandles.delete(jobId);
-          const timeout2 = this.activeTimeouts.get(jobId);
-          if (timeout2) {
-            clearTimeout(timeout2);
-            this.activeTimeouts.delete(jobId);
-          }
           this.processNext();
         }
       }
@@ -229,7 +217,6 @@ class JobManager {
       const currentJob = jobsRepo.getJob(jobId);
       if (currentJob?.status === "running") {
         log.warn(`Job ${jobId} timed out after ${JobManager.JOB_TIMEOUT_MS / 1e3}s, killing`);
-        handle.kill();
         jobsRepo.updateJob(jobId, {
           status: "failed",
           error: `Timed out after ${JobManager.JOB_TIMEOUT_MS / 6e4} minutes`,
@@ -239,19 +226,18 @@ class JobManager {
           type: "status_change",
           data: JSON.stringify({ status: "failed", error: "Job timed out" })
         });
-        this.activeHandles.delete(jobId);
-        this.activeTimeouts.delete(jobId);
-        this.processNext();
+        handle.kill();
       }
     }, JobManager.JOB_TIMEOUT_MS);
     this.activeTimeouts.set(jobId, timeout);
-    handle.promise.then(() => {
-      const t = this.activeTimeouts.get(jobId);
-      if (t) {
-        clearTimeout(t);
-        this.activeTimeouts.delete(jobId);
-      }
-    });
+  }
+  releaseSlot(jobId) {
+    this.activeHandles.delete(jobId);
+    const timeout = this.activeTimeouts.get(jobId);
+    if (timeout) {
+      clearTimeout(timeout);
+      this.activeTimeouts.delete(jobId);
+    }
   }
 }
 let manager = null;

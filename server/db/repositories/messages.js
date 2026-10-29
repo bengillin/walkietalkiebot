@@ -43,6 +43,15 @@ function getImagesForMessages(messageIds) {
   }
   return imageMap;
 }
+function getMessage(id) {
+  const row = getDb().prepare(
+    "SELECT id, conversation_id, role, content, timestamp, position, source FROM messages WHERE id = ?"
+  ).get(id);
+  return row ?? null;
+}
+function imageExists(id) {
+  return getDb().prepare("SELECT 1 FROM message_images WHERE id = ?").get(id) !== void 0;
+}
 function createMessage(input) {
   const db = getDb();
   const timestamp = input.timestamp || Date.now();
@@ -102,6 +111,8 @@ export {
   deleteMessage,
   getImagesForMessage,
   getImagesForMessages,
+  getMessage,
   getMessagesForConversation,
+  imageExists,
   updateImageDescription
 };

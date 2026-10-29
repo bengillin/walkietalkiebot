@@ -11,6 +11,28 @@ function getAuthToken() {
   const token = process.env.WTB_AUTH_TOKEN;
   return token && token.length > 0 ? token : null;
 }
+function cookieValue(cookieHeader) {
+  if (!cookieHeader) return void 0;
+  for (const part of cookieHeader.split(";")) {
+    const [name, ...rest] = part.trim().split("=");
+    if (name !== AUTH_COOKIE) continue;
+    try {
+      return decodeURIComponent(rest.join("="));
+    } catch {
+      return void 0;
+    }
+  }
+  return void 0;
+}
+function hasValidCredentials(authorization, cookieHeader) {
+  const token = getAuthToken();
+  if (!token) return true;
+  if (authorization?.startsWith("Bearer ") && tokensMatch(authorization.slice(7), token)) {
+    return true;
+  }
+  const cookie = cookieValue(cookieHeader);
+  return cookie !== void 0 && tokensMatch(cookie, token);
+}
 const LOGIN_PAGE = (error) => `<!doctype html>
 <html><head><meta charset="utf-8"><title>Walkie Talkie Bot \u2014 Sign in</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -44,6 +66,7 @@ async function authMiddleware(c, next) {
     setCookie(c, AUTH_COOKIE, token, {
       httpOnly: true,
       sameSite: "Strict",
+      secure: new URL(c.req.url).protocol === "https:",
       path: "/",
       maxAge: 60 * 60 * 24 * 30
     });
@@ -57,5 +80,6 @@ async function authMiddleware(c, next) {
 }
 export {
   authMiddleware,
-  getAuthToken
+  getAuthToken,
+  hasValidCredentials
 };

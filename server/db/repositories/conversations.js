@@ -21,6 +21,9 @@ function getConversation(id) {
   ).get(id);
   return row || null;
 }
+function transaction(fn) {
+  return getDb().transaction(fn);
+}
 function createConversation(input) {
   const db = getDb();
   const now = Date.now();
@@ -108,6 +111,7 @@ export {
   getLinerNotes,
   listConversations,
   touchConversation,
+  transaction,
   updateConversation,
   updateLinerNotes,
   updateMode

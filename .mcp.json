@@ -2,7 +2,7 @@
   "mcpServers": {
     "wtb": {
       "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp-server/dist/index.js"]
+      "args": ["${CLAUDE_PROJECT_DIR:-.}/mcp-server/dist/index.js"]
     }
   }
 }

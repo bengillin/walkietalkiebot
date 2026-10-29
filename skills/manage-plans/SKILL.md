@@ -1,7 +1,7 @@
 ---
 name: manage-plans
 description: Create, update, and track implementation plans in Walkie Talkie Bot. Use when the user wants to manage structured plans.
-allowed-tools: list_plans, get_plan, create_plan, update_plan, delete_plan
+allowed-tools: mcp__plugin_wtb_wtb__list_plans, mcp__plugin_wtb_wtb__get_plan, mcp__plugin_wtb_wtb__create_plan, mcp__plugin_wtb_wtb__update_plan, mcp__plugin_wtb_wtb__delete_plan
 ---
 
 # Manage Plans

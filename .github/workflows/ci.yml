@@ -43,3 +43,9 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      # Spawns the built MCP bundle over stdio with a throwaway HOME and checks
+      # initialize, tools/list, offline data tools (direct SQLite), and the
+      # HTTP proxy's paths/auth/errors. Needs the build output, so it runs last.
+      - name: MCP server smoke test
+        run: npx vitest run --config mcp-server/vitest.config.ts

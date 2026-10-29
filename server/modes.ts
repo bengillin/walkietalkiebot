@@ -1,8 +1,8 @@
 import { existsSync, readdirSync, readFileSync } from 'fs'
-import { homedir } from 'os'
 import { join } from 'path'
 
 import { createLogger } from './logger.js'
+import { getWtbDir } from './paths.js'
 
 const log = createLogger('modes')
 
@@ -70,23 +70,22 @@ const BUILT_IN_MODES: [Mode, ...Mode[]] = [
   },
 ]
 
-const MODES_DIR = join(homedir(), '.wtb', 'modes')
-
 function loadCustomModes(): Mode[] {
-  if (!existsSync(MODES_DIR)) return []
+  const modesDir = join(getWtbDir(), 'modes')
+  if (!existsSync(modesDir)) return []
 
   const modes: Mode[] = []
   let files: string[]
   try {
-    files = readdirSync(MODES_DIR).filter((f) => f.endsWith('.json'))
+    files = readdirSync(modesDir).filter((f) => f.endsWith('.json'))
   } catch (err) {
-    log.warn(`Could not read custom modes from ${MODES_DIR}:`, err)
+    log.warn(`Could not read custom modes from ${modesDir}:`, err)
     return []
   }
 
   for (const file of files) {
     try {
-      const content = readFileSync(join(MODES_DIR, file), 'utf-8')
+      const content = readFileSync(join(modesDir, file), 'utf-8')
       const mode = JSON.parse(content) as Partial<Mode>
       if (mode.name && mode.label && mode.instruction) {
         modes.push({

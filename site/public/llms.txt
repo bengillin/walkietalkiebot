@@ -1,44 +1,72 @@
 # Walkie Talkie Bot — A Walkie Talkie for Claude
 
-> Voice-first AI assistant for Claude Code — use as a Claude Code plugin (30 MCP tools + 5 skills, offline SQLite) or full server (web UI, 6 retro themes, voice, Telegram).
+> Voice-first AI assistant for Claude Code — use as a Claude Code plugin (30 MCP tools + 5 skills, offline SQLite) or full server (web UI, 6 retro themes, voice, background jobs).
 
 ## Quick Start
 
-  Install: npx walkietalkiebot
+  Install: npx walkietalkiebot   (run it from the project directory Claude should work in)
+  Requires: Node.js >= 20; Claude Code CLI installed and logged in (`claude` on PATH); Chrome or Edge for voice
   Repository: https://github.com/bengillin/walkietalkiebot
   npm: https://www.npmjs.com/package/walkietalkiebot
   Website: https://walkietalkie.bot
   Version: 0.3.8
   License: MIT
 
-## Plugin Installation
+## MCP Installation
 
-  Add to your Claude Code MCP settings (~/.claude/settings.json):
+  Register the MCP server for all projects (user scope):
+    claude mcp add --scope user wtb -- npx -y -p walkietalkiebot wtb-mcp
+
+  Or add it to a project's .mcp.json:
   {
     "mcpServers": {
       "wtb": {
         "command": "npx",
-        "args": ["wtb-mcp"]
+        "args": ["-y", "-p", "walkietalkiebot", "wtb-mcp"]
       }
     }
   }
 
-  The plugin provides 30 MCP tools (15 work offline via direct SQLite, 15 require the Walkie Talkie Bot server)
-  and 5 skills for common workflows.
+  WARNING: do not use `npx wtb-mcp`. The `wtb-mcp` package on npm is an unrelated third party's
+  package; the Talkie binary ships inside `walkietalkiebot`, hence `-p walkietalkiebot`.
+
+  The MCP server provides 30 tools (15 work offline via direct SQLite, 15 require the Walkie Talkie Bot server).
+  The 5 skills ship with the Claude Code plugin in the repository (skills/).
+
+## Security
+
+  Claude Code runs with --permission-mode bypassPermissions in the server's working directory, so
+  access to the API is equivalent to shell access on the host.
+  - The server binds to 127.0.0.1 by default. WTB_HOST changes it; a non-loopback host requires WTB_AUTH_TOKEN
+    or the server refuses to start.
+  - Cross-origin requests are rejected (no wildcard CORS). Without a token, only localhost Host
+    names are answered (blocks DNS rebinding); with a token, the token protects remote access.
+  - With WTB_AUTH_TOKEN set, send `Authorization: Bearer <token>` on every /api request.
+
+## Configuration (environment variables)
+
+  WTB_PORT            default 5173        Server port (also used by the MCP server to find it)
+  WTB_HOST            default 127.0.0.1   Bind address; non-loopback requires WTB_AUTH_TOKEN
+  WTB_DIR             default ~/.wtb      Data dir: database, modes, logs, pid, TLS certs
+  WTB_AUTH_TOKEN      default unset       Shared-secret bearer token for /api/*
+  WTB_LOG_LEVEL       default info        debug | info | warn | error | silent
+  WTB_TELEMETRY       default off         Set to 1 to opt in to MCP telemetry (tool name, category,
+                                          success flag to PostHog; nothing from conversations)
+  WTB_URL             default http://localhost:$WTB_PORT   MCP only: where server tools reach Talkie
+  WTB_MAX_BODY_BYTES  default 52428800    Max request body (50 MB)
 
 ## Documentation
 
   - Getting Started: https://walkietalkie.bot/docs/getting-started.html
   - Features: https://walkietalkie.bot/docs/features.html
   - API Reference: https://walkietalkie.bot/docs/api.html
-  - Integrations (MCP, Telegram, Claude Code): https://walkietalkie.bot/docs/integrations.html
+  - Integrations (MCP, Claude Code, server management): https://walkietalkie.bot/docs/integrations.html
   - Theme System: https://walkietalkie.bot/docs/themes.html
 
 ## Architecture
 
   Frontend: React 18, TypeScript, Vite, Zustand
   Server: Node.js, Hono, better-sqlite3 (WAL mode)
-  Telegram: grammy
   MCP: @modelcontextprotocol/sdk (stdio transport)
   Voice: Web Speech API (browser-native STT/TTS)
   Database: SQLite at ~/.wtb/wtb.db
@@ -48,16 +76,15 @@
   - Voice input: Push-to-talk, wake word ("Hey Talkie"), continuous listening, trigger word ("over")
   - 6 retro themes: TalkBoy, Bubble, Dial-Up, Finder, Guestbook, 1984 (70+ CSS custom properties each)
   - Cassette tape UI: Conversations stored as illustrated cassette tapes with spinning reels
-  - Claude Code CLI integration: Spawns claude -p with full tool access, real-time activity feed
-  - Direct API mode: Anthropic API with model selection (Sonnet/Opus/Haiku)
+  - Claude Code CLI integration (the only backend; no API-key mode): runs claude -p with full tool access, persistent per-conversation sessions, real-time activity feed
+  - Modes: Voice, Pair, Architect, Code Review, Debug, plus custom modes from ~/.wtb/modes/*.json
   - Plans system: Auto-detect plans in Claude responses, status workflow (draft/approved/in_progress/completed/archived)
   - Liner notes: Per-conversation markdown notes
   - Full-text search: FTS5-powered, Cmd+K global search
   - Context linking: Use past conversations as context for new messages
   - Image handling: Drag-drop, Claude vision analysis, media library
-  - Background jobs: Async task execution with SSE streaming
+  - Background jobs: Up to 3 concurrent async jobs with SSE streaming
   - Export: Markdown and JSON
-  - Telegram bot: Text and photo messages to Claude
   - Keyboard shortcuts: Spacebar push-to-talk, Cmd+K search, Cmd+E export
 
 ## MCP Server (30 Tools)
@@ -135,12 +162,12 @@
   - Status & Health: GET /api/status, GET /api/integrations
   - Conversations: CRUD, messages, liner notes, images (9 endpoints)
   - Plans: CRUD with status workflow (5 endpoints)
-  - Jobs: CRUD + SSE streaming (4 endpoints)
+  - Jobs: create, orchestrate, list, get, cancel, SSE events (6 endpoints)
   - Search: GET /api/search (FTS5 full-text)
   - IPC: pending, respond, send (3 endpoints)
   - Sessions: get, set, delete (3 endpoints)
   - Claude Code: POST /api/claude-code (SSE streaming)
-  - Media: analyze-image, open-url
+  - Media: analyze-image-cc, open-url
 
   Full reference: https://walkietalkie.bot/docs/api.html
 
@@ -154,10 +181,10 @@
   wtb-server install       Install as macOS launchd daemon
   wtb-server uninstall     Remove launchd daemon
 
-## Database Schema (v4)
+## Database Schema (v6)
 
-  Tables: conversations, messages, message_images, activities, plans, jobs, telegram_state, messages_fts, schema_version
-  Location: ~/.wtb/wtb.db (SQLite WAL mode)
+  Tables: conversations, messages, message_images, activities, plans, jobs, job_events, messages_fts, schema_version
+  Location: ~/.wtb/wtb.db, or $WTB_DIR/wtb.db (SQLite WAL mode)
 
 ---
-Last updated: 2026-02-18
+Last updated: 2026-10-29

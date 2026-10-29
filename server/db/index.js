@@ -1,25 +1,13 @@
 import Database from "better-sqlite3";
-import { existsSync, mkdirSync, renameSync } from "fs";
+import { existsSync, mkdirSync } from "fs";
 import { dirname, join } from "path";
-import { homedir } from "os";
 import { initSchema } from "./schema.js";
+import { getWtbDir, migrateLegacyDataDir } from "../paths.js";
 import { createLogger } from "../logger.js";
 const log = createLogger("db");
-function migrateDataDir() {
-  const wtbDir = join(homedir(), ".wtb");
-  const oldDir2 = join(homedir(), ".talkie");
-  const oldDir1 = join(homedir(), ".talkboy");
-  if (existsSync(oldDir2) && !existsSync(wtbDir)) {
-    log.debug(`Migrating ${oldDir2} \u2192 ${wtbDir}`);
-    renameSync(oldDir2, wtbDir);
-  } else if (existsSync(oldDir1) && !existsSync(wtbDir)) {
-    log.debug(`Migrating ${oldDir1} \u2192 ${wtbDir}`);
-    renameSync(oldDir1, wtbDir);
-  }
-}
 let db = null;
 function getDbPath() {
-  return join(homedir(), ".wtb", "wtb.db");
+  return join(getWtbDir(), "wtb.db");
 }
 function getDb() {
   if (!db) {
@@ -31,7 +19,7 @@ function initDb() {
   if (db) {
     return db;
   }
-  migrateDataDir();
+  migrateLegacyDataDir();
   const dbPath = getDbPath();
   const dbDir = dirname(dbPath);
   if (!existsSync(dbDir)) {

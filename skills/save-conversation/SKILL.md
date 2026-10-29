@@ -1,7 +1,7 @@
 ---
 name: save-conversation
 description: Save the current conversation to Walkie Talkie Bot as a cassette tape. Use when the user wants to archive or save a conversation.
-allowed-tools: create_conversation, add_message, list_conversations
+allowed-tools: mcp__plugin_wtb_wtb__create_conversation, mcp__plugin_wtb_wtb__add_message, mcp__plugin_wtb_wtb__list_conversations
 ---
 
 # Save Conversation

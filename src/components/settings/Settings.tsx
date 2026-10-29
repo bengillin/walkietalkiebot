@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { exportConversation } from '../../lib/export'
 import { getIntegrations, type IntegrationsStatus } from '../../lib/api'
 import { useTheme } from '../../contexts/ThemeContext'
 import type { Conversation } from '../../types'
+import { groupVoices } from './voiceList'
 import './Settings.css'
 
 interface SettingsProps {
@@ -58,6 +59,10 @@ export function Settings({
   const [integrations, setIntegrations] = useState<IntegrationsStatus | null>(null)
   const [showMcpTools, setShowMcpTools] = useState(false)
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([])
+  const voiceGroups = useMemo(
+    () => groupVoices(voices, navigator.language || 'en', ttsVoice),
+    [voices, ttsVoice],
+  )
 
   useEffect(() => {
     getIntegrations()
@@ -111,7 +116,11 @@ export function Settings({
                   onChange={(e) => setTitleDraft(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleSaveTitle()
-                    if (e.key === 'Escape') setEditingTitle(false)
+                    if (e.key === 'Escape') {
+                      // Cancel the edit only, not the whole drawer
+                      e.stopPropagation()
+                      setEditingTitle(false)
+                    }
                   }}
                   autoFocus
                 />
@@ -177,11 +186,15 @@ export function Settings({
                 onChange={(e) => setTtsVoice(e.target.value)}
               >
                 <option value="">System default</option>
-                {voices.map((v) => (
-                  <option key={v.voiceURI} value={v.voiceURI}>
-                    {v.name}
-                    {v.lang ? ` (${v.lang})` : ''}
-                  </option>
+                {voiceGroups.map((group) => (
+                  <optgroup key={group.language || 'other'} label={group.label}>
+                    {group.voices.map((v) => (
+                      <option key={v.voiceURI} value={v.voiceURI}>
+                        {v.name}
+                        {v.lang ? ` (${v.lang})` : ''}
+                      </option>
+                    ))}
+                  </optgroup>
                 ))}
               </select>
             </div>

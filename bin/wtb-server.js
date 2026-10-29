@@ -1,22 +1,32 @@
 #!/usr/bin/env node
 
 import { spawn, execSync } from 'child_process'
-import { existsSync, mkdirSync, writeFileSync, readFileSync, unlinkSync } from 'fs'
-import { join, dirname } from 'path'
+import {
+  chmodSync,
+  closeSync,
+  existsSync,
+  mkdirSync,
+  openSync,
+  readFileSync,
+  unlinkSync,
+  writeFileSync,
+} from 'fs'
+import { join, dirname, resolve } from 'path'
 import { homedir } from 'os'
 import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const PLIST_NAME = 'com.wtb.server'
 const PLIST_PATH = join(homedir(), 'Library', 'LaunchAgents', `${PLIST_NAME}.plist`)
-const LOG_DIR = join(homedir(), '.wtb', 'logs')
-const PID_FILE = join(homedir(), '.wtb', 'server.pid')
+// Mirrors server/paths.ts getWtbDir(); this CLI is plain JS and can't import the TS source.
+const WTB_DIR = process.env.WTB_DIR ? resolve(process.env.WTB_DIR) : join(homedir(), '.wtb')
+const LOG_DIR = join(WTB_DIR, 'logs')
+const PID_FILE = join(WTB_DIR, 'server.pid')
 const PORT = parseInt(process.env.WTB_PORT || '5173', 10)
 
 function ensureDirs() {
-  const wtbDir = join(homedir(), '.wtb')
-  if (!existsSync(wtbDir)) {
-    mkdirSync(wtbDir, { recursive: true })
+  if (!existsSync(WTB_DIR)) {
+    mkdirSync(WTB_DIR, { recursive: true })
   }
   if (!existsSync(LOG_DIR)) {
     mkdirSync(LOG_DIR, { recursive: true })
@@ -25,6 +35,41 @@ function ensureDirs() {
   if (!existsSync(launchAgentsDir)) {
     mkdirSync(launchAgentsDir, { recursive: true })
   }
+}
+
+// Settings the daemon must inherit from the shell that ran `install`. Without
+// WTB_AUTH_TOKEN in particular, a daemon with WTB_HOST set would refuse to start.
+const PASSTHROUGH_ENV = [
+  'WTB_AUTH_TOKEN',
+  'WTB_HOST',
+  'WTB_DIR',
+  'WTB_LOG_LEVEL',
+  'WTB_MAX_BODY_BYTES',
+]
+
+function xmlEscape(value) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
+function plistEnv() {
+  // launchd starts with a bare PATH; keep the installing shell's so `node` and
+  // `claude` (often in ~/.local/bin or a version manager's dir) resolve.
+  const path = [process.env.PATH, '/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin']
+    .filter(Boolean)
+    .join(':')
+  const env = { PORT: String(PORT), WTB_PORT: String(PORT), PATH: path }
+  for (const key of PASSTHROUGH_ENV) {
+    if (process.env[key]) env[key] = process.env[key]
+  }
+  return Object.entries(env)
+    .map(
+      ([key, value]) => `        <key>${key}</key>\n        <string>${xmlEscape(value)}</string>`,
+    )
+    .join('\n')
 }
 
 function generatePlist() {
@@ -44,13 +89,10 @@ function generatePlist() {
     </array>
     <key>EnvironmentVariables</key>
     <dict>
-        <key>PORT</key>
-        <string>${PORT}</string>
-        <key>PATH</key>
-        <string>/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin</string>
+${plistEnv()}
     </dict>
     <key>WorkingDirectory</key>
-    <string>${join(__dirname, '..')}</string>
+    <string>${xmlEscape(process.cwd())}</string>
     <key>RunAtLoad</key>
     <true/>
     <key>KeepAlive</key>
@@ -72,13 +114,51 @@ function isLaunchctlLoaded() {
   }
 }
 
-function isServerRunning() {
+const BASE_URL = `http://localhost:${PORT}`
+
+function authHeaders() {
+  const token = process.env.WTB_AUTH_TOKEN
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
+
+/**
+ * What is listening on PORT: 'talkie', 'other' (some unrelated program; 5173 is
+ * also Vite's default), or 'down'. A Talkie server with auth on answers 401.
+ */
+async function probe() {
   try {
-    execSync(`curl -s http://localhost:${PORT}/api/status`, { encoding: 'utf-8' })
-    return true
+    const res = await fetch(`${BASE_URL}/api/status`, {
+      headers: authHeaders(),
+      signal: AbortSignal.timeout(2000),
+    })
+    const data = await res.json().catch(() => null)
+    if (res.ok && data?.running === true) return 'talkie'
+    if (res.status === 401 && data?.error === 'Unauthorized') return 'talkie'
+    return 'other'
+  } catch {
+    return 'down'
+  }
+}
+
+async function isServerRunning() {
+  return (await probe()) === 'talkie'
+}
+
+/** Whether `pid` is a live Talkie server process (guards against a reused stale pid). */
+function isOurServerPid(pid) {
+  try {
+    const command = execSync(`ps -p ${pid} -o command=`, { encoding: 'utf-8' })
+    return command.includes(join('server', 'index.js'))
   } catch {
     return false
   }
+}
+
+function portInUseMessage() {
+  return (
+    `Port ${PORT} is in use by another program, not Walkie Talkie Bot.\n` +
+    `Pick a different port, e.g. WTB_PORT=5199 wtb-server start`
+  )
 }
 
 function getPid() {
@@ -130,15 +210,20 @@ async function commands() {
 async function startServer(foreground = false) {
   ensureDirs()
 
-  if (isServerRunning()) {
-    console.log('Server is already running.')
+  const existing = await probe()
+  if (existing === 'talkie') {
+    console.log(`Server is already running at ${BASE_URL}`)
     return
+  }
+  if (existing === 'other') {
+    throw new Error(portInUseMessage())
   }
 
   if (foreground) {
     console.log(`Starting Walkie Talkie Bot server in foreground on port ${PORT}...`)
-    const { startServer } = await import('../server/index.js')
+    const { setupShutdownHandlers, startServer } = await import('../server/index.js')
     await startServer(PORT)
+    setupShutdownHandlers()
   } else {
     // Check if launchd plist is installed
     if (existsSync(PLIST_PATH)) {
@@ -148,22 +233,22 @@ async function startServer(foreground = false) {
       // Start as background process
       console.log('Starting as background process...')
       const serverScript = join(__dirname, '..', 'server', 'index.js')
-      const child = spawn('node', [serverScript], {
+      // Hand the child the log files directly. Piping through this process kept
+      // the CLI from exiting, and once it was killed the server died on its next
+      // log write.
+      const out = openSync(join(LOG_DIR, 'stdout.log'), 'a')
+      const err = openSync(join(LOG_DIR, 'stderr.log'), 'a')
+      const child = spawn(process.execPath, [serverScript], {
         detached: true,
-        stdio: ['ignore', 'pipe', 'pipe'],
-        env: { ...process.env, PORT: String(PORT) },
-        cwd: join(__dirname, '..'),
+        stdio: ['ignore', out, err],
+        env: { ...process.env, PORT: String(PORT), WTB_PORT: String(PORT) },
+        // Claude works in the server's directory, so keep the user's.
+        cwd: process.cwd(),
       })
+      closeSync(out)
+      closeSync(err)
 
-      // Save PID
       writeFileSync(PID_FILE, String(child.pid))
-
-      // Pipe logs
-      const stdout = createWriteStream(join(LOG_DIR, 'stdout.log'), { flags: 'a' })
-      const stderr = createWriteStream(join(LOG_DIR, 'stderr.log'), { flags: 'a' })
-      child.stdout?.pipe(stdout)
-      child.stderr?.pipe(stderr)
-
       child.unref()
     }
 
@@ -171,8 +256,9 @@ async function startServer(foreground = false) {
     console.log('Waiting for server to start...')
     for (let i = 0; i < 30; i++) {
       await new Promise((r) => setTimeout(r, 500))
-      if (isServerRunning()) {
-        console.log(`Walkie Talkie Bot server running at http://localhost:${PORT}`)
+      if (await isServerRunning()) {
+        console.log(`Walkie Talkie Bot server running at ${BASE_URL}`)
+        console.log(`Claude Code will work in: ${process.cwd()}`)
         return
       }
     }
@@ -193,48 +279,63 @@ async function stopServer() {
 
   const pid = getPid()
   if (pid) {
-    console.log(`Stopping process ${pid}...`)
+    if (isOurServerPid(pid)) {
+      console.log(`Stopping process ${pid}...`)
+      try {
+        process.kill(pid, 'SIGTERM')
+      } catch {
+        // Exited between the check and the kill
+      }
+    }
+    // Either way the file is spent; a stale pid could later match an unrelated process.
     try {
-      process.kill(pid, 'SIGTERM')
       unlinkSync(PID_FILE)
     } catch {
-      // Process may already be dead
+      /* already gone */
     }
   }
 
   // Wait for server to stop
   for (let i = 0; i < 10; i++) {
     await new Promise((r) => setTimeout(r, 500))
-    if (!isServerRunning()) {
+    if (!(await isServerRunning())) {
       console.log('Server stopped.')
       return
     }
   }
 
-  if (isServerRunning()) {
-    console.log('Warning: Server may still be running.')
-  } else {
-    console.log('Server stopped.')
-  }
+  console.log(
+    `A server is still answering at ${BASE_URL}. If it was started with ` +
+      `\`wtb-server start -f\`, stop it with Ctrl+C in that terminal.`,
+  )
 }
 
 async function showStatus() {
-  const running = isServerRunning()
+  const state = await probe()
+  const running = state === 'talkie'
   const launchd = isLaunchctlLoaded()
 
   console.log('Walkie Talkie Bot Server Status')
   console.log('================================')
-  console.log(`Server:   ${running ? '✅ Running' : '❌ Stopped'}`)
+  console.log(
+    `Server:   ${running ? '✅ Running' : state === 'other' ? '⚠️ Port taken by another program' : '❌ Stopped'}`,
+  )
   console.log(`Port:     ${PORT}`)
   console.log(`launchd:  ${launchd ? '✅ Loaded' : '⚪ Not loaded'}`)
   console.log(`Plist:    ${existsSync(PLIST_PATH) ? '✅ Installed' : '⚪ Not installed'}`)
 
   if (running) {
     try {
-      const response = await fetch(`http://localhost:${PORT}/api/status`)
-      const data = await response.json()
-      console.log(`Database: ${data.dbStatus === 'connected' ? '✅ Connected' : '⚠️ Unavailable'}`)
-      console.log(`Avatar:   ${data.avatarState}`)
+      const response = await fetch(`${BASE_URL}/api/status`, { headers: authHeaders() })
+      if (response.status === 401) {
+        console.log('Details:  set WTB_AUTH_TOKEN to see database status')
+      } else {
+        const data = await response.json()
+        console.log(
+          `Database: ${data.dbStatus === 'connected' ? '✅ Connected' : '⚠️ Unavailable'}`,
+        )
+        console.log(`Workdir:  ${data.cwd}`)
+      }
     } catch {
       // Ignore
     }
@@ -282,8 +383,11 @@ async function installDaemon() {
   ensureDirs()
 
   const plist = generatePlist()
-  writeFileSync(PLIST_PATH, plist)
+  // 0600: the plist may carry WTB_AUTH_TOKEN.
+  writeFileSync(PLIST_PATH, plist, { mode: 0o600 })
+  chmodSync(PLIST_PATH, 0o600) // mode above only applies when the file is new
   console.log(`Installed plist to ${PLIST_PATH}`)
+  console.log(`Claude Code will work in: ${process.cwd()}`)
 
   // Load the daemon
   execSync(`launchctl load ${PLIST_PATH}`)
@@ -322,11 +426,17 @@ Commands:
   uninstall       Remove launchd daemon
 
 Environment:
-  WTB_PORT    Server port (default: 5173)
+  WTB_PORT        Server port (default: 5173)
+  WTB_HOST        Address to listen on (default: 127.0.0.1). Anything other than
+                  loopback requires WTB_AUTH_TOKEN.
+  WTB_AUTH_TOKEN  Shared secret required on every request
+  WTB_DIR         Data directory: database, modes, logs (default: ~/.wtb)
 `)
 }
 
-// Import createWriteStream for logging
-import { createWriteStream } from 'fs'
-
-commands().catch(console.error)
+commands().catch((err) => {
+  // Startup errors (port in use, refusing an unauthenticated bind) are written for
+  // the user; a stack trace would bury them.
+  console.error(err instanceof Error ? err.message : err)
+  process.exit(1)
+})

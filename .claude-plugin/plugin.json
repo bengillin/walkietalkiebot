@@ -4,5 +4,11 @@
   "version": "0.3.8",
   "author": { "name": "Ben Gillin" },
   "homepage": "https://walkietalkie.bot",
-  "repository": "https://github.com/bengillin/walkietalkiebot"
+  "repository": "https://github.com/bengillin/walkietalkiebot",
+  "mcpServers": {
+    "wtb": {
+      "command": "npx",
+      "args": ["-y", "-p", "walkietalkiebot", "wtb-mcp"]
+    }
+  }
 }

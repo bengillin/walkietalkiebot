@@ -9,14 +9,17 @@ get set up, the quality bar for changes, and a few project-specific gotchas.
 git clone https://github.com/bengillin/walkietalkiebot
 cd walkietalkiebot
 npm install
-npm run dev        # Vite dev server (frontend + in-process API)
+npm run build:server && WTB_DIR=/tmp/wtb-dev node bin/wtb-server.js start -f   # API on :5173
+npm run dev        # in another terminal: frontend with hot reload on :5180
 ```
 
-The dev server runs the frontend with an embedded API (see `vite.config.ts`). For
-the full experience (built frontend served by the real server), run `npm run build`
-then `wtb-server start -f`.
+The dev server is frontend-only and proxies `/api` to the real server (see
+`vite.config.ts`). Set `WTB_DIR` so development doesn't touch your real data in
+`~/.wtb`. For the full production experience, run `npm run build` then
+`wtb-server start -f`.
 
-> Voice features require Chrome or Edge (Web Speech API).
+> Requires Node.js 20+, the Claude Code CLI (`claude`, logged in) on your `PATH`,
+> and Chrome or Edge for voice features (Web Speech API).
 
 ## Before you open a PR
 
@@ -26,7 +29,7 @@ Run the full local gate — CI runs the same checks and will block on any failur
 npm run typecheck    # tsc --noEmit
 npm run lint         # ESLint (must be error-free; warnings are tolerated)
 npm run format:check # Prettier
-npm test             # client + server unit tests (~170 across 13 files)
+npm test             # client + server unit tests (322 across 22 files)
 ```
 
 `npm run format` will auto-fix formatting. Most lint issues are auto-fixable with

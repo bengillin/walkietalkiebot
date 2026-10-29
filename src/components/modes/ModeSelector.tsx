@@ -20,8 +20,22 @@ export function ModeSelector({ modes, currentMode, onSelectMode }: ModeSelectorP
         setIsOpen(false)
       }
     }
-    if (isOpen) document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    // Escape closes the dropdown (and only the dropdown: stop it reaching the
+    // app-wide handler, which would close the next layer down too)
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation()
+        setIsOpen(false)
+      }
+    }
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      document.addEventListener('keydown', handleKeyDown)
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
   }, [isOpen])
 
   if (!current) return null
@@ -32,9 +46,19 @@ export function ModeSelector({ modes, currentMode, onSelectMode }: ModeSelectorP
         className="mode-selector__trigger"
         onClick={() => setIsOpen(!isOpen)}
         title={`Mode: ${current.label} — ${current.description}`}
+        aria-label={`Mode: ${current.label}`}
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
       >
-        <span className="mode-selector__icon">{current.icon}</span>
-        <span className="mode-selector__label">{current.label}</span>
+        <span className="mode-selector__icon" aria-hidden="true">
+          {current.icon}
+        </span>
+        <span className="mode-selector__text">
+          <span className="mode-selector__eyebrow" aria-hidden="true">
+            Mode
+          </span>
+          <span className="mode-selector__label">{current.label}</span>
+        </span>
         <svg
           className={`mode-selector__chevron ${isOpen ? 'mode-selector__chevron--open' : ''}`}
           viewBox="0 0 24 24"
@@ -47,10 +71,12 @@ export function ModeSelector({ modes, currentMode, onSelectMode }: ModeSelectorP
       </button>
 
       {isOpen && (
-        <div className="mode-selector__dropdown">
+        <div className="mode-selector__dropdown" role="menu" aria-label="Mode">
           {modes.map((mode) => (
             <button
               key={mode.name}
+              role="menuitemradio"
+              aria-checked={mode.name === currentMode}
               className={`mode-selector__option ${mode.name === currentMode ? 'mode-selector__option--active' : ''}`}
               onClick={() => {
                 onSelectMode(mode.name)

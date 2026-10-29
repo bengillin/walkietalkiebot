@@ -1,5 +1,4 @@
 import { Hono } from "hono";
-import { cors } from "hono/cors";
 import { streamSSE } from "hono/streaming";
 import { spawn } from "child_process";
 import { state, updateState, generateRequestId } from "./state.js";
@@ -15,7 +14,10 @@ import { getModeInfoList, reloadModes } from "./modes.js";
 import { createLogger } from "./logger.js";
 const log = createLogger("api");
 const api = new Hono();
-api.use("*", cors());
+function intParam(value, fallback, min, max) {
+  const n = Number.parseInt(value ?? "", 10);
+  return Number.isFinite(n) ? Math.min(Math.max(n, min), max) : fallback;
+}
 api.route("/jobs", jobRoutes);
 api.get("/status", (c) => {
   return c.json({
@@ -27,8 +29,8 @@ api.get("/status", (c) => {
   });
 });
 api.get("/conversations", (c) => {
-  const limit = parseInt(c.req.query("limit") || "50", 10);
-  const offset = parseInt(c.req.query("offset") || "0", 10);
+  const limit = intParam(c.req.query("limit"), 50, 1, 500);
+  const offset = intParam(c.req.query("offset"), 0, 0, Number.MAX_SAFE_INTEGER);
   const convos = conversations.listConversations(limit, offset);
   const total = conversations.countConversations();
   return c.json({
@@ -92,7 +94,8 @@ api.post("/conversations", async (c) => {
   const body = await c.req.json().catch(() => ({}));
   const id = body.id || crypto.randomUUID();
   const title = body.title || "New conversation";
-  const conv = conversations.createConversation({ id, title, mode: body.mode });
+  const existing = conversations.getConversation(id);
+  const conv = existing ?? conversations.createConversation({ id, title, mode: body.mode });
   return c.json(
     {
       id: conv.id,
@@ -101,7 +104,7 @@ api.post("/conversations", async (c) => {
       updatedAt: conv.updated_at,
       mode: conv.mode || "voice"
     },
-    201
+    existing ? 200 : 201
   );
 });
 api.patch("/conversations/:id", async (c) => {
@@ -158,6 +161,19 @@ api.post("/conversations/:id/messages", async (c) => {
   if (!conv) {
     return c.json({ error: "Conversation not found" }, 404);
   }
+  const existing = body.id ? messages.getMessage(body.id) : null;
+  if (existing) {
+    if (existing.conversation_id !== conversationId) {
+      return c.json({ error: "Message id belongs to another conversation" }, 409);
+    }
+    return c.json({
+      id: existing.id,
+      role: existing.role,
+      content: existing.content,
+      timestamp: existing.timestamp,
+      source: existing.source
+    });
+  }
   const msg = messages.createMessage({
     id: body.id || crypto.randomUUID(),
     conversationId,
@@ -212,8 +228,8 @@ api.patch("/images/:id", async (c) => {
   return c.json({ success: true });
 });
 api.get("/plans", (c) => {
-  const limit = parseInt(c.req.query("limit") || "50", 10);
-  const offset = parseInt(c.req.query("offset") || "0", 10);
+  const limit = intParam(c.req.query("limit"), 50, 1, 500);
+  const offset = intParam(c.req.query("offset"), 0, 0, Number.MAX_SAFE_INTEGER);
   const conversationId = c.req.query("conversationId") || void 0;
   const planList = plans.listPlans(limit, offset, conversationId);
   return c.json({
@@ -291,7 +307,7 @@ api.delete("/plans/:id", (c) => {
 });
 api.get("/search", (c) => {
   const query = c.req.query("q") || "";
-  const limit = parseInt(c.req.query("limit") || "50", 10);
+  const limit = intParam(c.req.query("limit"), 50, 1, 500);
   if (!query.trim()) {
     return c.json({ results: [] });
   }
@@ -337,49 +353,77 @@ api.post("/migrate", async (c) => {
   if (!localConversations || !Array.isArray(localConversations)) {
     return c.json({ error: "Invalid conversations data" }, 400);
   }
-  let imported = 0;
-  let skipped = 0;
-  for (const conv of localConversations) {
-    if (conversations.getConversation(conv.id)) {
-      skipped++;
-      continue;
-    }
-    conversations.createConversation({
-      id: conv.id,
-      title: conv.title
-    });
+  const importOne = conversations.transaction((conv) => {
+    const created = !conversations.getConversation(conv.id);
+    if (created) conversations.createConversation({ id: conv.id, title: conv.title });
+    let messagesAdded = 0;
+    const remapped = {};
     for (const msg of conv.messages || []) {
+      let id = msg.id;
+      const owner = messages.getMessage(id)?.conversation_id;
+      if (owner === conv.id) continue;
+      if (owner !== void 0) {
+        id = `${msg.id}~${conv.id}`;
+        remapped[msg.id] = id;
+        const remappedOwner = messages.getMessage(id)?.conversation_id;
+        if (remappedOwner === conv.id) continue;
+        if (remappedOwner !== void 0) throw new Error(`message id conflict: ${msg.id}`);
+      }
       messages.createMessage({
-        id: msg.id,
+        id,
         conversationId: conv.id,
         role: msg.role,
         content: msg.content,
         timestamp: msg.timestamp,
         source: "web",
-        images: msg.images
+        // Image ids are global too; a new message never owns an existing one
+        images: msg.images?.map(
+          (img) => messages.imageExists(img.id) ? { ...img, id: `${img.id}~${id}` } : img
+        )
       });
+      messagesAdded++;
     }
-    if (conv.activities && conv.activities.length > 0) {
-      activities.createActivitiesBatch(
-        conv.activities.map((a) => ({
-          id: a.id,
-          conversationId: conv.id,
-          tool: a.tool,
-          input: a.input,
-          status: a.status,
-          timestamp: a.timestamp,
-          duration: a.duration,
-          error: a.error
-        }))
-      );
+    const newActivities = (conv.activities || []).filter((a) => !activities.activityExists(a.id));
+    activities.createActivitiesBatch(
+      newActivities.map((a) => ({
+        id: a.id,
+        conversationId: conv.id,
+        tool: a.tool,
+        input: a.input,
+        status: a.status,
+        timestamp: a.timestamp,
+        duration: a.duration,
+        error: a.error
+      }))
+    );
+    return { created, messagesAdded, remapped };
+  });
+  let imported = 0;
+  let skipped = 0;
+  const results = [];
+  for (const conv of localConversations) {
+    try {
+      const { created, messagesAdded, remapped } = importOne(conv);
+      if (created) imported++;
+      else skipped++;
+      results.push({
+        id: conv.id,
+        ok: true,
+        created,
+        messagesAdded,
+        ...Object.keys(remapped).length > 0 && { remapped }
+      });
+    } catch (err) {
+      log.warn(`Migrate: failed to import conversation ${conv.id}; rolled back:`, err);
+      results.push({ id: conv.id, ok: false, error: String(err) });
     }
-    imported++;
   }
   return c.json({
-    success: true,
+    success: results.every((r) => r.ok),
     imported,
     skipped,
-    total: localConversations.length
+    total: localConversations.length,
+    results
   });
 });
 api.get("/modes", (c) => {
@@ -450,8 +494,40 @@ api.get("/history", (c) => {
     messages: state.messages
   });
 });
+const AVATAR_STATES = /* @__PURE__ */ new Set(["idle", "listening", "thinking", "speaking", "happy", "confused"]);
+function parseStateUpdate(body) {
+  if (typeof body !== "object" || body === null || Array.isArray(body)) return null;
+  const b = body;
+  const update = {};
+  if ("avatarState" in b) {
+    if (typeof b.avatarState !== "string" || !AVATAR_STATES.has(b.avatarState)) return null;
+    update.avatarState = b.avatarState;
+  }
+  for (const key of ["transcript", "lastUserMessage", "lastAssistantMessage"]) {
+    if (key in b) {
+      const value = b[key];
+      if (typeof value !== "string") return null;
+      update[key] = value;
+    }
+  }
+  if ("messages" in b) {
+    const msgs = b.messages;
+    if (!Array.isArray(msgs) || !msgs.every(
+      (m) => typeof m === "object" && m !== null && typeof m.role === "string" && typeof m.content === "string" && typeof m.timestamp === "number"
+    )) {
+      return null;
+    }
+    update.messages = msgs.map((m) => ({
+      role: m.role,
+      content: m.content,
+      timestamp: m.timestamp
+    }));
+  }
+  return update;
+}
 api.post("/state", async (c) => {
-  const update = await c.req.json();
+  const update = parseStateUpdate(await c.req.json().catch(() => null));
+  if (!update) return c.json({ error: "Invalid state update" }, 400);
   updateState(update);
   return c.json({ success: true });
 });
@@ -615,39 +691,62 @@ api.post("/open-url", async (c) => {
     });
   });
 });
+const MAX_CONCURRENT_CHATS = 4;
+let activeChats = 0;
 api.post("/claude-code", async (c) => {
   const { message, history, images, mode, conversationId } = await c.req.json();
-  if (!message) {
+  if (!message || typeof message !== "string") {
     return c.json({ error: "Message required" }, 400);
   }
+  if (history !== void 0 && !Array.isArray(history)) {
+    return c.json({ error: "history must be an array" }, 400);
+  }
+  if (images !== void 0 && (!Array.isArray(images) || !images.every((img) => typeof img === "object" && img && typeof img.dataUrl === "string"))) {
+    return c.json({ error: "images must be an array of { dataUrl, fileName }" }, 400);
+  }
+  if (activeChats >= MAX_CONCURRENT_CHATS) {
+    return c.json(
+      {
+        error: `Too many Claude turns running (limit ${MAX_CONCURRENT_CHATS}). Try again shortly.`
+      },
+      429
+    );
+  }
+  activeChats++;
   return streamSSE(c, async (stream) => {
-    const handle = spawnClaude({
-      prompt: message,
-      history: history || state.messages || [],
-      images,
-      mode,
-      conversationId,
-      callbacks: {
-        onText: (text) => {
-          stream.writeSSE({ data: JSON.stringify({ text }) });
-        },
-        onActivity: (event) => {
-          stream.writeSSE({ data: JSON.stringify({ activity: event }) });
-        },
-        onPlan: (plan) => {
-          stream.writeSSE({ data: JSON.stringify({ plan }) });
-        },
-        onError: (error) => {
-          stream.writeSSE({ data: JSON.stringify({ error }) });
-        },
-        onComplete: (code) => {
-          stream.writeSSE({ data: JSON.stringify({ done: true, code }) });
+    try {
+      const handle = spawnClaude({
+        prompt: message,
+        history: history || state.messages || [],
+        images,
+        mode,
+        conversationId,
+        callbacks: {
+          onText: (text) => {
+            stream.writeSSE({ data: JSON.stringify({ text }) });
+          },
+          onActivity: (event) => {
+            stream.writeSSE({ data: JSON.stringify({ activity: event }) });
+          },
+          onPlan: (plan) => {
+            stream.writeSSE({ data: JSON.stringify({ plan }) });
+          },
+          onError: (error) => {
+            stream.writeSSE({ data: JSON.stringify({ error }) });
+          },
+          onComplete: (code) => {
+            stream.writeSSE({ data: JSON.stringify({ done: true, code }) });
+          }
         }
-      }
-    });
-    await handle.promise;
+      });
+      stream.onAbort(() => handle.kill());
+      await handle.promise;
+    } finally {
+      activeChats--;
+    }
   });
 });
 export {
-  api
+  api,
+  parseStateUpdate
 };
